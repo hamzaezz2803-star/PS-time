@@ -2,8 +2,6 @@
 
 import { APIError } from "better-auth/api";
 import { headers } from "next/headers";
-import { redirect } from "next/navigation";
-import { CHEMIN_ESPACE } from "@/lib/constantes";
 import { auth } from "@/lib/donnees/authentification";
 import { obtenirUtilisateurConnecte } from "@/lib/donnees/session";
 import { marquerMotDePasseChange } from "@/lib/donnees/utilisateurs";
@@ -43,5 +41,7 @@ export async function changerMotDePasse(
   }
 
   await marquerMotDePasseChange(utilisateur.id);
-  redirect(CHEMIN_ESPACE);
+  // Pas de redirect() ici : Better Auth vient de remplacer le cookie de session, et Next
+  // rafraîchit alors la page courante au lieu de suivre la redirection. Le formulaire navigue.
+  return { estTermine: true };
 }

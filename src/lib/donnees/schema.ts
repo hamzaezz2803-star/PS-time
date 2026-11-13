@@ -6,6 +6,7 @@ import {
   datetime,
   index,
   mysqlTable,
+  text,
   uniqueIndex,
   varchar,
 } from "drizzle-orm/mysql-core";
@@ -52,6 +53,8 @@ export const utilisateurs = mysqlTable(
     email: varchar("email", { length: 254 }).notNull(),
     emailVerifie: boolean("email_verifie").notNull().default(false),
     nom: varchar("nom", { length: 100 }).notNull(),
+    // Exigée par Better Auth ; non collectée pour l'instant (reste vide).
+    image: varchar("image", { length: 500 }),
     doitChangerMotDePasse: boolean("doit_changer_mot_de_passe")
       .notNull()
       .default(true),
@@ -106,6 +109,13 @@ export const comptes = mysqlTable(
     compteId: varchar("compte_id", { length: 255 }).notNull(),
     // Empreinte scrypt calculée par Better Auth (sel inclus). Jamais de mot de passe en clair ni de MD5.
     motDePasse: varchar("mot_de_passe", { length: 255 }),
+    // Colonnes exigées par Better Auth pour les connexions externes (Google, etc.) ; vides pour l'instant.
+    jetonAcces: text("jeton_acces"),
+    jetonRafraichissement: text("jeton_rafraichissement"),
+    jetonIdentite: text("jeton_identite"),
+    jetonAccesExpireLe: date("jeton_acces_expire_le"),
+    jetonRafraichissementExpireLe: date("jeton_rafraichissement_expire_le"),
+    portee: varchar("portee", { length: 500 }),
     creeLe: dateCreation(),
     modifieLe: dateModification(),
   },
