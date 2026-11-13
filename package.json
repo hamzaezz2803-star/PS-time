@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "db:generer": "drizzle-kit generate",
-    "db:migrer": "drizzle-kit migrate"
+    "db:migrer": "drizzle-kit migrate",
+    "admin:creer": "node scripts/creer-administrateur.mts"
   },
   "dependencies": {
     "better-auth": "^1.7.23",
