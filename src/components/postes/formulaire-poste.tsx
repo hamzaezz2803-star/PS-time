@@ -42,30 +42,28 @@ export function FormulairePoste({
   return (
     <form action={action} noValidate className="flex flex-col gap-5">
       {poste && <input type="hidden" name="id" value={poste.id} />}
-      <div className="grid items-start gap-5 sm:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
-        <ChampFormulaire
-          nom="code"
-          libelle={textes.code}
-          defaultValue={poste?.code ?? ""}
-          placeholder={textes.exempleCode}
-          maxLength={LONGUEUR_MAX_CODE_POSTE}
-          autoComplete="off"
-          spellCheck={false}
-          required
-          aide={textes.aideCode}
-          erreur={erreurs?.code}
-        />
-        <ChampFormulaire
-          nom="nom"
-          libelle={textes.nom}
-          defaultValue={poste?.nom ?? ""}
-          placeholder={textes.exempleNom}
-          maxLength={LONGUEUR_MAX_NOM_POSTE}
-          autoComplete="off"
-          required
-          erreur={erreurs?.nom}
-        />
-      </div>
+      <ChampFormulaire
+        nom="code"
+        libelle={textes.code}
+        defaultValue={poste?.code ?? ""}
+        placeholder={textes.exempleCode}
+        maxLength={LONGUEUR_MAX_CODE_POSTE}
+        autoComplete="off"
+        spellCheck={false}
+        required
+        aide={textes.aideCode}
+        erreur={erreurs?.code}
+      />
+      <ChampFormulaire
+        nom="nom"
+        libelle={textes.nom}
+        defaultValue={poste?.nom ?? ""}
+        placeholder={textes.exempleNom}
+        maxLength={LONGUEUR_MAX_NOM_POSTE}
+        autoComplete="off"
+        required
+        erreur={erreurs?.nom}
+      />
       <ChampFormulaire
         nom="ordre"
         libelle={textes.ordre}
