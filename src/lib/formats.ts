@@ -32,3 +32,8 @@ export function initiales(nom: string): string {
     .map((mot) => mot[0]?.toLocaleUpperCase(LANGUE_FORMATS) ?? "")
     .join("");
 }
+
+/** Jour du calendrier (AAAA-MM-JJ) : midi UTC évite tout décalage de jour avec le fuseau. */
+export function formaterJour(jour: string): string {
+  return formatDate.format(new Date(`${jour}T12:00:00Z`));
+}

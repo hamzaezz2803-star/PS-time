@@ -4,6 +4,7 @@ import {
   boolean,
   char,
   check,
+  date as dateCalendrier,
   datetime,
   index,
   int,
@@ -202,5 +203,104 @@ export const postes = mysqlTable(
       "postes_pas_son_propre_parent",
       sql`${table.parentId} IS NULL OR ${table.parentId} <> ${table.id}`,
     ),
+  ],
+);
+
+// Jour du calendrier sans heure (embauche, fin de contrat) : pas de fuseau à gérer.
+const jour = (nom: string) => dateCalendrier(nom, { mode: "string" });
+
+/**
+ * Employés (personnes pointées). Seules les informations utiles au pointage sont
+ * collectées : pas de date de naissance, de CIN ni de genre (minimisation).
+ */
+export const employes = mysqlTable(
+  "employes",
+  {
+    id: identifiantUnique(),
+    matricule: varchar("matricule", { length: 30 }).notNull(),
+    prenom: varchar("prenom", { length: 100 }).notNull(),
+    nom: varchar("nom", { length: 100 }).notNull(),
+    departementId: char("departement_id", { length: 36 })
+      .notNull()
+      .references(() => departements.id, { onDelete: "restrict" }),
+    posteId: char("poste_id", { length: 36 }).references(() => postes.id, {
+      onDelete: "set null",
+    }),
+    // Format international E.164 (+212612345678).
+    telephone: varchar("telephone", { length: 16 }),
+    email: varchar("email", { length: 254 }),
+    typeEmploi: varchar("type_emploi", { length: 20 }),
+    dateEmbauche: jour("date_embauche"),
+    dateFinEmploi: jour("date_fin_emploi"),
+    creeLe: dateCreation(),
+    modifieLe: dateModification(),
+  },
+  (table) => [
+    uniqueIndex("employes_matricule_idx").on(table.matricule),
+    // Plusieurs NULL sont permis par un index unique MySQL : l'e-mail reste facultatif.
+    uniqueIndex("employes_email_idx").on(table.email),
+    index("employes_departement_idx").on(table.departementId),
+    index("employes_poste_idx").on(table.posteId),
+    index("employes_nom_idx").on(table.nom, table.prenom),
+    check("employes_matricule_non_vide", sql`CHAR_LENGTH(TRIM(${table.matricule})) > 0`),
+    check("employes_prenom_non_vide", sql`CHAR_LENGTH(TRIM(${table.prenom})) > 0`),
+    check("employes_nom_non_vide", sql`CHAR_LENGTH(TRIM(${table.nom})) > 0`),
+    check(
+      "employes_email_minuscules",
+      sql`${table.email} IS NULL OR CAST(${table.email} AS BINARY) = CAST(LOWER(${table.email}) AS BINARY)`,
+    ),
+    check(
+      "employes_telephone_e164",
+      sql`${table.telephone} IS NULL OR ${table.telephone} REGEXP '^[+][1-9][0-9]{7,14}$'`,
+    ),
+    check(
+      "employes_type_emploi_valide",
+      sql`${table.typeEmploi} IS NULL OR ${table.typeEmploi} IN ('cdi', 'cdd', 'interim', 'stage')`,
+    ),
+    check(
+      "employes_dates_emploi_coherentes",
+      sql`${table.dateFinEmploi} IS NULL OR ${table.dateEmbauche} IS NULL OR ${table.dateFinEmploi} >= ${table.dateEmbauche}`,
+    ),
+  ],
+);
+
+/** Champs facultatifs créés par l'administrateur (ex. : « Taille de blouse »). */
+export const champsPersonnalises = mysqlTable(
+  "champs_personnalises",
+  {
+    id: identifiantUnique(),
+    nom: varchar("nom", { length: 60 }).notNull(),
+    type: varchar("type", { length: 10 }).notNull().default("texte"),
+    creeLe: dateCreation(),
+    modifieLe: dateModification(),
+  },
+  (table) => [
+    uniqueIndex("champs_personnalises_nom_idx").on(table.nom),
+    check("champs_personnalises_nom_non_vide", sql`CHAR_LENGTH(TRIM(${table.nom})) > 0`),
+    check(
+      "champs_personnalises_type_valide",
+      sql`${table.type} IN ('texte', 'nombre', 'date')`,
+    ),
+  ],
+);
+
+/** Valeur d'un champ facultatif pour un employé (une seule par champ et par employé). */
+export const valeursChampsPersonnalises = mysqlTable(
+  "valeurs_champs_personnalises",
+  {
+    id: identifiantUnique(),
+    employeId: char("employe_id", { length: 36 })
+      .notNull()
+      .references(() => employes.id, { onDelete: "cascade" }),
+    champId: char("champ_id", { length: 36 })
+      .notNull()
+      .references(() => champsPersonnalises.id, { onDelete: "cascade" }),
+    valeur: varchar("valeur", { length: 255 }).notNull(),
+    creeLe: dateCreation(),
+    modifieLe: dateModification(),
+  },
+  (table) => [
+    uniqueIndex("valeurs_champs_employe_champ_idx").on(table.employeId, table.champId),
+    index("valeurs_champs_champ_idx").on(table.champId),
   ],
 );

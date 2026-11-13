@@ -41,3 +41,36 @@ export type Poste = {
   ordre: number;
   parentId: string | null;
 };
+
+export type TypeEmploi = "cdi" | "cdd" | "interim" | "stage";
+export type TypeChampPersonnalise = "texte" | "nombre" | "date";
+
+/** Champ facultatif défini par l'administrateur. */
+export type ChampPersonnalise = {
+  id: string;
+  nom: string;
+  type: TypeChampPersonnalise;
+};
+
+/** Ligne de la liste des employés (dates au format AAAA-MM-JJ). */
+export type EmployeListe = {
+  id: string;
+  matricule: string;
+  prenom: string;
+  nom: string;
+  departement: string;
+  poste: string | null;
+  telephone: string | null;
+  dateEmbauche: string | null;
+};
+
+/**
+ * État du formulaire d'employé. Les clés des erreurs sont les noms des champs
+ * (`matricule`, `champ_<id>`...). `valeurs` réaffiche la saisie après une erreur.
+ */
+export type EtatFormulaireEmploye = {
+  erreursChamps?: Record<string, string | undefined>;
+  message?: string;
+  succes?: string;
+  valeurs?: Record<string, string>;
+};

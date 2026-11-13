@@ -6,7 +6,12 @@ import {
   Users,
   type LucideIcon,
 } from "lucide-react";
-import { CHEMIN_DEPARTEMENTS, CHEMIN_ESPACE, CHEMIN_POSTES } from "@/lib/constantes";
+import {
+  CHEMIN_DEPARTEMENTS,
+  CHEMIN_ESPACE,
+  CHEMIN_PERSONNES,
+  CHEMIN_POSTES,
+} from "@/lib/constantes";
 import { TEXTES_NAVIGATION as T } from "@/lib/textes/navigation";
 
 /** Sans `href` : fonctionnalité pas encore développée, affichée « Bientôt » et non cliquable. */
@@ -37,7 +42,7 @@ export const GROUPES_NAVIGATION: GroupeNavigation[] = [
         libelle: T.personnel,
         icone: Users,
         sousLiens: [
-          { libelle: T.personnes, icone: UserRound },
+          { libelle: T.personnes, icone: UserRound, href: CHEMIN_PERSONNES },
           { libelle: T.departements, icone: Building2, href: CHEMIN_DEPARTEMENTS },
           { libelle: T.postes, icone: Briefcase, href: CHEMIN_POSTES },
         ],

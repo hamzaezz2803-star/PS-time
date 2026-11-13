@@ -52,6 +52,8 @@ export const TEXTES_DEPARTEMENTS = {
     aDesEnfants:
       "Ce département contient des sous-départements. Déplacez-les ou supprimez-les d'abord.",
     droits: "Vous n'avez pas les droits pour modifier les départements.",
+    aDesEmployes:
+      "Des employés sont rattachés à ce département. Changez-les de département d'abord.",
     echec: "L'opération a échoué. Réessayez dans un instant.",
   },
 } as const;

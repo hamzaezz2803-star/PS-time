@@ -8,7 +8,7 @@ import {
   mettreAJourDepartement,
   supprimerDepartementParId,
 } from "@/lib/donnees/departements";
-import { indexEnDoublon } from "@/lib/donnees/erreurs";
+import { estEncoreReference, indexEnDoublon } from "@/lib/donnees/erreurs";
 import { obtenirUtilisateurPourEspace } from "@/lib/donnees/session";
 import { nomDejaPris, peutDeplacer } from "@/lib/metier/arbre";
 import { TEXTES_DEPARTEMENTS } from "@/lib/textes/departements";
@@ -99,6 +99,8 @@ export async function supprimerDepartement(
   try {
     await supprimerDepartementParId(id);
   } catch (erreur) {
+    // Clé étrangère « restrict » : des employés sont encore rattachés à ce département.
+    if (estEncoreReference(erreur)) return { message: erreurs.aDesEmployes };
     journaliserEchec("de la suppression", erreur);
     return { message: erreurs.echec };
   }

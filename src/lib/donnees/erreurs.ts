@@ -8,3 +8,9 @@ export function indexEnDoublon(erreur: unknown): string | null {
   // Ex. : « Duplicate entry 'OP-01' for key 'postes_code_idx' » (MySQL 8 préfixe la table).
   return cause.sqlMessage?.match(/for key '(?:[^.']*\.)?([^']+)'/)?.[1] ?? "";
 }
+
+/** Vrai si la suppression est bloquée par une clé étrangère (ligne encore utilisée ailleurs). */
+export function estEncoreReference(erreur: unknown): boolean {
+  const cause = (erreur as { cause?: { code?: string } } | null)?.cause;
+  return cause?.code === "ER_ROW_IS_REFERENCED_2";
+}

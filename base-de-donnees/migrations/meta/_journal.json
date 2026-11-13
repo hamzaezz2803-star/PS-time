@@ -43,6 +43,13 @@
       "when": 1794587313722,
       "tag": "0005_creer_postes",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1794590578871,
+      "tag": "0006_creer_employes",
+      "breakpoints": true
     }
   ]
 }

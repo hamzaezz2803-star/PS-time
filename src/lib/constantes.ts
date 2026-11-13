@@ -35,3 +35,17 @@ export const LONGUEUR_MAX_NOM_POSTE = 100;
 export const ORDRE_POSTE_MIN = 0;
 export const ORDRE_POSTE_MAX = 99999;
 export const ORDRE_POSTE_DEFAUT = 99999;
+
+export const CHEMIN_PERSONNES = "/personnel/personnes";
+export const EMPLOYES_PAR_PAGE = 50;
+export const LONGUEUR_MAX_MATRICULE = 30;
+export const LONGUEUR_MAX_NOM_EMPLOYE = 100;
+/** Indicatif ajouté aux numéros saisis au format national (06..., 07..., 05...). */
+export const INDICATIF_PAYS = "212";
+export const TYPES_EMPLOI = ["cdi", "cdd", "interim", "stage"] as const;
+
+/** Champs facultatifs créés par l'administrateur. */
+export const TYPES_CHAMP_PERSONNALISE = ["texte", "nombre", "date"] as const;
+export const LIMITE_CHAMPS_PERSONNALISES = 50;
+export const LONGUEUR_MAX_NOM_CHAMP = 60;
+export const LONGUEUR_MAX_VALEUR_CHAMP = 255;
