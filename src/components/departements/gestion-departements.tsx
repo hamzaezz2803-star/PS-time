@@ -3,7 +3,6 @@
 import { useCallback, useMemo, useState } from "react";
 import { ChevronsDownUp, ChevronsUpDown, Plus } from "lucide-react";
 import { Bouton } from "@/components/ui/bouton";
-import { MessageSucces } from "@/components/ui/message-succes";
 import {
   aplatirArbre,
   construireArbre,
@@ -14,14 +13,13 @@ import {
 import { TEXTES_DEPARTEMENTS } from "@/lib/textes/departements";
 import type { EtatFormulaireDepartement } from "@/types";
 import { ArbreDepartements } from "./arbre-departements";
-import { FormulaireDepartement } from "./formulaire-departement";
-import { SuppressionDepartement } from "./suppression-departement";
+import { PanneauDepartement } from "./panneau-departement";
 
-const { arbre: textesArbre, formulaire: textes } = TEXTES_DEPARTEMENTS;
+const { arbre: textesArbre } = TEXTES_DEPARTEMENTS;
 type Succes = NonNullable<EtatFormulaireDepartement["succes"]>;
 
 const BOUTON_ICONE =
-  "flex size-11 items-center justify-center rounded-lg text-texte-secondaire hover:bg-ciel focus-visible:outline-2 focus-visible:outline-primaire";
+  "flex size-11 shrink-0 items-center justify-center rounded-md text-texte-secondaire transition-colors duration-150 hover:bg-canevas hover:text-texte focus-visible:outline-2 focus-visible:outline-primaire lg:size-8";
 
 /** Vue complète : arbre à gauche, formulaire de création ou de modification à droite. */
 export function GestionDepartements({ departements }: { departements: DepartementPlat[] }) {
@@ -78,61 +76,67 @@ export function GestionDepartements({ departements }: { departements: Departemen
     [departements],
   );
 
-  const nombreEnfants = selection ? departements.filter((d) => d.parentId === selection.id).length : 0;
-
   return (
-    <div className="grid gap-6 lg:grid-cols-[minmax(18rem,2fr)_3fr]">
-      <section className="rounded-xl border border-bordure bg-surface p-4" aria-labelledby="titre-arbre">
-        <div className="mb-3 flex items-center justify-between gap-2">
-          <h2 id="titre-arbre" className="text-lg font-semibold text-marine">
-            {textesArbre.titre}
-          </h2>
-          <div className="flex items-center gap-1">
-            <button type="button" className={BOUTON_ICONE} aria-label={textesArbre.toutDeplier} title={textesArbre.toutDeplier} onClick={() => setIdsOuverts(new Set(idsParents))}>
-              <ChevronsUpDown className="size-5" aria-hidden="true" />
-            </button>
-            <button type="button" className={BOUTON_ICONE} aria-label={textesArbre.toutReplier} title={textesArbre.toutReplier} onClick={() => setIdsOuverts(new Set())}>
-              <ChevronsDownUp className="size-5" aria-hidden="true" />
-            </button>
+    <div className="grid items-start gap-6 lg:grid-cols-[minmax(20rem,5fr)_7fr]">
+      <section
+        className="overflow-hidden rounded-xl border border-bordure bg-surface"
+        aria-labelledby="titre-arbre"
+      >
+        <div className="flex items-center gap-1 border-b border-bordure py-3 pe-2 ps-4">
+          <div className="min-w-0 flex-1">
+            <h2 id="titre-arbre" className="text-base font-semibold text-marine">
+              {textesArbre.titre}
+            </h2>
+            <p className="text-sm text-texte-secondaire">{textesArbre.total(departements.length)}</p>
           </div>
+          <button
+            type="button"
+            className={BOUTON_ICONE}
+            aria-label={textesArbre.toutDeplier}
+            title={textesArbre.toutDeplier}
+            onClick={() => setIdsOuverts(new Set(idsParents))}
+          >
+            <ChevronsUpDown className="size-4" aria-hidden="true" />
+          </button>
+          <button
+            type="button"
+            className={BOUTON_ICONE}
+            aria-label={textesArbre.toutReplier}
+            title={textesArbre.toutReplier}
+            onClick={() => setIdsOuverts(new Set())}
+          >
+            <ChevronsDownUp className="size-4" aria-hidden="true" />
+          </button>
         </div>
-        <Bouton variante="contour" className="mb-3 w-full" onClick={() => selectionner(null)}>
-          <Plus className="size-5" aria-hidden="true" />
-          {textesArbre.nouveau}
-        </Bouton>
-        <ArbreDepartements
-          noeuds={arbre}
-          idSelectionne={idSelectionne}
-          idsOuverts={idsOuverts}
-          onBasculer={basculer}
-          onSelectionner={selectionner}
-        />
+        <div className="p-2">
+          <ArbreDepartements
+            noeuds={arbre}
+            idSelectionne={idSelectionne}
+            idsOuverts={idsOuverts}
+            onBasculer={basculer}
+            onSelectionner={selectionner}
+          />
+        </div>
+        <div className="border-t border-bordure p-2">
+          <Bouton
+            variante="fantome"
+            className="w-full justify-start px-3"
+            onClick={() => selectionner(null)}
+            aria-pressed={!selection}
+          >
+            <Plus className="size-4" aria-hidden="true" />
+            {textesArbre.nouveau}
+          </Bouton>
+        </div>
       </section>
 
-      <section className="flex flex-col gap-5 rounded-xl border border-bordure bg-surface p-6" aria-labelledby="titre-formulaire">
-        <div>
-          <h2 id="titre-formulaire" className="text-lg font-semibold text-marine">
-            {selection ? textes.titreModification : textes.titreCreation}
-          </h2>
-          {selection && (
-            <p className="mt-1 text-sm text-texte-secondaire">
-              {textesArbre.sousDepartements(nombreEnfants)}
-            </p>
-          )}
-        </div>
-        <MessageSucces message={messageSucces} />
-        <FormulaireDepartement
-          // Recréé quand le département change en base : les valeurs par défaut suivent.
-          key={selection ? `formulaire-${selection.id}-${selection.parentId}-${selection.nom}` : "formulaire-nouveau"}
-          departement={selection}
-          parentParDefaut={null}
-          optionsParent={optionsParent}
-          onTermine={terminer}
-        />
-        {selection && (
-          <SuppressionDepartement key={`suppression-${selection.id}`} id={selection.id} nom={selection.nom} onTermine={terminer} />
-        )}
-      </section>
+      <PanneauDepartement
+        selection={selection}
+        departements={departements}
+        optionsParent={optionsParent}
+        messageSucces={messageSucces}
+        onTermine={terminer}
+      />
     </div>
   );
 }

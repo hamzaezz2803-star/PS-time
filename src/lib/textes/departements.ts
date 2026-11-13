@@ -14,11 +14,19 @@ export const TEXTES_DEPARTEMENTS = {
     videAction: "Créez le premier avec le formulaire.",
     nouveau: "Nouveau département",
     sousDepartements: (nombre: number) =>
-      nombre === 1 ? "1 sous-département" : `${nombre} sous-départements`,
+      nombre === 0
+        ? "Aucun sous-département"
+        : nombre === 1
+          ? "1 sous-département"
+          : `${nombre} sous-départements`,
+    total: (nombre: number) => (nombre <= 1 ? `${nombre} département` : `${nombre} départements`),
+    principal: "Département principal",
+    rattacheA: (nom: string) => `Rattaché à ${nom}`,
   },
   formulaire: {
     titreCreation: "Nouveau département",
-    titreModification: "Modifier le département",
+    sousTitreCreation: "Il apparaîtra dans l'organisation dès son enregistrement.",
+    titreModification: (nom: string) => `Modifier « ${nom} »`,
     nom: "Nom du département",
     exempleNom: "Par exemple : Logistique",
     parent: "Département parent",

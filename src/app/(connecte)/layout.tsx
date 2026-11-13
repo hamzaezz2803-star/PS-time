@@ -1,37 +1,33 @@
 import { Suspense, type ReactNode } from "react";
-import { LogOut } from "lucide-react";
 import { CadreTableauDeBord } from "@/components/tableau-de-bord/cadre-tableau-de-bord";
-import { Bouton } from "@/components/ui/bouton";
-import { deconnecter } from "@/lib/actions/deconnexion";
+import { MenuUtilisateur } from "@/components/tableau-de-bord/menu-utilisateur";
 import { obtenirUtilisateurPourEspace } from "@/lib/donnees/session";
-import { TEXTES_ESPACE } from "@/lib/textes/espace";
 
-/** Nom de l'utilisateur, lu à la requête (donc sous <Suspense>). */
-async function NomUtilisateur() {
+/** Compte connecté, lu à la requête (donc sous <Suspense>). */
+async function CompteUtilisateur() {
   const utilisateur = await obtenirUtilisateurPourEspace();
-  return (
-    <span className="hidden text-base font-medium text-texte sm:inline">
-      {utilisateur.nom}
-    </span>
-  );
+  return <MenuUtilisateur nom={utilisateur.nom} email={utilisateur.email} />;
 }
 
-function EnTete() {
+function CompteEnChargement() {
   return (
-    <div className="flex items-center gap-4">
-      <Suspense fallback={null}>
-        <NomUtilisateur />
-      </Suspense>
-      <form action={deconnecter}>
-        <Bouton type="submit" variante="contour">
-          <LogOut className="size-5" aria-hidden="true" />
-          {TEXTES_ESPACE.deconnexion}
-        </Bouton>
-      </form>
+    <div className="flex min-h-12 items-center gap-2.5 p-1.5" aria-hidden="true">
+      <span className="size-8 shrink-0 rounded-md bg-surface ring-1 ring-bordure" />
+      <span className="h-4 flex-1 rounded bg-surface ring-1 ring-bordure" />
     </div>
   );
 }
 
 export default function LayoutConnecte({ children }: { children: ReactNode }) {
-  return <CadreTableauDeBord enTete={<EnTete />}>{children}</CadreTableauDeBord>;
+  return (
+    <CadreTableauDeBord
+      pied={
+        <Suspense fallback={<CompteEnChargement />}>
+          <CompteUtilisateur />
+        </Suspense>
+      }
+    >
+      {children}
+    </CadreTableauDeBord>
+  );
 }

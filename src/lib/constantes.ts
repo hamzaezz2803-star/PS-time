@@ -22,3 +22,7 @@ export const CHEMIN_DEPARTEMENTS = "/personnel/departements";
 /** Garde-fou de lecture : une entreprise a rarement plus de quelques dizaines de départements. */
 export const LIMITE_DEPARTEMENTS = 1000;
 export const LONGUEUR_MAX_NOM_DEPARTEMENT = 100;
+
+/** Fuseau d'affichage par défaut au Maroc (les dates sont stockées en UTC). */
+export const FUSEAU_HORAIRE = "Africa/Casablanca";
+export const LANGUE_FORMATS = "fr-FR";
