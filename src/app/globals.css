@@ -39,10 +39,12 @@
 
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  /* En « inline » : --duree doit être lue sur chaque icône, pas à la racine. */
+  --animate-orbite: orbite calc(var(--duree) * 1s) linear infinite;
 }
 
 @theme {
-  --animate-orbite: orbite calc(var(--duree) * 1s) linear infinite;
   --animate-ondulation: ondulation 6s ease-in-out infinite;
 
   @keyframes orbite {
