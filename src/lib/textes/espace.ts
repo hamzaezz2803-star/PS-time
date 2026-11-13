@@ -3,8 +3,8 @@ export const TEXTES_ESPACE = {
   titrePage: "Mon espace",
   chargement: "Chargement de votre espace...",
   bonjour: (nom: string) => `Bonjour ${nom}`,
-  enConstruction:
-    "Vous êtes connecté. Les écrans de pointage arrivent dans les prochaines étapes.",
+  introduction:
+    "Commencez par organiser vos départements. Les écrans de pointage arrivent dans les prochaines étapes.",
   deconnexion: "Se déconnecter",
   changerMotDePasse: "Changer mon mot de passe",
 } as const;

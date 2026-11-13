@@ -2,7 +2,7 @@ import "server-only";
 
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { CHEMIN_CONNEXION } from "@/lib/constantes";
+import { CHEMIN_CHANGER_MOT_DE_PASSE, CHEMIN_CONNEXION } from "@/lib/constantes";
 import { auth } from "./authentification";
 
 export type UtilisateurConnecte = {
@@ -32,4 +32,14 @@ export async function obtenirUtilisateurConnecte(): Promise<UtilisateurConnecte>
     doitChangerMotDePasse: user.doitChangerMotDePasse,
     estSuperAdmin: user.estSuperAdmin,
   };
+}
+
+/**
+ * Pour les pages du tableau de bord : comme obtenirUtilisateurConnecte, et renvoie
+ * vers le changement de mot de passe tant qu'il est obligatoire.
+ */
+export async function obtenirUtilisateurPourEspace(): Promise<UtilisateurConnecte> {
+  const utilisateur = await obtenirUtilisateurConnecte();
+  if (utilisateur.doitChangerMotDePasse) redirect(CHEMIN_CHANGER_MOT_DE_PASSE);
+  return utilisateur;
 }

@@ -1,0 +1,113 @@
+import assert from "node:assert/strict";
+import { describe, it } from "node:test";
+import {
+  aplatirArbre,
+  construireArbre,
+  idsAncetres,
+  idsDescendants,
+  nomDejaPris,
+  peutDeplacer,
+  type DepartementPlat,
+} from "./arbre-departements.ts";
+
+// Données fictives.
+const LISTE: DepartementPlat[] = [
+  { id: "prod", nom: "Production", parentId: null },
+  { id: "sousprod", nom: "Sous-production", parentId: "prod" },
+  { id: "atelier", nom: "Atelier", parentId: "sousprod" },
+  { id: "si", nom: "Systèmes information", parentId: null },
+  { id: "dev", nom: "Développement", parentId: "si" },
+  { id: "logistique", nom: "logistique", parentId: null },
+];
+
+describe("construireArbre", () => {
+  it("range les enfants sous leur parent et trie par nom", () => {
+    const arbre = construireArbre(LISTE);
+    assert.deepEqual(
+      arbre.map((noeud) => noeud.nom),
+      ["logistique", "Production", "Systèmes information"],
+    );
+    const production = arbre.find((noeud) => noeud.id === "prod");
+    assert.equal(production?.enfants[0]?.id, "sousprod");
+    assert.equal(production?.enfants[0]?.enfants[0]?.id, "atelier");
+  });
+
+  it("place à la racine un département dont le parent est introuvable", () => {
+    const arbre = construireArbre([{ id: "seul", nom: "Seul", parentId: "inconnu" }]);
+    assert.equal(arbre.length, 1);
+    assert.equal(arbre[0]?.id, "seul");
+  });
+
+  it("renvoie un arbre vide pour une liste vide", () => {
+    assert.deepEqual(construireArbre([]), []);
+  });
+});
+
+describe("idsDescendants", () => {
+  it("trouve les sous-départements à tous les niveaux", () => {
+    assert.deepEqual([...idsDescendants(LISTE, "prod")].sort(), ["atelier", "sousprod"]);
+  });
+
+  it("renvoie un ensemble vide pour une feuille", () => {
+    assert.equal(idsDescendants(LISTE, "atelier").size, 0);
+  });
+});
+
+describe("idsAncetres", () => {
+  it("remonte jusqu'à la racine, du plus proche au plus lointain", () => {
+    assert.deepEqual(idsAncetres(LISTE, "atelier"), ["sousprod", "prod"]);
+  });
+
+  it("renvoie une liste vide pour un département principal ou inconnu", () => {
+    assert.deepEqual(idsAncetres(LISTE, "prod"), []);
+    assert.deepEqual(idsAncetres(LISTE, "inconnu"), []);
+  });
+
+  it("s'arrête sur une boucle au lieu de tourner sans fin", () => {
+    const boucle: DepartementPlat[] = [
+      { id: "a", nom: "A", parentId: "b" },
+      { id: "b", nom: "B", parentId: "a" },
+    ];
+    assert.deepEqual(idsAncetres(boucle, "a"), ["b", "a"]);
+  });
+});
+
+describe("peutDeplacer", () => {
+  it("autorise un déplacement vers la racine ou une autre branche", () => {
+    assert.equal(peutDeplacer(LISTE, "sousprod", null), true);
+    assert.equal(peutDeplacer(LISTE, "sousprod", "si"), true);
+  });
+
+  it("refuse de placer un département sous lui-même", () => {
+    assert.equal(peutDeplacer(LISTE, "prod", "prod"), false);
+  });
+
+  it("refuse de placer un département sous un de ses descendants (boucle)", () => {
+    assert.equal(peutDeplacer(LISTE, "prod", "atelier"), false);
+  });
+});
+
+describe("nomDejaPris", () => {
+  it("détecte un doublon chez les frères, sans tenir compte de la casse ni des espaces", () => {
+    assert.equal(nomDejaPris(LISTE, "  PRODUCTION ", null), true);
+    assert.equal(nomDejaPris(LISTE, "Logistique", null), true);
+  });
+
+  it("accepte le même nom sous un autre parent", () => {
+    assert.equal(nomDejaPris(LISTE, "Atelier", "si"), false);
+  });
+
+  it("ignore le département en cours de modification", () => {
+    assert.equal(nomDejaPris(LISTE, "Production", null, "prod"), false);
+  });
+});
+
+describe("aplatirArbre", () => {
+  it("donne l'ordre de l'arbre avec la profondeur", () => {
+    const plat = aplatirArbre(construireArbre(LISTE));
+    assert.deepEqual(
+      plat.map(({ id, profondeur }) => `${id}:${profondeur}`),
+      ["logistique:0", "prod:0", "sousprod:1", "atelier:2", "si:0", "dev:1"],
+    );
+  });
+});

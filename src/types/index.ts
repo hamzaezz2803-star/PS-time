@@ -21,3 +21,11 @@ export type EtatChangementMotDePasse = {
   erreursChamps?: Partial<Record<keyof ChangementMotDePasse, string>>;
   message?: string;
 };
+
+/** État renvoyé au formulaire des départements. */
+export type EtatFormulaireDepartement = {
+  erreursChamps?: { nom?: string; parentId?: string };
+  message?: string;
+  /** Message de réussite, et identifiant du département à sélectionner ensuite. */
+  succes?: { message: string; idSelectionne: string | null };
+};

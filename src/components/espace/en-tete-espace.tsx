@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { LogOut } from "lucide-react";
-import { deconnecter } from "@/app/espace/actions";
+import { deconnecter } from "@/lib/actions/deconnexion";
 import { Bouton } from "@/components/ui/bouton";
 import { TEXTES_CONNEXION } from "@/lib/textes/connexion";
 import { TEXTES_ESPACE } from "@/lib/textes/espace";

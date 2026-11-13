@@ -29,6 +29,13 @@
       "when": 1794580890439,
       "tag": "0003_colonnes_better_auth",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1794583228365,
+      "tag": "0004_creer_departements",
+      "breakpoints": true
     }
   ]
 }

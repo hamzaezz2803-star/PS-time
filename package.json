@@ -9,7 +9,8 @@
     "lint": "eslint",
     "db:generer": "drizzle-kit generate",
     "db:migrer": "drizzle-kit migrate",
-    "admin:creer": "node scripts/creer-administrateur.mts"
+    "admin:creer": "node scripts/creer-administrateur.mts",
+    "test": "node --test --disable-warning=MODULE_TYPELESS_PACKAGE_JSON \"src/**/*.test.ts\""
   },
   "dependencies": {
     "better-auth": "^1.7.23",

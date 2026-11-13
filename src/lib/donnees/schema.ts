@@ -1,5 +1,6 @@
 import { sql } from "drizzle-orm";
 import {
+  type AnyMySqlColumn,
   boolean,
   char,
   check,
@@ -140,4 +141,33 @@ export const verifications = mysqlTable(
     modifieLe: dateModification(),
   },
   (table) => [index("verifications_identifiant_idx").on(table.identifiant)],
+);
+
+/**
+ * Départements de l'entreprise, organisés en arbre (un parent, plusieurs enfants).
+ * Un département qui a des sous-départements ne peut pas être supprimé (restrict).
+ */
+export const departements = mysqlTable(
+  "departements",
+  {
+    id: identifiantUnique(),
+    nom: varchar("nom", { length: 100 }).notNull(),
+    parentId: char("parent_id", { length: 36 }).references(
+      (): AnyMySqlColumn => departements.id,
+      { onDelete: "restrict" },
+    ),
+    creeLe: dateCreation(),
+    modifieLe: dateModification(),
+  },
+  (table) => [
+    // Deux sous-départements d'un même parent ne peuvent pas porter le même nom.
+    // (À la racine, parent_id est NULL : l'application fait la vérification.)
+    uniqueIndex("departements_parent_nom_idx").on(table.parentId, table.nom),
+    index("departements_parent_idx").on(table.parentId),
+    check("departements_nom_non_vide", sql`CHAR_LENGTH(TRIM(${table.nom})) > 0`),
+    check(
+      "departements_pas_son_propre_parent",
+      sql`${table.parentId} IS NULL OR ${table.parentId} <> ${table.id}`,
+    ),
+  ],
 );

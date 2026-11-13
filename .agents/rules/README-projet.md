@@ -28,8 +28,12 @@ Ces règles s'appliquent à **chaque prompt** et à chaque modification du proje
 | Espace | Chemin | Rôles autorisés |
 | --- | --- | --- |
 | Connexion | `/connexion` | Tout le monde |
-| Espace connecté | `/espace`, `/changer-mot-de-passe` | Tout utilisateur connecté et actif |
-| [Administration] | [`/admin/*`] | [Super administrateur, à créer] |
+| Tableau de bord | `/espace` | Tout utilisateur connecté et actif |
+| Personnel > Départements | `/personnel/departements` | Lecture : tout utilisateur connecté. Modification : super administrateur |
+| Changement de mot de passe | `/changer-mot-de-passe` | Tout utilisateur connecté et actif |
+
+- Les pages du tableau de bord sont dans le groupe de routes `src/app/(connecte)/`, qui partage le menu latéral (`src/components/tableau-de-bord/`).
+- Le menu affiche « Bientôt » (sans lien) pour les fonctionnalités pas encore développées : Personnes, Postes.
 
 - `src/proxy.ts` redirige vers `/connexion` sans cookie de session (confort seulement). La vraie vérification est faite dans chaque page et action par `obtenirUtilisateurConnecte()` (`src/lib/donnees/session.ts`).
 - Un compte désactivé (`est_actif = 0`) ne peut plus ouvrir de session, et ses sessions existantes sont refusées.
@@ -48,7 +52,8 @@ Ces règles s'appliquent à **chaque prompt** et à chaque modification du proje
   - `utilisateurs` : identifiant et e-mail uniques en minuscules, nom, compte actif, super administrateur, mot de passe à changer ;
   - `comptes` : moyen de connexion (empreinte du mot de passe, fournisseur `credential`) ;
   - `sessions` : sessions ouvertes (jeton, expiration, IP et navigateur pour la sécurité) ;
-  - `verifications` : jetons temporaires (réinitialisation, vérification d'e-mail).
+  - `verifications` : jetons temporaires (réinitialisation, vérification d'e-mail) ;
+  - `departements` : arbre parent/enfants (`parent_id`). Nom unique parmi les départements d'un même parent ; un département qui a des sous-départements ne peut pas être supprimé (clé étrangère `restrict`).
 - `sessions`, `comptes` et `verifications` suivent le modèle imposé par Better Auth. Certaines colonnes (image, jetons de connexion externe) sont exigées mais restent vides.
 - Pas de colonne `organisation_id` : une installation = un client = une base.
 - Reprise de l'ancien logiciel : ses mots de passe (MD5 + sel) ne sont pas repris. Chaque utilisateur repart avec un mot de passe à changer.
@@ -81,8 +86,12 @@ src/
   app/                  pages et Server Actions (connexion, espace, changer-mot-de-passe, api/auth)
   components/ui/        composants réutilisables (bouton, champ-saisie, etiquette, message-erreur, chargement)
   components/connexion/ composants de l'écran de connexion
-  components/espace/    composants des pages connectées
-  lib/donnees/          accès aux données : base, schéma, authentification, session, utilisateurs
+  components/espace/    composants du changement de mot de passe
+  components/tableau-de-bord/  cadre et menu latéral des pages connectées
+  components/departements/     arbre et formulaires des départements
+  lib/actions/          Server Actions partagées (déconnexion)
+  lib/donnees/          accès aux données : base, schéma, authentification, session, utilisateurs, départements
+  lib/metier/           règles métier pures et leurs tests (*.test.ts, lancés par npm test)
   lib/client-authentification.ts  client Better Auth du navigateur
   proxy.ts              redirection rapide des pages connectées
 scripts/                scripts d'installation (création du premier administrateur)
@@ -126,4 +135,5 @@ Modifier le schéma : éditer `src/lib/donnees/schema.ts`, puis `npm run db:gene
 ## Avant de terminer une tâche
 
 - Appliquer la liste « Avant de terminer une tâche » de `README-qualite-code.md`.
-- [Vérification propre au projet, ex. : tester l'interface en arabe.]
+- `npm test` : tests de la logique métier (lanceur intégré à Node, sans dépendance).
+- Tester les pages connectées sur ordinateur et sur mobile (360 px, menu en tiroir).
