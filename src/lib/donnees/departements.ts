@@ -2,7 +2,7 @@ import "server-only";
 
 import { asc, count, eq } from "drizzle-orm";
 import { LIMITE_DEPARTEMENTS } from "@/lib/constantes";
-import type { DepartementPlat } from "@/lib/metier/arbre-departements";
+import type { ElementArbre } from "@/lib/metier/arbre";
 import { obtenirBase } from "./base";
 import { departements } from "./schema";
 
@@ -12,7 +12,7 @@ const colonnes = {
   parentId: departements.parentId,
 };
 
-export async function listerDepartements(): Promise<DepartementPlat[]> {
+export async function listerDepartements(): Promise<ElementArbre[]> {
   return obtenirBase()
     .select(colonnes)
     .from(departements)

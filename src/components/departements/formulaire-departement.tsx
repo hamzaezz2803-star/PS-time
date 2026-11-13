@@ -8,7 +8,7 @@ import { ChampSaisie } from "@/components/ui/champ-saisie";
 import { Etiquette } from "@/components/ui/etiquette";
 import { MessageErreur } from "@/components/ui/message-erreur";
 import { LONGUEUR_MAX_NOM_DEPARTEMENT } from "@/lib/constantes";
-import type { DepartementPlat } from "@/lib/metier/arbre-departements";
+import type { ElementArbre } from "@/lib/metier/arbre";
 import { TEXTES_DEPARTEMENTS } from "@/lib/textes/departements";
 import type { EtatFormulaireDepartement } from "@/types";
 
@@ -22,12 +22,10 @@ type Succes = NonNullable<EtatFormulaireDepartement["succes"]>;
 /** Création (sans `departement`) ou modification d'un département. */
 export function FormulaireDepartement({
   departement,
-  parentParDefaut,
   optionsParent,
   onTermine,
 }: {
-  departement?: DepartementPlat;
-  parentParDefaut: string | null;
+  departement?: ElementArbre;
   optionsParent: OptionParent[];
   onTermine: (succes: Succes) => void;
 }) {
@@ -67,7 +65,7 @@ export function FormulaireDepartement({
         <select
           id="parentId"
           name="parentId"
-          defaultValue={departement ? (departement.parentId ?? "") : (parentParDefaut ?? "")}
+          defaultValue={departement ? (departement.parentId ?? "") : ""}
           aria-invalid={erreurParent ? true : undefined}
           aria-describedby={erreurParent ? "erreur-parent" : undefined}
           className="h-11 w-full rounded-lg border border-bordure-champ bg-surface px-3 text-base text-texte shadow-[0_1px_2px_rgb(15_27_51/0.04)] lg:h-10 focus-visible:border-primaire focus-visible:outline-2 focus-visible:outline-primaire aria-invalid:border-erreur"

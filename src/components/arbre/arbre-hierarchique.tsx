@@ -1,21 +1,33 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { ChevronRight, FileText, Folder, FolderOpen, FolderPlus } from "lucide-react";
-import type { NoeudDepartement } from "@/lib/metier/arbre-departements";
-import { TEXTES_DEPARTEMENTS } from "@/lib/textes/departements";
+import type { ElementArbre, Noeud } from "@/lib/metier/arbre";
 import { cn } from "@/lib/utils";
 
-const { arbre: textes } = TEXTES_DEPARTEMENTS;
+export type TextesArbre = {
+  deplier: (nom: string) => string;
+  replier: (nom: string) => string;
+  vide: string;
+  videAction: string;
+};
 
-type ProprietesArbre = {
-  noeuds: NoeudDepartement[];
+type ProprietesArbre<T extends ElementArbre> = {
+  noeuds: Noeud<T>[];
   idSelectionne: string | null;
   idsOuverts: Set<string>;
   onBasculer: (id: string) => void;
   onSelectionner: (id: string) => void;
+  textes: TextesArbre;
+  /** Information secondaire affichée après le nom (ex. le numéro d'un poste). */
+  detail?: (element: T) => ReactNode;
 };
 
-function Noeud({ noeud, ...proprietes }: Omit<ProprietesArbre, "noeuds"> & { noeud: NoeudDepartement }) {
+function Ligne<T extends ElementArbre>({
+  noeud,
+  ...proprietes
+}: Omit<ProprietesArbre<T>, "noeuds"> & { noeud: Noeud<T> }) {
+  const { textes } = proprietes;
   const aDesEnfants = noeud.enfants.length > 0;
   const estOuvert = proprietes.idsOuverts.has(noeud.id);
   const estSelectionne = proprietes.idSelectionne === noeud.id;
@@ -54,13 +66,18 @@ function Noeud({ noeud, ...proprietes }: Omit<ProprietesArbre, "noeuds"> & { noe
             aria-hidden="true"
           />
           <span className="truncate">{noeud.nom}</span>
+          {proprietes.detail && (
+            <span className="ms-auto shrink-0 text-sm font-normal tabular-nums text-texte-secondaire">
+              {proprietes.detail(noeud)}
+            </span>
+          )}
         </button>
       </div>
       {aDesEnfants && estOuvert && (
-        // La ligne verticale montre le rattachement des sous-départements à leur parent.
+        // La ligne verticale montre le rattachement des enfants à leur parent.
         <ul className="ms-[1.375rem] border-s border-bordure ps-1.5 lg:ms-4">
           {noeud.enfants.map((enfant) => (
-            <Noeud key={enfant.id} noeud={enfant} {...proprietes} />
+            <Ligne key={enfant.id} noeud={enfant} {...proprietes} />
           ))}
         </ul>
       )}
@@ -68,8 +85,8 @@ function Noeud({ noeud, ...proprietes }: Omit<ProprietesArbre, "noeuds"> & { noe
   );
 }
 
-/** Arbre des départements : chevron pour déplier, clic sur le nom pour sélectionner. */
-export function ArbreDepartements({ noeuds, ...proprietes }: ProprietesArbre) {
+/** Arbre parent/enfants : chevron pour déplier, clic sur le nom pour sélectionner. */
+export function ArbreHierarchique<T extends ElementArbre>({ noeuds, ...proprietes }: ProprietesArbre<T>) {
   if (noeuds.length === 0) {
     return (
       <div className="flex flex-col items-center gap-3 px-6 py-12 text-center">
@@ -77,8 +94,8 @@ export function ArbreDepartements({ noeuds, ...proprietes }: ProprietesArbre) {
           <FolderPlus className="size-6" aria-hidden="true" />
         </span>
         <div>
-          <p className="text-base font-semibold text-texte">{textes.vide}</p>
-          <p className="mt-1 text-sm text-texte-secondaire">{textes.videAction}</p>
+          <p className="text-base font-semibold text-texte">{proprietes.textes.vide}</p>
+          <p className="mt-1 text-sm text-texte-secondaire">{proprietes.textes.videAction}</p>
         </div>
       </div>
     );
@@ -87,7 +104,7 @@ export function ArbreDepartements({ noeuds, ...proprietes }: ProprietesArbre) {
   return (
     <ul className="flex flex-col">
       {noeuds.map((noeud) => (
-        <Noeud key={noeud.id} noeud={noeud} {...proprietes} />
+        <Ligne key={noeud.id} noeud={noeud} {...proprietes} />
       ))}
     </ul>
   );

@@ -22,10 +22,13 @@ export type EtatChangementMotDePasse = {
   message?: string;
 };
 
-/** État renvoyé au formulaire des départements. */
-export type EtatFormulaireDepartement = {
-  erreursChamps?: { nom?: string; parentId?: string };
+/** État renvoyé par les formulaires d'un arbre (départements, postes...). */
+export type EtatFormulaire<Champ extends string = string> = {
+  erreursChamps?: Partial<Record<Champ, string>>;
   message?: string;
-  /** Message de réussite, et identifiant du département à sélectionner ensuite. */
+  /** Message de réussite, et identifiant de l'élément à sélectionner ensuite. */
   succes?: { message: string; idSelectionne: string | null };
 };
+
+export type EtatFormulaireDepartement = EtatFormulaire<"nom" | "parentId">;
+export type EtatFormulairePoste = EtatFormulaire<"code" | "nom" | "ordre" | "parentId">;

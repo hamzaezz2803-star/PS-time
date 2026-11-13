@@ -7,11 +7,11 @@ import {
   idsDescendants,
   nomDejaPris,
   peutDeplacer,
-  type DepartementPlat,
-} from "./arbre-departements.ts";
+  type ElementArbre,
+} from "./arbre.ts";
 
 // Données fictives.
-const LISTE: DepartementPlat[] = [
+const LISTE: ElementArbre[] = [
   { id: "prod", nom: "Production", parentId: null },
   { id: "sousprod", nom: "Sous-production", parentId: "prod" },
   { id: "atelier", nom: "Atelier", parentId: "sousprod" },
@@ -21,6 +21,15 @@ const LISTE: DepartementPlat[] = [
 ];
 
 describe("construireArbre", () => {
+  it("accepte un autre ordre de tri (ex. ordre d'affichage puis nom)", () => {
+    const postes = [
+      { id: "b", nom: "B", parentId: null, ordre: 1 },
+      { id: "a", nom: "A", parentId: null, ordre: 2 },
+    ];
+    const arbre = construireArbre(postes, (x, y) => x.ordre - y.ordre);
+    assert.deepEqual(arbre.map((noeud) => noeud.id), ["b", "a"]);
+  });
+
   it("range les enfants sous leur parent et trie par nom", () => {
     const arbre = construireArbre(LISTE);
     assert.deepEqual(
@@ -64,7 +73,7 @@ describe("idsAncetres", () => {
   });
 
   it("s'arrête sur une boucle au lieu de tourner sans fin", () => {
-    const boucle: DepartementPlat[] = [
+    const boucle: ElementArbre[] = [
       { id: "a", nom: "A", parentId: "b" },
       { id: "b", nom: "B", parentId: "a" },
     ];

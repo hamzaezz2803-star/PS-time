@@ -10,7 +10,7 @@ import {
   supprimerDepartementParId,
 } from "@/lib/donnees/departements";
 import { obtenirUtilisateurPourEspace } from "@/lib/donnees/session";
-import { nomDejaPris, peutDeplacer } from "@/lib/metier/arbre-departements";
+import { nomDejaPris, peutDeplacer } from "@/lib/metier/arbre";
 import { TEXTES_DEPARTEMENTS } from "@/lib/textes/departements";
 import { validerDepartement } from "@/lib/validation/departement";
 import type { EtatFormulaireDepartement } from "@/types";
