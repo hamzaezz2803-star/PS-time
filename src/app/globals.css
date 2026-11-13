@@ -9,11 +9,13 @@
   --couleur-ciel: #e8f3fd;
 
   --couleur-texte: #0f1b33;
-  --couleur-texte-secondaire: #4a5876;
-  --couleur-bordure: #d5deec;
+  --couleur-texte-secondaire: #55627c;
+  --couleur-bordure: #e2e8f1;
   /* Bordure des champs : contraste 3:1 minimum sur fond blanc. */
   --couleur-bordure-champ: #7487a6;
   --couleur-fond: #f6f9fd;
+  /* Canevas du tableau de bord : derrière le menu et la zone de travail. */
+  --couleur-canevas: #eef2f7;
   --couleur-surface: #ffffff;
 
   --couleur-succes: #15803d;
@@ -32,13 +34,13 @@
   --color-bordure: var(--couleur-bordure);
   --color-bordure-champ: var(--couleur-bordure-champ);
   --color-fond: var(--couleur-fond);
+  --color-canevas: var(--couleur-canevas);
   --color-surface: var(--couleur-surface);
   --color-succes: var(--couleur-succes);
   --color-attention: var(--couleur-attention);
   --color-erreur: var(--couleur-erreur);
 
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-texte), ui-sans-serif, system-ui, sans-serif;
 
   /* En « inline » : --duree doit être lue sur chaque icône, pas à la racine. */
   --animate-orbite: orbite calc(var(--duree) * 1s) linear infinite;

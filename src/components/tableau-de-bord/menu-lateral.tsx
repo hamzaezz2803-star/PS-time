@@ -2,43 +2,46 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
-import { ChevronDown } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { useState, type ReactNode } from "react";
+import { ChevronRight } from "lucide-react";
 import { TEXTES_NAVIGATION } from "@/lib/textes/navigation";
-import {
-  SECTIONS_NAVIGATION,
-  type LienNavigation,
-  type SectionNavigation,
-} from "./navigation";
+import { cn } from "@/lib/utils";
+import { useMenu } from "./contexte-menu";
+import { GROUPES_NAVIGATION, type ElementNavigation, type LienNavigation } from "./navigation";
 
-const STYLE_LIGNE =
-  "flex min-h-11 w-full items-center gap-3 rounded-lg px-3 text-base transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white";
+const LIGNE =
+  "group/ligne relative flex min-h-11 w-full items-center gap-3 rounded-lg px-3 text-sm transition-colors duration-150 lg:min-h-9 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primaire";
+const ACTIF = "bg-surface font-semibold text-marine shadow-[0_1px_2px_rgb(15_27_51/0.06)] ring-1 ring-bordure";
+const INACTIF = "text-texte hover:bg-surface/70";
 
-function Lien({
-  lien,
-  estActif,
-  estSousLien = false,
-  onNavigation,
-}: {
-  lien: LienNavigation;
-  estActif: boolean;
-  estSousLien?: boolean;
-  onNavigation: () => void;
-}) {
-  const Icone = lien.icone;
-  const contenu = (
-    <>
-      <Icone className="size-5 shrink-0" aria-hidden="true" />
-      <span className="flex-1 text-start">{lien.libelle}</span>
-    </>
+/** Info-bulle affichée en mode icônes (survol ou focus clavier). */
+function InfoBulle({ children }: { children: ReactNode }) {
+  const { estReplie } = useMenu();
+  if (!estReplie) return null;
+  return (
+    <span
+      aria-hidden="true"
+      className="pointer-events-none absolute start-full top-1/2 z-50 ms-3 hidden -translate-y-1/2 whitespace-nowrap rounded-md bg-marine px-2.5 py-1.5 text-sm font-medium text-white group-hover/ligne:lg:block group-focus-visible/ligne:lg:block"
+    >
+      {children}
+    </span>
   );
+}
+
+function Libelle({ children }: { children: ReactNode }) {
+  const { estReplie } = useMenu();
+  return <span className={cn("flex-1 truncate text-start", estReplie && "lg:sr-only")}>{children}</span>;
+}
+
+function SousLien({ lien, chemin }: { lien: LienNavigation; chemin: string }) {
+  const { fermerMobile } = useMenu();
+  const estActif = Boolean(lien.href && chemin.startsWith(lien.href));
 
   if (!lien.href) {
     return (
-      <span className={cn(STYLE_LIGNE, estSousLien && "ps-10", "cursor-default text-white/60")}>
-        {contenu}
-        <span className="rounded-md border border-white/30 px-2 py-0.5 text-sm">
+      <span className={cn(LIGNE, "cursor-default text-texte-secondaire")}>
+        <span className="flex-1 truncate">{lien.libelle}</span>
+        <span className="rounded-md bg-surface/80 px-1.5 text-sm text-texte-secondaire ring-1 ring-bordure">
           {TEXTES_NAVIGATION.bientot}
         </span>
       </span>
@@ -48,86 +51,103 @@ function Lien({
   return (
     <Link
       href={lien.href}
-      onClick={onNavigation}
+      onClick={fermerMobile}
       aria-current={estActif ? "page" : undefined}
-      className={cn(
-        STYLE_LIGNE,
-        estSousLien && "ps-10",
-        estActif
-          ? "bg-white font-semibold text-marine"
-          : "text-white/90 hover:bg-white/10",
-      )}
+      className={cn(LIGNE, estActif ? ACTIF : INACTIF)}
     >
-      {contenu}
+      <span className="truncate">{lien.libelle}</span>
     </Link>
   );
 }
 
-function Section({
-  section,
-  chemin,
-  onNavigation,
-}: {
-  section: SectionNavigation;
-  chemin: string;
-  onNavigation: () => void;
-}) {
-  const [estOuverte, setEstOuverte] = useState(true);
-  const Icone = section.icone;
+function Element({ element, chemin }: { element: ElementNavigation; chemin: string }) {
+  const { estReplie, basculer, fermerMobile } = useMenu();
+  const contientPageActive = Boolean(
+    element.sousLiens?.some((lien) => lien.href && chemin.startsWith(lien.href)),
+  );
+  const [estOuvert, setEstOuvert] = useState(true);
+  const Icone = element.icone;
 
-  if (!section.liens) {
+  if (element.href) {
+    const estActif = chemin === element.href;
     return (
-      <Lien lien={section} estActif={chemin === section.href} onNavigation={onNavigation} />
+      <Link
+        href={element.href}
+        onClick={fermerMobile}
+        aria-current={estActif ? "page" : undefined}
+        aria-label={estReplie ? element.libelle : undefined}
+        className={cn(LIGNE, estActif ? ACTIF : INACTIF)}
+      >
+        <Icone className="size-[18px] shrink-0" aria-hidden="true" />
+        <Libelle>{element.libelle}</Libelle>
+        <InfoBulle>{element.libelle}</InfoBulle>
+      </Link>
     );
   }
 
-  const idListe = `menu-${section.libelle}`;
+  const idSousMenu = `sous-menu-${element.libelle}`;
+  // Replié, l'icône d'une section rouvre le menu pour montrer ses pages.
+  const surClic = () => (estReplie ? (basculer(), setEstOuvert(true)) : setEstOuvert((o) => !o));
+
   return (
-    <div>
+    <>
       <button
         type="button"
-        onClick={() => setEstOuverte((ouverte) => !ouverte)}
-        aria-expanded={estOuverte}
-        aria-controls={idListe}
-        className={cn(STYLE_LIGNE, "font-semibold text-white hover:bg-white/10")}
+        onClick={surClic}
+        aria-expanded={estReplie ? false : estOuvert}
+        aria-controls={idSousMenu}
+        aria-label={estReplie ? element.libelle : undefined}
+        className={cn(LIGNE, contientPageActive && estReplie ? ACTIF : INACTIF)}
       >
-        <Icone className="size-5 shrink-0" aria-hidden="true" />
-        <span className="flex-1 text-start">{section.libelle}</span>
-        <ChevronDown
-          className={cn("size-5 transition-transform duration-150", !estOuverte && "-rotate-90")}
+        <Icone className="size-[18px] shrink-0" aria-hidden="true" />
+        <Libelle>{element.libelle}</Libelle>
+        <ChevronRight
+          className={cn(
+            "size-4 shrink-0 text-texte-secondaire transition-transform duration-150 motion-reduce:transition-none",
+            estOuvert && "rotate-90",
+            estReplie && "lg:hidden",
+          )}
           aria-hidden="true"
         />
+        <InfoBulle>{element.libelle}</InfoBulle>
       </button>
-      {estOuverte && (
-        <ul id={idListe} className="mt-1 flex flex-col gap-1">
-          {section.liens.map((lien) => (
+      {estOuvert && (
+        <ul
+          id={idSousMenu}
+          className={cn("ms-[1.4rem] mt-0.5 flex flex-col gap-0.5 border-s border-bordure-champ/40 ps-2.5", estReplie && "lg:hidden")}
+        >
+          {element.sousLiens?.map((lien) => (
             <li key={lien.libelle}>
-              <Lien
-                lien={lien}
-                estSousLien
-                estActif={Boolean(lien.href && chemin.startsWith(lien.href))}
-                onNavigation={onNavigation}
-              />
+              <SousLien lien={lien} chemin={chemin} />
             </li>
           ))}
         </ul>
       )}
-    </div>
+    </>
   );
 }
 
-/** Liens du menu latéral, partagés par la version ordinateur et le menu mobile. */
-export function MenuLateral({ onNavigation }: { onNavigation: () => void }) {
+/** Groupes de liens du menu latéral (ordinateur et tiroir mobile). */
+export function MenuLateral() {
   const chemin = usePathname();
+  const { estReplie } = useMenu();
+
   return (
-    <nav aria-label={TEXTES_NAVIGATION.menuPrincipal}>
-      <ul className="flex flex-col gap-2">
-        {SECTIONS_NAVIGATION.map((section) => (
-          <li key={section.libelle}>
-            <Section section={section} chemin={chemin} onNavigation={onNavigation} />
-          </li>
-        ))}
-      </ul>
+    <nav aria-label={TEXTES_NAVIGATION.menuPrincipal} className="flex flex-col gap-5">
+      {GROUPES_NAVIGATION.map((groupe) => (
+        <div key={groupe.titre} className="flex flex-col gap-1">
+          <p className={cn("px-3 pb-1 text-sm font-medium text-texte-secondaire", estReplie && "lg:sr-only")}>
+            {groupe.titre}
+          </p>
+          <ul className="flex flex-col gap-0.5">
+            {groupe.elements.map((element) => (
+              <li key={element.libelle}>
+                <Element element={element} chemin={chemin} />
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
     </nav>
   );
 }

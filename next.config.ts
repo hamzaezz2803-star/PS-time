@@ -3,6 +3,10 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   /* config options here */
   cacheComponents: true,
+  // Pas encore de page d'accueil : la racine mène à la connexion (307, non mis en cache).
+  redirects: async () => [
+    { source: "/", destination: "/connexion", permanent: false },
+  ],
   partialPrefetching: true,
   turbopack: {
     rules: {

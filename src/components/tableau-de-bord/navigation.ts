@@ -16,19 +16,46 @@ export type LienNavigation = {
   href?: string;
 };
 
-export type SectionNavigation = LienNavigation & {
-  liens?: LienNavigation[];
+export type ElementNavigation = LienNavigation & {
+  sousLiens?: LienNavigation[];
 };
 
-export const SECTIONS_NAVIGATION: SectionNavigation[] = [
-  { libelle: T.tableauDeBord, icone: LayoutDashboard, href: CHEMIN_ESPACE },
+export type GroupeNavigation = {
+  titre: string;
+  elements: ElementNavigation[];
+};
+
+export const GROUPES_NAVIGATION: GroupeNavigation[] = [
   {
-    libelle: T.personnel,
-    icone: Users,
-    liens: [
-      { libelle: T.personnes, icone: UserRound },
-      { libelle: T.departements, icone: Building2, href: CHEMIN_DEPARTEMENTS },
-      { libelle: T.postes, icone: Briefcase },
+    titre: T.groupeGeneral,
+    elements: [{ libelle: T.tableauDeBord, icone: LayoutDashboard, href: CHEMIN_ESPACE }],
+  },
+  {
+    titre: T.groupePersonnel,
+    elements: [
+      {
+        libelle: T.personnel,
+        icone: Users,
+        sousLiens: [
+          { libelle: T.personnes, icone: UserRound },
+          { libelle: T.departements, icone: Building2, href: CHEMIN_DEPARTEMENTS },
+          { libelle: T.postes, icone: Briefcase },
+        ],
+      },
     ],
   },
 ];
+
+/** Libellés du fil d'Ariane pour un chemin : groupe puis page (ex. Personnel, Départements). */
+export function cheminVersFilAriane(chemin: string): string[] {
+  for (const groupe of GROUPES_NAVIGATION) {
+    for (const element of groupe.elements) {
+      if (element.href && chemin === element.href) return [element.libelle];
+      const sousLien = element.sousLiens?.find(
+        (lien) => lien.href && chemin.startsWith(lien.href),
+      );
+      if (sousLien) return [element.libelle, sousLien.libelle];
+    }
+  }
+  return [];
+}

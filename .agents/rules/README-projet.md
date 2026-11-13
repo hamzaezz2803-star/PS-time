@@ -129,6 +129,7 @@ npm run dev
 
 - `BETTER_AUTH_SECRET` est différent pour chaque client (commande de génération dans `.env.example`).
 - `admin:creer` affiche une seule fois un mot de passe temporaire, à changer à la première connexion.
+- Sans accès direct à la base (phpMyAdmin seulement) : `npm run --silent sql:utilisateur -- --identifiant ... --email ... --nom "..." [--super-admin]` affiche le SQL à exécuter (empreinte scrypt incluse, jamais le mot de passe en clair) et le mot de passe temporaire. On ne crée pas de mot de passe en SQL pur : MySQL ne propose que MD5/SHA, interdits par les règles.
 
 Modifier le schéma : éditer `src/lib/donnees/schema.ts`, puis `npm run db:generer -- --name <nom_explicite>` (relire le SQL produit) et `npm run db:migrer`. Ne jamais modifier une migration déjà appliquée chez un client.
 
