@@ -32,3 +32,12 @@ export type EtatFormulaire<Champ extends string = string> = {
 
 export type EtatFormulaireDepartement = EtatFormulaire<"nom" | "parentId">;
 export type EtatFormulairePoste = EtatFormulaire<"code" | "nom" | "ordre" | "parentId">;
+
+/** Poste (fonction) : élément d'arbre avec un numéro unique et un ordre d'affichage. */
+export type Poste = {
+  id: string;
+  code: string;
+  nom: string;
+  ordre: number;
+  parentId: string | null;
+};

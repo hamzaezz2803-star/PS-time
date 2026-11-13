@@ -49,8 +49,3 @@ export async function supprimerDepartementParId(id: string): Promise<void> {
   await obtenirBase().delete(departements).where(eq(departements.id, id));
 }
 
-/** Vrai pour une violation d'unicité MySQL/MariaDB (nom déjà pris, enregistré entre-temps). */
-export function estErreurDoublon(erreur: unknown): boolean {
-  const cause = (erreur as { cause?: { code?: string } } | null)?.cause;
-  return cause?.code === "ER_DUP_ENTRY";
-}

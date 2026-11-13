@@ -6,6 +6,7 @@ import {
   check,
   datetime,
   index,
+  int,
   mysqlTable,
   text,
   uniqueIndex,
@@ -167,6 +168,38 @@ export const departements = mysqlTable(
     check("departements_nom_non_vide", sql`CHAR_LENGTH(TRIM(${table.nom})) > 0`),
     check(
       "departements_pas_son_propre_parent",
+      sql`${table.parentId} IS NULL OR ${table.parentId} <> ${table.id}`,
+    ),
+  ],
+);
+
+/**
+ * Postes (fonctions) de l'entreprise, organisés en arbre comme les départements.
+ * Le numéro est unique ; « ordre » règle l'ordre d'affichage (plus petit en premier).
+ */
+export const postes = mysqlTable(
+  "postes",
+  {
+    id: identifiantUnique(),
+    code: varchar("code", { length: 30 }).notNull(),
+    nom: varchar("nom", { length: 100 }).notNull(),
+    ordre: int("ordre").notNull().default(99999),
+    parentId: char("parent_id", { length: 36 }).references(
+      (): AnyMySqlColumn => postes.id,
+      { onDelete: "restrict" },
+    ),
+    creeLe: dateCreation(),
+    modifieLe: dateModification(),
+  },
+  (table) => [
+    uniqueIndex("postes_code_idx").on(table.code),
+    uniqueIndex("postes_parent_nom_idx").on(table.parentId, table.nom),
+    index("postes_parent_idx").on(table.parentId),
+    check("postes_code_non_vide", sql`CHAR_LENGTH(TRIM(${table.code})) > 0`),
+    check("postes_nom_non_vide", sql`CHAR_LENGTH(TRIM(${table.nom})) > 0`),
+    check("postes_ordre_borne", sql`${table.ordre} BETWEEN 0 AND 99999`),
+    check(
+      "postes_pas_son_propre_parent",
       sql`${table.parentId} IS NULL OR ${table.parentId} <> ${table.id}`,
     ),
   ],

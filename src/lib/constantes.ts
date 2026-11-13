@@ -26,3 +26,12 @@ export const LONGUEUR_MAX_NOM_DEPARTEMENT = 100;
 /** Fuseau d'affichage par défaut au Maroc (les dates sont stockées en UTC). */
 export const FUSEAU_HORAIRE = "Africa/Casablanca";
 export const LANGUE_FORMATS = "fr-FR";
+
+export const CHEMIN_POSTES = "/personnel/postes";
+export const LIMITE_POSTES = 1000;
+export const LONGUEUR_MAX_CODE_POSTE = 30;
+export const LONGUEUR_MAX_NOM_POSTE = 100;
+/** Ordre d'affichage d'un poste : le plus petit apparaît en premier ; par défaut, en dernier. */
+export const ORDRE_POSTE_MIN = 0;
+export const ORDRE_POSTE_MAX = 99999;
+export const ORDRE_POSTE_DEFAUT = 99999;

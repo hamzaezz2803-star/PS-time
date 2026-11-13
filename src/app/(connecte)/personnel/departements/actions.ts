@@ -3,12 +3,12 @@
 import { refresh } from "next/cache";
 import { z } from "zod";
 import {
-  estErreurDoublon,
   insererDepartement,
   listerDepartements,
   mettreAJourDepartement,
   supprimerDepartementParId,
 } from "@/lib/donnees/departements";
+import { indexEnDoublon } from "@/lib/donnees/erreurs";
 import { obtenirUtilisateurPourEspace } from "@/lib/donnees/session";
 import { nomDejaPris, peutDeplacer } from "@/lib/metier/arbre";
 import { TEXTES_DEPARTEMENTS } from "@/lib/textes/departements";
@@ -64,7 +64,7 @@ export async function enregistrerDepartement(
       idSelectionne = await insererDepartement(nom, parentId);
     }
   } catch (erreur) {
-    if (estErreurDoublon(erreur)) return { erreursChamps: { nom: erreurs.nomDejaPris } };
+    if (indexEnDoublon(erreur) !== null) return { erreursChamps: { nom: erreurs.nomDejaPris } };
     journaliserEchec("de l'enregistrement", erreur);
     return { message: erreurs.echec };
   }
