@@ -42,7 +42,7 @@ export function FormulairePoste({
   return (
     <form action={action} noValidate className="flex flex-col gap-5">
       {poste && <input type="hidden" name="id" value={poste.id} />}
-      <div className="grid gap-5 sm:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
+      <div className="grid items-start gap-5 sm:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
         <ChampFormulaire
           nom="code"
           libelle={textes.code}
@@ -52,6 +52,7 @@ export function FormulairePoste({
           autoComplete="off"
           spellCheck={false}
           required
+          aide={textes.aideCode}
           erreur={erreurs?.code}
         />
         <ChampFormulaire
@@ -65,7 +66,6 @@ export function FormulairePoste({
           erreur={erreurs?.nom}
         />
       </div>
-      <p className="-mt-3 text-sm text-texte-secondaire">{textes.aideCode}</p>
       <ChampFormulaire
         nom="ordre"
         libelle={textes.ordre}

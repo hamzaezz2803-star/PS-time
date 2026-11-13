@@ -4,7 +4,7 @@ export const TEXTES_ESPACE = {
   chargement: "Chargement de votre espace...",
   bonjour: (nom: string) => `Bonjour ${nom}`,
   introduction:
-    "Commencez par organiser vos départements. Les écrans de pointage arrivent dans les prochaines étapes.",
+    "Commencez par organiser vos départements et vos postes. Les écrans de pointage arrivent dans les prochaines étapes.",
   deconnexion: "Se déconnecter",
   changerMotDePasse: "Changer mon mot de passe",
 } as const;
