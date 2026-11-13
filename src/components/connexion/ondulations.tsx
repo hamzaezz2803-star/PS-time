@@ -14,10 +14,12 @@ export function Ondulations() {
         return (
           <span
             key={index}
-            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 animate-ondulation rounded-full border border-white/15 bg-white/[0.03] motion-reduce:animate-none"
+            className="absolute left-1/2 top-1/2 animate-ondulation rounded-full border border-white/15 bg-white/[0.03] motion-reduce:animate-none"
             style={{
               width: taille,
               height: taille,
+              // Même centrage que l'animation, pour le cas où elle est désactivée.
+              transform: "translate(-50%, -50%)",
               animationDelay: `${index * 0.15}s`,
             }}
           />

@@ -9,7 +9,7 @@ Ces règles s'appliquent à **chaque prompt** et à chaque modification du proje
 
 ## Contexte
 
-- **But** : [ce que fait l'application, en une phrase].
+- **But** : application de pointage des équipes (arrivées, départs, pauses, heures travaillées).
 - **Utilisateurs** : [qui l'utilise : administrateurs, clients, collaborateurs, patients...].
 - **Client ou commanditaire** : [nom, ou « projet personnel »].
 - **Marché** : [pays, langues : français, arabe, anglais...].
@@ -19,7 +19,7 @@ Ces règles s'appliquent à **chaque prompt** et à chaque modification du proje
 
 - Framework : Next.js 16 (App Router, dossier `src/`), React 19, TypeScript strict, Tailwind CSS v4.
 - Base de données : [Supabase / PostgreSQL / aucune pour l'instant : données fictives dans `lib/mock-data.ts`].
-- Authentification : [Supabase Auth / Auth.js / démo en `localStorage`, à remplacer avant la production].
+- Authentification : [Supabase Auth / Auth.js, à choisir]. En attendant, `src/lib/donnees/authentification.ts` refuse toute connexion.
 - Hébergement : [Vercel / autre].
 - Services externes : [WhatsApp, SMS, e-mail, paiement, IA...].
 
@@ -45,8 +45,9 @@ Ces règles s'appliquent à **chaque prompt** et à chaque modification du proje
 
 ## Design
 
-- Couleurs : [primaire `#______`, texte `#______`, fond `#______`].
-- Polices : [Inter, IBM Plex Sans Arabic...].
+- Couleurs (tirées du logo, définies dans `src/app/globals.css`) : primaire `#0b4fb3`, marine `#0a2463`, accent `#1aa3e8`, texte `#0f1b33`, fond `#f6f9fd`.
+- Logo : `public/logo-ps-time.webp`.
+- Polices : Geist (OFL), via `next/font`.
 - Priorité d'affichage : [mobile d'abord pour l'espace X, ordinateur pour l'espace Y].
 - Thème sombre : [oui / non].
 
@@ -54,14 +55,22 @@ Ces règles s'appliquent à **chaque prompt** et à chaque modification du proje
 
 | Besoin | Bibliothèque |
 | --- | --- |
-| [Formulaires] | [`react-hook-form`, `zod`] |
-| [Icônes] | [`lucide-react`] |
-| [...] | [...] |
+| Validation des données | `zod` |
+| Icônes | `lucide-react` |
+| Assemblage des classes CSS | `clsx`, `tailwind-merge` |
 
 ## Structure des dossiers
 
 ```text
-[Coller ici l'arborescence propre au projet]
+src/
+  app/                  pages et Server Actions (ex. connexion/page.tsx, connexion/actions.ts)
+  components/ui/        composants réutilisables (bouton, champ-saisie, etiquette, message-erreur)
+  components/connexion/ composants de l'écran de connexion
+  lib/donnees/          accès aux données et aux services externes
+  lib/validation/       schémas zod
+  lib/textes/           textes affichés
+  lib/constantes.ts     limites et seuils
+  types/index.ts        types partagés
 ```
 
 ## Exceptions aux règles communes

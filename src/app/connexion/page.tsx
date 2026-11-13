@@ -21,6 +21,7 @@ export default function PageConnexion() {
             width={1261}
             height={1247}
             priority
+            sizes="96px"
             className="mx-auto mb-6 size-24 lg:hidden"
           />
 

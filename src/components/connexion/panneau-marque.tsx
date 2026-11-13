@@ -6,8 +6,8 @@ import { OrbiteIcones } from "./orbite-icones";
 /** Moitié gauche de l'écran de connexion (ordinateur uniquement). */
 export function PanneauMarque() {
   return (
-    <aside className="relative hidden flex-col overflow-hidden bg-marine text-white lg:flex lg:w-1/2">
-      <div className="relative flex min-h-[640px] flex-1 items-center justify-center">
+    <aside className="sticky top-0 hidden h-dvh flex-col overflow-hidden bg-marine text-white lg:flex lg:w-1/2">
+      <div className="relative flex min-h-0 flex-1 items-center justify-center">
         <div className="absolute inset-0 scale-75 xl:scale-100">
           <Ondulations />
           <OrbiteIcones />
@@ -18,6 +18,7 @@ export function PanneauMarque() {
           width={1261}
           height={1247}
           priority
+          sizes="176px"
           className="relative z-10 size-36 xl:size-44"
         />
       </div>

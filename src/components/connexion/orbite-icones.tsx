@@ -15,20 +15,33 @@ import {
 type Anneau = {
   rayon: number;
   dureeSecondes: number;
+  /** Décale les icônes de cet anneau pour qu'elles ne s'alignent pas avec celles des autres. */
+  decalageDegres: number;
   inverse?: boolean;
   icones: LucideIcon[];
 };
 
 /** Thèmes du pointage : heures, pauses, équipes, planning, statistiques, paie. */
 const ANNEAUX: Anneau[] = [
-  { rayon: 135, dureeSecondes: 32, icones: [Clock, Coffee, Fingerprint] },
+  {
+    rayon: 135,
+    dureeSecondes: 32,
+    decalageDegres: 0,
+    icones: [Clock, Coffee, Fingerprint],
+  },
   {
     rayon: 210,
     dureeSecondes: 44,
+    decalageDegres: 60,
     inverse: true,
     icones: [Users, CalendarCheck, Timer],
   },
-  { rayon: 285, dureeSecondes: 56, icones: [ChartColumn, Wallet, LogIn] },
+  {
+    rayon: 285,
+    dureeSecondes: 56,
+    decalageDegres: 30,
+    icones: [ChartColumn, Wallet, LogIn],
+  },
 ];
 
 function IconeEnOrbite({
@@ -40,8 +53,9 @@ function IconeEnOrbite({
   anneau: Anneau;
   position: number;
 }) {
-  const fraction = position / anneau.icones.length;
-  const angleDepart = fraction * 360;
+  const angleDepart =
+    (position / anneau.icones.length) * 360 + anneau.decalageDegres;
+  const fraction = angleDepart / 360;
 
   // La position statique sert quand les animations sont désactivées ;
   // le délai négatif fait partir l'animation du même angle.
