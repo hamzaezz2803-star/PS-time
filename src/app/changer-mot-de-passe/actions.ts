@@ -2,6 +2,8 @@
 
 import { APIError } from "better-auth/api";
 import { headers } from "next/headers";
+import { redirect } from "next/navigation";
+import { CHEMIN_ESPACE } from "@/lib/constantes";
 import { auth } from "@/lib/donnees/authentification";
 import { obtenirUtilisateurConnecte } from "@/lib/donnees/session";
 import { marquerMotDePasseChange } from "@/lib/donnees/utilisateurs";
@@ -21,15 +23,20 @@ export async function changerMotDePasse(
   const validation = validerChangementMotDePasse(formulaire);
   if (!validation.ok) return { erreursChamps: validation.erreursChamps };
 
+  const entetes = await headers();
   try {
+    // La session courante est conservée : la remplacer ferait réafficher la page
+    // avec l'ancien cookie (déjà révoqué) et renverrait vers la connexion.
     await auth.api.changePassword({
       body: {
         currentPassword: validation.donnees.actuel,
         newPassword: validation.donnees.nouveau,
-        revokeOtherSessions: true,
+        revokeOtherSessions: false,
       },
-      headers: await headers(),
+      headers: entetes,
     });
+    // Déconnecte les autres appareils, qui connaissaient peut-être l'ancien mot de passe.
+    await auth.api.revokeOtherSessions({ headers: entetes });
   } catch (erreur) {
     if (erreur instanceof APIError && erreur.body?.code === "INVALID_PASSWORD") {
       return { erreursChamps: { actuel: erreurs.actuelIncorrect } };
@@ -41,7 +48,5 @@ export async function changerMotDePasse(
   }
 
   await marquerMotDePasseChange(utilisateur.id);
-  // Pas de redirect() ici : Better Auth vient de remplacer le cookie de session, et Next
-  // rafraîchit alors la page courante au lieu de suivre la redirection. Le formulaire navigue.
-  return { estTermine: true };
+  redirect(CHEMIN_ESPACE);
 }

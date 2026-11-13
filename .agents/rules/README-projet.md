@@ -19,7 +19,7 @@ Ces règles s'appliquent à **chaque prompt** et à chaque modification du proje
 
 - Framework : Next.js 16 (App Router, dossier `src/`), React 19, TypeScript strict, Tailwind CSS v4.
 - Base de données : MySQL 8.0.16+ ou MariaDB 10.4+, **une base par client** (l'application est installée chez chaque client, avec sa propre base). Accès via Drizzle ORM (`mysql2`), uniquement côté serveur (`src/lib/donnees/base.ts`). Développement : XAMPP, base `ps-time`.
-- Authentification : [Auth.js ou autre service éprouvé, à choisir]. En attendant, `src/lib/donnees/authentification.ts` refuse toute connexion.
+- Authentification : Better Auth (`src/lib/donnees/authentification.ts`) : e-mail et mot de passe (hachage scrypt), sessions en base dans un cookie httpOnly, 5 tentatives de connexion par minute et par IP, inscription libre désactivée. Les comptes sont créés par un administrateur.
 - Hébergement : [Vercel / autre].
 - Services externes : [WhatsApp, SMS, e-mail, paiement, IA...].
 
@@ -27,9 +27,13 @@ Ces règles s'appliquent à **chaque prompt** et à chaque modification du proje
 
 | Espace | Chemin | Rôles autorisés |
 | --- | --- | --- |
-| [Administrateur] | [`/admin/*`] | [`admin`, `super_admin`] |
-| [Utilisateur] | [`/espace/*`] | [`utilisateur`] |
-| [Public] | [`/`] | Tout le monde |
+| Connexion | `/connexion` | Tout le monde |
+| Espace connecté | `/espace`, `/changer-mot-de-passe` | Tout utilisateur connecté et actif |
+| [Administration] | [`/admin/*`] | [Super administrateur, à créer] |
+
+- `src/proxy.ts` redirige vers `/connexion` sans cookie de session (confort seulement). La vraie vérification est faite dans chaque page et action par `obtenirUtilisateurConnecte()` (`src/lib/donnees/session.ts`).
+- Un compte désactivé (`est_actif = 0`) ne peut plus ouvrir de session, et ses sessions existantes sont refusées.
+- Tant que `doit_changer_mot_de_passe = 1`, l'espace renvoie vers `/changer-mot-de-passe`.
 
 ## Règles métier
 
@@ -40,7 +44,12 @@ Ces règles s'appliquent à **chaque prompt** et à chaque modification du proje
 ## Données
 
 - Schéma : `src/lib/donnees/schema.ts` ; migrations SQL : `base-de-donnees/migrations/`.
-- Tables principales : `utilisateurs` (identifiant et e-mail uniques en minuscules, empreinte du mot de passe, compte actif, super administrateur, mot de passe à changer).
+- Tables principales :
+  - `utilisateurs` : identifiant et e-mail uniques en minuscules, nom, compte actif, super administrateur, mot de passe à changer ;
+  - `comptes` : moyen de connexion (empreinte du mot de passe, fournisseur `credential`) ;
+  - `sessions` : sessions ouvertes (jeton, expiration, IP et navigateur pour la sécurité) ;
+  - `verifications` : jetons temporaires (réinitialisation, vérification d'e-mail).
+- `sessions`, `comptes` et `verifications` suivent le modèle imposé par Better Auth. Certaines colonnes (image, jetons de connexion externe) sont exigées mais restent vides.
 - Pas de colonne `organisation_id` : une installation = un client = une base.
 - Reprise de l'ancien logiciel : ses mots de passe (MD5 + sel) ne sont pas repris. Chaque utilisateur repart avec un mot de passe à changer.
 - Données sensibles traitées : [aucune / santé / financières / mineurs...] et précautions associées.
@@ -58,6 +67,7 @@ Ces règles s'appliquent à **chaque prompt** et à chaque modification du proje
 
 | Besoin | Bibliothèque |
 | --- | --- |
+| Authentification | `better-auth` |
 | Base de données et migrations | `drizzle-orm`, `drizzle-kit`, `mysql2` |
 | Isolation du code serveur | `server-only` |
 | Validation des données | `zod` |
@@ -68,10 +78,15 @@ Ces règles s'appliquent à **chaque prompt** et à chaque modification du proje
 
 ```text
 src/
-  app/                  pages et Server Actions (ex. connexion/page.tsx, connexion/actions.ts)
-  components/ui/        composants réutilisables (bouton, champ-saisie, etiquette, message-erreur)
+  app/                  pages et Server Actions (connexion, espace, changer-mot-de-passe, api/auth)
+  components/ui/        composants réutilisables (bouton, champ-saisie, etiquette, message-erreur, chargement)
   components/connexion/ composants de l'écran de connexion
-  lib/donnees/          accès aux données et aux services externes
+  components/espace/    composants des pages connectées
+  lib/donnees/          accès aux données : base, schéma, authentification, session, utilisateurs
+  lib/client-authentification.ts  client Better Auth du navigateur
+  proxy.ts              redirection rapide des pages connectées
+scripts/                scripts d'installation (création du premier administrateur)
+base-de-donnees/migrations/  migrations SQL versionnées
   lib/validation/       schémas zod
   lib/textes/           textes affichés
   lib/constantes.ts     limites et seuils
@@ -90,15 +105,21 @@ Lister ici, de façon explicite, toute règle commune volontairement non appliqu
 | RLS sur toutes les tables | Non applicable | La base n'est jamais accessible depuis le navigateur ; une base par client | Définitif |
 | Migrations Supabase (`npx supabase ...`) | `npm run db:generer` puis `npm run db:migrer` (drizzle-kit) | Pas de Supabase | Définitif |
 | Types générés par `supabase gen types` | Types déduits du schéma Drizzle | Le schéma TypeScript est la source | Définitif |
+| Double authentification (MFA) des administrateurs | Pas encore en place | Première version de la connexion | Avant la mise en production chez un client |
+| Limitation de tentatives partagée | Compteur en mémoire du serveur (remis à zéro au redémarrage) | Une installation = un seul serveur | Si un client utilise plusieurs serveurs |
 
 ## Installation et lancement
 
 ```bash
 npm install
-cp .env.example .env.local   # puis remplir DATABASE_URL avec la base du client
+cp .env.example .env.local   # puis remplir DATABASE_URL, BETTER_AUTH_SECRET et BETTER_AUTH_URL
 npm run db:migrer            # crée ou met à jour les tables
+npm run admin:creer -- --identifiant admin --email admin@client.ma --nom "Nom Prénom"
 npm run dev
 ```
+
+- `BETTER_AUTH_SECRET` est différent pour chaque client (commande de génération dans `.env.example`).
+- `admin:creer` affiche une seule fois un mot de passe temporaire, à changer à la première connexion.
 
 Modifier le schéma : éditer `src/lib/donnees/schema.ts`, puis `npm run db:generer -- --name <nom_explicite>` (relire le SQL produit) et `npm run db:migrer`. Ne jamais modifier une migration déjà appliquée chez un client.
 

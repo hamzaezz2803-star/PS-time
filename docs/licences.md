@@ -5,4 +5,5 @@
 | Logo PS Time (`public/logo-ps-time.webp`) | Fourni par le commanditaire | Propriété de PS Time |
 | Police Geist | Vercel, via Google Fonts (`next/font`) | SIL Open Font License 1.1 |
 | Icônes | Lucide (`lucide-react`) | ISC |
-| zod, clsx, tailwind-merge | npm | MIT |
+| zod, clsx, tailwind-merge, mysql2, drizzle-kit, better-auth, server-only | npm | MIT |
+| drizzle-orm | npm | Apache 2.0 |

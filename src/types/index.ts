@@ -20,6 +20,4 @@ export type ChangementMotDePasse = {
 export type EtatChangementMotDePasse = {
   erreursChamps?: Partial<Record<keyof ChangementMotDePasse, string>>;
   message?: string;
-  /** Vrai quand le mot de passe a été changé : le formulaire renvoie alors vers l'espace. */
-  estTermine?: boolean;
 };

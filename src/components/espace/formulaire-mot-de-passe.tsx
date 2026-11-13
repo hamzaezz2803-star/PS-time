@@ -1,14 +1,13 @@
 "use client";
 
-import { useActionState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useActionState } from "react";
 import { LoaderCircle } from "lucide-react";
 import { changerMotDePasse } from "@/app/changer-mot-de-passe/actions";
 import { ChampMotDePasse } from "@/components/connexion/champ-mot-de-passe";
 import { Bouton } from "@/components/ui/bouton";
 import { Etiquette } from "@/components/ui/etiquette";
 import { MessageErreur } from "@/components/ui/message-erreur";
-import { CHEMIN_ESPACE, LONGUEUR_MIN_MOT_DE_PASSE } from "@/lib/constantes";
+import { LONGUEUR_MIN_MOT_DE_PASSE } from "@/lib/constantes";
 import { TEXTES_MOT_DE_PASSE } from "@/lib/textes/espace";
 import type { ChangementMotDePasse, EtatChangementMotDePasse } from "@/types";
 
@@ -34,12 +33,7 @@ const CHAMPS: ChampConfig[] = [
 ];
 
 export function FormulaireMotDePasse() {
-  const router = useRouter();
   const [etat, action, enCours] = useActionState(changerMotDePasse, ETAT_INITIAL);
-
-  useEffect(() => {
-    if (etat.estTermine) router.replace(CHEMIN_ESPACE);
-  }, [etat.estTermine, router]);
 
   return (
     <form action={action} noValidate className="flex flex-col gap-5">
@@ -75,7 +69,7 @@ export function FormulaireMotDePasse() {
         />
       </div>
 
-      <Bouton type="submit" disabled={enCours || etat.estTermine} className="w-full">
+      <Bouton type="submit" disabled={enCours} className="w-full">
         {enCours && (
           <LoaderCircle
             className="size-5 animate-spin motion-reduce:animate-none"
