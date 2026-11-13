@@ -28,7 +28,11 @@ export const TEXTES_CONNEXION = {
     motDePasseVide: "Saisissez votre mot de passe.",
     motDePasseTropLong: "Ce mot de passe est trop long.",
     identifiantsInvalides: "Adresse e-mail ou mot de passe incorrect.",
+    compteDesactive:
+      "Ce compte est désactivé. Contactez l'administrateur de votre entreprise.",
+    tropDeTentatives:
+      "Trop de tentatives de connexion. Patientez une minute avant de réessayer.",
     serviceIndisponible:
-      "La connexion n'est pas encore disponible : le service d'authentification n'est pas encore branché.",
+      "La connexion a échoué. Vérifiez votre réseau puis réessayez.",
   },
 } as const;

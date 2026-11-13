@@ -10,9 +10,14 @@ export type ErreursChampsConnexion = Partial<
   Record<keyof IdentifiantsConnexion, string>
 >;
 
-/** État renvoyé par l'action de connexion au formulaire. Ne contient jamais le mot de passe. */
-export type EtatConnexion = {
-  email: string;
-  erreursChamps?: ErreursChampsConnexion;
+export type ChangementMotDePasse = {
+  actuel: string;
+  nouveau: string;
+  confirmation: string;
+};
+
+/** État renvoyé au formulaire de changement de mot de passe. Ne contient jamais de mot de passe. */
+export type EtatChangementMotDePasse = {
+  erreursChamps?: Partial<Record<keyof ChangementMotDePasse, string>>;
   message?: string;
 };

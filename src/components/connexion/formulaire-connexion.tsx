@@ -1,26 +1,61 @@
 "use client";
 
-import { useActionState } from "react";
+import { useState, type FormEvent } from "react";
+import { useRouter } from "next/navigation";
 import { LoaderCircle } from "lucide-react";
-import { connecter } from "@/app/connexion/actions";
 import { Bouton } from "@/components/ui/bouton";
 import { ChampSaisie } from "@/components/ui/champ-saisie";
 import { Etiquette } from "@/components/ui/etiquette";
 import { MessageErreur } from "@/components/ui/message-erreur";
+import { clientAuthentification } from "@/lib/client-authentification";
+import { CHEMIN_ESPACE } from "@/lib/constantes";
 import { TEXTES_CONNEXION } from "@/lib/textes/connexion";
-import type { EtatConnexion } from "@/types";
+import { validerIdentifiants } from "@/lib/validation/connexion";
+import type { ErreursChampsConnexion } from "@/types";
 import { ChampMotDePasse } from "./champ-mot-de-passe";
+import { messagePourErreurConnexion } from "./erreurs-connexion";
 
-const ETAT_INITIAL: EtatConnexion = { email: "" };
 const { champs } = TEXTES_CONNEXION;
 
 export function FormulaireConnexion() {
-  const [etat, action, enCours] = useActionState(connecter, ETAT_INITIAL);
-  const erreurEmail = etat.erreursChamps?.email;
-  const erreurMotDePasse = etat.erreursChamps?.motDePasse;
+  const router = useRouter();
+  const [enCours, setEnCours] = useState(false);
+  const [erreursChamps, setErreursChamps] = useState<ErreursChampsConnexion>({});
+  const [message, setMessage] = useState<string>();
+
+  async function soumettre(evenement: FormEvent<HTMLFormElement>) {
+    evenement.preventDefault();
+    const formulaire = new FormData(evenement.currentTarget);
+    const validation = validerIdentifiants(
+      formulaire.get("email"),
+      formulaire.get("motDePasse"),
+    );
+
+    setMessage(undefined);
+    setErreursChamps(validation.ok ? {} : (validation.erreursChamps ?? {}));
+    if (!validation.ok) return;
+
+    setEnCours(true);
+    // La validation définitive (format, limite de tentatives, compte actif) est faite par le serveur.
+    const { error } = await clientAuthentification.signIn.email({
+      email: validation.donnees.email,
+      password: validation.donnees.motDePasse,
+    });
+
+    if (error) {
+      setMessage(messagePourErreurConnexion(error));
+      setEnCours(false);
+      return;
+    }
+
+    router.replace(CHEMIN_ESPACE);
+  }
+
+  const erreurEmail = erreursChamps.email;
+  const erreurMotDePasse = erreursChamps.motDePasse;
 
   return (
-    <form action={action} noValidate className="flex flex-col gap-5">
+    <form onSubmit={soumettre} noValidate className="flex flex-col gap-5">
       <div className="flex flex-col gap-2">
         <Etiquette htmlFor="email">{champs.email.libelle}</Etiquette>
         <ChampSaisie
@@ -30,7 +65,6 @@ export function FormulaireConnexion() {
           autoComplete="email"
           inputMode="email"
           placeholder={champs.email.exemple}
-          defaultValue={etat.email}
           required
           aria-invalid={erreurEmail ? true : undefined}
           aria-describedby={erreurEmail ? "erreur-email" : undefined}
@@ -53,7 +87,7 @@ export function FormulaireConnexion() {
 
       <div role="alert" aria-live="polite">
         <MessageErreur
-          message={etat.message}
+          message={message}
           className="rounded-lg border border-erreur/30 bg-erreur/5 p-3"
         />
       </div>
