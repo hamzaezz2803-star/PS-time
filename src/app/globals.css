@@ -1,26 +1,72 @@
 @import "tailwindcss";
 
+/* Couleurs de la marque PS Time, tirées du logo. Définies une seule fois ici. */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --couleur-marine: #0a2463;
+  --couleur-primaire: #0b4fb3;
+  --couleur-primaire-survol: #093f8f;
+  --couleur-accent: #1aa3e8;
+  --couleur-ciel: #e8f3fd;
+
+  --couleur-texte: #0f1b33;
+  --couleur-texte-secondaire: #4a5876;
+  --couleur-bordure: #d5deec;
+  /* Bordure des champs : contraste 3:1 minimum sur fond blanc. */
+  --couleur-bordure-champ: #7487a6;
+  --couleur-fond: #f6f9fd;
+  --couleur-surface: #ffffff;
+
+  --couleur-succes: #15803d;
+  --couleur-attention: #b45309;
+  --couleur-erreur: #b91c1c;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-marine: var(--couleur-marine);
+  --color-primaire: var(--couleur-primaire);
+  --color-primaire-survol: var(--couleur-primaire-survol);
+  --color-accent: var(--couleur-accent);
+  --color-ciel: var(--couleur-ciel);
+  --color-texte: var(--couleur-texte);
+  --color-texte-secondaire: var(--couleur-texte-secondaire);
+  --color-bordure: var(--couleur-bordure);
+  --color-bordure-champ: var(--couleur-bordure-champ);
+  --color-fond: var(--couleur-fond);
+  --color-surface: var(--couleur-surface);
+  --color-succes: var(--couleur-succes);
+  --color-attention: var(--couleur-attention);
+  --color-erreur: var(--couleur-erreur);
+
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@theme {
+  --animate-orbite: orbite calc(var(--duree) * 1s) linear infinite;
+  --animate-ondulation: ondulation 6s ease-in-out infinite;
+
+  @keyframes orbite {
+    from {
+      transform: rotate(0deg) translateY(calc(var(--rayon) * 1px)) rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg) translateY(calc(var(--rayon) * 1px))
+        rotate(-360deg);
+    }
+  }
+
+  @keyframes ondulation {
+    0%,
+    100% {
+      transform: translate(-50%, -50%) scale(1);
+    }
+    50% {
+      transform: translate(-50%, -50%) scale(0.94);
+    }
   }
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--couleur-fond);
+  color: var(--couleur-texte);
 }
