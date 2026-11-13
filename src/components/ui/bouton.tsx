@@ -22,7 +22,8 @@ export function Bouton({
     <button
       type={type}
       className={cn(
-        "inline-flex min-h-12 items-center justify-center gap-2 rounded-lg px-5 text-base font-semibold transition-colors duration-150",
+        // 44 px de haut sur mobile (zone tactile), 40 px sur ordinateur.
+        "inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-4 text-base font-semibold transition-colors duration-150 lg:min-h-10",
         "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primaire",
         "disabled:cursor-not-allowed disabled:opacity-60",
         STYLES_VARIANTES[variante],

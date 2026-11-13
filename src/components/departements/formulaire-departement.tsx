@@ -70,7 +70,7 @@ export function FormulaireDepartement({
           defaultValue={departement ? (departement.parentId ?? "") : (parentParDefaut ?? "")}
           aria-invalid={erreurParent ? true : undefined}
           aria-describedby={erreurParent ? "erreur-parent" : undefined}
-          className="h-12 w-full rounded-lg border border-bordure-champ bg-surface px-3 text-base text-texte focus-visible:border-primaire focus-visible:outline-2 focus-visible:outline-primaire aria-invalid:border-erreur"
+          className="h-11 w-full rounded-lg border border-bordure-champ bg-surface px-3 text-base text-texte shadow-[0_1px_2px_rgb(15_27_51/0.04)] lg:h-10 focus-visible:border-primaire focus-visible:outline-2 focus-visible:outline-primaire aria-invalid:border-erreur"
         >
           <option value="">{textes.aucunParent}</option>
           {optionsParent.map((option) => (
