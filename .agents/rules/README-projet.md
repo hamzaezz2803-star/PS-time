@@ -18,8 +18,8 @@ Ces règles s'appliquent à **chaque prompt** et à chaque modification du proje
 ## Stack
 
 - Framework : Next.js 16 (App Router, dossier `src/`), React 19, TypeScript strict, Tailwind CSS v4.
-- Base de données : [Supabase / PostgreSQL / aucune pour l'instant : données fictives dans `lib/mock-data.ts`].
-- Authentification : [Supabase Auth / Auth.js, à choisir]. En attendant, `src/lib/donnees/authentification.ts` refuse toute connexion.
+- Base de données : MySQL 8.0.16+ ou MariaDB 10.4+, **une base par client** (l'application est installée chez chaque client, avec sa propre base). Accès via Drizzle ORM (`mysql2`), uniquement côté serveur (`src/lib/donnees/base.ts`). Développement : XAMPP, base `ps-time`.
+- Authentification : [Auth.js ou autre service éprouvé, à choisir]. En attendant, `src/lib/donnees/authentification.ts` refuse toute connexion.
 - Hébergement : [Vercel / autre].
 - Services externes : [WhatsApp, SMS, e-mail, paiement, IA...].
 
@@ -39,7 +39,10 @@ Ces règles s'appliquent à **chaque prompt** et à chaque modification du proje
 
 ## Données
 
-- Tables principales : [liste ou lien vers le schéma].
+- Schéma : `src/lib/donnees/schema.ts` ; migrations SQL : `base-de-donnees/migrations/`.
+- Tables principales : `utilisateurs` (identifiant et e-mail uniques en minuscules, empreinte du mot de passe, compte actif, super administrateur, mot de passe à changer).
+- Pas de colonne `organisation_id` : une installation = un client = une base.
+- Reprise de l'ancien logiciel : ses mots de passe (MD5 + sel) ne sont pas repris. Chaque utilisateur repart avec un mot de passe à changer.
 - Données sensibles traitées : [aucune / santé / financières / mineurs...] et précautions associées.
 - Données à ne jamais collecter : [CIN, date de naissance...].
 
@@ -55,6 +58,8 @@ Ces règles s'appliquent à **chaque prompt** et à chaque modification du proje
 
 | Besoin | Bibliothèque |
 | --- | --- |
+| Base de données et migrations | `drizzle-orm`, `drizzle-kit`, `mysql2` |
+| Isolation du code serveur | `server-only` |
 | Validation des données | `zod` |
 | Icônes | `lucide-react` |
 | Assemblage des classes CSS | `clsx`, `tailwind-merge` |
@@ -79,15 +84,23 @@ Lister ici, de façon explicite, toute règle commune volontairement non appliqu
 
 | Règle commune | Exception | Raison | Jusqu'à quand |
 | --- | --- | --- | --- |
-| [Session en cookie httpOnly] | [Session en `localStorage`] | [Démo sans backend] | [Arrivée du backend] |
+| `id uuid default gen_random_uuid()` | `char(36)`, UUID v4 généré par l'application (`crypto.randomUUID()`) | MySQL/MariaDB n'ont ni type uuid ni UUID v4 natif (10.4) | Définitif |
+| Dates en `timestamptz` | `datetime(3)` en UTC (connexion en `time_zone = '+00:00'`) | Pas de `timestamptz` en MySQL ; `timestamp` est limité à 2038 | Définitif |
+| Trigger `maj_modifie_le` | `ON UPDATE CURRENT_TIMESTAMP(3)` sur `modifie_le` | Équivalent natif MySQL | Définitif |
+| RLS sur toutes les tables | Non applicable | La base n'est jamais accessible depuis le navigateur ; une base par client | Définitif |
+| Migrations Supabase (`npx supabase ...`) | `npm run db:generer` puis `npm run db:migrer` (drizzle-kit) | Pas de Supabase | Définitif |
+| Types générés par `supabase gen types` | Types déduits du schéma Drizzle | Le schéma TypeScript est la source | Définitif |
 
 ## Installation et lancement
 
 ```bash
 npm install
-cp .env.example .env.local   # puis remplir les valeurs
+cp .env.example .env.local   # puis remplir DATABASE_URL avec la base du client
+npm run db:migrer            # crée ou met à jour les tables
 npm run dev
 ```
+
+Modifier le schéma : éditer `src/lib/donnees/schema.ts`, puis `npm run db:generer -- --name <nom_explicite>` (relire le SQL produit) et `npm run db:migrer`. Ne jamais modifier une migration déjà appliquée chez un client.
 
 ## Avant de terminer une tâche
 

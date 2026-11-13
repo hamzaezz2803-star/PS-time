@@ -8,6 +8,20 @@
       "when": 1794580235914,
       "tag": "0000_creer_utilisateurs",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1794580582941,
+      "tag": "0001_retirer_mot_de_passe_utilisateurs",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1794580589604,
+      "tag": "0002_authentification",
+      "breakpoints": true
     }
   ]
 }

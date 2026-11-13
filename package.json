@@ -11,6 +11,7 @@
     "db:migrer": "drizzle-kit migrate"
   },
   "dependencies": {
+    "better-auth": "^1.7.23",
     "clsx": "^2.1.1",
     "drizzle-orm": "^0.45.4",
     "lucide-react": "^1.72.0",

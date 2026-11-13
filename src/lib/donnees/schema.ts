@@ -4,6 +4,7 @@ import {
   char,
   check,
   datetime,
+  index,
   mysqlTable,
   uniqueIndex,
   varchar,
@@ -11,42 +12,53 @@ import {
 
 /**
  * Schéma de la base. Toute modification passe par une migration :
- * `npm run db:generer` puis `npm run db:migrer`.
+ * `npm run db:generer -- --name <nom>` puis `npm run db:migrer`.
  *
  * Compatible MariaDB 10.4+ et MySQL 8.0.16+.
  * Les dates sont en UTC (la connexion force time_zone = '+00:00').
+ * Les tables utilisateurs, sessions, comptes et verifications suivent le
+ * modèle de Better Auth (voir src/lib/donnees/authentification.ts).
  */
 
-const dateCreation = (nom: string) =>
-  datetime(nom, { fsp: 3, mode: "date" })
+// UUID() de MariaDB/MySQL est un v1 (horodaté, devinable) : l'application fournit un v4 aléatoire.
+// Le défaut SQL ne sert que pour une insertion manuelle (phpMyAdmin).
+const identifiantUnique = () =>
+  char("id", { length: 36 })
+    .primaryKey()
+    .default(sql`(uuid())`)
+    .$defaultFn(() => crypto.randomUUID());
+
+const referenceUtilisateur = () =>
+  char("utilisateur_id", { length: 36 })
     .notNull()
-    .default(sql`CURRENT_TIMESTAMP(3)`);
+    .references(() => utilisateurs.id, { onDelete: "cascade" });
+
+const date = (nom: string) => datetime(nom, { fsp: 3, mode: "date" });
+
+const dateCreation = () =>
+  date("cree_le").notNull().default(sql`CURRENT_TIMESTAMP(3)`);
+
+// Drizzle n'offre « ON UPDATE » que pour TIMESTAMP (limité à 2038) : on l'écrit dans le défaut.
+const dateModification = () =>
+  date("modifie_le")
+    .notNull()
+    .default(sql`CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3)`);
 
 export const utilisateurs = mysqlTable(
   "utilisateurs",
   {
-    // UUID() de MariaDB/MySQL est un v1 (horodaté, devinable) : l'application fournit un v4 aléatoire.
-    // Le défaut SQL ne sert que pour une insertion manuelle (phpMyAdmin).
-    id: char("id", { length: 36 })
-      .primaryKey()
-      .default(sql`(uuid())`)
-      .$defaultFn(() => crypto.randomUUID()),
+    id: identifiantUnique(),
     identifiant: varchar("identifiant", { length: 50 }).notNull(),
     email: varchar("email", { length: 254 }).notNull(),
+    emailVerifie: boolean("email_verifie").notNull().default(false),
     nom: varchar("nom", { length: 100 }).notNull(),
-    // Empreinte argon2id ou bcrypt (sel inclus). Jamais de mot de passe en clair ni de MD5.
-    motDePasseHash: varchar("mot_de_passe_hash", { length: 255 }).notNull(),
     doitChangerMotDePasse: boolean("doit_changer_mot_de_passe")
       .notNull()
       .default(true),
-    motDePasseModifieLe: dateCreation("mot_de_passe_modifie_le"),
     estActif: boolean("est_actif").notNull().default(true),
     estSuperAdmin: boolean("est_super_admin").notNull().default(false),
-    creeLe: dateCreation("cree_le"),
-    // Drizzle n'offre « ON UPDATE » que pour TIMESTAMP (limité à 2038) : on l'écrit dans le défaut.
-    modifieLe: datetime("modifie_le", { fsp: 3, mode: "date" })
-      .notNull()
-      .default(sql`CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3)`),
+    creeLe: dateCreation(),
+    modifieLe: dateModification(),
   },
   (table) => [
     uniqueIndex("utilisateurs_identifiant_idx").on(table.identifiant),
@@ -62,4 +74,60 @@ export const utilisateurs = mysqlTable(
     ),
     check("utilisateurs_nom_non_vide", sql`CHAR_LENGTH(TRIM(${table.nom})) > 0`),
   ],
+);
+
+/** Sessions de connexion. Le jeton est stocké dans un cookie httpOnly. */
+export const sessions = mysqlTable(
+  "sessions",
+  {
+    id: identifiantUnique(),
+    utilisateurId: referenceUtilisateur(),
+    jeton: varchar("jeton", { length: 255 }).notNull(),
+    expireLe: date("expire_le").notNull(),
+    // Conservés pour repérer une connexion suspecte (journal de sécurité).
+    adresseIp: varchar("adresse_ip", { length: 45 }),
+    agentUtilisateur: varchar("agent_utilisateur", { length: 500 }),
+    creeLe: dateCreation(),
+    modifieLe: dateModification(),
+  },
+  (table) => [
+    uniqueIndex("sessions_jeton_idx").on(table.jeton),
+    index("sessions_utilisateur_idx").on(table.utilisateurId),
+  ],
+);
+
+/** Moyens de connexion d'un utilisateur. Pour l'instant : mot de passe (fournisseur « credential »). */
+export const comptes = mysqlTable(
+  "comptes",
+  {
+    id: identifiantUnique(),
+    utilisateurId: referenceUtilisateur(),
+    fournisseurId: varchar("fournisseur_id", { length: 50 }).notNull(),
+    compteId: varchar("compte_id", { length: 255 }).notNull(),
+    // Empreinte scrypt calculée par Better Auth (sel inclus). Jamais de mot de passe en clair ni de MD5.
+    motDePasse: varchar("mot_de_passe", { length: 255 }),
+    creeLe: dateCreation(),
+    modifieLe: dateModification(),
+  },
+  (table) => [
+    uniqueIndex("comptes_fournisseur_compte_idx").on(
+      table.fournisseurId,
+      table.compteId,
+    ),
+    index("comptes_utilisateur_idx").on(table.utilisateurId),
+  ],
+);
+
+/** Jetons temporaires (réinitialisation de mot de passe, vérification d'e-mail). */
+export const verifications = mysqlTable(
+  "verifications",
+  {
+    id: identifiantUnique(),
+    identifiant: varchar("identifiant", { length: 255 }).notNull(),
+    valeur: varchar("valeur", { length: 255 }).notNull(),
+    expireLe: date("expire_le").notNull(),
+    creeLe: dateCreation(),
+    modifieLe: dateModification(),
+  },
+  (table) => [index("verifications_identifiant_idx").on(table.identifiant)],
 );
