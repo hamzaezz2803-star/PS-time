@@ -58,7 +58,7 @@ export type EmployeListe = {
 
 /**
  * État du formulaire d'employé. Les clés des erreurs sont les noms des champs
- * (`matricule`, `champ_<id>`...). `valeurs` réaffiche la saisie après une erreur.
+ * (`matricule`, `information_<n>_libelle`...). `valeurs` réaffiche la saisie après une erreur.
  */
 export type EtatFormulaireEmploye = {
   erreursChamps?: Record<string, string | undefined>;
@@ -67,4 +67,27 @@ export type EtatFormulaireEmploye = {
   valeurs?: Record<string, string>;
   /** Informations supplémentaires saisies, réaffichées après une erreur. */
   informations?: { libelle: string; valeur: string }[];
+};
+
+/** Fiche complète d'un employé (dates au format AAAA-MM-JJ, téléphone en E.164). */
+export type EmployeDetail = {
+  id: string;
+  matricule: string;
+  numeroBadge: string;
+  prenom: string;
+  nom: string;
+  departementId: string;
+  departement: string;
+  posteId: string | null;
+  poste: string | null;
+  genre: string | null;
+  typePieceIdentite: string | null;
+  numeroPieceIdentite: string | null;
+  telephone: string | null;
+  email: string | null;
+  typeEmploi: string | null;
+  dateEmbauche: string | null;
+  dateDebutEmploi: string | null;
+  dateFinEmploi: string | null;
+  informations: { libelle: string; valeur: string }[];
 };

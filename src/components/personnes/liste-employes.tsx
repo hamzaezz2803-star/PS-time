@@ -5,6 +5,7 @@ import { formaterJour } from "@/lib/formats";
 import { formaterTelephone } from "@/lib/metier/employes";
 import { TEXTES_PERSONNES } from "@/lib/textes/personnes";
 import type { EmployeListe } from "@/types";
+import { ActionsLigneEmploye } from "./actions-ligne-employe";
 
 const { liste: textes } = TEXTES_PERSONNES;
 
@@ -39,7 +40,7 @@ export function ListeEmployes({
         <p className="p-5 text-base text-texte-secondaire sm:p-6">{textes.vide}</p>
       ) : (
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[46rem] text-left text-sm">
+          <table className="w-full min-w-[52rem] text-left text-sm">
             <thead className="bg-fond text-texte-secondaire">
               <tr>
                 {[textes.matricule, textes.numeroBadge, textes.nomComplet, textes.departement, textes.poste, textes.telephone, textes.dateEmbauche].map(
@@ -49,6 +50,9 @@ export function ListeEmployes({
                     </th>
                   ),
                 )}
+                <th scope="col" className="px-5 py-3 text-right font-medium">
+                  <span className="sr-only">{textes.actions}</span>
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-bordure text-texte">
@@ -64,6 +68,9 @@ export function ListeEmployes({
                   </td>
                   <td className="px-5 py-3 whitespace-nowrap">
                     {employe.dateEmbauche ? formaterJour(employe.dateEmbauche) : <NonRenseigne />}
+                  </td>
+                  <td className="px-3 py-1.5">
+                    <ActionsLigneEmploye employe={{ id: employe.id, nomComplet: `${employe.prenom} ${employe.nom}` }} />
                   </td>
                 </tr>
               ))}

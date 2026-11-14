@@ -2,7 +2,7 @@
 
 import { useActionState, useState } from "react";
 import { LoaderCircle } from "lucide-react";
-import { creerEmploye } from "@/app/(connecte)/personnel/personnes/actions";
+import { creerEmploye, modifierEmploye } from "@/app/(connecte)/personnel/personnes/actions";
 import { Bouton } from "@/components/ui/bouton";
 import { ChampFormulaire } from "@/components/ui/champ-formulaire";
 import { ChampSelection, type OptionSelection } from "@/components/ui/champ-selection";
@@ -10,16 +10,28 @@ import { MessageErreur } from "@/components/ui/message-erreur";
 import { ListeOnglets, PanneauOnglet } from "@/components/ui/onglets";
 import { LONGUEUR_MAX_MATRICULE, LONGUEUR_MAX_NOM_EMPLOYE, LONGUEUR_MAX_NUMERO_BADGE } from "@/lib/constantes";
 import { TEXTES_PERSONNES } from "@/lib/textes/personnes";
-import type { EtatFormulaireEmploye } from "@/types";
+import type { EmployeDetail, EtatFormulaireEmploye } from "@/types";
 import { ChampsEmploi } from "./champs-emploi";
 import { ChampsIdentiteContact } from "./champs-identite-contact";
 import { InformationsEmploye } from "./informations-employe";
 
-const { formulaire: textes } = TEXTES_PERSONNES;
+const { formulaire: textes, modification } = TEXTES_PERSONNES;
 /** `numeroReponse` change à chaque réponse : les champs sont alors recréés avec la saisie
  * renvoyée (React ne remet pas à jour une liste déroulante ni des lignes ajoutées après coup). */
 type EtatFormulaire = EtatFormulaireEmploye & { numeroReponse: number };
-const ETAT_INITIAL: EtatFormulaire = { numeroReponse: 0 };
+const ETAT_CREATION: EtatFormulaire = { numeroReponse: 0 };
+
+/** Valeurs initiales du formulaire en modification (les champs vides deviennent « »). */
+function etatModification(employe: EmployeDetail): EtatFormulaire {
+  const { id, departement, poste, informations, ...champs } = employe;
+  void id;
+  void departement;
+  void poste;
+  const valeurs = Object.fromEntries(
+    Object.entries(champs).map(([nom, valeur]) => [nom, typeof valeur === "string" ? valeur : ""]),
+  );
+  return { numeroReponse: 0, valeurs, informations };
+}
 const obligatoire = (libelle: string) => `${libelle} *`;
 
 const ONGLETS = ["identite-contact", "emploi", "informations"] as const;
@@ -43,29 +55,32 @@ function compterErreurs(erreurs: EtatFormulaireEmploye["erreursChamps"]): Record
 }
 
 /**
- * Création d'un employé, sur le modèle CVAccess : l'essentiel en haut, toujours visible,
- * puis les informations facultatives en onglets. Les deux boutons de création se distinguent
- * par `apresCreation` (fermer la fenêtre ou en saisir un autre).
+ * Création (sans `employe`) ou modification d'un employé, sur le modèle CVAccess : l'essentiel
+ * en haut, toujours visible, puis les informations facultatives en onglets. En création, les deux
+ * boutons se distinguent par `apresCreation` (fermer la fenêtre ou en saisir un autre).
  */
 export function FormulaireEmploye({
   departements,
   postes,
-  onCree,
+  employe,
+  onReussite,
   onAnnuler,
 }: {
   departements: OptionSelection[];
   postes: OptionSelection[];
-  onCree: (message: string, continuer: boolean) => void;
+  employe?: EmployeDetail;
+  onReussite: (message: string, continuer: boolean) => void;
   onAnnuler: () => void;
 }) {
+  const enregistrer = employe ? modifierEmploye : creerEmploye;
   const [onglet, setOnglet] = useState<IdOnglet>("identite-contact");
   const [etat, action, enCours] = useActionState(
     async (precedent: EtatFormulaire, formulaire: FormData): Promise<EtatFormulaire> => {
       const continuer = formulaire.get("apresCreation") === "continuer";
-      const resultat = await creerEmploye(precedent, formulaire);
+      const resultat = await enregistrer(precedent, formulaire);
       if (resultat.succes) {
         setOnglet("identite-contact");
-        onCree(resultat.succes, continuer);
+        onReussite(resultat.succes, continuer);
       } else {
         // Ouvre le premier onglet facultatif qui contient une erreur (l'essentiel reste visible).
         const nombres = compterErreurs(resultat.erreursChamps);
@@ -74,7 +89,7 @@ export function FormulaireEmploye({
       }
       return { ...resultat, numeroReponse: precedent.numeroReponse + 1 };
     },
-    ETAT_INITIAL,
+    employe ? etatModification(employe) : ETAT_CREATION,
   );
   const erreurs = etat.erreursChamps;
   const valeurs = etat.valeurs ?? {};
@@ -91,6 +106,7 @@ export function FormulaireEmploye({
 
   return (
     <form action={action} noValidate className="flex min-h-0 flex-1 flex-col">
+      {employe && <input type="hidden" name="id" value={employe.id} />}
       <div key={etat.numeroReponse} className="flex-1 overflow-y-auto px-5 py-5 sm:px-6">
         <fieldset className="grid gap-x-6 gap-y-4 sm:grid-cols-2">
           <legend className="mb-3 flex w-full items-baseline justify-between gap-4">
@@ -127,11 +143,15 @@ export function FormulaireEmploye({
         <div className="flex flex-col gap-2 sm:flex-row-reverse sm:justify-start">
           <Bouton type="submit" name="apresCreation" value="fermer" disabled={enCours}>
             {enCours && <LoaderCircle className="size-5 animate-spin motion-reduce:animate-none" aria-hidden="true" />}
-            {enCours ? textes.enregistrementEnCours : textes.enregistrer}
+            {enCours
+              ? (employe ? modification.enregistrementEnCours : textes.enregistrementEnCours)
+              : (employe ? modification.enregistrer : textes.enregistrer)}
           </Bouton>
-          <Bouton type="submit" name="apresCreation" value="continuer" variante="contour" disabled={enCours}>
-            {textes.creerEtContinuer}
-          </Bouton>
+          {!employe && (
+            <Bouton type="submit" name="apresCreation" value="continuer" variante="contour" disabled={enCours}>
+              {textes.creerEtContinuer}
+            </Bouton>
+          )}
           <Bouton variante="fantome" onClick={onAnnuler}>{textes.annuler}</Bouton>
         </div>
       </div>

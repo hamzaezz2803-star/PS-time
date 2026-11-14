@@ -54,6 +54,30 @@ export const TEXTES_PERSONNES = {
     aucunDepartement: "Créez d'abord au moins un département : chaque employé doit y être rattaché.",
     lienDepartements: "Aller aux départements",
   },
+  modification: {
+    titre: (nom: string) => `Modifier « ${nom} »`,
+    enregistrer: "Enregistrer les modifications",
+    enregistrementEnCours: "Enregistrement...",
+    modifie: (nom: string) => `Employé « ${nom} » modifié.`,
+  },
+  details: {
+    titre: (nom: string) => `Fiche de ${nom}`,
+    chargement: "Chargement de la fiche...",
+    modifier: "Modifier",
+    supprimer: "Supprimer",
+    fermer: "Fermer",
+    aucuneInformation: "Aucune information supplémentaire.",
+  },
+  suppression: {
+    titre: "Supprimer l'employé",
+    question: (nom: string) => `Supprimer définitivement « ${nom} » ?`,
+    explication:
+      "Sa fiche et ses informations supplémentaires seront effacées. Cette action ne peut pas être annulée.",
+    confirmer: "Supprimer définitivement",
+    enCours: "Suppression...",
+    annuler: "Annuler",
+    supprime: (nom: string) => `Employé « ${nom} » supprimé.`,
+  },
   informations: {
     description:
       "Ajoutez des informations propres à cet employé, par exemple « Taille de blouse : M » ou « Casier : A12 ».",
@@ -78,6 +102,10 @@ export const TEXTES_PERSONNES = {
     telephone: "Téléphone",
     dateEmbauche: "Embauche",
     nonRenseigne: "Non renseigné",
+    actions: "Actions",
+    voir: (nom: string) => `Voir la fiche de ${nom}`,
+    modifier: (nom: string) => `Modifier ${nom}`,
+    supprimer: (nom: string) => `Supprimer ${nom}`,
     pagination: "Pagination de la liste des employés",
     precedente: "Page précédente",
     suivante: "Page suivante",
@@ -123,6 +151,7 @@ export const TEXTES_PERSONNES = {
     tropDInformations: (limite: number) => `Vous pouvez ajouter au plus ${limite} informations.`,
     droits: "Vous n'avez pas les droits pour gérer les employés.",
     echec: "L'opération a échoué. Réessayez dans un instant.",
+    introuvable: "Cet employé n'existe plus. La liste a été actualisée.",
   },
 } as const;
 

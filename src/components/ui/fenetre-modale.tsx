@@ -27,8 +27,11 @@ export function FenetreModale({
     if (!element) return;
     if (ouverte && !element.open) {
       element.showModal();
-      // Le navigateur placerait le focus sur la croix : on le met sur le premier champ à remplir.
-      element.querySelector<HTMLElement>("form input:not([type=hidden]), form select")?.focus();
+      // Le navigateur placerait le focus sur la croix : on le met sur l'élément prévu
+      // (data-focus-initial) ou, à défaut, sur le premier champ à remplir.
+      element
+        .querySelector<HTMLElement>("[data-focus-initial], form input:not([type=hidden]), form select")
+        ?.focus();
     }
     if (!ouverte && element.open) element.close();
   }, [ouverte]);

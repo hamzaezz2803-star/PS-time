@@ -2,7 +2,7 @@ import "server-only";
 
 import { asc, count, eq } from "drizzle-orm";
 import type { DonneesEmploye } from "@/lib/validation/employe";
-import type { EmployeListe } from "@/types";
+import type { EmployeDetail, EmployeListe } from "@/types";
 import { obtenirBase } from "./base";
 import type { Information } from "@/lib/metier/employes";
 import { departements, employes, informationsEmployes, postes } from "./schema";
@@ -51,3 +51,76 @@ export async function insererEmploye(
   return id;
 }
 
+
+/** Fiche complète d'un employé avec ses informations supplémentaires, ou null s'il n'existe plus. */
+export async function obtenirEmploye(id: string): Promise<EmployeDetail | null> {
+  const base = obtenirBase();
+  const [employe] = await base
+    .select({
+      id: employes.id,
+      matricule: employes.matricule,
+      numeroBadge: employes.numeroBadge,
+      prenom: employes.prenom,
+      nom: employes.nom,
+      departementId: employes.departementId,
+      departement: departements.nom,
+      posteId: employes.posteId,
+      poste: postes.nom,
+      genre: employes.genre,
+      typePieceIdentite: employes.typePieceIdentite,
+      numeroPieceIdentite: employes.numeroPieceIdentite,
+      telephone: employes.telephone,
+      email: employes.email,
+      typeEmploi: employes.typeEmploi,
+      dateEmbauche: employes.dateEmbauche,
+      dateDebutEmploi: employes.dateDebutEmploi,
+      dateFinEmploi: employes.dateFinEmploi,
+    })
+    .from(employes)
+    .innerJoin(departements, eq(departements.id, employes.departementId))
+    .leftJoin(postes, eq(postes.id, employes.posteId))
+    .where(eq(employes.id, id))
+    .limit(1);
+  if (!employe) return null;
+
+  const informations = await base
+    .select({ libelle: informationsEmployes.libelle, valeur: informationsEmployes.valeur })
+    .from(informationsEmployes)
+    .where(eq(informationsEmployes.employeId, id))
+    .orderBy(asc(informationsEmployes.creeLe), asc(informationsEmployes.libelle));
+  return { ...employe, informations };
+}
+
+/**
+ * Met à jour l'employé et remplace ses informations supplémentaires, dans une seule transaction.
+ * Renvoie false si l'employé n'existe plus.
+ */
+export async function mettreAJourEmploye(
+  id: string,
+  donnees: DonneesEmploye,
+  informations: Information[],
+): Promise<boolean> {
+  return obtenirBase().transaction(async (transaction) => {
+    const [existant] = await transaction
+      .select({ id: employes.id })
+      .from(employes)
+      .where(eq(employes.id, id))
+      .limit(1)
+      .for("update");
+    if (!existant) return false;
+
+    await transaction.update(employes).set(donnees).where(eq(employes.id, id));
+    await transaction.delete(informationsEmployes).where(eq(informationsEmployes.employeId, id));
+    if (informations.length > 0) {
+      await transaction
+        .insert(informationsEmployes)
+        .values(informations.map((information) => ({ employeId: id, ...information })));
+    }
+    return true;
+  });
+}
+
+/** Supprime l'employé ; ses informations supplémentaires partent avec lui (cascade). */
+export async function supprimerEmployeParId(id: string): Promise<void> {
+  await obtenirBase().delete(employes).where(eq(employes.id, id));
+}

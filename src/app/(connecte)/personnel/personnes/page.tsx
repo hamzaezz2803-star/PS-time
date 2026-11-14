@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { CreationEmploye } from "@/components/personnes/creation-employe";
+import { GestionEmployes } from "@/components/personnes/gestion-employes";
 import { ListeEmployes } from "@/components/personnes/liste-employes";
 import { Chargement } from "@/components/ui/chargement";
 import { MessageErreur } from "@/components/ui/message-erreur";
@@ -72,11 +72,12 @@ async function ContenuPersonnes({ searchParams }: { searchParams: ParametresRech
 
   return (
     <>
-      <CreationEmploye
+      <GestionEmployes
         departements={versOptions(construireArbre(departements))}
         postes={versOptions(construireArbre(postes, comparerPostes))}
-      />
-      <ListeEmployes employes={employes} total={total} page={page} nombrePages={nombrePages} />
+      >
+        <ListeEmployes employes={employes} total={total} page={page} nombrePages={nombrePages} />
+      </GestionEmployes>
     </>
   );
 }
