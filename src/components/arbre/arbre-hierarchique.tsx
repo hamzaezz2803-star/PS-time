@@ -21,6 +21,8 @@ type ProprietesArbre<T extends ElementArbre> = {
   textes: TextesArbre;
   /** Information secondaire affichée après le nom (ex. le numéro d'un poste). */
   detail?: (element: T) => ReactNode;
+  /** Boutons affichés au bout de chaque ligne (ex. modifier, supprimer). */
+  actions?: (element: T) => ReactNode;
 };
 
 function Ligne<T extends ElementArbre>({
@@ -72,6 +74,7 @@ function Ligne<T extends ElementArbre>({
             </span>
           )}
         </button>
+        {proprietes.actions?.(noeud)}
       </div>
       {aDesEnfants && estOuvert && (
         // La ligne verticale montre le rattachement des enfants à leur parent.
