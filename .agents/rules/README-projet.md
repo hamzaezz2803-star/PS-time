@@ -35,7 +35,7 @@ Ces règles s'appliquent à **chaque prompt** et à chaque modification du proje
 | Changement de mot de passe | `/changer-mot-de-passe` | Tout utilisateur connecté et actif |
 
 - Les pages du tableau de bord sont dans le groupe de routes `src/app/(connecte)/`, qui partage le menu latéral (`src/components/tableau-de-bord/`).
-- Toutes les entrées du menu Personnel (Personnes, Départements, Postes) sont développées. Les personnes ne peuvent pour l'instant qu'être créées et listées (modification et suppression à venir).
+- Toutes les entrées du menu Personnel (Personnes, Départements, Postes) sont développées. Personnes : liste paginée, puis création, fiche, modification et suppression (avec confirmation) dans des fenêtres modales.
 
 - `src/proxy.ts` redirige vers `/connexion` sans cookie de session (confort seulement). La vraie vérification est faite dans chaque page et action par `obtenirUtilisateurConnecte()` (`src/lib/donnees/session.ts`).
 - Un compte désactivé (`est_actif = 0`) ne peut plus ouvrir de session, et ses sessions existantes sont refusées.
@@ -57,10 +57,10 @@ Ces règles s'appliquent à **chaque prompt** et à chaque modification du proje
   - `verifications` : jetons temporaires (réinitialisation, vérification d'e-mail) ;
   - `departements` : arbre parent/enfants (`parent_id`). Nom unique parmi les départements d'un même parent ; un département qui a des sous-départements ou des employés ne peut pas être supprimé (clé étrangère `restrict`).
   - `postes` : arbre parent/enfants, numéro (`code`) unique, ordre d'affichage.
-  - `employes` : matricule unique, prénom, nom, département (obligatoire, `restrict`), poste (facultatif, `set null`), téléphone E.164, e-mail unique en minuscules, type d'emploi (`cdi`, `cdd`, `interim`, `stage`), dates d'embauche et de fin d'emploi (type `date`, fin ≥ embauche) ;
-  - `champs_personnalises` : champs facultatifs créés par l'administrateur depuis le formulaire d'employé (nom unique, type `texte`, `nombre` ou `date`, 50 au maximum) ;
-  - `valeurs_champs_personnalises` : valeur d'un champ facultatif pour un employé (une par couple employé/champ, supprimée avec l'employé ou le champ).
-- Champs volontairement non repris de l'ancien logiciel (minimisation) : genre, date de naissance, type et numéro de pièce d'identité. Photo, numéro de carte, biométrie et mot de passe de la badgeuse viendront avec la gestion des badgeuses.
+  - `employes` : matricule et numéro de badge obligatoires et uniques, prénom, nom, département (obligatoire, `restrict`), poste (facultatif, `set null`), genre (`homme`, `femme`), pièce d'identité (type `cin`, `passeport` ou `carte_sejour` + numéro, renseignés ensemble, uniques), téléphone E.164, e-mail unique en minuscules, type d'emploi (`cdi`, `cdd`, `interim`, `stage`), dates d'embauche, de début et de fin d'emploi (type `date`, fin ≥ embauche et fin ≥ début) ;
+  - `informations_employes` : informations supplémentaires propres à un employé (libellé + valeur, 20 au maximum, libellé unique par employé), saisies dans son formulaire et supprimées avec lui (`cascade`).
+- Champ volontairement non repris de l'ancien logiciel (minimisation) : date de naissance. Photo, biométrie et mot de passe de la badgeuse viendront avec la gestion des badgeuses.
+- La pièce d'identité est une donnée sensible : réservée aux super administrateurs, jamais écrite dans les journaux.
 - `sessions`, `comptes` et `verifications` suivent le modèle imposé par Better Auth. Certaines colonnes (image, jetons de connexion externe) sont exigées mais restent vides.
 - Pas de colonne `organisation_id` : une installation = un client = une base.
 - Reprise de l'ancien logiciel : ses mots de passe (MD5 + sel) ne sont pas repris. Chaque utilisateur repart avec un mot de passe à changer.
@@ -92,13 +92,13 @@ Ces règles s'appliquent à **chaque prompt** et à chaque modification du proje
 ```text
 src/
   app/                  pages et Server Actions (connexion, espace, changer-mot-de-passe, api/auth)
-  components/ui/        composants réutilisables (bouton, champ-saisie, etiquette, message-erreur, chargement)
+  components/ui/        composants réutilisables (bouton, champs, messages, chargement, fenetre-modale, onglets, pied-fenetre)
   components/connexion/ composants de l'écran de connexion
   components/espace/    composants du changement de mot de passe
   components/tableau-de-bord/  cadre et menu latéral des pages connectées
   components/departements/     arbre et formulaires des départements
   components/postes/           arbre et formulaires des postes
-  components/personnes/        formulaire d'employé, champs facultatifs, liste paginée
+  components/personnes/        gestion des employés : fenêtres de création, fiche, modification, suppression ; liste paginée
   lib/actions/          Server Actions partagées (déconnexion)
   lib/donnees/          accès aux données : base, schéma, authentification, session, utilisateurs, départements
   lib/metier/           règles métier pures et leurs tests (*.test.ts, lancés par npm test)
@@ -125,6 +125,8 @@ Lister ici, de façon explicite, toute règle commune volontairement non appliqu
 | RLS sur toutes les tables | Non applicable | La base n'est jamais accessible depuis le navigateur ; une base par client | Définitif |
 | Migrations Supabase (`npx supabase ...`) | `npm run db:generer` puis `npm run db:migrer` (drizzle-kit) | Pas de Supabase | Définitif |
 | Types générés par `supabase gen types` | Types déduits du schéma Drizzle | Le schéma TypeScript est la source | Définitif |
+| Pas de CIN « au cas où » (minimisation) | Type et numéro de pièce d'identité, facultatifs | Déclaration CNSS des salariés (obligation de l'employeur) | Définitif, à revoir si la déclaration CNSS n'est pas faite depuis l'application |
+| Minimisation des données personnelles | Genre, facultatif | Demandé par le responsable du projet (usage précis à documenter) | À confirmer avant la mise en production |
 | Double authentification (MFA) des administrateurs | Pas encore en place | Première version de la connexion | Avant la mise en production chez un client |
 | Limitation de tentatives partagée | Compteur en mémoire du serveur (remis à zéro au redémarrage) | Une installation = un seul serveur | Si un client utilise plusieurs serveurs |
 
