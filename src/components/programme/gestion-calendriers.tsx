@@ -3,7 +3,7 @@
 import { CalendarClock, MoonStar } from "lucide-react";
 import { supprimerCalendrier } from "@/app/(connecte)/programme/calendriers/actions";
 import { GestionListe, type ColonneListe } from "@/components/liste/gestion-liste";
-import { dureeTravailMinutes, finLeLendemain, formaterDuree, minutesVersHeure } from "@/lib/metier/programme";
+import { dureePauseMinutes, dureeTravailMinutes, finLeLendemain, formaterDuree, minutesVersHeure } from "@/lib/metier/programme";
 import { TEXTES_PROGRAMME } from "@/lib/textes/programme";
 import type { Calendrier } from "@/types";
 import { FormulaireCalendrier } from "./formulaire-calendrier";
@@ -30,18 +30,26 @@ const COLONNES: ColonneListe<Calendrier>[] = [
     titre: textes.colonnes.travail,
     rendu: (calendrier) => (
       <span className="tabular-nums">
-        {formaterDuree(dureeTravailMinutes(calendrier.debutMinutes, calendrier.finMinutes, calendrier.pauseMinutes))}
+        {formaterDuree(
+          dureeTravailMinutes(
+            calendrier.debutMinutes,
+            calendrier.finMinutes,
+            dureePauseMinutes(calendrier.pauseDebutMinutes, calendrier.pauseFinMinutes),
+          ),
+        )}
       </span>
     ),
   },
   {
     titre: textes.colonnes.pause,
     estSecondaire: true,
-    rendu: (calendrier) =>
-      calendrier.pauseMinutes === 0 ? (
+    rendu: ({ pauseDebutMinutes, pauseFinMinutes }) =>
+      pauseDebutMinutes === null || pauseFinMinutes === null ? (
         <span className="text-texte-secondaire">{textes.sansPause}</span>
       ) : (
-        <span className="tabular-nums">{`${calendrier.pauseMinutes} ${textes.minutes}`}</span>
+        <span className="tabular-nums whitespace-nowrap">
+          {minutesVersHeure(pauseDebutMinutes)} – {minutesVersHeure(pauseFinMinutes)}
+        </span>
       ),
   },
 ];

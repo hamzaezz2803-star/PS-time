@@ -3,10 +3,9 @@ import {
   FENETRE_POINTAGE_MAX_MINUTES,
   HEURES_SUP_MAX_MINUTES,
   LONGUEUR_MAX_NOM_PROGRAMME,
-  PAUSE_MAX_MINUTES,
   TOLERANCE_MAX_MINUTES,
 } from "@/lib/constantes";
-import { dureeServiceMinutes, heureVersMinutes } from "@/lib/metier/programme";
+import { heureVersMinutes, pauseDansService } from "@/lib/metier/programme";
 import { TEXTES_PROGRAMME } from "@/lib/textes/programme";
 import type { Calendrier, Resultat } from "@/types";
 import { caseCochee, entierBorne, lireChamps, nomObligatoire, premieresErreurs } from "./commun";
@@ -18,13 +17,16 @@ const heure = z.string().transform((valeur, contexte) => {
   if (resultat === null) contexte.addIssue({ code: "custom", message: textes.erreurs.heureInvalide });
   return resultat ?? 0;
 });
+/** Heure facultative : une saisie vide donne null. */
+const heureFacultative = z.union([z.literal("").transform(() => null), heure]);
 
 const schemaCalendrier = z
   .object({
     nom: nomObligatoire(LONGUEUR_MAX_NOM_PROGRAMME, textes.nomVide, textes.nomTropLong),
     debutMinutes: heure,
     finMinutes: heure,
-    pauseMinutes: minutes(PAUSE_MAX_MINUTES),
+    pauseDebutMinutes: heureFacultative,
+    pauseFinMinutes: heureFacultative,
     entreeAvantMinutes: minutes(FENETRE_POINTAGE_MAX_MINUTES),
     entreeApresMinutes: minutes(FENETRE_POINTAGE_MAX_MINUTES),
     sortieAvantMinutes: minutes(FENETRE_POINTAGE_MAX_MINUTES),
@@ -39,10 +41,17 @@ const schemaCalendrier = z
     heuresSupMaximumMinutes: minutes(HEURES_SUP_MAX_MINUTES),
   })
   .refine((c) => c.debutMinutes !== c.finMinutes, { error: textes.erreurs.heuresIdentiques, path: ["finMinutes"] })
-  .refine((c) => c.pauseMinutes < dureeServiceMinutes(c.debutMinutes, c.finMinutes), {
-    error: textes.erreurs.pauseTropLongue,
-    path: ["pauseMinutes"],
-  });
+  .refine((c) => (c.pauseDebutMinutes === null) === (c.pauseFinMinutes === null), {
+    error: textes.erreurs.pauseIncomplete,
+    path: ["pauseFinMinutes"],
+  })
+  .refine(
+    (c) =>
+      c.pauseDebutMinutes === null ||
+      c.pauseFinMinutes === null ||
+      pauseDansService(c.debutMinutes, c.finMinutes, c.pauseDebutMinutes, c.pauseFinMinutes),
+    { error: textes.erreurs.pauseHorsService, path: ["pauseDebutMinutes"] },
+  );
 
 export type DonneesCalendrier = Omit<Calendrier, "id">;
 export const CHAMPS_CALENDRIER = Object.keys(schemaCalendrier.shape) as (keyof DonneesCalendrier)[];

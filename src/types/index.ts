@@ -98,7 +98,9 @@ export type Calendrier = {
   nom: string;
   debutMinutes: number;
   finMinutes: number;
-  pauseMinutes: number;
+  /** Pause de … à … (null toutes les deux = pas de pause). */
+  pauseDebutMinutes: number | null;
+  pauseFinMinutes: number | null;
   entreeAvantMinutes: number;
   entreeApresMinutes: number;
   sortieAvantMinutes: number;

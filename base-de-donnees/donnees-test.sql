@@ -37,13 +37,13 @@ INSERT INTO postes (id, code, nom, ordre, parent_id) VALUES
   ('00000000-0000-4000-8000-000000000205', 'P05', 'Agent administratif', 5, '00000000-0000-4000-8000-000000000201'),
   ('00000000-0000-4000-8000-000000000206', 'P06', 'Comptable', 6, '00000000-0000-4000-8000-000000000205');
 
--- 4. Calendriers (heures en minutes depuis minuit : 360 = 06:00).
-INSERT INTO calendriers (id, nom, debut_minutes, fin_minutes, pause_minutes, retard_tolere_minutes, heures_sup_actives, heures_sup_minimum_minutes, heures_sup_maximum_minutes) VALUES
-  ('00000000-0000-4000-8000-000000000401', 'Matin', 360, 840, 30, 5, 0, 30, 0),
-  ('00000000-0000-4000-8000-000000000402', 'Après-midi', 840, 1320, 30, 5, 0, 30, 0),
-  ('00000000-0000-4000-8000-000000000403', 'Nuit', 1320, 360, 30, 5, 0, 30, 0),
-  ('00000000-0000-4000-8000-000000000404', 'Bureau', 510, 1050, 60, 10, 1, 30, 120),
-  ('00000000-0000-4000-8000-000000000405', 'Samedi matin', 480, 720, 0, 10, 0, 30, 0);
+-- 4. Calendriers (heures en minutes depuis minuit : 360 = 06:00). Pause de … à … (NULL = pas de pause).
+INSERT INTO calendriers (id, nom, debut_minutes, fin_minutes, pause_debut_minutes, pause_fin_minutes, retard_tolere_minutes, heures_sup_actives, heures_sup_minimum_minutes, heures_sup_maximum_minutes) VALUES
+  ('00000000-0000-4000-8000-000000000401', 'Matin', 360, 840, 600, 630, 5, 0, 30, 0),           -- 06:00-14:00, pause 10:00-10:30
+  ('00000000-0000-4000-8000-000000000402', 'Après-midi', 840, 1320, 1080, 1110, 5, 0, 30, 0),   -- 14:00-22:00, pause 18:00-18:30
+  ('00000000-0000-4000-8000-000000000403', 'Nuit', 1320, 360, 120, 150, 5, 0, 30, 0),           -- 22:00-06:00, pause 02:00-02:30
+  ('00000000-0000-4000-8000-000000000404', 'Bureau', 510, 1050, 750, 810, 10, 1, 30, 120),      -- 08:30-17:30, pause 12:30-13:30
+  ('00000000-0000-4000-8000-000000000405', 'Samedi matin', 480, 720, NULL, NULL, 10, 0, 30, 0); -- 08:00-12:00, sans pause
 
 -- 5. Rotations et calendrier de chaque jour (jour absent = repos).
 INSERT INTO rotations (id, nom, type, nombre_jours) VALUES

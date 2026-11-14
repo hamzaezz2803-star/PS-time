@@ -38,6 +38,23 @@ export function dureeTravailMinutes(debut: number, fin: number, pause: number): 
   return Math.max(0, dureeServiceMinutes(debut, fin) - pause);
 }
 
+/** Durée d'une pause de … à … ; 0 sans pause (heures vides). */
+export function dureePauseMinutes(debutPause: number | null, finPause: number | null): number {
+  if (debutPause === null || finPause === null) return 0;
+  return dureeServiceMinutes(debutPause, finPause);
+}
+
+/**
+ * Vrai si la pause tient entièrement dans le service (nuit comprise) et laisse du temps
+ * de travail : 12:00 à 13:00 dans 08:00 à 17:00, ou 02:00 à 02:30 dans 22:00 à 06:00.
+ */
+export function pauseDansService(debut: number, fin: number, debutPause: number, finPause: number): boolean {
+  const decalage = (debutPause - debut + MINUTES_PAR_JOUR) % MINUTES_PAR_JOUR;
+  const duree = dureeServiceMinutes(debutPause, finPause);
+  const service = dureeServiceMinutes(debut, fin);
+  return duree > 0 && duree < service && decalage + duree <= service;
+}
+
 /** 480 donne « 8 h 00 », 45 donne « 0 h 45 ». */
 export function formaterDuree(minutes: number): string {
   return `${Math.floor(minutes / 60)} h ${String(minutes % 60).padStart(2, "0")}`;

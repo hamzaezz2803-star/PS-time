@@ -1,0 +1,3 @@
+ALTER TABLE `calendriers` ADD `pause_debut_minutes` int;--> statement-breakpoint
+ALTER TABLE `calendriers` ADD `pause_fin_minutes` int;--> statement-breakpoint
+ALTER TABLE `calendriers` ADD CONSTRAINT `calendriers_pause_valide` CHECK ((`calendriers`.`pause_debut_minutes` IS NULL AND `calendriers`.`pause_fin_minutes` IS NULL) OR (`calendriers`.`pause_debut_minutes` BETWEEN 0 AND 1439 AND `calendriers`.`pause_fin_minutes` BETWEEN 0 AND 1439 AND `calendriers`.`pause_debut_minutes` <> `calendriers`.`pause_fin_minutes`));

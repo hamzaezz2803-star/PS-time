@@ -326,7 +326,9 @@ export const calendriers = mysqlTable(
     nom: varchar("nom", { length: 60 }).notNull(),
     debutMinutes: int("debut_minutes").notNull(),
     finMinutes: int("fin_minutes").notNull(),
-    pauseMinutes: int("pause_minutes").notNull().default(0),
+    // Pause de … à … (vides toutes les deux = pas de pause), comprise dans le service.
+    pauseDebutMinutes: int("pause_debut_minutes"),
+    pauseFinMinutes: int("pause_fin_minutes"),
     // Fenêtres où un pointage compte comme entrée ou sortie de ce service.
     entreeAvantMinutes: int("entree_avant_minutes").notNull().default(60),
     entreeApresMinutes: int("entree_apres_minutes").notNull().default(60),
@@ -348,7 +350,10 @@ export const calendriers = mysqlTable(
     uniqueIndex("calendriers_nom_idx").on(table.nom),
     check("calendriers_nom_non_vide", sql`CHAR_LENGTH(TRIM(${table.nom})) > 0`),
     check("calendriers_heures_valides", sql`${table.debutMinutes} BETWEEN 0 AND 1439 AND ${table.finMinutes} BETWEEN 0 AND 1439 AND ${table.debutMinutes} <> ${table.finMinutes}`),
-    check("calendriers_pause_bornee", sql`${table.pauseMinutes} BETWEEN 0 AND 720`),
+    check(
+      "calendriers_pause_valide",
+      sql`(${table.pauseDebutMinutes} IS NULL AND ${table.pauseFinMinutes} IS NULL) OR (${table.pauseDebutMinutes} BETWEEN 0 AND 1439 AND ${table.pauseFinMinutes} BETWEEN 0 AND 1439 AND ${table.pauseDebutMinutes} <> ${table.pauseFinMinutes})`,
+    ),
     check(
       "calendriers_fenetres_bornees",
       sql`${table.entreeAvantMinutes} BETWEEN 0 AND 720 AND ${table.entreeApresMinutes} BETWEEN 0 AND 720 AND ${table.sortieAvantMinutes} BETWEEN 0 AND 720 AND ${table.sortieApresMinutes} BETWEEN 0 AND 720`,

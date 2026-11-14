@@ -69,16 +69,16 @@ export const LIMITE_LISTE_PROGRAMME = 500;
 export const LIMITE_EMPLOYES_SELECTION = 2000;
 export const FENETRE_POINTAGE_MAX_MINUTES = 720;
 export const TOLERANCE_MAX_MINUTES = 240;
-export const PAUSE_MAX_MINUTES = 720;
 export const HEURES_SUP_MAX_MINUTES = 1440;
 export const TYPES_ROTATION = ["hebdomadaire", "cycle"] as const;
 export const JOURS_ROTATION_MAX = 31;
 export const JOURS_PAR_SEMAINE = 7;
-/** Valeurs proposées pour un nouveau calendrier (journée de 08:00 à 17:00, une heure de pause). */
+/** Valeurs proposées pour un nouveau calendrier (journée de 08:00 à 17:00, pause de 12:00 à 13:00). */
 export const CALENDRIER_PAR_DEFAUT = {
   debutMinutes: 480,
   finMinutes: 1020,
-  pauseMinutes: 60,
+  pauseDebutMinutes: 720,
+  pauseFinMinutes: 780,
   entreeAvantMinutes: 60,
   entreeApresMinutes: 60,
   sortieAvantMinutes: 60,

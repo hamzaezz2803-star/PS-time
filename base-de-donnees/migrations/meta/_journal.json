@@ -71,6 +71,20 @@
       "when": 1794663537307,
       "tag": "0009_module_programme",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "5",
+      "when": 1794668194563,
+      "tag": "0010_suppression_pause_minutes",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "5",
+      "when": 1794668206184,
+      "tag": "0011_pause_debut_fin",
+      "breakpoints": true
     }
   ]
 }
