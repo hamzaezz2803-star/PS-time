@@ -32,10 +32,12 @@ Ces règles s'appliquent à **chaque prompt** et à chaque modification du proje
 | Personnel > Départements | `/personnel/departements` | Lecture : tout utilisateur connecté. Modification : super administrateur |
 | Personnel > Postes | `/personnel/postes` | Lecture : tout utilisateur connecté. Modification : super administrateur |
 | Personnel > Personnes | `/personnel/personnes` | Super administrateur (lecture et création : données personnelles) |
+| Programme > Calendriers, Rotations, Groupes, Affectations | `/programme/...` | Super administrateur (les groupes et affectations contiennent des noms d'employés) |
 | Changement de mot de passe | `/changer-mot-de-passe` | Tout utilisateur connecté et actif |
 
 - Les pages du tableau de bord sont dans le groupe de routes `src/app/(connecte)/`, qui partage le menu latéral (`src/components/tableau-de-bord/`).
-- Toutes les entrées du menu Personnel (Personnes, Départements, Postes) sont développées. Personnes : liste paginée, puis création, fiche, modification et suppression (avec confirmation) dans des fenêtres modales.
+- Toutes les entrées du menu Personnel (Personnes, Départements, Postes) sont développées. Personnes : liste paginée, puis création, fiche, modification et suppression (avec confirmation) dans des fenêtres modales. Départements et Postes : arbre sur toute la largeur (icône distincte pour un parent et pour un enfant, nombre d'employés par ligne : sous-départements compris pour un département, occupants exacts pour un poste), bouton « Nouveau » en haut, création, modification et suppression en fenêtre (composant commun `components/arbre/gestion-arbre.tsx`).
+- Menu Planning > Programme : liste simple + fenêtres (composant commun `components/liste/gestion-liste.tsx`). Ordre d'utilisation : 1. Calendriers (créneau horaire, temps de travail calculé en direct, service de nuit, fenêtres de pointage, tolérances, heures supplémentaires) ; 2. Rotations (semaine type du lundi au dimanche, ou cycle de 1 à 31 jours ; un calendrier ou « Repos » par jour) ; 3. Groupes (nom, description, membres cochés dans une liste avec recherche) ; 4. Affectations (une rotation pour un groupe ou un employé, de telle date à telle date ou sans fin).
 
 - `src/proxy.ts` redirige vers `/connexion` sans cookie de session (confort seulement). La vraie vérification est faite dans chaque page et action par `obtenirUtilisateurConnecte()` (`src/lib/donnees/session.ts`).
 - Un compte désactivé (`est_actif = 0`) ne peut plus ouvrir de session, et ses sessions existantes sont refusées.
@@ -59,6 +61,10 @@ Ces règles s'appliquent à **chaque prompt** et à chaque modification du proje
   - `postes` : arbre parent/enfants, numéro (`code`) unique, ordre d'affichage.
   - `employes` : matricule et numéro de badge obligatoires et uniques, prénom, nom, département (obligatoire, `restrict`), poste (facultatif, `set null`), genre (`homme`, `femme`), pièce d'identité (type `cin`, `passeport` ou `carte_sejour` + numéro, renseignés ensemble, uniques), téléphone E.164, e-mail unique en minuscules, type d'emploi (`cdi`, `cdd`, `interim`, `stage`), dates d'embauche, de début et de fin d'emploi (type `date`, fin ≥ embauche et fin ≥ début) ;
   - `informations_employes` : informations supplémentaires propres à un employé (libellé + valeur, 20 au maximum, libellé unique par employé), saisies dans son formulaire et supprimées avec lui (`cascade`).
+  - `calendriers` : créneau horaire en minutes depuis minuit (début ≠ fin ; fin < début = service de nuit), pause, fenêtres d'entrée et de sortie, tolérances de retard et de départ anticipé, pointages obligatoires, heures supplémentaires (après, minimum, maximum par jour, 0 = sans limite). Nom unique.
+  - `rotations` + `jours_rotation` : type `hebdomadaire` (7 jours, lundi = 0) ou `cycle` (1 à 31 jours, compté depuis le début de l'affectation) ; un jour absent = repos. Un calendrier utilisé par une rotation ne peut pas être supprimé (`restrict`).
+  - `groupes` : nom unique, description ; un employé appartient à un seul groupe (`employes.groupe_id`, `set null`).
+  - `affectations` : une rotation pour un groupe OU un employé (contrainte `check`), date de début, date de fin facultative. Pas de chevauchement de périodes pour une même cible (vérifié dans une transaction qui verrouille la cible). L'affectation d'un employé passe avant celle de son groupe. Supprimées avec leur groupe ou leur employé (dans une transaction) ; une rotation affectée ne peut pas être supprimée.
 - Champ volontairement non repris de l'ancien logiciel (minimisation) : date de naissance. Photo, biométrie et mot de passe de la badgeuse viendront avec la gestion des badgeuses.
 - La pièce d'identité est une donnée sensible : réservée aux super administrateurs, jamais écrite dans les journaux.
 - `sessions`, `comptes` et `verifications` suivent le modèle imposé par Better Auth. Certaines colonnes (image, jetons de connexion externe) sont exigées mais restent vides.
@@ -99,8 +105,10 @@ src/
   components/departements/     arbre et formulaires des départements
   components/postes/           arbre et formulaires des postes
   components/personnes/        gestion des employés : fenêtres de création, fiche, modification, suppression ; liste paginée
+  components/liste/            liste simple avec fenêtres (création, modification, suppression) et état des formulaires
+  components/programme/        calendriers, rotations, groupes (choix des membres) et affectations
   lib/actions/          Server Actions partagées (déconnexion)
-  lib/donnees/          accès aux données : base, schéma, authentification, session, utilisateurs, départements
+  lib/donnees/          accès aux données : base, schéma, authentification, session, utilisateurs, départements, postes, employés, calendriers, rotations, groupes, affectations
   lib/metier/           règles métier pures et leurs tests (*.test.ts, lancés par npm test)
   lib/client-authentification.ts  client Better Auth du navigateur
   proxy.ts              redirection rapide des pages connectées

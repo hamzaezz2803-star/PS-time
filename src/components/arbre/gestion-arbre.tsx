@@ -5,9 +5,9 @@ import { Pencil, Trash2 } from "lucide-react";
 import { BoutonIcone } from "@/components/ui/bouton-icone";
 import { FenetreModale } from "@/components/ui/fenetre-modale";
 import { MessageSucces } from "@/components/ui/message-succes";
-import type { Comparateur, ElementArbre } from "@/lib/metier/arbre";
+import { totalAvecDescendants, type Comparateur, type ElementArbre } from "@/lib/metier/arbre";
 import type { EtatFormulaire } from "@/types";
-import { ArbreHierarchique, type TextesArbre } from "./arbre-hierarchique";
+import { ArbreHierarchique, type IconesArbre, type TextesArbre } from "./arbre-hierarchique";
 import type { OptionParent } from "./champ-parent";
 import { PanneauArbre } from "./panneau-arbre";
 import { SuppressionElement, type TextesSuppression } from "./suppression-element";
@@ -48,6 +48,9 @@ export function GestionArbre<T extends ElementArbre>({
   elements,
   comparer,
   textes,
+  icones,
+  nombresEmployes,
+  cumulerSousElements = false,
   detail,
   rendreFormulaire,
   actionSupprimer,
@@ -55,6 +58,11 @@ export function GestionArbre<T extends ElementArbre>({
   elements: T[];
   comparer?: Comparateur<T>;
   textes: TextesGestionArbre;
+  icones: IconesArbre;
+  /** Nombre d'employés par identifiant d'élément (absent = 0). */
+  nombresEmployes: Record<string, number>;
+  /** Vrai : un parent affiche aussi les employés de ses descendants (départements). */
+  cumulerSousElements?: boolean;
   detail?: (element: T) => ReactNode;
   rendreFormulaire: (proprietes: ProprietesFormulaireArbre<T>) => ReactNode;
   actionSupprimer: (etat: EtatFormulaire, formulaire: FormData) => Promise<EtatFormulaire>;
@@ -101,6 +109,12 @@ export function GestionArbre<T extends ElementArbre>({
           onBasculer={gestion.basculer}
           onSelectionner={(id) => ouvrir({ type: "modification", id })}
           textes={textes}
+          icones={icones}
+          nombreEmployes={(element) =>
+            cumulerSousElements
+              ? totalAvecDescendants(elements, element.id, nombresEmployes)
+              : (nombresEmployes[element.id] ?? 0)
+          }
           detail={detail}
           actions={(element) => (
             <div className="flex shrink-0 items-center">

@@ -14,6 +14,12 @@ export const TEXTES_NAVIGATION = {
   personnes: "Personnes",
   departements: "Départements",
   postes: "Postes",
+  groupeProgramme: "Planning",
+  programme: "Programme",
+  calendriers: "Calendriers",
+  rotations: "Rotations",
+  groupes: "Groupes",
+  affectations: "Affectations",
   heureActuelle: "Date et heure actuelles",
   compte: {
     ouvrir: "Ouvrir le menu du compte",

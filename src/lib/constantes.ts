@@ -55,3 +55,40 @@ export const LONGUEUR_MAX_NUMERO_PIECE = 30;
 export const LIMITE_INFORMATIONS_EMPLOYE = 20;
 export const LONGUEUR_MAX_LIBELLE_INFORMATION = 60;
 export const LONGUEUR_MAX_VALEUR_INFORMATION = 255;
+
+/** Module Programme (calendriers, groupes, rotations, affectations). */
+export const CHEMIN_CALENDRIERS = "/programme/calendriers";
+export const CHEMIN_GROUPES = "/programme/groupes";
+export const CHEMIN_ROTATIONS = "/programme/rotations";
+export const CHEMIN_AFFECTATIONS = "/programme/affectations";
+export const LONGUEUR_MAX_NOM_PROGRAMME = 60;
+export const LONGUEUR_MAX_DESCRIPTION_GROUPE = 255;
+/** Garde-fou de lecture pour les listes du module (quelques dizaines en pratique). */
+export const LIMITE_LISTE_PROGRAMME = 500;
+/** Employés proposés dans le choix des membres d'un groupe. */
+export const LIMITE_EMPLOYES_SELECTION = 2000;
+export const FENETRE_POINTAGE_MAX_MINUTES = 720;
+export const TOLERANCE_MAX_MINUTES = 240;
+export const PAUSE_MAX_MINUTES = 720;
+export const HEURES_SUP_MAX_MINUTES = 1440;
+export const TYPES_ROTATION = ["hebdomadaire", "cycle"] as const;
+export const JOURS_ROTATION_MAX = 31;
+export const JOURS_PAR_SEMAINE = 7;
+/** Valeurs proposées pour un nouveau calendrier (journée de 08:00 à 17:00, une heure de pause). */
+export const CALENDRIER_PAR_DEFAUT = {
+  debutMinutes: 480,
+  finMinutes: 1020,
+  pauseMinutes: 60,
+  entreeAvantMinutes: 60,
+  entreeApresMinutes: 60,
+  sortieAvantMinutes: 60,
+  sortieApresMinutes: 60,
+  retardTolereMinutes: 0,
+  departAnticipeTolereMinutes: 0,
+  pointageEntreeObligatoire: true,
+  pointageSortieObligatoire: true,
+  heuresSupActives: false,
+  heuresSupApresMinutes: 0,
+  heuresSupMinimumMinutes: 30,
+  heuresSupMaximumMinutes: 0,
+} as const;

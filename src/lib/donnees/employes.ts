@@ -1,11 +1,11 @@
 import "server-only";
 
-import { asc, count, eq } from "drizzle-orm";
+import { asc, count, eq, isNotNull } from "drizzle-orm";
 import type { DonneesEmploye } from "@/lib/validation/employe";
 import type { EmployeDetail, EmployeListe } from "@/types";
 import { obtenirBase } from "./base";
 import type { Information } from "@/lib/metier/employes";
-import { departements, employes, informationsEmployes, postes } from "./schema";
+import { affectations, departements, employes, informationsEmployes, postes } from "./schema";
 
 /** Une page de la liste, triée par nom puis prénom. */
 export async function listerEmployes(page: number, parPage: number): Promise<EmployeListe[]> {
@@ -120,7 +120,32 @@ export async function mettreAJourEmploye(
   });
 }
 
-/** Supprime l'employé ; ses informations supplémentaires partent avec lui (cascade). */
+/**
+ * Supprime l'employé et ses affectations de rotation (transaction) ; ses informations
+ * supplémentaires partent avec lui (cascade).
+ */
 export async function supprimerEmployeParId(id: string): Promise<void> {
-  await obtenirBase().delete(employes).where(eq(employes.id, id));
+  await obtenirBase().transaction(async (transaction) => {
+    await transaction.delete(affectations).where(eq(affectations.employeId, id));
+    await transaction.delete(employes).where(eq(employes.id, id));
+  });
+}
+
+/** Nombre d'employés rattachés directement à chaque département (identifiant → nombre). */
+export async function compterEmployesParDepartement(): Promise<Record<string, number>> {
+  const lignes = await obtenirBase()
+    .select({ id: employes.departementId, total: count() })
+    .from(employes)
+    .groupBy(employes.departementId);
+  return Object.fromEntries(lignes.map((ligne) => [ligne.id, ligne.total]));
+}
+
+/** Nombre d'employés qui occupent chaque poste (identifiant → nombre). */
+export async function compterEmployesParPoste(): Promise<Record<string, number>> {
+  const lignes = await obtenirBase()
+    .select({ id: employes.posteId, total: count() })
+    .from(employes)
+    .where(isNotNull(employes.posteId))
+    .groupBy(employes.posteId);
+  return Object.fromEntries(lignes.flatMap((ligne) => (ligne.id ? [[ligne.id, ligne.total]] : [])));
 }

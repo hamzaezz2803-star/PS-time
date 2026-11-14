@@ -16,6 +16,12 @@ export const TEXTES_DEPARTEMENTS = {
     modifier: (nom: string) => `Modifier ${nom}`,
     supprimer: (nom: string) => `Supprimer ${nom}`,
     fermer: "Fermer",
+    employes: (nombre: number) =>
+      nombre === 0
+        ? "Aucun employé (sous-départements compris)"
+        : nombre === 1
+          ? "1 employé (sous-départements compris)"
+          : `${nombre} employés (sous-départements compris)`,
     total: (nombre: number) => (nombre <= 1 ? `${nombre} département` : `${nombre} départements`),
   },
   formulaire: {

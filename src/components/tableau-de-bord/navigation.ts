@@ -1,16 +1,25 @@
 import {
   Briefcase,
   Building2,
+  CalendarClock,
+  CalendarCog,
+  CalendarRange,
   LayoutDashboard,
+  Repeat,
   UserRound,
   Users,
+  UsersRound,
   type LucideIcon,
 } from "lucide-react";
 import {
+  CHEMIN_AFFECTATIONS,
+  CHEMIN_CALENDRIERS,
   CHEMIN_DEPARTEMENTS,
   CHEMIN_ESPACE,
+  CHEMIN_GROUPES,
   CHEMIN_PERSONNES,
   CHEMIN_POSTES,
+  CHEMIN_ROTATIONS,
 } from "@/lib/constantes";
 import { TEXTES_NAVIGATION as T } from "@/lib/textes/navigation";
 
@@ -45,6 +54,21 @@ export const GROUPES_NAVIGATION: GroupeNavigation[] = [
           { libelle: T.personnes, icone: UserRound, href: CHEMIN_PERSONNES },
           { libelle: T.departements, icone: Building2, href: CHEMIN_DEPARTEMENTS },
           { libelle: T.postes, icone: Briefcase, href: CHEMIN_POSTES },
+        ],
+      },
+    ],
+  },
+  {
+    titre: T.groupeProgramme,
+    elements: [
+      {
+        libelle: T.programme,
+        icone: CalendarCog,
+        sousLiens: [
+          { libelle: T.calendriers, icone: CalendarClock, href: CHEMIN_CALENDRIERS },
+          { libelle: T.rotations, icone: Repeat, href: CHEMIN_ROTATIONS },
+          { libelle: T.groupes, icone: UsersRound, href: CHEMIN_GROUPES },
+          { libelle: T.affectations, icone: CalendarRange, href: CHEMIN_AFFECTATIONS },
         ],
       },
     ],

@@ -106,3 +106,14 @@ export function aplatirArbre<T extends ElementArbre>(
     ...aplatirArbre(enfants, profondeur + 1),
   ]);
 }
+
+/** Somme d'un compteur pour un élément et tous ses descendants (ex. employés d'un département et de ses sous-départements). */
+export function totalAvecDescendants(
+  liste: ElementArbre[],
+  id: string,
+  compteurs: Record<string, number>,
+): number {
+  let total = compteurs[id] ?? 0;
+  for (const descendant of idsDescendants(liste, id)) total += compteurs[descendant] ?? 0;
+  return total;
+}

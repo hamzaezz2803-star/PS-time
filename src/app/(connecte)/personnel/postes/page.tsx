@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { GestionPostes } from "@/components/postes/gestion-postes";
 import { Chargement } from "@/components/ui/chargement";
+import { compterEmployesParPoste } from "@/lib/donnees/employes";
 import { listerPostes } from "@/lib/donnees/postes";
 import { obtenirUtilisateurPourEspace } from "@/lib/donnees/session";
 import { TEXTES_POSTES } from "@/lib/textes/postes";
@@ -26,6 +27,6 @@ export default function PagePostes() {
 
 async function ContenuPostes() {
   await obtenirUtilisateurPourEspace();
-  const postes = await listerPostes();
-  return <GestionPostes postes={postes} />;
+  const [postes, nombresEmployes] = await Promise.all([listerPostes(), compterEmployesParPoste()]);
+  return <GestionPostes postes={postes} nombresEmployes={nombresEmployes} />;
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { ChevronRight, FileText, Folder, FolderOpen, FolderPlus } from "lucide-react";
+import { ChevronRight, UserRound, type LucideIcon } from "lucide-react";
 import type { ElementArbre, Noeud } from "@/lib/metier/arbre";
 import { cn } from "@/lib/utils";
 
@@ -10,7 +10,12 @@ export type TextesArbre = {
   replier: (nom: string) => string;
   vide: string;
   videAction: string;
+  /** Nom accessible de l'indicateur d'employés (ex. « 3 employés »). */
+  employes: (nombre: number) => string;
 };
+
+/** Icônes propres à chaque écran : parent (qui a des enfants) et enfant (sans enfant). */
+export type IconesArbre = { parent: LucideIcon; enfant: LucideIcon };
 
 type ProprietesArbre<T extends ElementArbre> = {
   noeuds: Noeud<T>[];
@@ -19,6 +24,9 @@ type ProprietesArbre<T extends ElementArbre> = {
   onBasculer: (id: string) => void;
   onSelectionner: (id: string) => void;
   textes: TextesArbre;
+  icones: IconesArbre;
+  /** Nombre d'employés rattachés à l'élément, affiché en indicateur. */
+  nombreEmployes?: (element: T) => number;
   /** Information secondaire affichée après le nom (ex. le numéro d'un poste). */
   detail?: (element: T) => ReactNode;
   /** Boutons affichés au bout de chaque ligne (ex. modifier, supprimer). */
@@ -33,7 +41,8 @@ function Ligne<T extends ElementArbre>({
   const aDesEnfants = noeud.enfants.length > 0;
   const estOuvert = proprietes.idsOuverts.has(noeud.id);
   const estSelectionne = proprietes.idSelectionne === noeud.id;
-  const Icone = !aDesEnfants ? FileText : estOuvert ? FolderOpen : Folder;
+  const Icone = aDesEnfants ? proprietes.icones.parent : proprietes.icones.enfant;
+  const nombreEmployes = proprietes.nombreEmployes?.(noeud);
 
   return (
     <li>
@@ -63,11 +72,30 @@ function Ligne<T extends ElementArbre>({
             estSelectionne ? "bg-ciel font-semibold text-primaire" : "text-texte hover:bg-canevas",
           )}
         >
-          <Icone
-            className={cn("size-4 shrink-0", estSelectionne ? "text-primaire" : "text-texte-secondaire")}
+          {/* Un parent se distingue par une pastille colorée ; un enfant par une icône seule. */}
+          <span
+            className={cn(
+              "flex size-7 shrink-0 items-center justify-center rounded-md",
+              aDesEnfants ? "bg-ciel text-primaire" : estSelectionne ? "text-primaire" : "text-texte-secondaire",
+            )}
             aria-hidden="true"
-          />
-          <span className="truncate">{noeud.nom}</span>
+          >
+            <Icone className="size-4" />
+          </span>
+          <span className={cn("truncate", aDesEnfants && "font-semibold")}>{noeud.nom}</span>
+          {nombreEmployes !== undefined && (
+            <span
+              title={proprietes.textes.employes(nombreEmployes)}
+              className={cn(
+                "inline-flex shrink-0 items-center gap-1 rounded-md px-1.5 text-sm font-normal tabular-nums",
+                nombreEmployes > 0 ? "bg-canevas text-texte" : "text-texte-secondaire",
+              )}
+            >
+              <UserRound className="size-3.5" aria-hidden="true" />
+              <span aria-hidden="true">{nombreEmployes}</span>
+              <span className="sr-only">{proprietes.textes.employes(nombreEmployes)}</span>
+            </span>
+          )}
           {proprietes.detail && (
             <span className="ms-auto shrink-0 text-sm font-normal tabular-nums text-texte-secondaire">
               {proprietes.detail(noeud)}
@@ -91,10 +119,11 @@ function Ligne<T extends ElementArbre>({
 /** Arbre parent/enfants : chevron pour déplier, clic sur le nom pour sélectionner. */
 export function ArbreHierarchique<T extends ElementArbre>({ noeuds, ...proprietes }: ProprietesArbre<T>) {
   if (noeuds.length === 0) {
+    const IconeVide = proprietes.icones.parent;
     return (
       <div className="flex flex-col items-center gap-3 px-6 py-12 text-center">
         <span className="flex size-12 items-center justify-center rounded-xl bg-ciel text-primaire">
-          <FolderPlus className="size-6" aria-hidden="true" />
+          <IconeVide className="size-6" aria-hidden="true" />
         </span>
         <div>
           <p className="text-base font-semibold text-texte">{proprietes.textes.vide}</p>

@@ -16,6 +16,12 @@ export const TEXTES_POSTES = {
     modifier: (nom: string) => `Modifier ${nom}`,
     supprimer: (nom: string) => `Supprimer ${nom}`,
     fermer: "Fermer",
+    employes: (nombre: number) =>
+      nombre === 0
+        ? "Aucun employé n'occupe ce poste"
+        : nombre === 1
+          ? "1 employé occupe ce poste"
+          : `${nombre} employés occupent ce poste`,
     total: (nombre: number) => (nombre <= 1 ? `${nombre} poste` : `${nombre} postes`),
   },
   formulaire: {

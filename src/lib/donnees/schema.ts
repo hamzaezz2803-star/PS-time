@@ -227,6 +227,9 @@ export const employes = mysqlTable(
     posteId: char("poste_id", { length: 36 }).references(() => postes.id, {
       onDelete: "set null",
     }),
+    groupeId: char("groupe_id", { length: 36 }).references((): AnyMySqlColumn => groupes.id, {
+      onDelete: "set null",
+    }),
     // Format international E.164 (+212612345678).
     telephone: varchar("telephone", { length: 16 }),
     email: varchar("email", { length: 254 }),
@@ -249,6 +252,7 @@ export const employes = mysqlTable(
     uniqueIndex("employes_email_idx").on(table.email),
     index("employes_departement_idx").on(table.departementId),
     index("employes_poste_idx").on(table.posteId),
+    index("employes_groupe_idx").on(table.groupeId),
     index("employes_nom_idx").on(table.nom, table.prenom),
     check("employes_matricule_non_vide", sql`CHAR_LENGTH(TRIM(${table.matricule})) > 0`),
     check("employes_prenom_non_vide", sql`CHAR_LENGTH(TRIM(${table.prenom})) > 0`),
@@ -308,5 +312,143 @@ export const informationsEmployes = mysqlTable(
     uniqueIndex("informations_employes_employe_libelle_idx").on(table.employeId, table.libelle),
     check("informations_employes_libelle_non_vide", sql`CHAR_LENGTH(TRIM(${table.libelle})) > 0`),
     check("informations_employes_valeur_non_vide", sql`CHAR_LENGTH(TRIM(${table.valeur})) > 0`),
+  ],
+);
+
+/**
+ * Calendriers (créneaux horaires). Les heures sont en minutes depuis minuit (0 à 1439) :
+ * une fin plus petite que le début signifie un service de nuit qui finit le lendemain.
+ */
+export const calendriers = mysqlTable(
+  "calendriers",
+  {
+    id: identifiantUnique(),
+    nom: varchar("nom", { length: 60 }).notNull(),
+    debutMinutes: int("debut_minutes").notNull(),
+    finMinutes: int("fin_minutes").notNull(),
+    pauseMinutes: int("pause_minutes").notNull().default(0),
+    // Fenêtres où un pointage compte comme entrée ou sortie de ce service.
+    entreeAvantMinutes: int("entree_avant_minutes").notNull().default(60),
+    entreeApresMinutes: int("entree_apres_minutes").notNull().default(60),
+    sortieAvantMinutes: int("sortie_avant_minutes").notNull().default(60),
+    sortieApresMinutes: int("sortie_apres_minutes").notNull().default(60),
+    retardTolereMinutes: int("retard_tolere_minutes").notNull().default(0),
+    departAnticipeTolereMinutes: int("depart_anticipe_tolere_minutes").notNull().default(0),
+    pointageEntreeObligatoire: boolean("pointage_entree_obligatoire").notNull().default(true),
+    pointageSortieObligatoire: boolean("pointage_sortie_obligatoire").notNull().default(true),
+    heuresSupActives: boolean("heures_sup_actives").notNull().default(false),
+    heuresSupApresMinutes: int("heures_sup_apres_minutes").notNull().default(0),
+    heuresSupMinimumMinutes: int("heures_sup_minimum_minutes").notNull().default(30),
+    // 0 = sans limite.
+    heuresSupMaximumMinutes: int("heures_sup_maximum_minutes").notNull().default(0),
+    creeLe: dateCreation(),
+    modifieLe: dateModification(),
+  },
+  (table) => [
+    uniqueIndex("calendriers_nom_idx").on(table.nom),
+    check("calendriers_nom_non_vide", sql`CHAR_LENGTH(TRIM(${table.nom})) > 0`),
+    check("calendriers_heures_valides", sql`${table.debutMinutes} BETWEEN 0 AND 1439 AND ${table.finMinutes} BETWEEN 0 AND 1439 AND ${table.debutMinutes} <> ${table.finMinutes}`),
+    check("calendriers_pause_bornee", sql`${table.pauseMinutes} BETWEEN 0 AND 720`),
+    check(
+      "calendriers_fenetres_bornees",
+      sql`${table.entreeAvantMinutes} BETWEEN 0 AND 720 AND ${table.entreeApresMinutes} BETWEEN 0 AND 720 AND ${table.sortieAvantMinutes} BETWEEN 0 AND 720 AND ${table.sortieApresMinutes} BETWEEN 0 AND 720`,
+    ),
+    check("calendriers_tolerances_bornees", sql`${table.retardTolereMinutes} BETWEEN 0 AND 240 AND ${table.departAnticipeTolereMinutes} BETWEEN 0 AND 240`),
+    check(
+      "calendriers_heures_sup_bornees",
+      sql`${table.heuresSupApresMinutes} BETWEEN 0 AND 720 AND ${table.heuresSupMinimumMinutes} BETWEEN 0 AND 720 AND ${table.heuresSupMaximumMinutes} BETWEEN 0 AND 1440`,
+    ),
+  ],
+);
+
+/** Groupes d'employés, auxquels on affecte une rotation d'un seul coup. */
+export const groupes = mysqlTable(
+  "groupes",
+  {
+    id: identifiantUnique(),
+    nom: varchar("nom", { length: 60 }).notNull(),
+    description: varchar("description", { length: 255 }),
+    creeLe: dateCreation(),
+    modifieLe: dateModification(),
+  },
+  (table) => [
+    uniqueIndex("groupes_nom_idx").on(table.nom),
+    check("groupes_nom_non_vide", sql`CHAR_LENGTH(TRIM(${table.nom})) > 0`),
+  ],
+);
+
+/**
+ * Rotations : « hebdomadaire » (7 jours, du lundi au dimanche) ou « cycle » de N jours
+ * qui recommence à partir de la date de début de l'affectation.
+ */
+export const rotations = mysqlTable(
+  "rotations",
+  {
+    id: identifiantUnique(),
+    nom: varchar("nom", { length: 60 }).notNull(),
+    type: varchar("type", { length: 12 }).notNull(),
+    nombreJours: int("nombre_jours").notNull(),
+    creeLe: dateCreation(),
+    modifieLe: dateModification(),
+  },
+  (table) => [
+    uniqueIndex("rotations_nom_idx").on(table.nom),
+    check("rotations_nom_non_vide", sql`CHAR_LENGTH(TRIM(${table.nom})) > 0`),
+    check(
+      "rotations_type_et_duree",
+      sql`(${table.type} = 'hebdomadaire' AND ${table.nombreJours} = 7) OR (${table.type} = 'cycle' AND ${table.nombreJours} BETWEEN 1 AND 31)`,
+    ),
+  ],
+);
+
+/** Jours travaillés d'une rotation (un jour absent = repos). */
+export const joursRotation = mysqlTable(
+  "jours_rotation",
+  {
+    id: identifiantUnique(),
+    rotationId: char("rotation_id", { length: 36 })
+      .notNull()
+      .references(() => rotations.id, { onDelete: "cascade" }),
+    numeroJour: int("numero_jour").notNull(),
+    calendrierId: char("calendrier_id", { length: 36 })
+      .notNull()
+      .references(() => calendriers.id, { onDelete: "restrict" }),
+    creeLe: dateCreation(),
+    modifieLe: dateModification(),
+  },
+  (table) => [
+    uniqueIndex("jours_rotation_rotation_jour_idx").on(table.rotationId, table.numeroJour),
+    index("jours_rotation_calendrier_idx").on(table.calendrierId),
+    check("jours_rotation_numero_borne", sql`${table.numeroJour} BETWEEN 0 AND 30`),
+  ],
+);
+
+/**
+ * Affectation d'une rotation à un groupe OU à un employé, sur une période.
+ * L'affectation d'un employé passe avant celle de son groupe.
+ */
+export const affectations = mysqlTable(
+  "affectations",
+  {
+    id: identifiantUnique(),
+    rotationId: char("rotation_id", { length: 36 })
+      .notNull()
+      .references(() => rotations.id, { onDelete: "restrict" }),
+    // restrict (et non cascade) : MySQL 8 refuse un CHECK sur une colonne à suppression en cascade.
+    // Les affectations d'un groupe ou d'un employé sont supprimées avec lui, dans une transaction.
+    groupeId: char("groupe_id", { length: 36 }).references(() => groupes.id, { onDelete: "restrict" }),
+    employeId: char("employe_id", { length: 36 }).references(() => employes.id, { onDelete: "restrict" }),
+    dateDebut: jour("date_debut").notNull(),
+    // Vide = sans date de fin.
+    dateFin: jour("date_fin"),
+    creeLe: dateCreation(),
+    modifieLe: dateModification(),
+  },
+  (table) => [
+    index("affectations_rotation_idx").on(table.rotationId),
+    index("affectations_groupe_idx").on(table.groupeId, table.dateDebut),
+    index("affectations_employe_idx").on(table.employeId, table.dateDebut),
+    check("affectations_une_seule_cible", sql`(${table.groupeId} IS NULL) <> (${table.employeId} IS NULL)`),
+    check("affectations_dates_coherentes", sql`${table.dateFin} IS NULL OR ${table.dateFin} >= ${table.dateDebut}`),
   ],
 );

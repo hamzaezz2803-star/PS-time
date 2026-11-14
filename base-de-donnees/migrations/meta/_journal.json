@@ -64,6 +64,13 @@
       "when": 1794661825479,
       "tag": "0008_champs_employe_badge_identite",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "5",
+      "when": 1794663537307,
+      "tag": "0009_module_programme",
+      "breakpoints": true
     }
   ]
 }

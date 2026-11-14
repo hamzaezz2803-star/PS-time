@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import { GestionDepartements } from "@/components/departements/gestion-departements";
 import { Chargement } from "@/components/ui/chargement";
 import { listerDepartements } from "@/lib/donnees/departements";
+import { compterEmployesParDepartement } from "@/lib/donnees/employes";
 import { obtenirUtilisateurPourEspace } from "@/lib/donnees/session";
 import { TEXTES_DEPARTEMENTS } from "@/lib/textes/departements";
 
@@ -28,6 +29,9 @@ export default function PageDepartements() {
 
 async function ContenuDepartements() {
   await obtenirUtilisateurPourEspace();
-  const departements = await listerDepartements();
-  return <GestionDepartements departements={departements} />;
+  const [departements, nombresEmployes] = await Promise.all([
+    listerDepartements(),
+    compterEmployesParDepartement(),
+  ]);
+  return <GestionDepartements departements={departements} nombresEmployes={nombresEmployes} />;
 }

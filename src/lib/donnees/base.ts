@@ -4,7 +4,7 @@ import { drizzle, type MySql2Database } from "drizzle-orm/mysql2";
 import mysql from "mysql2/promise";
 import * as schema from "./schema";
 
-type Base = MySql2Database<typeof schema>;
+export type Base = MySql2Database<typeof schema>;
 
 // Conservé entre les rechargements à chaud du serveur de développement.
 const globalPourBase = globalThis as unknown as { basePsTime?: Base };

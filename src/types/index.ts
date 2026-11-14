@@ -91,3 +91,62 @@ export type EmployeDetail = {
   dateFinEmploi: string | null;
   informations: { libelle: string; valeur: string }[];
 };
+
+/** Calendrier (créneau horaire) : heures en minutes depuis minuit. */
+export type Calendrier = {
+  id: string;
+  nom: string;
+  debutMinutes: number;
+  finMinutes: number;
+  pauseMinutes: number;
+  entreeAvantMinutes: number;
+  entreeApresMinutes: number;
+  sortieAvantMinutes: number;
+  sortieApresMinutes: number;
+  retardTolereMinutes: number;
+  departAnticipeTolereMinutes: number;
+  pointageEntreeObligatoire: boolean;
+  pointageSortieObligatoire: boolean;
+  heuresSupActives: boolean;
+  heuresSupApresMinutes: number;
+  heuresSupMinimumMinutes: number;
+  heuresSupMaximumMinutes: number;
+};
+
+export type Groupe = {
+  id: string;
+  nom: string;
+  description: string | null;
+  /** Identifiants des employés membres. */
+  membres: string[];
+};
+
+/** Employé proposé dans le choix des membres d'un groupe. */
+export type EmployeSelection = {
+  id: string;
+  nomComplet: string;
+  matricule: string;
+  groupeId: string | null;
+};
+
+export type Rotation = {
+  id: string;
+  nom: string;
+  type: "hebdomadaire" | "cycle";
+  nombreJours: number;
+  /** Calendrier de chaque jour travaillé (numéro du jour → identifiant) ; absent = repos. */
+  jours: Record<number, string>;
+};
+
+export type Affectation = {
+  id: string;
+  /** Nom affiché (cible et rotation), utilisé par les titres et confirmations. */
+  nom: string;
+  rotationId: string;
+  rotation: string;
+  groupeId: string | null;
+  employeId: string | null;
+  cible: string;
+  dateDebut: string;
+  dateFin: string | null;
+};

@@ -7,6 +7,7 @@ import {
   idsDescendants,
   nomDejaPris,
   peutDeplacer,
+  totalAvecDescendants,
   type ElementArbre,
 } from "./arbre.ts";
 
@@ -118,5 +119,17 @@ describe("aplatirArbre", () => {
       plat.map(({ id, profondeur }) => `${id}:${profondeur}`),
       ["logistique:0", "prod:0", "sousprod:1", "atelier:2", "si:0", "dev:1"],
     );
+  });
+});
+
+describe("totalAvecDescendants", () => {
+  const compteurs = { prod: 2, sousprod: 1, atelier: 4, si: 3 };
+
+  it("additionne l'élément et tous ses descendants", () => {
+    assert.equal(totalAvecDescendants(LISTE, "prod", compteurs), 7);
+  });
+
+  it("compte zéro pour un élément sans valeur ni descendant", () => {
+    assert.equal(totalAvecDescendants(LISTE, "logistique", compteurs), 0);
   });
 });
