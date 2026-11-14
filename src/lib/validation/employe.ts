@@ -119,3 +119,4 @@ export function validerNouveauChamp(
   if (analyse.success) return { ok: true, donnees: analyse.data };
   return { ok: false, erreur: analyse.error.issues[0]?.message ?? erreurs.echec };
 }
+

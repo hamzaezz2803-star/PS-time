@@ -37,3 +37,4 @@ export async function insererChampPersonnalise(
   await obtenirBase().insert(champsPersonnalises).values({ id, nom, type });
   return { id, nom, type };
 }
+

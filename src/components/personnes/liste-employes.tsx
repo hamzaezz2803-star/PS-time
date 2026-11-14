@@ -102,3 +102,4 @@ export function ListeEmployes({
 function NonRenseigne() {
   return <span className="text-texte-secondaire">{textes.nonRenseigne}</span>;
 }
+

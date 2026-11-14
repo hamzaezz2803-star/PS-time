@@ -93,3 +93,4 @@ export const TEXTES_PERSONNES = {
     echec: "L'opération a échoué. Réessayez dans un instant.",
   },
 } as const;
+

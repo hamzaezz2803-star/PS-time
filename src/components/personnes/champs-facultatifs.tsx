@@ -53,3 +53,4 @@ export function ChampsFacultatifs({
     </fieldset>
   );
 }
+
