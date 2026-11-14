@@ -5,7 +5,6 @@ import { ListeEmployes } from "@/components/personnes/liste-employes";
 import { Chargement } from "@/components/ui/chargement";
 import { MessageErreur } from "@/components/ui/message-erreur";
 import { EMPLOYES_PAR_PAGE } from "@/lib/constantes";
-import { listerChampsPersonnalises } from "@/lib/donnees/champs-personnalises";
 import { listerDepartements } from "@/lib/donnees/departements";
 import { compterEmployes, listerEmployes } from "@/lib/donnees/employes";
 import { listerPostes } from "@/lib/donnees/postes";
@@ -62,10 +61,9 @@ async function ContenuPersonnes({ searchParams }: { searchParams: ParametresRech
     return <MessageErreur message={TEXTES_PERSONNES.droits} className="text-base" />;
   }
 
-  const [departements, postes, champs, total] = await Promise.all([
+  const [departements, postes, total] = await Promise.all([
     listerDepartements(),
     listerPostes(),
-    listerChampsPersonnalises(),
     compterEmployes(),
   ]);
   const nombrePages = Math.max(1, Math.ceil(total / EMPLOYES_PAR_PAGE));
@@ -77,7 +75,6 @@ async function ContenuPersonnes({ searchParams }: { searchParams: ParametresRech
       <CreationEmploye
         departements={versOptions(construireArbre(departements))}
         postes={versOptions(construireArbre(postes, comparerPostes))}
-        champs={champs}
       />
       <ListeEmployes employes={employes} total={total} page={page} nombrePages={nombrePages} />
     </>

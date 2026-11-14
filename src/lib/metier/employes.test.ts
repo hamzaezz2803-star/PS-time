@@ -5,7 +5,7 @@ import {
   estDateValide,
   formaterTelephone,
   normaliserTelephone,
-  validerValeurChamp,
+  validerInformations,
 } from "./employes.ts";
 
 describe("normaliserTelephone", () => {
@@ -55,22 +55,42 @@ describe("datesEmploiCoherentes", () => {
   });
 });
 
-describe("validerValeurChamp", () => {
-  it("transforme une saisie vide en null", () => {
-    assert.deepEqual(validerValeurChamp("nombre", "   "), { ok: true, valeur: null });
+describe("validerInformations", () => {
+  it("garde les lignes complètes, nettoie les espaces et ignore les lignes vides", () => {
+    const resultat = validerInformations([
+      { libelle: "  Taille   de blouse ", valeur: " M " },
+      { libelle: "", valeur: "  " },
+    ]);
+    assert.deepEqual(resultat.informations, [{ libelle: "Taille de blouse", valeur: "M" }]);
+    assert.deepEqual(resultat.erreurs, {});
+    assert.equal(resultat.estTropNombreuses, false);
   });
 
-  it("accepte un nombre avec une virgule décimale", () => {
-    assert.deepEqual(validerValeurChamp("nombre", "42,5"), { ok: true, valeur: "42.5" });
-    assert.deepEqual(validerValeurChamp("nombre", "douze"), { ok: false, erreur: "nombre" });
-  });
-
-  it("vérifie les dates et la longueur des textes", () => {
-    assert.deepEqual(validerValeurChamp("date", "2026-13-01"), { ok: false, erreur: "date" });
-    assert.deepEqual(validerValeurChamp("texte", "x".repeat(256)), {
-      ok: false,
-      erreur: "tropLong",
+  it("exige le libellé et la valeur ensemble", () => {
+    const resultat = validerInformations([
+      { libelle: "Vestiaire", valeur: "" },
+      { libelle: "", valeur: "12" },
+    ]);
+    assert.deepEqual(resultat.erreurs, {
+      0: { valeur: "valeurVide" },
+      1: { libelle: "libelleVide" },
     });
+    assert.deepEqual(resultat.informations, []);
+  });
+
+  it("refuse deux fois le même libellé, sans tenir compte de la casse", () => {
+    const resultat = validerInformations([
+      { libelle: "Casier", valeur: "A1" },
+      { libelle: "CASIER", valeur: "B2" },
+    ]);
+    assert.deepEqual(resultat.erreurs, { 1: { libelle: "libelleEnDouble" } });
+  });
+
+  it("borne les longueurs et le nombre de lignes", () => {
+    const tropLong = validerInformations([{ libelle: "x".repeat(61), valeur: "y".repeat(256) }]);
+    assert.deepEqual(tropLong.erreurs, { 0: { libelle: "libelleTropLong", valeur: "valeurTropLong" } });
+
+    const lignes = Array.from({ length: 21 }, (_, index) => ({ libelle: `Info ${index}`, valeur: "x" }));
+    assert.equal(validerInformations(lignes).estTropNombreuses, true);
   });
 });
-

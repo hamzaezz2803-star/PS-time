@@ -218,6 +218,7 @@ export const employes = mysqlTable(
   {
     id: identifiantUnique(),
     matricule: varchar("matricule", { length: 30 }).notNull(),
+    numeroBadge: varchar("numero_badge", { length: 30 }).notNull(),
     prenom: varchar("prenom", { length: 100 }).notNull(),
     nom: varchar("nom", { length: 100 }).notNull(),
     departementId: char("departement_id", { length: 36 })
@@ -229,14 +230,21 @@ export const employes = mysqlTable(
     // Format international E.164 (+212612345678).
     telephone: varchar("telephone", { length: 16 }),
     email: varchar("email", { length: 254 }),
+    genre: varchar("genre", { length: 10 }),
+    // Pièce d'identité : facultative, pour la déclaration CNSS. Jamais dans les journaux.
+    typePieceIdentite: varchar("type_piece_identite", { length: 20 }),
+    numeroPieceIdentite: varchar("numero_piece_identite", { length: 30 }),
     typeEmploi: varchar("type_emploi", { length: 20 }),
     dateEmbauche: jour("date_embauche"),
+    dateDebutEmploi: jour("date_debut_emploi"),
     dateFinEmploi: jour("date_fin_emploi"),
     creeLe: dateCreation(),
     modifieLe: dateModification(),
   },
   (table) => [
     uniqueIndex("employes_matricule_idx").on(table.matricule),
+    uniqueIndex("employes_numero_badge_idx").on(table.numeroBadge),
+    uniqueIndex("employes_piece_identite_idx").on(table.typePieceIdentite, table.numeroPieceIdentite),
     // Plusieurs NULL sont permis par un index unique MySQL : l'e-mail reste facultatif.
     uniqueIndex("employes_email_idx").on(table.email),
     index("employes_departement_idx").on(table.departementId),
@@ -245,6 +253,17 @@ export const employes = mysqlTable(
     check("employes_matricule_non_vide", sql`CHAR_LENGTH(TRIM(${table.matricule})) > 0`),
     check("employes_prenom_non_vide", sql`CHAR_LENGTH(TRIM(${table.prenom})) > 0`),
     check("employes_nom_non_vide", sql`CHAR_LENGTH(TRIM(${table.nom})) > 0`),
+    check("employes_numero_badge_non_vide", sql`CHAR_LENGTH(TRIM(${table.numeroBadge})) > 0`),
+    check("employes_genre_valide", sql`${table.genre} IS NULL OR ${table.genre} IN ('homme', 'femme')`),
+    check(
+      "employes_type_piece_valide",
+      sql`${table.typePieceIdentite} IS NULL OR ${table.typePieceIdentite} IN ('cin', 'passeport', 'carte_sejour')`,
+    ),
+    // Le type et le numéro de pièce vont ensemble : tous deux renseignés ou tous deux vides.
+    check(
+      "employes_piece_complete",
+      sql`(${table.typePieceIdentite} IS NULL) = (${table.numeroPieceIdentite} IS NULL)`,
+    ),
     check(
       "employes_email_minuscules",
       sql`${table.email} IS NULL OR CAST(${table.email} AS BINARY) = CAST(LOWER(${table.email}) AS BINARY)`,
@@ -261,46 +280,33 @@ export const employes = mysqlTable(
       "employes_dates_emploi_coherentes",
       sql`${table.dateFinEmploi} IS NULL OR ${table.dateEmbauche} IS NULL OR ${table.dateFinEmploi} >= ${table.dateEmbauche}`,
     ),
-  ],
-);
-
-/** Champs facultatifs créés par l'administrateur (ex. : « Taille de blouse »). */
-export const champsPersonnalises = mysqlTable(
-  "champs_personnalises",
-  {
-    id: identifiantUnique(),
-    nom: varchar("nom", { length: 60 }).notNull(),
-    type: varchar("type", { length: 10 }).notNull().default("texte"),
-    creeLe: dateCreation(),
-    modifieLe: dateModification(),
-  },
-  (table) => [
-    uniqueIndex("champs_personnalises_nom_idx").on(table.nom),
-    check("champs_personnalises_nom_non_vide", sql`CHAR_LENGTH(TRIM(${table.nom})) > 0`),
     check(
-      "champs_personnalises_type_valide",
-      sql`${table.type} IN ('texte', 'nombre', 'date')`,
+      "employes_debut_avant_fin",
+      sql`${table.dateFinEmploi} IS NULL OR ${table.dateDebutEmploi} IS NULL OR ${table.dateFinEmploi} >= ${table.dateDebutEmploi}`,
     ),
   ],
 );
 
-/** Valeur d'un champ facultatif pour un employé (une seule par champ et par employé). */
-export const valeursChampsPersonnalises = mysqlTable(
-  "valeurs_champs_personnalises",
+
+/**
+ * Informations supplémentaires propres à un employé (ex. « Taille de blouse : M »),
+ * saisies à sa création. Supprimées avec l'employé.
+ */
+export const informationsEmployes = mysqlTable(
+  "informations_employes",
   {
     id: identifiantUnique(),
     employeId: char("employe_id", { length: 36 })
       .notNull()
       .references(() => employes.id, { onDelete: "cascade" }),
-    champId: char("champ_id", { length: 36 })
-      .notNull()
-      .references(() => champsPersonnalises.id, { onDelete: "cascade" }),
+    libelle: varchar("libelle", { length: 60 }).notNull(),
     valeur: varchar("valeur", { length: 255 }).notNull(),
     creeLe: dateCreation(),
     modifieLe: dateModification(),
   },
   (table) => [
-    uniqueIndex("valeurs_champs_employe_champ_idx").on(table.employeId, table.champId),
-    index("valeurs_champs_champ_idx").on(table.champId),
+    uniqueIndex("informations_employes_employe_libelle_idx").on(table.employeId, table.libelle),
+    check("informations_employes_libelle_non_vide", sql`CHAR_LENGTH(TRIM(${table.libelle})) > 0`),
+    check("informations_employes_valeur_non_vide", sql`CHAR_LENGTH(TRIM(${table.valeur})) > 0`),
   ],
 );

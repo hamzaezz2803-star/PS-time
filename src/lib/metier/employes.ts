@@ -1,5 +1,10 @@
 /** Règles propres aux employés. Fonctions pures, testées dans employes.test.ts. */
-import { INDICATIF_PAYS, LONGUEUR_MAX_VALEUR_CHAMP } from "../constantes.ts";
+import {
+  INDICATIF_PAYS,
+  LIMITE_INFORMATIONS_EMPLOYE,
+  LONGUEUR_MAX_LIBELLE_INFORMATION,
+  LONGUEUR_MAX_VALEUR_INFORMATION,
+} from "../constantes.ts";
 
 const FORMAT_E164 = /^\+[1-9]\d{7,14}$/;
 const LONGUEUR_NUMERO_NATIONAL = 10; // 06 12 34 56 78
@@ -39,29 +44,54 @@ export function datesEmploiCoherentes(embauche: string | null, fin: string | nul
   return !embauche || !fin || fin >= embauche;
 }
 
-export type ErreurValeurChamp = "tropLong" | "nombre" | "date";
-type ResultatValeurChamp =
-  | { ok: true; valeur: string | null }
-  | { ok: false; erreur: ErreurValeurChamp };
+export type Information = { libelle: string; valeur: string };
+export type ErreurInformation =
+  | "libelleVide"
+  | "valeurVide"
+  | "libelleTropLong"
+  | "valeurTropLong"
+  | "libelleEnDouble";
 
-/** Valide la valeur d'un champ facultatif selon son type. Une saisie vide donne null. */
-export function validerValeurChamp(
-  type: "texte" | "nombre" | "date",
-  saisie: string,
-): ResultatValeurChamp {
-  const valeur = saisie.trim();
-  if (valeur === "") return { ok: true, valeur: null };
-  if (valeur.length > LONGUEUR_MAX_VALEUR_CHAMP) return { ok: false, erreur: "tropLong" };
+type ResultatInformations = {
+  /** Lignes valides à enregistrer (les lignes entièrement vides sont ignorées). */
+  informations: Information[];
+  /** Erreurs par numéro de ligne (dans l'ordre de la saisie). */
+  erreurs: Record<number, { libelle?: ErreurInformation; valeur?: ErreurInformation }>;
+  estTropNombreuses: boolean;
+};
 
-  if (type === "nombre") {
-    const nombre = valeur.replace(",", ".");
-    return /^-?\d+(\.\d+)?$/.test(nombre)
-      ? { ok: true, valeur: nombre }
-      : { ok: false, erreur: "nombre" };
-  }
-  if (type === "date") {
-    return estDateValide(valeur) ? { ok: true, valeur } : { ok: false, erreur: "date" };
-  }
-  return { ok: true, valeur };
+const nettoyer = (texte: string) => texte.replace(/\s+/g, " ").trim();
+
+/**
+ * Valide les informations supplémentaires d'un employé : libellé et valeur obligatoires
+ * ensemble, longueurs bornées, pas deux fois le même libellé (casse ignorée).
+ */
+export function validerInformations(lignes: Information[]): ResultatInformations {
+  const informations: Information[] = [];
+  const erreurs: ResultatInformations["erreurs"] = {};
+  const libellesVus = new Set<string>();
+
+  lignes.forEach((ligne, index) => {
+    const libelle = nettoyer(ligne.libelle);
+    const valeur = nettoyer(ligne.valeur);
+    if (libelle === "" && valeur === "") return;
+
+    const erreur: { libelle?: ErreurInformation; valeur?: ErreurInformation } = {};
+    const cle = libelle.toLocaleLowerCase("fr");
+    if (libelle === "") erreur.libelle = "libelleVide";
+    else if (libelle.length > LONGUEUR_MAX_LIBELLE_INFORMATION) erreur.libelle = "libelleTropLong";
+    else if (libellesVus.has(cle)) erreur.libelle = "libelleEnDouble";
+    if (valeur === "") erreur.valeur = "valeurVide";
+    else if (valeur.length > LONGUEUR_MAX_VALEUR_INFORMATION) erreur.valeur = "valeurTropLong";
+
+    libellesVus.add(cle);
+    if (erreur.libelle || erreur.valeur) erreurs[index] = erreur;
+    else informations.push({ libelle, valeur });
+  });
+
+  return {
+    informations,
+    erreurs,
+    estTropNombreuses: informations.length > LIMITE_INFORMATIONS_EMPLOYE,
+  };
 }
-

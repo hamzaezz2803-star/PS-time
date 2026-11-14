@@ -8,26 +8,38 @@ import { ChampFormulaire } from "@/components/ui/champ-formulaire";
 import { ChampSelection, type OptionSelection } from "@/components/ui/champ-selection";
 import { MessageErreur } from "@/components/ui/message-erreur";
 import { ListeOnglets, PanneauOnglet } from "@/components/ui/onglets";
-import { LONGUEUR_MAX_MATRICULE, LONGUEUR_MAX_NOM_EMPLOYE } from "@/lib/constantes";
+import { LONGUEUR_MAX_MATRICULE, LONGUEUR_MAX_NOM_EMPLOYE, LONGUEUR_MAX_NUMERO_BADGE } from "@/lib/constantes";
 import { TEXTES_PERSONNES } from "@/lib/textes/personnes";
-import type { ChampPersonnalise, EtatFormulaireEmploye } from "@/types";
-import { ChampsContactEmploi } from "./champs-contact-emploi";
-import { ChampsFacultatifs } from "./champs-facultatifs";
+import type { EtatFormulaireEmploye } from "@/types";
+import { ChampsEmploi } from "./champs-emploi";
+import { ChampsIdentiteContact } from "./champs-identite-contact";
+import { InformationsEmploye } from "./informations-employe";
 
 const { formulaire: textes } = TEXTES_PERSONNES;
-const ETAT_INITIAL: EtatFormulaireEmploye = {};
+/** `numeroReponse` change à chaque réponse : les champs sont alors recréés avec la saisie
+ * renvoyée (React ne remet pas à jour une liste déroulante ni des lignes ajoutées après coup). */
+type EtatFormulaire = EtatFormulaireEmploye & { numeroReponse: number };
+const ETAT_INITIAL: EtatFormulaire = { numeroReponse: 0 };
 const obligatoire = (libelle: string) => `${libelle} *`;
 
-type IdOnglet = "contact-emploi" | "champs-personnalises";
-const CHAMPS_CONTACT_EMPLOI = ["telephone", "email", "typeEmploi", "dateEmbauche", "dateFinEmploi"];
+const ONGLETS = ["identite-contact", "emploi", "informations"] as const;
+type IdOnglet = (typeof ONGLETS)[number];
 
-/** Nombre d'erreurs par onglet facultatif, pour les signaler et ouvrir le bon onglet. */
-function compterErreurs(erreurs: EtatFormulaireEmploye["erreursChamps"]) {
-  const cles = Object.entries(erreurs ?? {}).filter(([, message]) => message).map(([cle]) => cle);
-  return {
-    "contact-emploi": cles.filter((cle) => CHAMPS_CONTACT_EMPLOI.includes(cle)).length,
-    "champs-personnalises": cles.filter((cle) => cle.startsWith("champ_")).length,
-  } satisfies Record<IdOnglet, number>;
+/** Onglet de chaque champ facultatif, pour y signaler les erreurs et l'ouvrir. */
+function ongletDuChamp(cle: string): IdOnglet | null {
+  if (["genre", "typePieceIdentite", "numeroPieceIdentite", "telephone", "email"].includes(cle)) return "identite-contact";
+  if (["typeEmploi", "dateEmbauche", "dateDebutEmploi", "dateFinEmploi"].includes(cle)) return "emploi";
+  if (cle.startsWith("information_")) return "informations";
+  return null;
+}
+
+function compterErreurs(erreurs: EtatFormulaireEmploye["erreursChamps"]): Record<IdOnglet, number> {
+  const nombres: Record<IdOnglet, number> = { "identite-contact": 0, emploi: 0, informations: 0 };
+  for (const [cle, message] of Object.entries(erreurs ?? {})) {
+    const onglet = ongletDuChamp(cle);
+    if (message && onglet) nombres[onglet] += 1;
+  }
+  return nombres;
 }
 
 /**
@@ -38,69 +50,71 @@ function compterErreurs(erreurs: EtatFormulaireEmploye["erreursChamps"]) {
 export function FormulaireEmploye({
   departements,
   postes,
-  champs,
   onCree,
   onAnnuler,
 }: {
   departements: OptionSelection[];
   postes: OptionSelection[];
-  champs: ChampPersonnalise[];
   onCree: (message: string, continuer: boolean) => void;
   onAnnuler: () => void;
 }) {
-  const [onglet, setOnglet] = useState<IdOnglet>("contact-emploi");
+  const [onglet, setOnglet] = useState<IdOnglet>("identite-contact");
   const [etat, action, enCours] = useActionState(
-    async (precedent: EtatFormulaireEmploye, formulaire: FormData) => {
+    async (precedent: EtatFormulaire, formulaire: FormData): Promise<EtatFormulaire> => {
       const continuer = formulaire.get("apresCreation") === "continuer";
       const resultat = await creerEmploye(precedent, formulaire);
       if (resultat.succes) {
-        setOnglet("contact-emploi");
+        setOnglet("identite-contact");
         onCree(resultat.succes, continuer);
       } else {
-        // Ouvre l'onglet facultatif qui contient une erreur (l'essentiel est toujours visible).
+        // Ouvre le premier onglet facultatif qui contient une erreur (l'essentiel reste visible).
         const nombres = compterErreurs(resultat.erreursChamps);
-        if (nombres["contact-emploi"] > 0) setOnglet("contact-emploi");
-        else if (nombres["champs-personnalises"] > 0) setOnglet("champs-personnalises");
+        const ongletEnErreur = ONGLETS.find((id) => nombres[id] > 0);
+        if (ongletEnErreur) setOnglet(ongletEnErreur);
       }
-      return resultat;
+      return { ...resultat, numeroReponse: precedent.numeroReponse + 1 };
     },
     ETAT_INITIAL,
   );
   const erreurs = etat.erreursChamps;
   const valeurs = etat.valeurs ?? {};
   const nombresErreurs = compterErreurs(erreurs);
+  const onglets = [
+    { id: "identite-contact", libelle: textes.ongletIdentiteContact },
+    { id: "emploi", libelle: textes.ongletEmploi },
+    { id: "informations", libelle: textes.ongletInformations },
+  ].map((definition) => ({
+    ...definition,
+    nombreErreurs: nombresErreurs[definition.id as IdOnglet],
+    libelleErreurs: textes.erreursOnglet,
+  }));
 
   return (
     <form action={action} noValidate className="flex min-h-0 flex-1 flex-col">
-      <div className="flex-1 overflow-y-auto px-5 py-5 sm:px-6">
+      <div key={etat.numeroReponse} className="flex-1 overflow-y-auto px-5 py-5 sm:px-6">
         <fieldset className="grid gap-x-6 gap-y-4 sm:grid-cols-2">
           <legend className="mb-3 flex w-full items-baseline justify-between gap-4">
             <span className="text-base font-semibold text-marine">{textes.sectionPrincipale}</span>
             <span className="text-sm text-texte-secondaire">* {textes.obligatoire}</span>
           </legend>
-          <ChampFormulaire nom="matricule" libelle={obligatoire(textes.matricule)} defaultValue={valeurs.matricule ?? ""} maxLength={LONGUEUR_MAX_MATRICULE} autoComplete="off" spellCheck={false} required autoFocus aide={textes.aideMatricule} erreur={erreurs?.matricule} />
-          <ChampSelection nom="departementId" libelle={obligatoire(textes.departement)} options={departements} optionVide={textes.choisirDepartement} defaultValue={valeurs.departementId ?? ""} required erreur={erreurs?.departementId} />
+          <ChampFormulaire nom="matricule" libelle={obligatoire(textes.matricule)} defaultValue={valeurs.matricule ?? ""} maxLength={LONGUEUR_MAX_MATRICULE} autoComplete="off" spellCheck={false} required aide={textes.aideMatricule} erreur={erreurs?.matricule} />
+          <ChampFormulaire nom="numeroBadge" libelle={obligatoire(textes.numeroBadge)} defaultValue={valeurs.numeroBadge ?? ""} maxLength={LONGUEUR_MAX_NUMERO_BADGE} autoComplete="off" spellCheck={false} required aide={textes.aideBadge} erreur={erreurs?.numeroBadge} />
           <ChampFormulaire nom="prenom" libelle={obligatoire(textes.prenom)} defaultValue={valeurs.prenom ?? ""} maxLength={LONGUEUR_MAX_NOM_EMPLOYE} autoComplete="off" required erreur={erreurs?.prenom} />
           <ChampFormulaire nom="nom" libelle={obligatoire(textes.nom)} defaultValue={valeurs.nom ?? ""} maxLength={LONGUEUR_MAX_NOM_EMPLOYE} autoComplete="off" required erreur={erreurs?.nom} />
+          <ChampSelection nom="departementId" libelle={obligatoire(textes.departement)} options={departements} optionVide={textes.choisirDepartement} defaultValue={valeurs.departementId ?? ""} required erreur={erreurs?.departementId} />
           <ChampSelection nom="posteId" libelle={textes.poste} options={postes} optionVide={textes.aucunPoste} defaultValue={valeurs.posteId ?? ""} erreur={erreurs?.posteId} />
         </fieldset>
 
         <div className="mt-7">
-          <ListeOnglets
-            base="employe"
-            libelle={textes.ongletsFacultatifs}
-            actif={onglet}
-            onChanger={(id) => setOnglet(id as IdOnglet)}
-            onglets={[
-              { id: "contact-emploi", libelle: textes.ongletContactEmploi, nombreErreurs: nombresErreurs["contact-emploi"], libelleErreurs: textes.erreursOnglet },
-              { id: "champs-personnalises", libelle: textes.ongletChampsPersonnalises, nombreErreurs: nombresErreurs["champs-personnalises"], libelleErreurs: textes.erreursOnglet },
-            ]}
-          />
-          <PanneauOnglet base="employe" id="contact-emploi" actif={onglet}>
-            <ChampsContactEmploi valeurs={valeurs} erreurs={erreurs} />
+          <ListeOnglets base="employe" libelle={textes.ongletsFacultatifs} actif={onglet} onChanger={(id) => setOnglet(id as IdOnglet)} onglets={onglets} />
+          <PanneauOnglet base="employe" id="identite-contact" actif={onglet}>
+            <ChampsIdentiteContact valeurs={valeurs} erreurs={erreurs} />
           </PanneauOnglet>
-          <PanneauOnglet base="employe" id="champs-personnalises" actif={onglet}>
-            <ChampsFacultatifs champs={champs} valeurs={valeurs} erreurs={erreurs} />
+          <PanneauOnglet base="employe" id="emploi" actif={onglet}>
+            <ChampsEmploi valeurs={valeurs} erreurs={erreurs} />
+          </PanneauOnglet>
+          <PanneauOnglet base="employe" id="informations" actif={onglet}>
+            <InformationsEmploye initiales={etat.informations ?? []} erreurs={erreurs} />
           </PanneauOnglet>
         </div>
       </div>

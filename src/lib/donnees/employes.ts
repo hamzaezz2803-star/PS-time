@@ -4,9 +4,8 @@ import { asc, count, eq } from "drizzle-orm";
 import type { DonneesEmploye } from "@/lib/validation/employe";
 import type { EmployeListe } from "@/types";
 import { obtenirBase } from "./base";
-import { departements, employes, postes, valeursChampsPersonnalises } from "./schema";
-
-export type ValeurChamp = { champId: string; valeur: string };
+import type { Information } from "@/lib/metier/employes";
+import { departements, employes, informationsEmployes, postes } from "./schema";
 
 /** Une page de la liste, triée par nom puis prénom. */
 export async function listerEmployes(page: number, parPage: number): Promise<EmployeListe[]> {
@@ -14,6 +13,7 @@ export async function listerEmployes(page: number, parPage: number): Promise<Emp
     .select({
       id: employes.id,
       matricule: employes.matricule,
+      numeroBadge: employes.numeroBadge,
       prenom: employes.prenom,
       nom: employes.nom,
       departement: departements.nom,
@@ -34,18 +34,18 @@ export async function compterEmployes(): Promise<number> {
   return resultat?.total ?? 0;
 }
 
-/** Crée l'employé et ses valeurs de champs facultatifs dans une seule transaction. */
+/** Crée l'employé et ses informations supplémentaires dans une seule transaction. */
 export async function insererEmploye(
   donnees: DonneesEmploye,
-  valeurs: ValeurChamp[],
+  informations: Information[],
 ): Promise<string> {
   const id = crypto.randomUUID();
   await obtenirBase().transaction(async (transaction) => {
     await transaction.insert(employes).values({ id, ...donnees });
-    if (valeurs.length > 0) {
+    if (informations.length > 0) {
       await transaction
-        .insert(valeursChampsPersonnalises)
-        .values(valeurs.map((valeur) => ({ employeId: id, ...valeur })));
+        .insert(informationsEmployes)
+        .values(informations.map((information) => ({ employeId: id, ...information })));
     }
   });
   return id;

@@ -39,10 +39,10 @@ export function ListeEmployes({
         <p className="p-5 text-base text-texte-secondaire sm:p-6">{textes.vide}</p>
       ) : (
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[40rem] text-left text-sm">
+          <table className="w-full min-w-[46rem] text-left text-sm">
             <thead className="bg-fond text-texte-secondaire">
               <tr>
-                {[textes.matricule, textes.nomComplet, textes.departement, textes.poste, textes.telephone, textes.dateEmbauche].map(
+                {[textes.matricule, textes.numeroBadge, textes.nomComplet, textes.departement, textes.poste, textes.telephone, textes.dateEmbauche].map(
                   (titre) => (
                     <th key={titre} scope="col" className="px-5 py-3 font-medium">
                       {titre}
@@ -55,6 +55,7 @@ export function ListeEmployes({
               {employes.map((employe) => (
                 <tr key={employe.id}>
                   <td className="px-5 py-3 font-mono tabular-nums">{employe.matricule}</td>
+                  <td className="px-5 py-3 font-mono tabular-nums">{employe.numeroBadge}</td>
                   <td className="px-5 py-3 font-medium">{`${employe.nom} ${employe.prenom}`}</td>
                   <td className="px-5 py-3">{employe.departement}</td>
                   <td className="px-5 py-3">{employe.poste ?? <NonRenseigne />}</td>

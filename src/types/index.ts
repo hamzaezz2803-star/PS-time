@@ -43,19 +43,11 @@ export type Poste = {
 };
 
 export type TypeEmploi = "cdi" | "cdd" | "interim" | "stage";
-export type TypeChampPersonnalise = "texte" | "nombre" | "date";
-
-/** Champ facultatif défini par l'administrateur. */
-export type ChampPersonnalise = {
-  id: string;
-  nom: string;
-  type: TypeChampPersonnalise;
-};
-
 /** Ligne de la liste des employés (dates au format AAAA-MM-JJ). */
 export type EmployeListe = {
   id: string;
   matricule: string;
+  numeroBadge: string;
   prenom: string;
   nom: string;
   departement: string;
@@ -73,4 +65,6 @@ export type EtatFormulaireEmploye = {
   message?: string;
   succes?: string;
   valeurs?: Record<string, string>;
+  /** Informations supplémentaires saisies, réaffichées après une erreur. */
+  informations?: { libelle: string; valeur: string }[];
 };

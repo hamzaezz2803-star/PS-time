@@ -1,33 +1,25 @@
 "use server";
 
 import { refresh } from "next/cache";
-import { LIMITE_CHAMPS_PERSONNALISES } from "@/lib/constantes";
-import {
-  compterChampsPersonnalises,
-  insererChampPersonnalise,
-  listerChampsPersonnalises,
-} from "@/lib/donnees/champs-personnalises";
+import { LIMITE_INFORMATIONS_EMPLOYE } from "@/lib/constantes";
 import { listerDepartements } from "@/lib/donnees/departements";
-import { insererEmploye, type ValeurChamp } from "@/lib/donnees/employes";
+import { insererEmploye } from "@/lib/donnees/employes";
 import { indexEnDoublon } from "@/lib/donnees/erreurs";
 import { listerPostes } from "@/lib/donnees/postes";
 import { obtenirUtilisateurPourEspace } from "@/lib/donnees/session";
-import { validerValeurChamp, type ErreurValeurChamp } from "@/lib/metier/employes";
+import { validerInformations, type Information } from "@/lib/metier/employes";
 import { TEXTES_PERSONNES } from "@/lib/textes/personnes";
-import {
-  CHAMPS_EMPLOYE,
-  lireTexte,
-  validerEmploye,
-  validerNouveauChamp,
-} from "@/lib/validation/employe";
-import type { ChampPersonnalise, EtatFormulaireEmploye, Resultat } from "@/types";
+import { CHAMPS_EMPLOYE, lireTexte, validerEmploye } from "@/lib/validation/employe";
+import type { EtatFormulaireEmploye } from "@/types";
 
-const { erreurs, formulaire: textes, champsFacultatifs } = TEXTES_PERSONNES;
+const { erreurs, formulaire: textes } = TEXTES_PERSONNES;
 
-const MESSAGES_VALEUR: Record<ErreurValeurChamp, string> = {
-  tropLong: erreurs.valeurTropLongue,
-  nombre: erreurs.valeurNombre,
-  date: erreurs.valeurDate,
+/** Champ du formulaire en doublon, d'après l'index unique violé en base. */
+const CHAMP_PAR_INDEX: Record<string, { champ: string; message: string }> = {
+  employes_matricule_idx: { champ: "matricule", message: erreurs.matriculeDejaPris },
+  employes_numero_badge_idx: { champ: "numeroBadge", message: erreurs.badgeDejaPris },
+  employes_email_idx: { champ: "email", message: erreurs.emailDejaPris },
+  employes_piece_identite_idx: { champ: "numeroPieceIdentite", message: erreurs.pieceDejaPrise },
 };
 
 /** Les droits viennent toujours de la session. Pour l'instant : super administrateur uniquement. */
@@ -36,31 +28,23 @@ async function aLesDroits(): Promise<boolean> {
   return utilisateur.estSuperAdmin;
 }
 
-function journaliserEchec(operation: string, erreur: unknown) {
-  console.error(`Échec ${operation}`, {
-    type: erreur instanceof Error ? erreur.name : "inconnu",
-  });
+/** Lignes « libellé + valeur » saisies, dans l'ordre du formulaire. */
+function lireInformations(formulaire: FormData): Information[] {
+  const libelles = formulaire.getAll("informationLibelle").map(lireTexte);
+  const valeurs = formulaire.getAll("informationValeur").map(lireTexte);
+  return libelles.map((libelle, index) => ({ libelle, valeur: valeurs[index] ?? "" }));
 }
 
-const nomChampFormulaire = (champ: ChampPersonnalise) => `champ_${champ.id}`;
-
-/** Saisie renvoyée au formulaire pour la réafficher après une erreur. */
-function lireSaisie(formulaire: FormData, champs: ChampPersonnalise[]): Record<string, string> {
-  const noms = [...CHAMPS_EMPLOYE, ...champs.map(nomChampFormulaire)];
-  return Object.fromEntries(noms.map((nom) => [nom, lireTexte(formulaire.get(nom))]));
-}
-
-/** Valide les champs facultatifs ; les valeurs vides ne sont pas enregistrées. */
-function validerChampsFacultatifs(formulaire: FormData, champs: ChampPersonnalise[]) {
-  const valeurs: ValeurChamp[] = [];
+/** Erreurs des informations, rangées sous les noms de champs du formulaire. */
+function erreursInformations(formulaire: FormData) {
+  const saisie = lireInformations(formulaire);
+  const resultat = validerInformations(saisie);
   const erreursChamps: Record<string, string> = {};
-  for (const champ of champs) {
-    const nom = nomChampFormulaire(champ);
-    const resultat = validerValeurChamp(champ.type, lireTexte(formulaire.get(nom)));
-    if (!resultat.ok) erreursChamps[nom] = MESSAGES_VALEUR[resultat.erreur];
-    else if (resultat.valeur !== null) valeurs.push({ champId: champ.id, valeur: resultat.valeur });
+  for (const [index, erreur] of Object.entries(resultat.erreurs)) {
+    if (erreur.libelle) erreursChamps[`information_${index}_libelle`] = erreurs.informations[erreur.libelle];
+    if (erreur.valeur) erreursChamps[`information_${index}_valeur`] = erreurs.informations[erreur.valeur];
   }
-  return { valeurs, erreursChamps };
+  return { saisie, resultat, erreursChamps };
 }
 
 export async function creerEmploye(
@@ -69,18 +53,15 @@ export async function creerEmploye(
 ): Promise<EtatFormulaireEmploye> {
   if (!(await aLesDroits())) return { message: erreurs.droits };
 
-  const [champs, departements, postes] = await Promise.all([
-    listerChampsPersonnalises(),
-    listerDepartements(),
-    listerPostes(),
-  ]);
-  const valeurs = lireSaisie(formulaire, champs);
+  const [departements, postes] = await Promise.all([listerDepartements(), listerPostes()]);
+  const valeurs = Object.fromEntries(CHAMPS_EMPLOYE.map((nom) => [nom, lireTexte(formulaire.get(nom))]));
   const validation = validerEmploye(formulaire);
-  const facultatifs = validerChampsFacultatifs(formulaire, champs);
+  const informations = erreursInformations(formulaire);
+  const retour = { valeurs, informations: informations.saisie };
 
-  const erreursChamps = {
+  const erreursChamps: Record<string, string | undefined> = {
     ...(validation.ok ? {} : validation.erreursChamps),
-    ...facultatifs.erreursChamps,
+    ...informations.erreursChamps,
   };
   if (validation.ok) {
     const { departementId, posteId } = validation.donnees;
@@ -91,51 +72,26 @@ export async function creerEmploye(
       erreursChamps.posteId = erreurs.posteIntrouvable;
     }
   }
+  if (informations.resultat.estTropNombreuses) {
+    return { ...retour, erreursChamps, message: erreurs.tropDInformations(LIMITE_INFORMATIONS_EMPLOYE) };
+  }
   if (!validation.ok || Object.values(erreursChamps).some(Boolean)) {
-    return { erreursChamps, valeurs };
+    return { ...retour, erreursChamps };
   }
 
   try {
-    await insererEmploye(validation.donnees, facultatifs.valeurs);
+    await insererEmploye(validation.donnees, informations.resultat.informations);
   } catch (erreur) {
-    const index = indexEnDoublon(erreur);
-    if (index === "employes_matricule_idx") {
-      return { erreursChamps: { matricule: erreurs.matriculeDejaPris }, valeurs };
-    }
-    if (index === "employes_email_idx") {
-      return { erreursChamps: { email: erreurs.emailDejaPris }, valeurs };
-    }
-    journaliserEchec("de la création d'un employé", erreur);
-    return { message: erreurs.echec, valeurs };
+    const doublon = CHAMP_PAR_INDEX[indexEnDoublon(erreur) ?? ""];
+    if (doublon) return { ...retour, erreursChamps: { [doublon.champ]: doublon.message } };
+    // Journal sans donnée personnelle (ni nom, ni pièce d'identité).
+    console.error("Échec de la création d'un employé", {
+      type: erreur instanceof Error ? erreur.name : "inconnu",
+    });
+    return { ...retour, message: erreurs.echec };
   }
 
   refresh();
   const { prenom, nom } = validation.donnees;
   return { succes: textes.cree(`${prenom} ${nom}`) };
 }
-
-/** Crée un champ facultatif, aussitôt proposé dans le formulaire de tous les employés. */
-export async function ajouterChampPersonnalise(
-  saisie: unknown,
-): Promise<Resultat<ChampPersonnalise & { message: string }>> {
-  if (!(await aLesDroits())) return { ok: false, erreur: erreurs.droits };
-
-  const validation = validerNouveauChamp(saisie);
-  if (!validation.ok) return validation;
-  const { nom, type } = validation.donnees;
-
-  if ((await compterChampsPersonnalises()) >= LIMITE_CHAMPS_PERSONNALISES) {
-    return { ok: false, erreur: erreurs.limiteChamps(LIMITE_CHAMPS_PERSONNALISES) };
-  }
-
-  try {
-    const champ = await insererChampPersonnalise(nom, type);
-    refresh();
-    return { ok: true, donnees: { ...champ, message: champsFacultatifs.ajoute(nom) } };
-  } catch (erreur) {
-    if (indexEnDoublon(erreur) !== null) return { ok: false, erreur: erreurs.nomChampDejaPris };
-    journaliserEchec("de la création d'un champ facultatif", erreur);
-    return { ok: false, erreur: erreurs.echec };
-  }
-}
-

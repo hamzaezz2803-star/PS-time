@@ -45,7 +45,13 @@ export const INDICATIF_PAYS = "212";
 export const TYPES_EMPLOI = ["cdi", "cdd", "interim", "stage"] as const;
 
 /** Champs facultatifs créés par l'administrateur. */
-export const TYPES_CHAMP_PERSONNALISE = ["texte", "nombre", "date"] as const;
-export const LIMITE_CHAMPS_PERSONNALISES = 50;
-export const LONGUEUR_MAX_NOM_CHAMP = 60;
-export const LONGUEUR_MAX_VALEUR_CHAMP = 255;
+
+export const LONGUEUR_MAX_NUMERO_BADGE = 30;
+export const GENRES = ["homme", "femme"] as const;
+/** Pièce d'identité : utile à la déclaration CNSS (obligation de l'employeur). */
+export const TYPES_PIECE_IDENTITE = ["cin", "passeport", "carte_sejour"] as const;
+export const LONGUEUR_MAX_NUMERO_PIECE = 30;
+/** Informations supplémentaires propres à un employé (libellé + valeur). */
+export const LIMITE_INFORMATIONS_EMPLOYE = 20;
+export const LONGUEUR_MAX_LIBELLE_INFORMATION = 60;
+export const LONGUEUR_MAX_VALEUR_INFORMATION = 255;

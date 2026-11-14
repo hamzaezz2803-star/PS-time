@@ -5,13 +5,15 @@ import { MessageErreur } from "./message-erreur";
 
 type ProprietesChamp = Omit<InputHTMLAttributes<HTMLInputElement>, "id" | "name"> & {
   nom: string;
+  /** Nom envoyé avec le formulaire, s'il diffère de `nom` (ex. lignes répétées d'une liste). */
+  nomEnvoi?: string;
   libelle: string;
   aide?: string;
   erreur?: string;
 };
 
 /** Champ texte complet : libellé au-dessus, aide et erreur en dessous, reliés pour les lecteurs d'écran. */
-export function ChampFormulaire({ nom, libelle, aide, erreur, ...proprietes }: ProprietesChamp) {
+export function ChampFormulaire({ nom, nomEnvoi, libelle, aide, erreur, ...proprietes }: ProprietesChamp) {
   const idAide = aide ? `aide-${nom}` : undefined;
   const idErreur = erreur ? `erreur-${nom}` : undefined;
   const decritPar = [idAide, idErreur].filter(Boolean).join(" ") || undefined;
@@ -21,7 +23,7 @@ export function ChampFormulaire({ nom, libelle, aide, erreur, ...proprietes }: P
       <Etiquette htmlFor={nom}>{libelle}</Etiquette>
       <ChampSaisie
         id={nom}
-        name={nom}
+        name={nomEnvoi ?? nom}
         aria-invalid={erreur ? true : undefined}
         aria-describedby={decritPar}
         {...proprietes}

@@ -1,11 +1,13 @@
 import { z } from "zod";
 import {
+  GENRES,
   LONGUEUR_MAX_EMAIL,
   LONGUEUR_MAX_MATRICULE,
   LONGUEUR_MAX_NOM_EMPLOYE,
-  LONGUEUR_MAX_NOM_CHAMP,
-  TYPES_CHAMP_PERSONNALISE,
+  LONGUEUR_MAX_NUMERO_BADGE,
+  LONGUEUR_MAX_NUMERO_PIECE,
   TYPES_EMPLOI,
+  TYPES_PIECE_IDENTITE,
 } from "@/lib/constantes";
 import { datesEmploiCoherentes, estDateValide, normaliserTelephone } from "@/lib/metier/employes";
 import { TEXTES_PERSONNES } from "@/lib/textes/personnes";
@@ -16,6 +18,15 @@ const { erreurs } = TEXTES_PERSONNES;
 const texteNettoye = z.string().transform((valeur) => valeur.replace(/\s+/g, " ").trim());
 /** Champ facultatif : une saisie vide devient null. */
 const facultatif = texteNettoye.transform((valeur) => (valeur === "" ? null : valeur));
+
+/** Identifiant court sans espace (matricule, badge) : lettres, chiffres, « . », « - », « _ ». */
+const identifiant = (vide: string, tropLong: string, invalide: string, longueurMax: number) =>
+  z
+    .string()
+    .trim()
+    .min(1, { error: vide })
+    .max(longueurMax, { error: tropLong })
+    .regex(/^[\p{L}\p{N}._-]+$/u, { error: invalide });
 
 const nomPersonne = (erreurVide: string) =>
   texteNettoye.pipe(
@@ -31,16 +42,29 @@ const dateFacultative = facultatif.refine((valeur) => valeur === null || estDate
 
 const schemaEmploye = z
   .object({
-    matricule: z
-      .string()
-      .trim()
-      .min(1, { error: erreurs.matriculeVide })
-      .max(LONGUEUR_MAX_MATRICULE, { error: erreurs.matriculeTropLong })
-      .regex(/^[\p{L}\p{N}._-]+$/u, { error: erreurs.matriculeInvalide }),
+    matricule: identifiant(erreurs.matriculeVide, erreurs.matriculeTropLong, erreurs.matriculeInvalide, LONGUEUR_MAX_MATRICULE),
+    numeroBadge: identifiant(erreurs.badgeVide, erreurs.badgeTropLong, erreurs.badgeInvalide, LONGUEUR_MAX_NUMERO_BADGE),
     prenom: nomPersonne(erreurs.prenomVide),
     nom: nomPersonne(erreurs.nomVide),
     departementId: z.uuid({ error: erreurs.departementVide }),
     posteId: facultatif.pipe(z.uuid({ error: erreurs.posteIntrouvable }).nullable()),
+    genre: facultatif.pipe(z.enum(GENRES, { error: erreurs.genreInvalide }).nullable()),
+    typePieceIdentite: facultatif.pipe(
+      z.enum(TYPES_PIECE_IDENTITE, { error: erreurs.typePieceInvalide }).nullable(),
+    ),
+    // Enregistré en majuscules et sans espace : « ab 12345 » donne « AB12345 ».
+    numeroPieceIdentite: facultatif.pipe(
+      z
+        .string()
+        .transform((valeur) => valeur.replace(/\s+/g, "").toUpperCase())
+        .pipe(
+          z
+            .string()
+            .max(LONGUEUR_MAX_NUMERO_PIECE, { error: erreurs.numeroPieceTropLong })
+            .regex(/^[\p{L}\p{N}-]+$/u, { error: erreurs.numeroPieceInvalide }),
+        )
+        .nullable(),
+    ),
     telephone: facultatif.transform((valeur, contexte) => {
       if (valeur === null) return null;
       const numero = normaliserTelephone(valeur);
@@ -56,10 +80,19 @@ const schemaEmploye = z
     ),
     typeEmploi: facultatif.pipe(z.enum(TYPES_EMPLOI, { error: erreurs.typeEmploiInvalide }).nullable()),
     dateEmbauche: dateFacultative,
+    dateDebutEmploi: dateFacultative,
     dateFinEmploi: dateFacultative,
+  })
+  .refine((employe) => (employe.typePieceIdentite === null) === (employe.numeroPieceIdentite === null), {
+    error: erreurs.pieceIncomplete,
+    path: ["numeroPieceIdentite"],
   })
   .refine((employe) => datesEmploiCoherentes(employe.dateEmbauche, employe.dateFinEmploi), {
     error: erreurs.datesIncoherentes,
+    path: ["dateFinEmploi"],
+  })
+  .refine((employe) => datesEmploiCoherentes(employe.dateDebutEmploi, employe.dateFinEmploi), {
+    error: erreurs.debutApresFin,
     path: ["dateFinEmploi"],
   });
 
@@ -68,14 +101,19 @@ type ChampEmploye = keyof DonneesEmploye;
 
 export const CHAMPS_EMPLOYE = [
   "matricule",
+  "numeroBadge",
   "prenom",
   "nom",
   "departementId",
   "posteId",
+  "genre",
+  "typePieceIdentite",
+  "numeroPieceIdentite",
   "telephone",
   "email",
   "typeEmploi",
   "dateEmbauche",
+  "dateDebutEmploi",
   "dateFinEmploi",
 ] as const satisfies readonly ChampEmploye[];
 
@@ -85,7 +123,7 @@ type ResultatValidation =
   | { ok: true; donnees: DonneesEmploye }
   | { ok: false; erreursChamps: Partial<Record<ChampEmploye, string>> };
 
-/** Valide les informations principales d'un employé (les champs facultatifs sont validés à part). */
+/** Valide les informations d'un employé (les informations supplémentaires sont validées à part). */
 export function validerEmploye(formulaire: FormData): ResultatValidation {
   const saisie = Object.fromEntries(
     CHAMPS_EMPLOYE.map((champ) => [champ, lireTexte(formulaire.get(champ))]),
@@ -98,25 +136,3 @@ export function validerEmploye(formulaire: FormData): ResultatValidation {
   for (const champ of CHAMPS_EMPLOYE) erreursChamps[champ] = fieldErrors[champ]?.[0];
   return { ok: false, erreursChamps };
 }
-
-const schemaNouveauChamp = z.object({
-  nom: texteNettoye.pipe(
-    z
-      .string()
-      .min(1, { error: erreurs.nomChampVide })
-      .max(LONGUEUR_MAX_NOM_CHAMP, { error: erreurs.nomChampTropLong }),
-  ),
-  type: z.enum(TYPES_CHAMP_PERSONNALISE, { error: erreurs.typeChampInvalide }),
-});
-
-export type DonneesNouveauChamp = z.infer<typeof schemaNouveauChamp>;
-
-/** Valide la création d'un champ facultatif. Renvoie le premier message d'erreur sinon. */
-export function validerNouveauChamp(
-  saisie: unknown,
-): { ok: true; donnees: DonneesNouveauChamp } | { ok: false; erreur: string } {
-  const analyse = schemaNouveauChamp.safeParse(saisie);
-  if (analyse.success) return { ok: true, donnees: analyse.data };
-  return { ok: false, erreur: analyse.error.issues[0]?.message ?? erreurs.echec };
-}
-

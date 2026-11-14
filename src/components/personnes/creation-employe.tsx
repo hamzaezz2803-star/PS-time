@@ -9,7 +9,6 @@ import { FenetreModale } from "@/components/ui/fenetre-modale";
 import { MessageSucces } from "@/components/ui/message-succes";
 import { CHEMIN_DEPARTEMENTS } from "@/lib/constantes";
 import { TEXTES_PERSONNES } from "@/lib/textes/personnes";
-import type { ChampPersonnalise } from "@/types";
 import { FormulaireEmploye } from "./formulaire-employe";
 
 const { formulaire: textes } = TEXTES_PERSONNES;
@@ -18,11 +17,9 @@ const { formulaire: textes } = TEXTES_PERSONNES;
 export function CreationEmploye({
   departements,
   postes,
-  champs,
 }: {
   departements: OptionSelection[];
   postes: OptionSelection[];
-  champs: ChampPersonnalise[];
 }) {
   const [estOuverte, setEstOuverte] = useState(false);
   // Change à chaque création « et ajouter un autre » : le formulaire repart vide.
@@ -68,7 +65,6 @@ export function CreationEmploye({
           key={numeroSaisie}
           departements={departements}
           postes={postes}
-          champs={champs}
           onCree={surCreation}
           onAnnuler={() => setEstOuverte(false)}
         />

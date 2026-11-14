@@ -50,6 +50,20 @@
       "when": 1794590578871,
       "tag": "0006_creer_employes",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "5",
+      "when": 1794661775226,
+      "tag": "0007_supprimer_champs_personnalises",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "5",
+      "when": 1794661825479,
+      "tag": "0008_champs_employe_badge_identite",
+      "breakpoints": true
     }
   ]
 }
