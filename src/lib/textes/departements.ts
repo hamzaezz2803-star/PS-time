@@ -13,6 +13,9 @@ export const TEXTES_DEPARTEMENTS = {
     vide: "Aucun département pour l'instant.",
     videAction: "Créez le premier avec le formulaire.",
     nouveau: "Nouveau département",
+    modifier: (nom: string) => `Modifier ${nom}`,
+    supprimer: (nom: string) => `Supprimer ${nom}`,
+    fermer: "Fermer",
     sousDepartements: (nombre: number) =>
       nombre === 0
         ? "Aucun sous-département"
@@ -36,7 +39,9 @@ export const TEXTES_DEPARTEMENTS = {
     supprimer: "Supprimer",
     confirmerSuppression: (nom: string) =>
       `Supprimer définitivement « ${nom} » ?`,
-    oui: "Oui, supprimer",
+    titreSuppression: "Supprimer le département",
+    explicationSuppression: "Cette action ne peut pas être annulée.",
+    oui: "Supprimer définitivement",
     annuler: "Annuler",
     cree: "Département créé.",
     modifie: "Modifications enregistrées.",
