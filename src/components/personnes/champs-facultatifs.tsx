@@ -27,8 +27,9 @@ export function ChampsFacultatifs({
 }) {
   return (
     <fieldset className="flex flex-col gap-4">
-      <legend className="text-base font-semibold text-marine">{textes.titre}</legend>
-      <p className="-mt-2 text-sm text-texte-secondaire">{textes.description}</p>
+      {/* L'onglet affiche déjà le titre : la légende reste pour les lecteurs d'écran. */}
+      <legend className="sr-only">{textes.titre}</legend>
+      <p className="text-sm text-texte-secondaire">{textes.description}</p>
       {champs.length === 0 ? (
         <p className="text-sm text-texte-secondaire">{textes.aucun}</p>
       ) : (

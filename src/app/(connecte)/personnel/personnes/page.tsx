@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { FormulaireEmploye } from "@/components/personnes/formulaire-employe";
+import { CreationEmploye } from "@/components/personnes/creation-employe";
 import { ListeEmployes } from "@/components/personnes/liste-employes";
 import { Chargement } from "@/components/ui/chargement";
 import { MessageErreur } from "@/components/ui/message-erreur";
@@ -74,24 +74,11 @@ async function ContenuPersonnes({ searchParams }: { searchParams: ParametresRech
 
   return (
     <>
-      <section
-        className="overflow-hidden rounded-xl border border-bordure bg-surface"
-        aria-labelledby="titre-formulaire-employe"
-      >
-        <h2
-          id="titre-formulaire-employe"
-          className="border-b border-bordure px-5 py-4 text-lg font-semibold text-marine sm:px-6"
-        >
-          {TEXTES_PERSONNES.formulaire.titre}
-        </h2>
-        <div className="p-5 sm:p-6">
-          <FormulaireEmploye
-            departements={versOptions(construireArbre(departements))}
-            postes={versOptions(construireArbre(postes, comparerPostes))}
-            champs={champs}
-          />
-        </div>
-      </section>
+      <CreationEmploye
+        departements={versOptions(construireArbre(departements))}
+        postes={versOptions(construireArbre(postes, comparerPostes))}
+        champs={champs}
+      />
       <ListeEmployes employes={employes} total={total} page={page} nombrePages={nombrePages} />
     </>
   );
