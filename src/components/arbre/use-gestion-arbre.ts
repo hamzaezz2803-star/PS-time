@@ -71,13 +71,10 @@ export function useGestionArbre<T extends ElementArbre>(
 
   return {
     arbre,
-    selection,
     idSelectionne,
     idsOuverts,
     messageSucces,
     optionsParent,
-    nombreEnfants: selection ? liste.filter((element) => element.parentId === selection.id).length : 0,
-    parent: selection?.parentId ? liste.find((element) => element.id === selection.parentId) : undefined,
     selectionner,
     basculer,
     terminer,

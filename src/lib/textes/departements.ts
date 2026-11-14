@@ -2,7 +2,7 @@
 export const TEXTES_DEPARTEMENTS = {
   titrePage: "Départements",
   sousTitre:
-    "Organisez votre entreprise en départements et sous-départements. Sélectionnez un département pour le modifier.",
+    "Organisez votre entreprise en départements et sous-départements. Cliquez sur un département pour le modifier.",
   chargement: "Chargement des départements...",
   arbre: {
     titre: "Organisation",
@@ -11,24 +11,15 @@ export const TEXTES_DEPARTEMENTS = {
     deplier: (nom: string) => `Déplier ${nom}`,
     replier: (nom: string) => `Replier ${nom}`,
     vide: "Aucun département pour l'instant.",
-    videAction: "Créez le premier avec le formulaire.",
+    videAction: "Créez le premier avec « Nouveau département ».",
     nouveau: "Nouveau département",
     modifier: (nom: string) => `Modifier ${nom}`,
     supprimer: (nom: string) => `Supprimer ${nom}`,
     fermer: "Fermer",
-    sousDepartements: (nombre: number) =>
-      nombre === 0
-        ? "Aucun sous-département"
-        : nombre === 1
-          ? "1 sous-département"
-          : `${nombre} sous-départements`,
     total: (nombre: number) => (nombre <= 1 ? `${nombre} département` : `${nombre} départements`),
-    principal: "Département principal",
-    rattacheA: (nom: string) => `Rattaché à ${nom}`,
   },
   formulaire: {
     titreCreation: "Nouveau département",
-    sousTitreCreation: "Il apparaîtra dans l'organisation dès son enregistrement.",
     titreModification: (nom: string) => `Modifier « ${nom} »`,
     nom: "Nom du département",
     exempleNom: "Par exemple : Logistique",
@@ -36,7 +27,6 @@ export const TEXTES_DEPARTEMENTS = {
     aucunParent: "Aucun (département principal)",
     enregistrer: "Enregistrer",
     enregistrementEnCours: "Enregistrement...",
-    supprimer: "Supprimer",
     confirmerSuppression: (nom: string) =>
       `Supprimer définitivement « ${nom} » ?`,
     titreSuppression: "Supprimer le département",

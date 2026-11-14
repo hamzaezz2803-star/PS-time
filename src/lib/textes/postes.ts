@@ -2,7 +2,7 @@
 export const TEXTES_POSTES = {
   titrePage: "Postes",
   sousTitre:
-    "Définissez les postes de l'entreprise et leur hiérarchie. Sélectionnez un poste pour le modifier.",
+    "Définissez les postes de l'entreprise et leur hiérarchie. Cliquez sur un poste pour le modifier.",
   chargement: "Chargement des postes...",
   arbre: {
     titre: "Hiérarchie des postes",
@@ -11,21 +11,15 @@ export const TEXTES_POSTES = {
     deplier: (nom: string) => `Déplier ${nom}`,
     replier: (nom: string) => `Replier ${nom}`,
     vide: "Aucun poste pour l'instant.",
-    videAction: "Créez le premier avec le formulaire.",
+    videAction: "Créez le premier avec « Nouveau poste ».",
     nouveau: "Nouveau poste",
     modifier: (nom: string) => `Modifier ${nom}`,
     supprimer: (nom: string) => `Supprimer ${nom}`,
     fermer: "Fermer",
     total: (nombre: number) => (nombre <= 1 ? `${nombre} poste` : `${nombre} postes`),
-    sousPostes: (nombre: number) =>
-      nombre === 0 ? "Aucun poste rattaché" : nombre === 1 ? "1 poste rattaché" : `${nombre} postes rattachés`,
-    principal: "Poste principal",
-    rattacheA: (nom: string) => `Rattaché à ${nom}`,
-    numero: (code: string) => `N° ${code}`,
   },
   formulaire: {
     titreCreation: "Nouveau poste",
-    sousTitreCreation: "Il apparaîtra dans la hiérarchie dès son enregistrement.",
     titreModification: (nom: string) => `Modifier « ${nom} »`,
     code: "Numéro de poste",
     exempleCode: "Par exemple : OP-01",
@@ -39,7 +33,6 @@ export const TEXTES_POSTES = {
     aucunParent: "Aucun (poste principal)",
     enregistrer: "Enregistrer",
     enregistrementEnCours: "Enregistrement...",
-    supprimer: "Supprimer",
     confirmerSuppression: (nom: string) => `Supprimer définitivement « ${nom} » ?`,
     titreSuppression: "Supprimer le poste",
     explicationSuppression: "Les employés qui occupent ce poste n'auront plus de poste. Cette action ne peut pas être annulée.",

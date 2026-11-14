@@ -19,10 +19,12 @@ export function FormulaireDepartement({
   departement,
   optionsParent,
   onTermine,
+  onAnnuler,
 }: {
   departement?: ElementArbre;
   optionsParent: OptionParent[];
   onTermine: (succes: Succes) => void;
+  onAnnuler: () => void;
 }) {
   const [etat, action, enCours] = useActionState(
     async (precedent: EtatFormulaireDepartement, formulaire: FormData) => {
@@ -34,30 +36,34 @@ export function FormulaireDepartement({
   );
 
   return (
-    <form action={action} noValidate className="flex flex-col gap-5">
+    <form action={action} noValidate className="flex min-h-0 flex-1 flex-col">
       {departement && <input type="hidden" name="id" value={departement.id} />}
-      <ChampFormulaire
-        nom="nom"
-        libelle={textes.nom}
-        defaultValue={departement?.nom ?? ""}
-        placeholder={textes.exempleNom}
-        maxLength={LONGUEUR_MAX_NOM_DEPARTEMENT}
-        autoComplete="off"
-        required
-        erreur={etat.erreursChamps?.nom}
-      />
-      <ChampParent
-        libelle={textes.parent}
-        aucunParent={textes.aucunParent}
-        options={optionsParent}
-        valeurInitiale={departement?.parentId ?? null}
-        erreur={etat.erreursChamps?.parentId}
-      />
+      <div className="flex flex-1 flex-col gap-5 overflow-y-auto px-5 py-5 sm:px-6">
+        <ChampFormulaire
+          nom="nom"
+          libelle={textes.nom}
+          defaultValue={departement?.nom ?? ""}
+          placeholder={textes.exempleNom}
+          maxLength={LONGUEUR_MAX_NOM_DEPARTEMENT}
+          autoComplete="off"
+          required
+          erreur={etat.erreursChamps?.nom}
+        />
+        <ChampParent
+          libelle={textes.parent}
+          aucunParent={textes.aucunParent}
+          options={optionsParent}
+          valeurInitiale={departement?.parentId ?? null}
+          erreur={etat.erreursChamps?.parentId}
+        />
+      </div>
       <PiedFormulaire
         message={etat.message}
         enCours={enCours}
         libelle={textes.enregistrer}
         libelleEnCours={textes.enregistrementEnCours}
+        libelleAnnuler={textes.annuler}
+        onAnnuler={onAnnuler}
       />
     </form>
   );
