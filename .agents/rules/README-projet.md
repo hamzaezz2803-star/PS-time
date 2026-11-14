@@ -152,6 +152,8 @@ npm run dev
 - `admin:creer` affiche une seule fois un mot de passe temporaire, à changer à la première connexion.
 - Sans accès direct à la base (phpMyAdmin seulement) : `npm run --silent sql:utilisateur -- --identifiant ... --email ... --nom "..." [--super-admin]` affiche le SQL à exécuter (empreinte scrypt incluse, jamais le mot de passe en clair) et le mot de passe temporaire. On ne crée pas de mot de passe en SQL pur : MySQL ne propose que MD5/SHA, interdits par les règles.
 
+Données de test fictives (développement uniquement, jamais chez un client) : exécuter `base-de-donnees/donnees-test.sql` dans phpMyAdmin (onglet SQL ou Importer), ou `mysql -u root ps-time < base-de-donnees/donnees-test.sql`. Rejouable ; `base-de-donnees/supprimer-donnees-test.sql` retire ces seules données (identifiants commençant par `00000000-0000-4000-8000-`).
+
 Modifier le schéma : éditer `src/lib/donnees/schema.ts`, puis `npm run db:generer -- --name <nom_explicite>` (relire le SQL produit) et `npm run db:migrer`. Ne jamais modifier une migration déjà appliquée chez un client.
 
 ## Avant de terminer une tâche
