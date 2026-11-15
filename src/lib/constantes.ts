@@ -38,6 +38,13 @@ export const ORDRE_POSTE_DEFAUT = 99999;
 
 export const CHEMIN_PERSONNES = "/personnel/personnes";
 export const EMPLOYES_PAR_PAGE = 50;
+export const LONGUEUR_MAX_RECHERCHE = 100;
+/** Photo de profil : redimensionnée dans le navigateur, puis vérifiée par le serveur. */
+export const PHOTO_COTE_PIXELS = 512;
+export const PHOTO_QUALITE_WEBP = 0.85;
+/** 512 Ko : identique à la contrainte de la base (photos_employes_taille). */
+export const PHOTO_TAILLE_MAX_OCTETS = 524_288;
+export const CHEMIN_PHOTO_EMPLOYE = (id: string) => `/personnel/personnes/photo/${id}`;
 export const CHEMIN_EXPORT_EXCEL_PERSONNES = "/personnel/personnes/export-excel";
 export const CHEMIN_IMPRESSION_PERSONNES = "/impression/personnes";
 /** Garde-fou : nombre maximal d'employés dans un export (Excel ou PDF). */
@@ -96,3 +103,15 @@ export const CALENDRIER_PAR_DEFAUT = {
   heuresSupMinimumMinutes: 30,
   heuresSupMaximumMinutes: 0,
 } as const;
+
+/** Gestion des exceptions : pointages saisis à la main (corrections, tests). */
+export const CHEMIN_POINTAGES_MANUELS = "/exceptions/pointages-manuels";
+/** États d'un pointage, dans l'ordre d'une journée. */
+export const ETATS_POINTAGE = ["entree", "sortie", "debut_pause", "fin_pause", "debut_heures_sup", "fin_heures_sup"] as const;
+export const SOURCES_POINTAGE = ["manuel", "badgeuse"] as const;
+export const POINTAGES_PAR_PAGE = 50;
+/** Nombre maximal d'employés pointés en une seule saisie. */
+export const LIMITE_EMPLOYES_POINTAGE = 500;
+export const LONGUEUR_MAX_REMARQUE_POINTAGE = 255;
+/** Un pointage manuel ne peut pas être dans le futur (petite marge pour l'horloge du poste). */
+export const TOLERANCE_POINTAGE_FUTUR_MINUTES = 5;

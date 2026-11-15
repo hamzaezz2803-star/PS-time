@@ -10,6 +10,7 @@ import { ContexteMenu, useMenu, type EtatMenu } from "./contexte-menu";
 import { FilAriane } from "./fil-ariane";
 import { Horloge } from "./horloge";
 import { MenuLateral } from "./menu-lateral";
+import { Notifications } from "./notifications";
 import {
   abonnerPreferenceMenu,
   enregistrerPreferenceMenu,
@@ -118,6 +119,7 @@ export function CadreTableauDeBord({ pied, children }: { pied: ReactNode; childr
             <div className="ms-1 min-w-0 flex-1">
               <FilAriane />
             </div>
+            <Notifications />
             <Horloge />
           </header>
           <main className="flex-1 px-4 py-6 sm:px-6 lg:px-10 lg:py-8">{children}</main>

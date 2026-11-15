@@ -98,3 +98,8 @@ export function periodesSeChevauchent(a: Periode, b: Periode): boolean {
   const bAvantA = b.fin !== null && b.fin < a.debut;
   return !aAvantB && !bAvantA;
 }
+
+/** Écart lisible : « 12 min » sous une heure, sinon « 1 h 05 ». */
+export function formaterEcart(minutes: number): string {
+  return minutes < 60 ? `${minutes} min` : formaterDuree(minutes);
+}

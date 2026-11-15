@@ -3,6 +3,8 @@ import "server-only";
 import { LIMITE_INFORMATIONS_EMPLOYE } from "@/lib/constantes";
 import { listerDepartements } from "@/lib/donnees/departements";
 import { indexEnDoublon } from "@/lib/donnees/erreurs";
+import type { ChangementPhoto } from "@/lib/donnees/photos-employes";
+import { verifierPhoto } from "@/lib/metier/photo";
 import { listerPostes } from "@/lib/donnees/postes";
 import { validerInformations, type Information } from "@/lib/metier/employes";
 import { TEXTES_PERSONNES } from "@/lib/textes/personnes";
@@ -26,8 +28,23 @@ function lireInformations(formulaire: FormData): Information[] {
   return libelles.map((libelle, index) => ({ libelle, valeur: valeurs[index] ?? "" }));
 }
 
+/**
+ * Photo envoyée avec le formulaire : vérifiée par sa signature et sa taille (jamais d'après
+ * le nom ou le type annoncé). Sans fichier : on garde la photo actuelle, sauf « retirer ».
+ */
+async function lirePhoto(formulaire: FormData): Promise<{ ok: true; changement: ChangementPhoto } | { ok: false; erreur: string }> {
+  const fichier = formulaire.get("photo");
+  if (fichier instanceof File && fichier.size > 0) {
+    const octets = Buffer.from(await fichier.arrayBuffer());
+    const verification = verifierPhoto(octets);
+    if (!verification.ok) return { ok: false, erreur: verification.erreur === "taille" ? erreurs.photoTaille : erreurs.photoFormat };
+    return { ok: true, changement: { action: "remplacer", photo: { type: verification.type, octets } } };
+  }
+  return { ok: true, changement: { action: formulaire.get("retirerPhoto") === "oui" ? "retirer" : "garder" } };
+}
+
 type Preparation =
-  | { ok: true; donnees: DonneesEmploye; informations: Information[]; retour: EtatFormulaireEmploye }
+  | { ok: true; donnees: DonneesEmploye; informations: Information[]; photo: ChangementPhoto; retour: EtatFormulaireEmploye }
   | { ok: false; etat: EtatFormulaireEmploye };
 
 /**
@@ -42,7 +59,9 @@ export async function preparerEmploye(formulaire: FormData): Promise<Preparation
 
   const validation = validerEmploye(formulaire);
   const informations = validerInformations(saisieInformations);
+  const photo = await lirePhoto(formulaire);
   const erreursChamps: Record<string, string | undefined> = validation.ok ? {} : { ...validation.erreursChamps };
+  if (!photo.ok) erreursChamps.photo = photo.erreur;
   for (const [index, erreur] of Object.entries(informations.erreurs)) {
     if (erreur.libelle) erreursChamps[`information_${index}_libelle`] = erreurs.informations[erreur.libelle];
     if (erreur.valeur) erreursChamps[`information_${index}_valeur`] = erreurs.informations[erreur.valeur];
@@ -63,10 +82,10 @@ export async function preparerEmploye(formulaire: FormData): Promise<Preparation
       etat: { ...retour, erreursChamps, message: erreurs.tropDInformations(LIMITE_INFORMATIONS_EMPLOYE) },
     };
   }
-  if (!validation.ok || Object.values(erreursChamps).some(Boolean)) {
+  if (!validation.ok || !photo.ok || Object.values(erreursChamps).some(Boolean)) {
     return { ok: false, etat: { ...retour, erreursChamps } };
   }
-  return { ok: true, donnees: validation.donnees, informations: informations.informations, retour };
+  return { ok: true, donnees: validation.donnees, informations: informations.informations, photo: photo.changement, retour };
 }
 
 /** Traduit une erreur d'enregistrement en état du formulaire (doublon ou échec général). */

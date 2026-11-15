@@ -1,11 +1,14 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
-import { Pencil, Trash2 } from "lucide-react";
+import { useMemo, useState, type ReactNode } from "react";
+import { Pencil, SearchX, Trash2 } from "lucide-react";
 import { BoutonIcone } from "@/components/ui/bouton-icone";
+import { ChampRecherche } from "@/components/ui/champ-recherche";
 import { FenetreModale } from "@/components/ui/fenetre-modale";
 import { MessageSucces } from "@/components/ui/message-succes";
-import { totalAvecDescendants, type Comparateur, type ElementArbre } from "@/lib/metier/arbre";
+import { filtrerArbre, idsAvecEnfants, totalAvecDescendants, type Comparateur, type ElementArbre } from "@/lib/metier/arbre";
+import { correspondARecherche } from "@/lib/metier/recherche";
+import { TEXTES_LISTE } from "@/lib/textes/liste";
 import type { EtatFormulaire } from "@/types";
 import { ArbreHierarchique, type IconesArbre, type TextesArbre } from "./arbre-hierarchique";
 import type { OptionParent } from "./champ-parent";
@@ -52,6 +55,7 @@ export function GestionArbre<T extends ElementArbre>({
   nombresEmployes,
   cumulerSousElements = false,
   detail,
+  texteRecherche = (element) => element.nom,
   rendreFormulaire,
   actionSupprimer,
 }: {
@@ -64,11 +68,20 @@ export function GestionArbre<T extends ElementArbre>({
   /** Vrai : un parent affiche aussi les employés de ses descendants (départements). */
   cumulerSousElements?: boolean;
   detail?: (element: T) => ReactNode;
+  /** Texte dans lequel cherche le champ de recherche (par défaut le nom). */
+  texteRecherche?: (element: T) => string;
   rendreFormulaire: (proprietes: ProprietesFormulaireArbre<T>) => ReactNode;
   actionSupprimer: (etat: EtatFormulaire, formulaire: FormData) => Promise<EtatFormulaire>;
 }) {
   const gestion = useGestionArbre(elements, comparer);
   const [fenetre, setFenetre] = useState<Fenetre | null>(null);
+  const [recherche, setRecherche] = useState("");
+  const estEnRecherche = recherche.trim() !== "";
+  // En recherche : seulement les éléments trouvés et leurs parents, tout déplié.
+  const arbreAffiche = useMemo(
+    () => (estEnRecherche ? filtrerArbre(gestion.arbre, (element) => correspondARecherche(texteRecherche(element), recherche)) : gestion.arbre),
+    [estEnRecherche, gestion.arbre, recherche, texteRecherche],
+  );
 
   const ouvrir = (nouvelle: Fenetre) => {
     // La sélection détermine les parents proposés (jamais l'élément ni ses descendants).
@@ -101,11 +114,24 @@ export function GestionArbre<T extends ElementArbre>({
         onToutDeplier={gestion.toutDeplier}
         onToutReplier={gestion.toutReplier}
         onNouveau={() => ouvrir({ type: "creation" })}
+        recherche={
+          elements.length > 0 && (
+            <ChampRecherche id="recherche-arbre" libelle={TEXTES_LISTE.rechercher} valeur={recherche} onChange={setRecherche} placeholder={TEXTES_LISTE.exempleRecherche} className="sm:max-w-sm" />
+          )
+        }
       >
+        {estEnRecherche && arbreAffiche.length === 0 ? (
+          <p className="flex flex-col items-center gap-3 px-6 py-12 text-center text-base font-semibold text-texte">
+            <span className="flex size-12 items-center justify-center rounded-xl bg-ciel text-primaire">
+              <SearchX className="size-6" aria-hidden="true" />
+            </span>
+            {TEXTES_LISTE.aucunResultat(recherche.trim())}
+          </p>
+        ) : (
         <ArbreHierarchique
-          noeuds={gestion.arbre}
+          noeuds={arbreAffiche}
           idSelectionne={gestion.idSelectionne}
-          idsOuverts={gestion.idsOuverts}
+          idsOuverts={estEnRecherche ? idsAvecEnfants(arbreAffiche) : gestion.idsOuverts}
           onBasculer={gestion.basculer}
           onSelectionner={(id) => ouvrir({ type: "modification", id })}
           textes={textes}
@@ -123,6 +149,7 @@ export function GestionArbre<T extends ElementArbre>({
             </div>
           )}
         />
+        )}
       </PanneauArbre>
 
       <FenetreModale ouverte={fenetre !== null} onFermer={fermer} titre={titreFenetre} libelleFermer={textes.fermer}>

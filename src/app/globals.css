@@ -106,3 +106,15 @@ body {
   background: var(--couleur-fond);
   color: var(--couleur-texte);
 }
+
+/* Documents imprimés ou enregistrés en PDF (liste des employés). */
+@media print {
+  @page {
+    size: A4 landscape;
+    margin: 12mm;
+  }
+
+  body {
+    background: var(--couleur-surface);
+  }
+}

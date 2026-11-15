@@ -117,3 +117,30 @@ export function totalAvecDescendants(
   for (const descendant of idsDescendants(liste, id)) total += compteurs[descendant] ?? 0;
   return total;
 }
+
+/**
+ * Arbre réduit aux éléments qui correspondent à `garder`, avec leurs parents pour
+ * garder le contexte (ex. résultat d'une recherche). Un parent qui correspond garde ses enfants.
+ */
+export function filtrerArbre<T extends ElementArbre>(
+  arbre: Noeud<T>[],
+  garder: (element: T) => boolean,
+): Noeud<T>[] {
+  return arbre.flatMap((noeud) => {
+    if (garder(noeud)) return [noeud];
+    const enfants = filtrerArbre(noeud.enfants, garder);
+    return enfants.length > 0 ? [{ ...noeud, enfants }] : [];
+  });
+}
+
+/** Identifiants des éléments qui ont des enfants dans cet arbre (pour tout déplier). */
+export function idsAvecEnfants<T extends ElementArbre>(arbre: Noeud<T>[]): Set<string> {
+  const ids = new Set<string>();
+  const parcourir = (niveau: Noeud<T>[]) =>
+    niveau.forEach((noeud) => {
+      if (noeud.enfants.length > 0) ids.add(noeud.id);
+      parcourir(noeud.enfants);
+    });
+  parcourir(arbre);
+  return ids;
+}

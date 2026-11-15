@@ -11,6 +11,7 @@ import { ListeOnglets, PanneauOnglet } from "@/components/ui/onglets";
 import { LONGUEUR_MAX_MATRICULE, LONGUEUR_MAX_NOM_EMPLOYE, LONGUEUR_MAX_NUMERO_BADGE } from "@/lib/constantes";
 import { TEXTES_PERSONNES } from "@/lib/textes/personnes";
 import type { EmployeDetail, EtatFormulaireEmploye } from "@/types";
+import { ChampPhoto } from "./champ-photo";
 import { ChampsEmploi } from "./champs-emploi";
 import { ChampsIdentiteContact } from "./champs-identite-contact";
 import { InformationsEmploye } from "./informations-employe";
@@ -107,7 +108,10 @@ export function FormulaireEmploye({
   return (
     <form action={action} noValidate className="flex min-h-0 flex-1 flex-col">
       {employe && <input type="hidden" name="id" value={employe.id} />}
-      <div key={etat.numeroReponse} className="flex-1 overflow-y-auto px-5 py-5 sm:px-6">
+      <div className="flex-1 overflow-y-auto px-5 py-5 sm:px-6">
+        {/* Hors du bloc recréé après chaque réponse : la photo choisie reste en cas d'erreur. */}
+        <ChampPhoto employeId={employe?.id} photoModifieeLe={employe?.photoModifieeLe ?? null} erreur={erreurs?.photo} />
+        <div key={etat.numeroReponse} className="mt-6">
         <fieldset className="grid gap-x-6 gap-y-4 sm:grid-cols-2">
           <legend className="mb-3 flex w-full items-baseline justify-between gap-4">
             <span className="text-base font-semibold text-marine">{textes.sectionPrincipale}</span>
@@ -132,6 +136,7 @@ export function FormulaireEmploye({
           <PanneauOnglet base="employe" id="informations" actif={onglet}>
             <InformationsEmploye initiales={etat.informations ?? []} erreurs={erreurs} />
           </PanneauOnglet>
+        </div>
         </div>
       </div>
 

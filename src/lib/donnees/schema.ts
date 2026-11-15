@@ -4,6 +4,7 @@ import {
   boolean,
   char,
   check,
+  customType,
   date as dateCalendrier,
   datetime,
   index,
@@ -312,6 +313,66 @@ export const informationsEmployes = mysqlTable(
     uniqueIndex("informations_employes_employe_libelle_idx").on(table.employeId, table.libelle),
     check("informations_employes_libelle_non_vide", sql`CHAR_LENGTH(TRIM(${table.libelle})) > 0`),
     check("informations_employes_valeur_non_vide", sql`CHAR_LENGTH(TRIM(${table.valeur})) > 0`),
+  ],
+);
+
+// Drizzle n'a pas de type BLOB pour MySQL : MEDIUMBLOB (16 Mo au plus) lu et écrit en Buffer.
+const mediumBlob = customType<{ data: Buffer; driverData: Buffer }>({
+  dataType: () => "mediumblob",
+});
+
+/**
+ * Photo de profil d'un employé (facultative, une au plus), gardée en base : sauvegardée
+ * avec elle et jamais servie publiquement. Format et taille vérifiés par l'application.
+ */
+export const photosEmployes = mysqlTable(
+  "photos_employes",
+  {
+    employeId: char("employe_id", { length: 36 })
+      .primaryKey()
+      .references(() => employes.id, { onDelete: "cascade" }),
+    typeMime: varchar("type_mime", { length: 20 }).notNull(),
+    contenu: mediumBlob("contenu").notNull(),
+    tailleOctets: int("taille_octets").notNull(),
+    creeLe: dateCreation(),
+    modifieLe: dateModification(),
+  },
+  (table) => [
+    check("photos_employes_type_mime", sql`${table.typeMime} IN ('image/jpeg', 'image/png', 'image/webp')`),
+    check("photos_employes_taille", sql`${table.tailleOctets} BETWEEN 1 AND 524288`),
+  ],
+);
+
+/**
+ * Pointages (arrivées, départs, pauses, heures supplémentaires). Pour l'instant saisis à la main
+ * (gestion des exceptions) ; la badgeuse les ajoutera avec la source « badgeuse ».
+ * L'horodatage est en UTC ; un même état ne peut pas être pointé deux fois au même instant.
+ */
+export const pointages = mysqlTable(
+  "pointages",
+  {
+    id: identifiantUnique(),
+    employeId: char("employe_id", { length: 36 })
+      .notNull()
+      .references(() => employes.id, { onDelete: "cascade" }),
+    horodatage: date("horodatage").notNull(),
+    etat: varchar("etat", { length: 20 }).notNull(),
+    source: varchar("source", { length: 20 }).notNull().default("manuel"),
+    remarque: varchar("remarque", { length: 255 }),
+    // Qui a saisi le pointage (journal) ; gardé si ce compte est supprimé.
+    saisiPar: char("saisi_par", { length: 36 }).references(() => utilisateurs.id, { onDelete: "set null" }),
+    creeLe: dateCreation(),
+    modifieLe: dateModification(),
+  },
+  (table) => [
+    uniqueIndex("pointages_employe_horodatage_etat_idx").on(table.employeId, table.horodatage, table.etat),
+    index("pointages_horodatage_idx").on(table.horodatage),
+    index("pointages_saisi_par_idx").on(table.saisiPar),
+    check(
+      "pointages_etat",
+      sql`${table.etat} IN ('entree', 'sortie', 'debut_pause', 'fin_pause', 'debut_heures_sup', 'fin_heures_sup')`,
+    ),
+    check("pointages_source", sql`${table.source} IN ('manuel', 'badgeuse')`),
   ],
 );
 

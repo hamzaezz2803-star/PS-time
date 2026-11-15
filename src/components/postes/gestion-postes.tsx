@@ -28,6 +28,7 @@ export function GestionPostes({
       icones={ICONES}
       nombresEmployes={nombresEmployes}
       detail={(poste) => poste.code}
+      texteRecherche={(poste) => `${poste.nom} ${poste.code}`}
       actionSupprimer={supprimerPoste}
       rendreFormulaire={({ element, optionsParent, onTermine, onAnnuler }) => (
         <FormulairePoste poste={element} optionsParent={optionsParent} onTermine={onTermine} onAnnuler={onAnnuler} />

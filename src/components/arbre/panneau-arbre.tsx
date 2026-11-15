@@ -13,6 +13,7 @@ export function PanneauArbre({
   onToutDeplier,
   onToutReplier,
   onNouveau,
+  recherche,
   children,
 }: {
   titre: string;
@@ -21,6 +22,8 @@ export function PanneauArbre({
   onToutDeplier: () => void;
   onToutReplier: () => void;
   onNouveau: () => void;
+  /** Champ de recherche, affiché sous l'en-tête. */
+  recherche?: ReactNode;
   children: ReactNode;
 }) {
   return (
@@ -39,6 +42,7 @@ export function PanneauArbre({
           {textes.nouveau}
         </Bouton>
       </div>
+      {recherche && <div className="border-b border-bordure px-4 py-3 sm:px-5">{recherche}</div>}
       <div className="p-2 sm:p-3">{children}</div>
     </section>
   );

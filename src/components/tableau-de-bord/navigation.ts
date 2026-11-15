@@ -4,6 +4,8 @@ import {
   CalendarClock,
   CalendarCog,
   CalendarRange,
+  ClipboardClock,
+  ClockAlert,
   LayoutDashboard,
   Repeat,
   UserRound,
@@ -18,6 +20,7 @@ import {
   CHEMIN_ESPACE,
   CHEMIN_GROUPES,
   CHEMIN_PERSONNES,
+  CHEMIN_POINTAGES_MANUELS,
   CHEMIN_POSTES,
   CHEMIN_ROTATIONS,
 } from "@/lib/constantes";
@@ -70,6 +73,16 @@ export const GROUPES_NAVIGATION: GroupeNavigation[] = [
           { libelle: T.groupes, icone: UsersRound, href: CHEMIN_GROUPES },
           { libelle: T.affectations, icone: CalendarRange, href: CHEMIN_AFFECTATIONS },
         ],
+      },
+    ],
+  },
+  {
+    titre: T.groupePresence,
+    elements: [
+      {
+        libelle: T.gestionExceptions,
+        icone: ClockAlert,
+        sousLiens: [{ libelle: T.pointagesManuels, icone: ClipboardClock, href: CHEMIN_POINTAGES_MANUELS }],
       },
     ],
   },

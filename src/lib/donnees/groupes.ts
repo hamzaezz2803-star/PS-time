@@ -28,7 +28,7 @@ export async function listerGroupes(): Promise<Groupe[]> {
 /** Employés proposés comme membres (nom, matricule et groupe actuel). */
 export async function listerEmployesSelection(): Promise<EmployeSelection[]> {
   const lignes = await obtenirBase()
-    .select({ id: employes.id, prenom: employes.prenom, nom: employes.nom, matricule: employes.matricule, groupeId: employes.groupeId })
+    .select({ id: employes.id, prenom: employes.prenom, nom: employes.nom, matricule: employes.matricule, departementId: employes.departementId, groupeId: employes.groupeId })
     .from(employes)
     .orderBy(asc(employes.nom), asc(employes.prenom))
     .limit(LIMITE_EMPLOYES_SELECTION);

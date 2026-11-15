@@ -54,6 +54,8 @@ export type EmployeListe = {
   poste: string | null;
   telephone: string | null;
   dateEmbauche: string | null;
+  /** Date de la photo de profil (sert à rafraîchir l'image), null sans photo. */
+  photoModifieeLe: Date | null;
 };
 
 /**
@@ -89,6 +91,8 @@ export type EmployeDetail = {
   dateEmbauche: string | null;
   dateDebutEmploi: string | null;
   dateFinEmploi: string | null;
+  /** Date de la photo de profil, null sans photo. */
+  photoModifieeLe: Date | null;
   informations: { libelle: string; valeur: string }[];
 };
 
@@ -128,6 +132,7 @@ export type EmployeSelection = {
   id: string;
   nomComplet: string;
   matricule: string;
+  departementId: string;
   groupeId: string | null;
 };
 
@@ -151,4 +156,23 @@ export type Affectation = {
   cible: string;
   dateDebut: string;
   dateFin: string | null;
+};
+
+/** Pointage saisi à la main, tel qu'affiché dans la liste. */
+export type PointageListe = {
+  id: string;
+  employeId: string;
+  /** Groupe actuel de l'employé (son affectation de groupe s'applique s'il n'en a pas en propre). */
+  groupeId: string | null;
+  prenom: string;
+  nom: string;
+  matricule: string;
+  departement: string;
+  photoModifieeLe: Date | null;
+  /** Instant UTC du pointage. */
+  horodatage: Date;
+  etat: string;
+  remarque: string | null;
+  /** Nom du compte qui l'a saisi (null si ce compte a été supprimé). */
+  saisiPar: string | null;
 };

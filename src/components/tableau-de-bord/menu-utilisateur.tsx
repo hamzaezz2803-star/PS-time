@@ -1,12 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
 import { ChevronsUpDown, KeyRound, LogOut } from "lucide-react";
 import { deconnecter } from "@/lib/actions/deconnexion";
 import { CHEMIN_CHANGER_MOT_DE_PASSE } from "@/lib/constantes";
 import { initiales } from "@/lib/formats";
 import { TEXTES_NAVIGATION } from "@/lib/textes/navigation";
+import { useMenuDeroulant } from "@/components/ui/utiliser-menu-deroulant";
 import { cn } from "@/lib/utils";
 import { useMenu } from "./contexte-menu";
 
@@ -17,24 +17,7 @@ const ENTREE =
 /** Compte connecté en pied de menu : nom, e-mail, mot de passe et déconnexion. */
 export function MenuUtilisateur({ nom, email }: { nom: string; email: string }) {
   const { estReplie } = useMenu();
-  const [estOuvert, setEstOuvert] = useState(false);
-  const conteneur = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!estOuvert) return;
-    const fermerSiDehors = (evenement: PointerEvent) => {
-      if (!conteneur.current?.contains(evenement.target as Node)) setEstOuvert(false);
-    };
-    const fermerSurEchap = (evenement: KeyboardEvent) => {
-      if (evenement.key === "Escape") setEstOuvert(false);
-    };
-    document.addEventListener("pointerdown", fermerSiDehors);
-    document.addEventListener("keydown", fermerSurEchap);
-    return () => {
-      document.removeEventListener("pointerdown", fermerSiDehors);
-      document.removeEventListener("keydown", fermerSurEchap);
-    };
-  }, [estOuvert]);
+  const { estOuvert, basculer, conteneur } = useMenuDeroulant();
 
   return (
     <div ref={conteneur} className="relative">
@@ -65,7 +48,7 @@ export function MenuUtilisateur({ nom, email }: { nom: string; email: string }) 
       )}
       <button
         type="button"
-        onClick={() => setEstOuvert((ouvert) => !ouvert)}
+        onClick={basculer}
         aria-expanded={estOuvert}
         aria-controls="menu-compte"
         aria-label={compte.ouvrir}

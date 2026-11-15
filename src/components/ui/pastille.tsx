@@ -5,7 +5,8 @@ import { cn } from "@/lib/utils";
 const TONS = {
   info: "bg-ciel text-marine ring-primaire/15",
   neutre: "bg-fond text-texte ring-bordure",
-  attention: "bg-attention/10 text-attention ring-attention/25",
+  succes: "bg-succes/5 text-succes ring-succes/25",
+  attention: "bg-attention/5 text-attention ring-attention/25",
 } as const;
 
 /** Petite étiquette de statut ou de type : texte toujours présent (jamais la couleur seule). */

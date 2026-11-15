@@ -1,20 +1,12 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { ChampRecherche } from "@/components/ui/champ-recherche";
-import { Etiquette } from "@/components/ui/etiquette";
-import { initiales } from "@/lib/formats";
-import { correspondARecherche } from "@/lib/metier/recherche";
+import { ChoixEmployes } from "@/components/employes/choix-employes";
 import { TEXTES_PROGRAMME } from "@/lib/textes/programme";
-import { cn } from "@/lib/utils";
 import type { EmployeSelection } from "@/types";
 
 const textes = TEXTES_PROGRAMME.groupes;
 
-/**
- * Choix des membres d'un groupe : recherche par nom ou matricule et cases à cocher.
- * Les employés filtrés restent dans le formulaire (masqués), pour que leur choix soit envoyé.
- */
+/** Choix des membres d'un groupe : un employé déjà dans un autre groupe l'indique sous son nom. */
 export function ChoixMembres({
   employes,
   nomsGroupes,
@@ -26,75 +18,18 @@ export function ChoixMembres({
   idGroupe?: string;
   selectionInitiale: string[];
 }) {
-  const [recherche, setRecherche] = useState("");
-  const [selection, setSelection] = useState(() => new Set(selectionInitiale));
-  const visibles = useMemo(
-    () => new Set(employes.filter((e) => correspondARecherche(`${e.nomComplet} ${e.matricule}`, recherche)).map((e) => e.id)),
-    [employes, recherche],
-  );
-
-  const basculer = (id: string, coche: boolean) =>
-    setSelection((precedente) => {
-      const suivante = new Set(precedente);
-      if (coche) suivante.add(id);
-      else suivante.delete(id);
-      return suivante;
-    });
-
-  if (employes.length === 0) {
-    return <p className="rounded-lg border border-bordure bg-fond p-4 text-sm text-texte-secondaire">{textes.aucunEmploye}</p>;
-  }
-
+  const groupeParEmploye = new Map(employes.map((employe) => [employe.id, employe.groupeId]));
   return (
-    <div className="flex flex-col gap-2">
-      <div className="flex items-center justify-between gap-4">
-        <Etiquette htmlFor="recherche-membres">{textes.rechercher}</Etiquette>
-        <span className="rounded-md bg-ciel px-2 py-0.5 text-sm font-medium tabular-nums text-marine" aria-live="polite">
-          {textes.selectionnes(selection.size)}
-        </span>
-      </div>
-      <ChampRecherche id="recherche-membres" libelle={textes.rechercher} valeur={recherche} onChange={setRecherche} placeholder={textes.exempleRecherche} />
-      <p className="text-sm text-texte-secondaire">{textes.aideMembres}</p>
-      <ul className="max-h-72 divide-y divide-bordure overflow-y-auto rounded-lg border border-bordure bg-surface">
-        {employes.map((employe) => {
-          const groupeActuel = employe.groupeId && employe.groupeId !== idGroupe ? nomsGroupes.get(employe.groupeId) : undefined;
-          const estCoche = selection.has(employe.id);
-          return (
-            <li key={employe.id} hidden={!visibles.has(employe.id)}>
-              <label
-                className={cn(
-                  "flex min-h-11 cursor-pointer items-center gap-3 px-3 py-2 transition-colors duration-150 hover:bg-fond",
-                  estCoche && "bg-ciel/60 hover:bg-ciel",
-                )}
-              >
-                <input
-                  type="checkbox"
-                  name="membres"
-                  value={employe.id}
-                  checked={estCoche}
-                  onChange={(e) => basculer(employe.id, e.target.checked)}
-                  className="size-5 shrink-0 cursor-pointer accent-primaire focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primaire"
-                />
-                <span
-                  className={cn(
-                    "flex size-8 shrink-0 items-center justify-center rounded-md text-sm font-semibold",
-                    estCoche ? "bg-primaire text-white" : "bg-canevas text-texte-secondaire",
-                  )}
-                  aria-hidden="true"
-                >
-                  {initiales(employe.nomComplet)}
-                </span>
-                <span className="flex min-w-0 flex-1 flex-col">
-                  <span className="truncate text-base font-medium text-texte">{employe.nomComplet}</span>
-                  {groupeActuel && <span className="truncate text-sm text-texte-secondaire">{textes.dansGroupe(groupeActuel)}</span>}
-                </span>
-                <span className="shrink-0 font-mono text-sm tabular-nums text-texte-secondaire">{employe.matricule}</span>
-              </label>
-            </li>
-          );
-        })}
-      </ul>
-      {visibles.size === 0 && <p className="text-sm text-texte-secondaire">{textes.aucunResultat}</p>}
-    </div>
+    <ChoixEmployes
+      employes={employes}
+      nomChamp="membres"
+      selectionInitiale={selectionInitiale}
+      textes={{ ...textes, aide: textes.aideMembres }}
+      detail={(employe) => {
+        const groupeId = groupeParEmploye.get(employe.id);
+        const nomGroupe = groupeId && groupeId !== idGroupe ? nomsGroupes.get(groupeId) : undefined;
+        return nomGroupe ? textes.dansGroupe(nomGroupe) : undefined;
+      }}
+    />
   );
 }

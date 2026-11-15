@@ -1,0 +1,62 @@
+import type { Metadata } from "next";
+import { Suspense } from "react";
+import { GestionPointages } from "@/components/exceptions/gestion-pointages";
+import { ListePointages } from "@/components/exceptions/liste-pointages";
+import { Chargement } from "@/components/ui/chargement";
+import { EnTetePage } from "@/components/ui/en-tete-page";
+import { MessageErreur } from "@/components/ui/message-erreur";
+import { POINTAGES_PAR_PAGE } from "@/lib/constantes";
+import { listerDepartements } from "@/lib/donnees/departements";
+import { listerEmployesSelection } from "@/lib/donnees/groupes";
+import { evaluerPointages } from "@/lib/donnees/planning";
+import { compterPointagesManuels, listerPointagesManuels } from "@/lib/donnees/pointages";
+import { obtenirUtilisateurPourEspace } from "@/lib/donnees/session";
+import { TEXTES_EXCEPTIONS } from "@/lib/textes/exceptions";
+import { lireRecherchePointages } from "@/lib/validation/pointage";
+
+const textes = TEXTES_EXCEPTIONS.pointages;
+
+export const metadata: Metadata = { title: textes.titrePage };
+
+type ParametresRecherche = Promise<Record<string, string | string[] | undefined>>;
+
+export default function PagePointagesManuels({ searchParams }: { searchParams: ParametresRecherche }) {
+  return (
+    <div className="mx-auto flex max-w-6xl flex-col gap-6">
+      <EnTetePage titre={textes.titrePage} sousTitre={textes.sousTitre} />
+      <Suspense fallback={<Chargement message={textes.chargement} />}>
+        <ContenuPointages searchParams={searchParams} />
+      </Suspense>
+    </div>
+  );
+}
+
+/** Numéro de page demandé, ramené entre 1 et le nombre de pages. */
+function lirePage(valeur: string | string[] | undefined, nombrePages: number): number {
+  const page = Number.parseInt(typeof valeur === "string" ? valeur : "1", 10);
+  return Number.isNaN(page) ? 1 : Math.min(Math.max(page, 1), nombrePages);
+}
+
+async function ContenuPointages({ searchParams }: { searchParams: ParametresRecherche }) {
+  const utilisateur = await obtenirUtilisateurPourEspace();
+  // Pointages et noms d'employés : réservés aux super administrateurs (moindre privilège).
+  if (!utilisateur.estSuperAdmin) return <MessageErreur message={textes.droits} className="text-base" />;
+
+  const parametres = await searchParams;
+  const recherche = lireRecherchePointages(parametres);
+  const [total, employes, departements] = await Promise.all([
+    compterPointagesManuels(recherche),
+    listerEmployesSelection(),
+    listerDepartements(),
+  ]);
+  const nombrePages = Math.max(1, Math.ceil(total / POINTAGES_PAR_PAGE));
+  const page = lirePage(parametres.page, nombrePages);
+  const pointages = await listerPointagesManuels(page, POINTAGES_PAR_PAGE, recherche);
+  const statuts = await evaluerPointages(pointages);
+
+  return (
+    <GestionPointages employes={employes} departements={departements}>
+      <ListePointages pointages={pointages} statuts={statuts} total={total} page={page} nombrePages={nombrePages} recherche={recherche} />
+    </GestionPointages>
+  );
+}

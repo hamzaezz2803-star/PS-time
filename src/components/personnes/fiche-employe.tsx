@@ -3,6 +3,7 @@ import { formaterJour } from "@/lib/formats";
 import { formaterTelephone } from "@/lib/metier/employes";
 import { TEXTES_PERSONNES } from "@/lib/textes/personnes";
 import type { EmployeDetail } from "@/types";
+import { AvatarEmploye } from "./avatar-employe";
 
 const { formulaire: textes, details, liste } = TEXTES_PERSONNES;
 
@@ -36,6 +37,14 @@ export function FicheEmploye({ employe }: { employe: EmployeDetail }) {
   const typePiece = libelleDe(textes.typesPiece, employe.typePieceIdentite);
   return (
     <div className="flex flex-col gap-6">
+      <div className="flex items-center gap-4 rounded-xl border border-bordure bg-fond/60 p-4">
+        <AvatarEmploye id={employe.id} nomComplet={`${employe.prenom} ${employe.nom}`} photoModifieeLe={employe.photoModifieeLe} taille="grande" />
+        <div className="min-w-0">
+          <p className="truncate text-lg font-semibold text-marine">{`${employe.prenom} ${employe.nom}`}</p>
+          <p className="truncate text-sm text-texte-secondaire">{[employe.poste, employe.departement].filter(Boolean).join(" · ")}</p>
+          <p className="mt-1 font-mono text-sm tabular-nums text-texte-secondaire">{employe.matricule}</p>
+        </div>
+      </div>
       <Section titre={textes.sectionPrincipale}>
         <Element libelle={textes.matricule} valeur={<span className="tabular-nums">{employe.matricule}</span>} />
         <Element libelle={textes.numeroBadge} valeur={<span className="tabular-nums">{employe.numeroBadge}</span>} />

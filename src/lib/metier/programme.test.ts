@@ -7,6 +7,7 @@ import {
   pauseDansService,
   finLeLendemain,
   formaterDuree,
+  formaterEcart,
   heureVersMinutes,
   jourDeSemaine,
   minutesVersHeure,
@@ -105,5 +106,12 @@ describe("periodesSeChevauchent", () => {
 
   it("considère une période sans fin comme ouverte", () => {
     assert.equal(periodesSeChevauchent({ debut: "2026-01-01", fin: null }, { debut: "2030-05-01", fin: "2030-05-02" }), true);
+  });
+});
+
+describe("formaterEcart", () => {
+  it("écrit les minutes seules sous une heure", () => {
+    assert.equal(formaterEcart(12), "12 min");
+    assert.equal(formaterEcart(65), "1 h 05");
   });
 });

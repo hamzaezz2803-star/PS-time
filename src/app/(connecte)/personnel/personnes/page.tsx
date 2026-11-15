@@ -18,6 +18,7 @@ import {
 } from "@/lib/metier/arbre";
 import { comparerPostes } from "@/lib/metier/postes";
 import { TEXTES_PERSONNES } from "@/lib/textes/personnes";
+import { lireRechercheEmployes } from "@/lib/validation/recherche-employes";
 
 export const metadata: Metadata = { title: TEXTES_PERSONNES.titrePage };
 
@@ -55,22 +56,25 @@ async function ContenuPersonnes({ searchParams }: { searchParams: ParametresRech
     return <MessageErreur message={TEXTES_PERSONNES.droits} className="text-base" />;
   }
 
+  const parametres = await searchParams;
+  const recherche = lireRechercheEmployes(parametres);
   const [departements, postes, total] = await Promise.all([
     listerDepartements(),
     listerPostes(),
-    compterEmployes(),
+    compterEmployes(recherche),
   ]);
   const nombrePages = Math.max(1, Math.ceil(total / EMPLOYES_PAR_PAGE));
-  const page = lirePage((await searchParams).page, nombrePages);
-  const employes = await listerEmployes(page, EMPLOYES_PAR_PAGE);
+  const page = lirePage(parametres.page, nombrePages);
+  const employes = await listerEmployes(page, EMPLOYES_PAR_PAGE, recherche);
+  const optionsDepartements = versOptions(construireArbre(departements));
 
   return (
     <>
       <GestionEmployes
-        departements={versOptions(construireArbre(departements))}
+        departements={optionsDepartements}
         postes={versOptions(construireArbre(postes, comparerPostes))}
       >
-        <ListeEmployes employes={employes} total={total} page={page} nombrePages={nombrePages} />
+        <ListeEmployes employes={employes} total={total} page={page} nombrePages={nombrePages} recherche={recherche} departements={optionsDepartements} />
       </GestionEmployes>
     </>
   );

@@ -3,6 +3,8 @@ import { describe, it } from "node:test";
 import {
   aplatirArbre,
   construireArbre,
+  filtrerArbre,
+  idsAvecEnfants,
   idsAncetres,
   idsDescendants,
   nomDejaPris,
@@ -131,5 +133,30 @@ describe("totalAvecDescendants", () => {
 
   it("compte zéro pour un élément sans valeur ni descendant", () => {
     assert.equal(totalAvecDescendants(LISTE, "logistique", compteurs), 0);
+  });
+});
+
+describe("filtrerArbre", () => {
+  const arbre = construireArbre(LISTE);
+  const contient = (texte: string) => (element: ElementArbre) => element.nom.toLowerCase().includes(texte);
+
+  it("garde l'élément trouvé et ses parents", () => {
+    const resultat = aplatirArbre(filtrerArbre(arbre, contient("atelier")));
+    assert.deepEqual(resultat.map((element) => element.id), ["prod", "sousprod", "atelier"]);
+  });
+
+  it("garde les enfants d'un parent trouvé", () => {
+    const resultat = aplatirArbre(filtrerArbre(arbre, contient("systèmes")));
+    assert.deepEqual(resultat.map((element) => element.id), ["si", "dev"]);
+  });
+
+  it("renvoie un arbre vide sans correspondance", () => {
+    assert.deepEqual(filtrerArbre(arbre, contient("inconnu")), []);
+  });
+});
+
+describe("idsAvecEnfants", () => {
+  it("liste les parents à tous les niveaux", () => {
+    assert.deepEqual([...idsAvecEnfants(construireArbre(LISTE))].sort(), ["prod", "si", "sousprod"]);
   });
 });

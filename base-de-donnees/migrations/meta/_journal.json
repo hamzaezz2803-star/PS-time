@@ -85,6 +85,20 @@
       "when": 1794668206184,
       "tag": "0011_pause_debut_fin",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "5",
+      "when": 1794736399157,
+      "tag": "0012_photos_employes",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "5",
+      "when": 1794736790689,
+      "tag": "0013_pointages",
+      "breakpoints": true
     }
   ]
 }
