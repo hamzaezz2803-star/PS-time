@@ -3,8 +3,20 @@ export const TEXTES_ESPACE = {
   titrePage: "Mon espace",
   chargement: "Chargement de votre espace...",
   bonjour: (nom: string) => `Bonjour ${nom}`,
+  surtitre: "Tableau de bord",
   introduction:
-    "Commencez par organiser vos départements et vos postes. Les écrans de pointage arrivent dans les prochaines étapes.",
+    "Retrouvez ici l'essentiel de votre organisation : personnel, structure et planning des équipes. Les écrans de pointage arrivent dans les prochaines étapes.",
+  titreChiffres: "Vue d'ensemble",
+  voir: (libelle: string) => `Ouvrir ${libelle.toLocaleLowerCase("fr")}`,
+  titrePlanning: "Mettre en place le planning",
+  sousTitrePlanning: "Quatre étapes, dans cet ordre, pour organiser les horaires de vos équipes.",
+  etape: (numero: number) => `Étape ${numero}`,
+  etapes: {
+    calendriers: "Créneaux horaires, pauses, tolérances et heures supplémentaires.",
+    rotations: "Semaine type ou cycle : un calendrier ou un repos pour chaque jour.",
+    groupes: "Rassemblez les employés qui suivent le même planning.",
+    affectations: "Attribuez une rotation à un groupe ou à un employé, sur une période.",
+  },
   deconnexion: "Se déconnecter",
   changerMotDePasse: "Changer mon mot de passe",
 } as const;

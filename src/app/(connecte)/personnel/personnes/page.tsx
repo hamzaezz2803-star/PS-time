@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import { GestionEmployes } from "@/components/personnes/gestion-employes";
 import { ListeEmployes } from "@/components/personnes/liste-employes";
 import { Chargement } from "@/components/ui/chargement";
+import { EnTetePage } from "@/components/ui/en-tete-page";
 import { MessageErreur } from "@/components/ui/message-erreur";
 import { EMPLOYES_PAR_PAGE } from "@/lib/constantes";
 import { listerDepartements } from "@/lib/donnees/departements";
@@ -25,14 +26,7 @@ type ParametresRecherche = Promise<Record<string, string | string[] | undefined>
 export default function PagePersonnes({ searchParams }: { searchParams: ParametresRecherche }) {
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight text-marine sm:text-[1.75rem]">
-          {TEXTES_PERSONNES.titrePage}
-        </h1>
-        <p className="mt-1.5 max-w-2xl text-base text-texte-secondaire">
-          {TEXTES_PERSONNES.sousTitre}
-        </p>
-      </div>
+      <EnTetePage titre={TEXTES_PERSONNES.titrePage} sousTitre={TEXTES_PERSONNES.sousTitre} />
       <Suspense fallback={<Chargement message={TEXTES_PERSONNES.chargement} />}>
         <ContenuPersonnes searchParams={searchParams} />
       </Suspense>

@@ -18,6 +18,15 @@
   --couleur-canevas: #eef2f7;
   --couleur-surface: #ffffff;
 
+  /* Menu latéral sombre (marine du logo). Contrastes vérifiés sur --couleur-menu-fond :
+     texte 11:1, texte secondaire 6:1. */
+  --couleur-menu-fond: #0a2463;
+  --couleur-menu-texte: #d3ddf0;
+  --couleur-menu-texte-secondaire: #93a6cc;
+  --couleur-menu-survol: #12306f;
+  --couleur-menu-actif: #173b85;
+  --couleur-menu-bordure: #1c3a7a;
+
   --couleur-succes: #15803d;
   --couleur-attention: #b45309;
   --couleur-erreur: #b91c1c;
@@ -36,6 +45,12 @@
   --color-fond: var(--couleur-fond);
   --color-canevas: var(--couleur-canevas);
   --color-surface: var(--couleur-surface);
+  --color-menu-fond: var(--couleur-menu-fond);
+  --color-menu-texte: var(--couleur-menu-texte);
+  --color-menu-texte-secondaire: var(--couleur-menu-texte-secondaire);
+  --color-menu-survol: var(--couleur-menu-survol);
+  --color-menu-actif: var(--couleur-menu-actif);
+  --color-menu-bordure: var(--couleur-menu-bordure);
   --color-succes: var(--couleur-succes);
   --color-attention: var(--couleur-attention);
   --color-erreur: var(--couleur-erreur);
@@ -48,6 +63,23 @@
 
 @theme {
   --animate-ondulation: ondulation 6s ease-in-out infinite;
+  --animate-apparition: apparition 150ms ease-out;
+
+  /* Ombres : une seule échelle pour toute l'application. */
+  --shadow-carte: 0 1px 2px rgb(15 27 51 / 0.04), 0 1px 3px rgb(15 27 51 / 0.04);
+  --shadow-survol: 0 4px 12px rgb(15 27 51 / 0.08);
+  --shadow-flottant: 0 12px 32px rgb(15 27 51 / 0.14);
+
+  @keyframes apparition {
+    from {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 
   @keyframes orbite {
     from {

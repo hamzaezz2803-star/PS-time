@@ -89,7 +89,7 @@ export function GestionListe<T extends { id: string; nom: string }>({
   return (
     <div className="flex flex-col gap-4">
       {!fenetre && <MessageSucces message={messageSucces} />}
-      <section className="overflow-hidden rounded-xl border border-bordure bg-surface" aria-labelledby="titre-liste">
+      <section className="overflow-hidden rounded-xl border border-bordure bg-surface shadow-carte" aria-labelledby="titre-liste">
         <div className="flex flex-wrap items-center gap-3 border-b border-bordure px-4 py-3 sm:px-5">
           <div className="min-w-0 flex-1">
             <h2 id="titre-liste" className="text-base font-semibold text-marine">{textes.titre}</h2>
@@ -112,21 +112,21 @@ export function GestionListe<T extends { id: string; nom: string }>({
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
-              <thead className="bg-fond text-texte-secondaire">
+              <thead className="border-b border-bordure bg-fond/70 text-texte-secondaire">
                 <tr>
                   {colonnes.map((colonne) => (
-                    <th key={colonne.titre} scope="col" className={cn("px-5 py-3 font-medium", colonne.estSecondaire && "hidden md:table-cell")}>
+                    <th key={colonne.titre} scope="col" className={cn("px-5 py-3 font-semibold", colonne.estSecondaire && "hidden md:table-cell")}>
                       {colonne.titre}
                     </th>
                   ))}
-                  <th scope="col" className="px-5 py-3 text-right font-medium">
+                  <th scope="col" className="px-5 py-3 text-right font-semibold">
                     <span className="sr-only">{textes.actions}</span>
                   </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-bordure text-texte">
                 {elements.map((element) => (
-                  <tr key={element.id} className={cn(element.id === idEnEvidence && "bg-ciel/50")}>
+                  <tr key={element.id} className={cn("transition-colors duration-150 hover:bg-fond", element.id === idEnEvidence && "bg-ciel/50 hover:bg-ciel/70")}>
                     {colonnes.map((colonne, index) => (
                       <td key={colonne.titre} className={cn("px-5 py-3", colonne.estSecondaire && "hidden md:table-cell")}>
                         {index === 0 ? (

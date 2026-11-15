@@ -25,7 +25,7 @@ export default function PageConnexion() {
             className="mx-auto mb-6 size-24 lg:hidden"
           />
 
-          <div className="rounded-xl border border-bordure bg-surface p-6 shadow-sm sm:p-8">
+          <div className="rounded-xl border border-bordure bg-surface shadow-carte p-6 shadow-sm sm:p-8">
             <h1 className="text-2xl font-bold text-marine sm:text-3xl">
               {TEXTES_CONNEXION.titre}
             </h1>

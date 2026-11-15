@@ -41,7 +41,7 @@ export function FenetreModale({
       ref={fenetre}
       onClose={onFermer}
       aria-labelledby="titre-fenetre"
-      className="m-auto flex max-h-[min(92dvh,56rem)] w-[calc(100%-1rem)] max-w-4xl flex-col overflow-hidden rounded-xl bg-surface p-0 text-texte shadow-[0_24px_48px_rgb(15_27_51/0.18)] ring-1 ring-bordure backdrop:bg-marine/40 not-open:hidden sm:w-[calc(100%-2rem)]"
+      className="m-auto flex max-h-[min(92dvh,56rem)] w-[calc(100%-1rem)] max-w-4xl animate-apparition flex-col overflow-hidden rounded-xl bg-surface p-0 text-texte shadow-flottant ring-1 ring-bordure backdrop:bg-marine/50 backdrop:backdrop-blur-[2px] motion-reduce:animate-none not-open:hidden sm:w-[calc(100%-2rem)]"
     >
       <div className="flex shrink-0 items-center justify-between gap-4 border-b border-bordure py-3 pe-3 ps-5 sm:ps-6">
         <h2 id="titre-fenetre" className="text-lg font-semibold text-marine">

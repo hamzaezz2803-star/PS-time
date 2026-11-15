@@ -1,7 +1,7 @@
 /** Textes du cadre du tableau de bord (menu latéral, barre du haut, compte). */
 export const TEXTES_NAVIGATION = {
   nomApplication: "PS Time",
-  sousTitreApplication: "Pointage des équipes",
+  sousTitreApplication: "Gestion du temps",
   menuPrincipal: "Menu principal",
   basculerMenu: "Afficher ou masquer le menu (Ctrl+B)",
   fermerMenu: "Fermer le menu",

@@ -1,4 +1,4 @@
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, UsersRound } from "lucide-react";
 import Link from "next/link";
 import { CHEMIN_PERSONNES } from "@/lib/constantes";
 import { formaterJour } from "@/lib/formats";
@@ -26,7 +26,7 @@ export function ListeEmployes({
 }) {
   return (
     <section
-      className="overflow-hidden rounded-xl border border-bordure bg-surface"
+      className="overflow-hidden rounded-xl border border-bordure bg-surface shadow-carte"
       aria-labelledby="titre-liste-employes"
     >
       <div className="flex flex-wrap items-baseline justify-between gap-2 border-b border-bordure px-5 py-4 sm:px-6">
@@ -37,30 +37,35 @@ export function ListeEmployes({
       </div>
 
       {employes.length === 0 ? (
-        <p className="p-5 text-base text-texte-secondaire sm:p-6">{textes.vide}</p>
+        <div className="flex flex-col items-center gap-3 px-6 py-12 text-center">
+          <span className="flex size-12 items-center justify-center rounded-xl bg-ciel text-primaire">
+            <UsersRound className="size-6" aria-hidden="true" />
+          </span>
+          <p className="max-w-md text-base text-texte-secondaire">{textes.vide}</p>
+        </div>
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full min-w-[52rem] text-left text-sm">
-            <thead className="bg-fond text-texte-secondaire">
+            <thead className="border-b border-bordure bg-fond/70 text-texte-secondaire">
               <tr>
                 {[textes.matricule, textes.numeroBadge, textes.nomComplet, textes.departement, textes.poste, textes.telephone, textes.dateEmbauche].map(
                   (titre) => (
-                    <th key={titre} scope="col" className="px-5 py-3 font-medium">
+                    <th key={titre} scope="col" className="px-5 py-3 font-semibold">
                       {titre}
                     </th>
                   ),
                 )}
-                <th scope="col" className="px-5 py-3 text-right font-medium">
+                <th scope="col" className="px-5 py-3 text-right font-semibold">
                   <span className="sr-only">{textes.actions}</span>
                 </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-bordure text-texte">
               {employes.map((employe) => (
-                <tr key={employe.id}>
+                <tr key={employe.id} className="transition-colors duration-150 hover:bg-fond">
                   <td className="px-5 py-3 font-mono tabular-nums">{employe.matricule}</td>
                   <td className="px-5 py-3 font-mono tabular-nums">{employe.numeroBadge}</td>
-                  <td className="px-5 py-3 font-medium">{`${employe.nom} ${employe.prenom}`}</td>
+                  <td className="px-5 py-3 font-semibold">{`${employe.nom} ${employe.prenom}`}</td>
                   <td className="px-5 py-3">{employe.departement}</td>
                   <td className="px-5 py-3">{employe.poste ?? <NonRenseigne />}</td>
                   <td className="px-5 py-3 whitespace-nowrap tabular-nums">

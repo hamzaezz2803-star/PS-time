@@ -1,5 +1,6 @@
 import { Suspense, type ReactNode } from "react";
 import { Chargement } from "@/components/ui/chargement";
+import { EnTetePage } from "@/components/ui/en-tete-page";
 import { MessageErreur } from "@/components/ui/message-erreur";
 import { obtenirUtilisateurPourEspace } from "@/lib/donnees/session";
 import { TEXTES_PROGRAMME } from "@/lib/textes/programme";
@@ -18,10 +19,7 @@ export function CadrePageProgramme({
 }) {
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight text-marine sm:text-[1.75rem]">{titre}</h1>
-        <p className="mt-1.5 max-w-2xl text-base text-texte-secondaire">{sousTitre}</p>
-      </div>
+      <EnTetePage titre={titre} sousTitre={sousTitre} />
       <Suspense fallback={<Chargement message={chargement} />}>{children}</Suspense>
     </div>
   );

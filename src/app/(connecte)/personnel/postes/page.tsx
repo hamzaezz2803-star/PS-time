@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { GestionPostes } from "@/components/postes/gestion-postes";
 import { Chargement } from "@/components/ui/chargement";
+import { EnTetePage } from "@/components/ui/en-tete-page";
 import { compterEmployesParPoste } from "@/lib/donnees/employes";
 import { listerPostes } from "@/lib/donnees/postes";
 import { obtenirUtilisateurPourEspace } from "@/lib/donnees/session";
@@ -12,12 +13,7 @@ export const metadata: Metadata = { title: TEXTES_POSTES.titrePage };
 export default function PagePostes() {
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight text-marine sm:text-[1.75rem]">
-          {TEXTES_POSTES.titrePage}
-        </h1>
-        <p className="mt-1.5 max-w-2xl text-base text-texte-secondaire">{TEXTES_POSTES.sousTitre}</p>
-      </div>
+      <EnTetePage titre={TEXTES_POSTES.titrePage} sousTitre={TEXTES_POSTES.sousTitre} />
       <Suspense fallback={<Chargement message={TEXTES_POSTES.chargement} />}>
         <ContenuPostes />
       </Suspense>

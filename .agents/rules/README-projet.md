@@ -78,7 +78,9 @@ Ces règles s'appliquent à **chaque prompt** et à chaque modification du proje
 - Couleurs (tirées du logo, définies dans `src/app/globals.css`) : primaire `#0b4fb3`, marine `#0a2463`, accent `#1aa3e8`, texte `#0f1b33`, fond `#f6f9fd`.
 - Logo : `public/logo-ps-time.webp`.
 - Police : Hanken Grotesk (OFL), via `next/font` ; chiffres à chasse fixe (`tabular-nums`) pour les heures.
-- Cadre des pages connectées (style « inset ») : canevas `#eef2f7` derrière un menu latéral clair repliable en icônes (Ctrl+B, préférence gardée dans le navigateur), zone de travail blanche, barre du haut avec fil d'Ariane et horloge en direct (fuseau Africa/Casablanca), compte utilisateur en pied de menu.
+- Cadre des pages connectées : menu latéral sombre (marine `#0a2463`, page active repérée par une barre accent et un fond plus clair) repliable en icônes (Ctrl+B, préférence gardée dans le navigateur), barre du haut blanche avec fil d'Ariane et horloge en direct (fuseau Africa/Casablanca), zone de travail sur fond `#f6f9fd`, compte utilisateur en pied de menu.
+- Échelle d'ombres unique (`shadow-carte`, `shadow-survol`, `shadow-flottant`) et en-tête de page commun (`components/ui/en-tete-page.tsx`).
+- Tableau de bord : bannière d'accueil, chiffres réels (personnes pour les super administrateurs, départements, postes), puis les quatre étapes du planning (super administrateurs). Pas de cloche de notifications ni de thème sombre tant que ces fonctions n'existent pas.
 - Priorité d'affichage : [mobile d'abord pour l'espace X, ordinateur pour l'espace Y].
 - Thème sombre : [oui / non].
 
@@ -100,7 +102,7 @@ src/
   app/                  pages et Server Actions (connexion, espace, changer-mot-de-passe, api/auth)
   components/ui/        composants réutilisables (bouton, champs, messages, chargement, fenetre-modale, onglets, pied-fenetre)
   components/connexion/ composants de l'écran de connexion
-  components/espace/    composants du changement de mot de passe
+  components/espace/    tableau de bord (bannière, cartes chiffrées, étapes du planning) et changement de mot de passe
   components/tableau-de-bord/  cadre et menu latéral des pages connectées
   components/departements/     arbre et formulaires des départements
   components/postes/           arbre et formulaires des postes

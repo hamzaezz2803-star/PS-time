@@ -12,8 +12,8 @@ async function CompteUtilisateur() {
 function CompteEnChargement() {
   return (
     <div className="flex min-h-12 items-center gap-2.5 p-1.5" aria-hidden="true">
-      <span className="size-8 shrink-0 rounded-md bg-surface ring-1 ring-bordure" />
-      <span className="h-4 flex-1 rounded bg-surface ring-1 ring-bordure" />
+      <span className="size-8 shrink-0 rounded-md bg-menu-survol" />
+      <span className="h-4 flex-1 rounded bg-menu-survol" />
     </div>
   );
 }

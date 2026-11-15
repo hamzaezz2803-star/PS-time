@@ -78,7 +78,7 @@ export function GestionEmployes({
 
   if (departements.length === 0) {
     return (
-      <div className="flex flex-col gap-2 rounded-xl border border-bordure bg-surface p-5 text-base text-texte sm:p-6">
+      <div className="flex flex-col gap-2 rounded-xl border border-bordure bg-surface shadow-carte p-5 text-base text-texte sm:p-6">
         <p>{textes.aucunDepartement}</p>
         <Link href={CHEMIN_DEPARTEMENTS} className="w-fit font-semibold text-primaire underline underline-offset-4">
           {textes.lienDepartements}

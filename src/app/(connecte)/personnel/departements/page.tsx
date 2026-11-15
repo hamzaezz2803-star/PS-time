@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { GestionDepartements } from "@/components/departements/gestion-departements";
 import { Chargement } from "@/components/ui/chargement";
+import { EnTetePage } from "@/components/ui/en-tete-page";
 import { listerDepartements } from "@/lib/donnees/departements";
 import { compterEmployesParDepartement } from "@/lib/donnees/employes";
 import { obtenirUtilisateurPourEspace } from "@/lib/donnees/session";
@@ -12,14 +13,7 @@ export const metadata: Metadata = { title: TEXTES_DEPARTEMENTS.titrePage };
 export default function PageDepartements() {
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight text-marine sm:text-[1.75rem]">
-          {TEXTES_DEPARTEMENTS.titrePage}
-        </h1>
-        <p className="mt-1.5 max-w-2xl text-base text-texte-secondaire">
-          {TEXTES_DEPARTEMENTS.sousTitre}
-        </p>
-      </div>
+      <EnTetePage titre={TEXTES_DEPARTEMENTS.titrePage} sousTitre={TEXTES_DEPARTEMENTS.sousTitre} />
       <Suspense fallback={<Chargement message={TEXTES_DEPARTEMENTS.chargement} />}>
         <ContenuDepartements />
       </Suspense>

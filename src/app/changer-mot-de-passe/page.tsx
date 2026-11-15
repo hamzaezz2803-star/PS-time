@@ -13,7 +13,7 @@ export default function PageChangerMotDePasse() {
     <div className="flex min-h-dvh flex-col">
       <EnTeteEspace />
       <main className="flex flex-1 justify-center px-4 py-10">
-        <div className="w-full max-w-md rounded-xl border border-bordure bg-surface p-6 shadow-sm sm:p-8">
+        <div className="w-full max-w-md rounded-xl border border-bordure bg-surface shadow-carte p-6 shadow-sm sm:p-8">
           <h1 className="text-2xl font-bold text-marine">
             {TEXTES_MOT_DE_PASSE.titre}
           </h1>

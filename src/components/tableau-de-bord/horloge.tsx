@@ -25,15 +25,16 @@ export function Horloge() {
   return (
     <p
       aria-label={TEXTES_NAVIGATION.heureActuelle}
-      className="flex items-center gap-2 text-sm text-texte-secondaire"
+      className="flex h-9 items-center gap-2 rounded-lg border border-bordure bg-fond px-3 text-sm text-texte-secondaire"
     >
-      <Clock className="size-4 shrink-0" aria-hidden="true" />
+      <Clock className="size-4 shrink-0 text-primaire" aria-hidden="true" />
       {maintenant ? (
         <>
-          <span className="hidden sm:inline">{formaterDate(maintenant)},</span>
+          <span className="hidden capitalize sm:inline">{formaterDate(maintenant)}</span>
+          <span className="hidden h-4 w-px bg-bordure sm:inline-block" aria-hidden="true" />
           <time
             dateTime={maintenant.toISOString()}
-            className="text-base font-semibold tabular-nums text-marine"
+            className="font-semibold tabular-nums text-marine"
           >
             {formaterHeure(maintenant)}
           </time>

@@ -42,7 +42,7 @@ export function MenuUtilisateur({ nom, email }: { nom: string; email: string }) 
         <div
           id="menu-compte"
           className={cn(
-            "absolute bottom-full z-50 mb-2 w-60 rounded-lg bg-surface p-1 shadow-[0_8px_24px_rgb(15_27_51/0.12)] ring-1 ring-bordure",
+            "absolute bottom-full z-50 mb-2 w-60 animate-apparition rounded-lg bg-surface p-1 shadow-flottant ring-1 ring-bordure motion-reduce:animate-none",
             estReplie ? "lg:start-0" : "start-0 end-0 w-auto",
           )}
         >
@@ -69,17 +69,17 @@ export function MenuUtilisateur({ nom, email }: { nom: string; email: string }) 
         aria-expanded={estOuvert}
         aria-controls="menu-compte"
         aria-label={compte.ouvrir}
-        className="flex min-h-12 w-full items-center gap-2.5 rounded-lg p-1.5 text-start transition-colors duration-150 hover:bg-surface/70 focus-visible:outline-2 focus-visible:outline-primaire"
+        className="flex min-h-12 w-full items-center gap-2.5 rounded-lg p-1.5 text-start transition-colors duration-150 hover:bg-menu-survol focus-visible:outline-2 focus-visible:outline-accent"
       >
-        <span className="flex size-8 shrink-0 items-center justify-center rounded-md bg-marine text-sm font-semibold text-white">
+        <span className="flex size-8 shrink-0 items-center justify-center rounded-md bg-accent text-sm font-semibold text-marine">
           {initiales(nom)}
         </span>
         <span className={cn("min-w-0 flex-1", estReplie && "lg:sr-only")}>
-          <span className="block truncate text-sm font-semibold text-texte">{nom}</span>
-          <span className="block truncate text-sm text-texte-secondaire">{email}</span>
+          <span className="block truncate text-sm font-semibold text-white">{nom}</span>
+          <span className="block truncate text-sm text-menu-texte-secondaire">{email}</span>
         </span>
         <ChevronsUpDown
-          className={cn("size-4 shrink-0 text-texte-secondaire", estReplie && "lg:hidden")}
+          className={cn("size-4 shrink-0 text-menu-texte-secondaire", estReplie && "lg:hidden")}
           aria-hidden="true"
         />
       </button>

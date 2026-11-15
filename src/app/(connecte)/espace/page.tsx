@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { Suspense } from "react";
-import { Briefcase, Building2, ChevronRight, type LucideIcon } from "lucide-react";
-import { Chargement } from "@/components/ui/chargement";
-import { CHEMIN_DEPARTEMENTS, CHEMIN_POSTES } from "@/lib/constantes";
+import { Briefcase, Building2, Users } from "lucide-react";
+import { BanniereAccueil } from "@/components/espace/banniere-accueil";
+import { CarteCompteur, CarteCompteurSquelette } from "@/components/espace/carte-compteur";
+import { EtapesPlanning } from "@/components/espace/etapes-planning";
+import { CHEMIN_DEPARTEMENTS, CHEMIN_PERSONNES, CHEMIN_POSTES } from "@/lib/constantes";
 import { compterDepartements } from "@/lib/donnees/departements";
+import { compterEmployes } from "@/lib/donnees/employes";
 import { compterPostes } from "@/lib/donnees/postes";
 import { obtenirUtilisateurPourEspace } from "@/lib/donnees/session";
 import { TEXTES_ESPACE } from "@/lib/textes/espace";
@@ -14,59 +16,53 @@ export const metadata: Metadata = { title: TEXTES_NAVIGATION.tableauDeBord };
 
 export default function PageTableauDeBord() {
   return (
-    <div className="mx-auto flex max-w-6xl flex-col gap-6">
-      <Suspense fallback={<Chargement message={TEXTES_ESPACE.chargement} />}>
+    <div className="mx-auto flex max-w-6xl flex-col gap-8">
+      <Suspense fallback={<SqueletteTableauDeBord />}>
         <ContenuTableauDeBord />
       </Suspense>
     </div>
   );
 }
 
-function CarteCompteur({
-  href,
-  libelle,
-  total,
-  Icone,
-}: {
-  href: string;
-  libelle: string;
-  total: number;
-  Icone: LucideIcon;
-}) {
+function SqueletteTableauDeBord() {
   return (
-    <Link
-      href={href}
-      className="group flex items-center gap-4 rounded-xl border border-bordure bg-surface p-5 transition-colors duration-150 hover:border-primaire focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primaire"
-    >
-      <span className="flex size-12 shrink-0 items-center justify-center rounded-lg bg-ciel text-primaire">
-        <Icone className="size-6" aria-hidden="true" />
-      </span>
-      <span className="flex flex-1 flex-col">
-        <span className="text-sm text-texte-secondaire">{libelle}</span>
-        <span className="text-2xl font-bold tabular-nums text-marine">{total}</span>
-      </span>
-      <ChevronRight className="size-5 text-texte-secondaire group-hover:text-primaire" aria-hidden="true" />
-    </Link>
+    <div role="status" className="flex flex-col gap-8">
+      <span className="sr-only">{TEXTES_ESPACE.chargement}</span>
+      <div className="h-40 animate-pulse rounded-xl bg-canevas motion-reduce:animate-none" aria-hidden="true" />
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <CarteCompteurSquelette />
+        <CarteCompteurSquelette />
+        <CarteCompteurSquelette />
+      </div>
+    </div>
   );
 }
 
 async function ContenuTableauDeBord() {
   const utilisateur = await obtenirUtilisateurPourEspace();
-  const [nombreDepartements, nombrePostes] = await Promise.all([compterDepartements(), compterPostes()]);
+  // Personnes et Planning sont réservés aux super administrateurs : leurs blocs aussi.
+  const [nombreDepartements, nombrePostes, nombreEmployes] = await Promise.all([
+    compterDepartements(),
+    compterPostes(),
+    utilisateur.estSuperAdmin ? compterEmployes() : null,
+  ]);
 
   return (
     <>
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight text-marine sm:text-[1.75rem]">
-          {TEXTES_ESPACE.bonjour(utilisateur.nom)}
-        </h1>
-        <p className="mt-1.5 max-w-2xl text-base text-texte-secondaire">{TEXTES_ESPACE.introduction}</p>
-      </div>
+      <BanniereAccueil nom={utilisateur.nom} />
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <CarteCompteur href={CHEMIN_DEPARTEMENTS} libelle={TEXTES_NAVIGATION.departements} total={nombreDepartements} Icone={Building2} />
-        <CarteCompteur href={CHEMIN_POSTES} libelle={TEXTES_NAVIGATION.postes} total={nombrePostes} Icone={Briefcase} />
-      </div>
+      <section aria-labelledby="titre-chiffres" className="flex flex-col gap-4">
+        <h2 id="titre-chiffres" className="text-lg font-semibold text-marine">{TEXTES_ESPACE.titreChiffres}</h2>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {nombreEmployes !== null && (
+            <CarteCompteur href={CHEMIN_PERSONNES} libelle={TEXTES_NAVIGATION.personnes} total={nombreEmployes} Icone={Users} />
+          )}
+          <CarteCompteur href={CHEMIN_DEPARTEMENTS} libelle={TEXTES_NAVIGATION.departements} total={nombreDepartements} Icone={Building2} />
+          <CarteCompteur href={CHEMIN_POSTES} libelle={TEXTES_NAVIGATION.postes} total={nombrePostes} Icone={Briefcase} />
+        </div>
+      </section>
+
+      {utilisateur.estSuperAdmin && <EtapesPlanning />}
     </>
   );
 }

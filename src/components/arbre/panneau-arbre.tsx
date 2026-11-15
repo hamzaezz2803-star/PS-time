@@ -24,7 +24,7 @@ export function PanneauArbre({
   children: ReactNode;
 }) {
   return (
-    <section className="overflow-hidden rounded-xl border border-bordure bg-surface" aria-labelledby="titre-arbre">
+    <section className="overflow-hidden rounded-xl border border-bordure bg-surface shadow-carte" aria-labelledby="titre-arbre">
       <div className="flex flex-wrap items-center gap-x-2 gap-y-3 border-b border-bordure px-4 py-3 sm:px-5">
         <div className="min-w-0 flex-1">
           <h2 id="titre-arbre" className="text-base font-semibold text-marine">{titre}</h2>
