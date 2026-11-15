@@ -3,21 +3,18 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, type ReactNode } from "react";
-import { ChevronRight } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import { TEXTES_NAVIGATION } from "@/lib/textes/navigation";
 import { cn } from "@/lib/utils";
 import { useMenu } from "./contexte-menu";
 import { GROUPES_NAVIGATION, type ElementNavigation, type LienNavigation } from "./navigation";
 
 const LIGNE =
-  "group/ligne relative flex min-h-11 w-full items-center gap-3 rounded-lg px-3 text-sm transition-colors duration-150 lg:min-h-9 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-accent";
-const ACTIF = "bg-menu-actif font-semibold text-white";
-const INACTIF = "text-menu-texte hover:bg-menu-survol hover:text-white";
-
-/** Repère de la page active : barre à gauche, en plus du fond (jamais la couleur seule). */
-function Repere() {
-  return <span className="absolute inset-y-1.5 start-0 w-[3px] rounded-e bg-accent" aria-hidden="true" />;
-}
+  "group/ligne relative flex min-h-11 w-full items-center gap-3 rounded-lg px-3 text-sm transition-[background-color,box-shadow,color] duration-150 lg:min-h-10 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primaire";
+// Page active : carte blanche en relief et texte en gras (jamais la couleur seule).
+const ACTIF = "bg-menu-actif font-semibold text-menu-texte shadow-survol";
+const INACTIF = "font-medium text-menu-texte hover:bg-menu-survol hover:shadow-carte";
+const SOUS_INACTIF = "font-medium text-menu-texte-secondaire hover:bg-menu-survol hover:text-menu-texte hover:shadow-carte";
 
 /** Info-bulle affichée en mode icônes (survol ou focus clavier). */
 function InfoBulle({ children }: { children: ReactNode }) {
@@ -41,14 +38,12 @@ function Libelle({ children }: { children: ReactNode }) {
 function SousLien({ lien, chemin }: { lien: LienNavigation; chemin: string }) {
   const { fermerMobile } = useMenu();
   const estActif = Boolean(lien.href && chemin.startsWith(lien.href));
-  const Icone = lien.icone;
 
   if (!lien.href) {
     return (
       <span className={cn(LIGNE, "cursor-default text-menu-texte-secondaire")}>
-        <Icone className="size-4 shrink-0" aria-hidden="true" />
         <span className="flex-1 truncate">{lien.libelle}</span>
-        <span className="rounded-md bg-menu-survol px-1.5 text-sm text-menu-texte-secondaire">{TEXTES_NAVIGATION.bientot}</span>
+        <span className="rounded-md bg-surface px-1.5 text-sm text-menu-texte-secondaire ring-1 ring-menu-bordure">{TEXTES_NAVIGATION.bientot}</span>
       </span>
     );
   }
@@ -58,10 +53,8 @@ function SousLien({ lien, chemin }: { lien: LienNavigation; chemin: string }) {
       href={lien.href}
       onClick={fermerMobile}
       aria-current={estActif ? "page" : undefined}
-      className={cn(LIGNE, estActif ? ACTIF : INACTIF)}
+      className={cn(LIGNE, estActif ? ACTIF : SOUS_INACTIF)}
     >
-      {estActif && <Repere />}
-      <Icone className={cn("size-4 shrink-0", estActif ? "text-accent" : "text-menu-texte-secondaire group-hover/ligne:text-white")} aria-hidden="true" />
       <span className="truncate">{lien.libelle}</span>
     </Link>
   );
@@ -85,8 +78,7 @@ function Element({ element, chemin }: { element: ElementNavigation; chemin: stri
         aria-label={estReplie ? element.libelle : undefined}
         className={cn(LIGNE, estActif ? ACTIF : INACTIF)}
       >
-        {estActif && <Repere />}
-        <Icone className={cn("size-[18px] shrink-0", estActif && "text-accent")} aria-hidden="true" />
+        <Icone className="size-[18px] shrink-0" aria-hidden="true" />
         <Libelle>{element.libelle}</Libelle>
         <InfoBulle>{element.libelle}</InfoBulle>
       </Link>
@@ -105,15 +97,14 @@ function Element({ element, chemin }: { element: ElementNavigation; chemin: stri
         aria-expanded={estReplie ? false : estOuvert}
         aria-controls={idSousMenu}
         aria-label={estReplie ? element.libelle : undefined}
-        className={cn(LIGNE, contientPageActive && estReplie ? ACTIF : INACTIF)}
+        className={cn(LIGNE, contientPageActive && estReplie ? ACTIF : INACTIF, contientPageActive && "font-semibold")}
       >
-        {contientPageActive && estReplie && <Repere />}
-        <Icone className={cn("size-[18px] shrink-0", contientPageActive && "text-accent")} aria-hidden="true" />
+        <Icone className="size-[18px] shrink-0" aria-hidden="true" />
         <Libelle>{element.libelle}</Libelle>
-        <ChevronRight
+        <ChevronDown
           className={cn(
             "size-4 shrink-0 text-menu-texte-secondaire transition-transform duration-150 motion-reduce:transition-none",
-            estOuvert && "rotate-90",
+            estOuvert && "rotate-180",
             estReplie && "lg:hidden",
           )}
           aria-hidden="true"
@@ -123,10 +114,14 @@ function Element({ element, chemin }: { element: ElementNavigation; chemin: stri
       {estOuvert && (
         <ul
           id={idSousMenu}
-          className={cn("ms-[1.3rem] mt-0.5 flex flex-col gap-0.5 border-s border-menu-bordure ps-2", estReplie && "lg:hidden")}
+          className={cn("ms-[1.3rem] mt-1 flex flex-col gap-1", estReplie && "lg:hidden")}
         >
           {element.sousLiens?.map((lien) => (
-            <li key={lien.libelle}>
+            // Trait vertical continu (sauf après le dernier) et coude arrondi vers chaque page.
+            <li
+              key={lien.libelle}
+              className="relative ps-4 before:absolute before:start-0 before:top-0 before:h-1/2 before:w-3 before:rounded-es-lg before:border-b before:border-s before:border-menu-bordure after:absolute after:inset-y-0 after:start-0 after:border-s after:border-menu-bordure last:after:hidden"
+            >
               <SousLien lien={lien} chemin={chemin} />
             </li>
           ))}

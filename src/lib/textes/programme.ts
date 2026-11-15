@@ -145,6 +145,8 @@ export const TEXTES_PROGRAMME = {
     aideCycle: "Le cycle recommence à partir de la date de début de l'affectation.",
     nombreJours: "Nombre de jours du cycle",
     planning: "Calendrier de chaque jour",
+    rappelDates:
+      "Les dates de début et de fin se choisissent à l'étape Affectations, quand vous appliquez cette rotation à un groupe ou à un employé.",
     repos: "Repos",
     jour: (numero: number) => `Jour ${numero}`,
     joursSemaine: ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"],
@@ -176,6 +178,8 @@ export const TEXTES_PROGRAMME = {
     titreSuppression: "Supprimer l'affectation",
     explicationSuppression: "Cette action ne peut pas être annulée.",
     colonnes: { cible: "Pour", rotation: "Rotation", periode: "Période" },
+    cibleGroupe: "Groupe",
+    cibleEmploye: "Employé",
     nomAffectation: (cible: string, rotation: string) => `${rotation} pour ${cible}`,
     groupe: (nom: string) => `Groupe ${nom}`,
     periode: (debut: string, fin: string | null) => (fin ? `Du ${debut} au ${fin}` : `À partir du ${debut}`),

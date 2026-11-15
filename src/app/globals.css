@@ -18,14 +18,14 @@
   --couleur-canevas: #eef2f7;
   --couleur-surface: #ffffff;
 
-  /* Menu latéral sombre (marine du logo). Contrastes vérifiés sur --couleur-menu-fond :
-     texte 11:1, texte secondaire 6:1. */
-  --couleur-menu-fond: #0a2463;
-  --couleur-menu-texte: #d3ddf0;
-  --couleur-menu-texte-secondaire: #93a6cc;
-  --couleur-menu-survol: #12306f;
-  --couleur-menu-actif: #173b85;
-  --couleur-menu-bordure: #1c3a7a;
+  /* Menu latéral clair : survol et page active en blanc. Contrastes vérifiés sur
+     --couleur-menu-fond : texte 15:1, texte secondaire 5,5:1. */
+  --couleur-menu-fond: #f0f3f8;
+  --couleur-menu-texte: #0f1b33;
+  --couleur-menu-texte-secondaire: #55627c;
+  --couleur-menu-survol: #ffffff;
+  --couleur-menu-actif: #ffffff;
+  --couleur-menu-bordure: #d5dce7;
 
   --couleur-succes: #15803d;
   --couleur-attention: #b45309;

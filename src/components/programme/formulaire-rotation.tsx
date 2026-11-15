@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { CalendarRange } from "lucide-react";
 import { enregistrerRotation } from "@/app/(connecte)/programme/rotations/actions";
 import type { ProprietesFormulaireListe } from "@/components/liste/gestion-liste";
 import { useFormulaireListe, valeurSaisie, type EtatFormulaireListe } from "@/components/liste/utiliser-formulaire-liste";
@@ -95,6 +96,11 @@ function ContenuRotation({ etat, rotation, options }: { etat: EtatFormulaireList
         )}
         <MessageErreur message={erreurs?.jours} />
       </fieldset>
+      {/* Une rotation est un modèle : sa période d'application appartient à l'affectation. */}
+      <p className="flex items-start gap-2.5 rounded-lg border border-primaire/20 bg-ciel p-3 text-sm text-texte">
+        <CalendarRange className="mt-0.5 size-4 shrink-0 text-primaire" aria-hidden="true" />
+        <span>{textes.rappelDates}</span>
+      </p>
     </div>
   );
 }

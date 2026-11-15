@@ -17,8 +17,8 @@ export function SectionFormulaire({
 }) {
   return (
     <fieldset className={cn("flex flex-col gap-4", className)}>
-      <legend className="mb-3 flex items-center gap-2 text-base font-semibold text-marine">
-        <span className="flex size-7 items-center justify-center rounded-md bg-ciel text-primaire">
+      <legend className="mb-4 flex w-full items-center gap-2.5 border-b border-bordure pb-3 text-base font-semibold text-marine">
+        <span className="flex size-8 items-center justify-center rounded-lg bg-ciel text-primaire">
           <Icone className="size-4" aria-hidden="true" />
         </span>
         {titre}

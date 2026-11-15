@@ -1,7 +1,7 @@
 import { ChevronLeft, ChevronRight, UsersRound } from "lucide-react";
 import Link from "next/link";
 import { CHEMIN_PERSONNES } from "@/lib/constantes";
-import { formaterJour } from "@/lib/formats";
+import { formaterJour, initiales } from "@/lib/formats";
 import { formaterTelephone } from "@/lib/metier/employes";
 import { TEXTES_PERSONNES } from "@/lib/textes/personnes";
 import type { EmployeListe } from "@/types";
@@ -29,11 +29,13 @@ export function ListeEmployes({
       className="overflow-hidden rounded-xl border border-bordure bg-surface shadow-carte"
       aria-labelledby="titre-liste-employes"
     >
-      <div className="flex flex-wrap items-baseline justify-between gap-2 border-b border-bordure px-5 py-4 sm:px-6">
-        <h2 id="titre-liste-employes" className="text-lg font-semibold text-marine">
+      <div className="flex flex-wrap items-center gap-2.5 border-b border-bordure px-4 py-3.5 sm:px-5">
+        <h2 id="titre-liste-employes" className="text-base font-semibold text-marine">
           {textes.titre}
         </h2>
-        <p className="text-sm text-texte-secondaire">{textes.total(total)}</p>
+        <span className="rounded-md bg-fond px-2 py-0.5 text-sm font-medium tabular-nums text-texte-secondaire ring-1 ring-inset ring-bordure">
+          {textes.total(total)}
+        </span>
       </div>
 
       {employes.length === 0 ? (
@@ -63,9 +65,16 @@ export function ListeEmployes({
             <tbody className="divide-y divide-bordure text-texte">
               {employes.map((employe) => (
                 <tr key={employe.id} className="transition-colors duration-150 hover:bg-fond">
-                  <td className="px-5 py-3 font-mono tabular-nums">{employe.matricule}</td>
-                  <td className="px-5 py-3 font-mono tabular-nums">{employe.numeroBadge}</td>
-                  <td className="px-5 py-3 font-semibold">{`${employe.nom} ${employe.prenom}`}</td>
+                  <td className="px-5 py-3 font-mono font-medium tabular-nums text-marine">{employe.matricule}</td>
+                  <td className="px-5 py-3 font-mono tabular-nums text-texte-secondaire">{employe.numeroBadge}</td>
+                  <td className="px-5 py-2.5">
+                    <span className="flex items-center gap-3 font-medium">
+                      <span className="flex size-8 shrink-0 items-center justify-center rounded-md bg-ciel text-sm font-semibold text-marine" aria-hidden="true">
+                        {initiales(`${employe.prenom} ${employe.nom}`)}
+                      </span>
+                      <span className="truncate">{`${employe.nom} ${employe.prenom}`}</span>
+                    </span>
+                  </td>
                   <td className="px-5 py-3">{employe.departement}</td>
                   <td className="px-5 py-3">{employe.poste ?? <NonRenseigne />}</td>
                   <td className="px-5 py-3 whitespace-nowrap tabular-nums">

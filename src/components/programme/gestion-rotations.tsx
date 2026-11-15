@@ -1,9 +1,10 @@
 "use client";
 
 import { useMemo } from "react";
-import { Repeat } from "lucide-react";
+import { CalendarDays, Repeat } from "lucide-react";
 import { supprimerRotation } from "@/app/(connecte)/programme/rotations/actions";
 import { GestionListe, type ColonneListe } from "@/components/liste/gestion-liste";
+import { Pastille } from "@/components/ui/pastille";
 import { minutesVersHeure } from "@/lib/metier/programme";
 import { TEXTES_PROGRAMME } from "@/lib/textes/programme";
 import type { Calendrier, Rotation } from "@/types";
@@ -16,7 +17,11 @@ const COLONNES: ColonneListe<Rotation>[] = [
   {
     titre: textes.colonnes.type,
     rendu: (rotation) =>
-      rotation.type === "hebdomadaire" ? textes.typeCourt.hebdomadaire : textes.typeCourt.cycle(rotation.nombreJours),
+      rotation.type === "hebdomadaire" ? (
+        <Pastille Icone={CalendarDays}>{textes.typeCourt.hebdomadaire}</Pastille>
+      ) : (
+        <Pastille Icone={Repeat} ton="neutre">{textes.typeCourt.cycle(rotation.nombreJours)}</Pastille>
+      ),
   },
   {
     titre: textes.colonnes.jours,

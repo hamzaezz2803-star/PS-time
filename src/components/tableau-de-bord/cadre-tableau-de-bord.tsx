@@ -21,17 +21,17 @@ const ECRAN_ORDINATEUR = "(min-width: 1024px)";
 const BOUTON_ICONE =
   "flex size-11 shrink-0 items-center justify-center rounded-lg text-texte-secondaire transition-colors duration-150 hover:bg-canevas hover:text-texte focus-visible:outline-2 focus-visible:outline-primaire lg:size-9";
 const BOUTON_ICONE_MENU =
-  "flex size-11 shrink-0 items-center justify-center rounded-lg text-menu-texte-secondaire transition-colors duration-150 hover:bg-menu-survol hover:text-white focus-visible:outline-2 focus-visible:outline-accent";
+  "flex size-11 shrink-0 items-center justify-center rounded-lg text-menu-texte-secondaire transition-colors duration-150 hover:bg-menu-survol hover:text-menu-texte focus-visible:outline-2 focus-visible:outline-primaire";
 
 function Marque() {
   const { estReplie } = useMenu();
   return (
     <div className={cn("flex h-16 shrink-0 items-center gap-3 border-b border-menu-bordure px-3", estReplie && "lg:justify-center lg:px-0")}>
-      <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-white p-1 shadow-carte">
+      <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-surface p-1 shadow-carte ring-1 ring-menu-bordure">
         <Image src="/logo-ps-time.webp" alt={TEXTES_CONNEXION.altLogo} width={1261} height={1247} sizes="28px" className="size-7" />
       </span>
       <span className={cn("min-w-0", estReplie && "lg:sr-only")}>
-        <span className="block truncate text-base font-bold leading-tight tracking-tight text-white">{TEXTES_NAVIGATION.nomApplication}</span>
+        <span className="block truncate text-base font-bold leading-tight tracking-tight text-marine">{TEXTES_NAVIGATION.nomApplication}</span>
         <span className="block truncate text-sm leading-tight text-menu-texte-secondaire">{TEXTES_NAVIGATION.sousTitreApplication}</span>
       </span>
     </div>
@@ -90,7 +90,7 @@ export function CadreTableauDeBord({ pied, children }: { pied: ReactNode; childr
       <div className="flex min-h-dvh bg-fond">
         <aside
           className={cn(
-            "sticky top-0 hidden h-dvh shrink-0 flex-col bg-menu-fond transition-[width] duration-200 ease-out motion-reduce:transition-none lg:flex",
+            "sticky top-0 hidden h-dvh shrink-0 flex-col border-e border-menu-bordure bg-menu-fond transition-[width] duration-200 ease-out motion-reduce:transition-none lg:flex",
             estReplie ? "w-[4.5rem]" : "w-64",
           )}
         >

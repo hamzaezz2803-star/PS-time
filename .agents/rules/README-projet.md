@@ -100,7 +100,7 @@ Ces règles s'appliquent à **chaque prompt** et à chaque modification du proje
 ```text
 src/
   app/                  pages et Server Actions (connexion, espace, changer-mot-de-passe, api/auth)
-  components/ui/        composants réutilisables (bouton, champs, messages, chargement, fenetre-modale, onglets, pied-fenetre)
+  components/ui/        composants réutilisables (bouton, champs, champ-recherche, pastille, en-tete-page, messages, chargement, fenetre-modale, onglets, pied-fenetre)
   components/connexion/ composants de l'écran de connexion
   components/espace/    tableau de bord (bannière, cartes chiffrées, étapes du planning) et changement de mot de passe
   components/tableau-de-bord/  cadre et menu latéral des pages connectées

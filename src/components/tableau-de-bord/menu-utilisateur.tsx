@@ -69,13 +69,13 @@ export function MenuUtilisateur({ nom, email }: { nom: string; email: string }) 
         aria-expanded={estOuvert}
         aria-controls="menu-compte"
         aria-label={compte.ouvrir}
-        className="flex min-h-12 w-full items-center gap-2.5 rounded-lg p-1.5 text-start transition-colors duration-150 hover:bg-menu-survol focus-visible:outline-2 focus-visible:outline-accent"
+        className="flex min-h-12 w-full items-center gap-2.5 rounded-lg p-1.5 text-start transition-colors duration-150 hover:bg-menu-survol hover:shadow-carte focus-visible:outline-2 focus-visible:outline-primaire"
       >
-        <span className="flex size-8 shrink-0 items-center justify-center rounded-md bg-accent text-sm font-semibold text-marine">
+        <span className="flex size-8 shrink-0 items-center justify-center rounded-md bg-marine text-sm font-semibold text-white">
           {initiales(nom)}
         </span>
         <span className={cn("min-w-0 flex-1", estReplie && "lg:sr-only")}>
-          <span className="block truncate text-sm font-semibold text-white">{nom}</span>
+          <span className="block truncate text-sm font-semibold text-menu-texte">{nom}</span>
           <span className="block truncate text-sm text-menu-texte-secondaire">{email}</span>
         </span>
         <ChevronsUpDown

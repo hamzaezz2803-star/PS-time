@@ -25,10 +25,12 @@ export function PanneauArbre({
 }) {
   return (
     <section className="overflow-hidden rounded-xl border border-bordure bg-surface shadow-carte" aria-labelledby="titre-arbre">
-      <div className="flex flex-wrap items-center gap-x-2 gap-y-3 border-b border-bordure px-4 py-3 sm:px-5">
-        <div className="min-w-0 flex-1">
+      <div className="flex flex-wrap items-center gap-x-2 gap-y-3 border-b border-bordure px-4 py-3.5 sm:px-5">
+        <div className="flex min-w-0 flex-1 items-center gap-2.5">
           <h2 id="titre-arbre" className="text-base font-semibold text-marine">{titre}</h2>
-          <p className="text-sm text-texte-secondaire">{total}</p>
+          <span className="rounded-md bg-fond px-2 py-0.5 text-sm font-medium tabular-nums text-texte-secondaire ring-1 ring-inset ring-bordure">
+            {total}
+          </span>
         </div>
         <BoutonIcone libelle={textes.toutDeplier} Icone={ChevronsUpDown} onClick={onToutDeplier} />
         <BoutonIcone libelle={textes.toutReplier} Icone={ChevronsDownUp} onClick={onToutReplier} />

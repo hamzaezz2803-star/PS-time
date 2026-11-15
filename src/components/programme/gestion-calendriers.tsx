@@ -3,6 +3,7 @@
 import { CalendarClock, MoonStar } from "lucide-react";
 import { supprimerCalendrier } from "@/app/(connecte)/programme/calendriers/actions";
 import { GestionListe, type ColonneListe } from "@/components/liste/gestion-liste";
+import { Pastille } from "@/components/ui/pastille";
 import { dureePauseMinutes, dureeTravailMinutes, finLeLendemain, formaterDuree, minutesVersHeure } from "@/lib/metier/programme";
 import { TEXTES_PROGRAMME } from "@/lib/textes/programme";
 import type { Calendrier } from "@/types";
@@ -18,10 +19,7 @@ const COLONNES: ColonneListe<Calendrier>[] = [
       <span className="inline-flex items-center gap-2 tabular-nums whitespace-nowrap">
         {minutesVersHeure(calendrier.debutMinutes)} – {minutesVersHeure(calendrier.finMinutes)}
         {finLeLendemain(calendrier.debutMinutes, calendrier.finMinutes) && (
-          <span className="inline-flex items-center gap-1 rounded-md bg-ciel px-1.5 py-0.5 text-xs font-medium text-marine">
-            <MoonStar className="size-3.5" aria-hidden="true" />
-            {textes.lendemain}
-          </span>
+          <Pastille Icone={MoonStar}>{textes.lendemain}</Pastille>
         )}
       </span>
     ),
@@ -29,7 +27,7 @@ const COLONNES: ColonneListe<Calendrier>[] = [
   {
     titre: textes.colonnes.travail,
     rendu: (calendrier) => (
-      <span className="tabular-nums">
+      <span className="font-semibold tabular-nums text-marine">
         {formaterDuree(
           dureeTravailMinutes(
             calendrier.debutMinutes,

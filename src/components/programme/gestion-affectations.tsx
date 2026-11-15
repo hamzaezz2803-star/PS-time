@@ -1,8 +1,9 @@
 "use client";
 
-import { CalendarRange } from "lucide-react";
+import { CalendarRange, Repeat, TriangleAlert, UserRound, UsersRound } from "lucide-react";
 import { supprimerAffectation } from "@/app/(connecte)/programme/affectations/actions";
 import { GestionListe, type ColonneListe } from "@/components/liste/gestion-liste";
+import { Pastille } from "@/components/ui/pastille";
 import { formaterJour } from "@/lib/formats";
 import { TEXTES_PROGRAMME } from "@/lib/textes/programme";
 import type { Affectation } from "@/types";
@@ -11,8 +12,20 @@ import { FormulaireAffectation, type OptionsAffectation } from "./formulaire-aff
 const textes = TEXTES_PROGRAMME.affectations;
 
 const COLONNES: ColonneListe<Affectation>[] = [
-  { titre: textes.colonnes.cible, rendu: (affectation) => affectation.cible },
-  { titre: textes.colonnes.rotation, rendu: (affectation) => affectation.rotation },
+  {
+    titre: textes.colonnes.cible,
+    rendu: (affectation) => (
+      <span className="inline-flex flex-wrap items-center gap-2">
+        {affectation.cible}
+        {affectation.groupeId !== null ? (
+          <Pastille Icone={UsersRound} ton="neutre">{textes.cibleGroupe}</Pastille>
+        ) : (
+          <Pastille Icone={UserRound} ton="neutre">{textes.cibleEmploye}</Pastille>
+        )}
+      </span>
+    ),
+  },
+  { titre: textes.colonnes.rotation, rendu: (affectation) => <Pastille Icone={Repeat}>{affectation.rotation}</Pastille> },
   {
     titre: textes.colonnes.periode,
     estSecondaire: true,
@@ -30,7 +43,10 @@ export function GestionAffectations({ affectations, options }: { affectations: A
   return (
     <div className="flex flex-col gap-4">
       {manqueDonnees && (
-        <p className="rounded-lg border border-attention/40 bg-attention/5 p-3 text-sm text-texte">{textes.manque}</p>
+        <p className="flex items-start gap-2.5 rounded-lg border border-attention/40 bg-attention/5 p-3 text-sm text-texte">
+          <TriangleAlert className="mt-0.5 size-4 shrink-0 text-attention" aria-hidden="true" />
+          {textes.manque}
+        </p>
       )}
       <GestionListe
         elements={affectations}

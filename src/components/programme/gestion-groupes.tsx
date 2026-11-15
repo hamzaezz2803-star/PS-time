@@ -1,9 +1,10 @@
 "use client";
 
 import { useMemo } from "react";
-import { UsersRound } from "lucide-react";
+import { UserRound, UsersRound } from "lucide-react";
 import { supprimerGroupe } from "@/app/(connecte)/programme/groupes/actions";
 import { GestionListe, type ColonneListe } from "@/components/liste/gestion-liste";
+import { Pastille } from "@/components/ui/pastille";
 import { TEXTES_PROGRAMME } from "@/lib/textes/programme";
 import type { EmployeSelection, Groupe } from "@/types";
 import { FormulaireGroupe } from "./formulaire-groupe";
@@ -15,9 +16,9 @@ const COLONNES: ColonneListe<Groupe>[] = [
   {
     titre: textes.colonnes.membres,
     rendu: (groupe) => (
-      <span className="inline-flex items-center rounded-md bg-ciel px-2 py-0.5 text-sm font-medium tabular-nums text-marine">
+      <Pastille Icone={UserRound} ton={groupe.membres.length > 0 ? "info" : "neutre"}>
         {textes.nombreMembres(groupe.membres.length)}
-      </span>
+      </Pastille>
     ),
   },
   {

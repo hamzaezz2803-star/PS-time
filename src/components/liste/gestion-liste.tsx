@@ -1,14 +1,16 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
-import { Pencil, Plus, Trash2, type LucideIcon } from "lucide-react";
+import { Plus, SearchX, type LucideIcon } from "lucide-react";
 import { SuppressionElement, type TextesSuppression } from "@/components/arbre/suppression-element";
 import { Bouton } from "@/components/ui/bouton";
-import { BoutonIcone } from "@/components/ui/bouton-icone";
+import { ChampRecherche } from "@/components/ui/champ-recherche";
 import { FenetreModale } from "@/components/ui/fenetre-modale";
 import { MessageSucces } from "@/components/ui/message-succes";
-import { cn } from "@/lib/utils";
+import { correspondARecherche } from "@/lib/metier/recherche";
+import { TEXTES_LISTE } from "@/lib/textes/liste";
 import type { EtatFormulaire } from "@/types";
+import { TableauListe } from "./tableau-liste";
 
 type Succes = NonNullable<EtatFormulaire["succes"]>;
 
@@ -64,6 +66,8 @@ export function GestionListe<T extends { id: string; nom: string }>({
   const [fenetre, setFenetre] = useState<Fenetre | null>(null);
   const [messageSucces, setMessageSucces] = useState<string>();
   const [idEnEvidence, setIdEnEvidence] = useState<string | null>(null);
+  const [recherche, setRecherche] = useState("");
+  const visibles = elements.filter((element) => correspondARecherche(element.nom, recherche));
 
   const ouvrir = (nouvelle: Fenetre) => {
     setMessageSucces(undefined);
@@ -90,11 +94,23 @@ export function GestionListe<T extends { id: string; nom: string }>({
     <div className="flex flex-col gap-4">
       {!fenetre && <MessageSucces message={messageSucces} />}
       <section className="overflow-hidden rounded-xl border border-bordure bg-surface shadow-carte" aria-labelledby="titre-liste">
-        <div className="flex flex-wrap items-center gap-3 border-b border-bordure px-4 py-3 sm:px-5">
-          <div className="min-w-0 flex-1">
+        <div className="flex flex-wrap items-center gap-3 border-b border-bordure px-4 py-3.5 sm:px-5">
+          <div className="flex min-w-0 flex-1 items-center gap-2.5">
             <h2 id="titre-liste" className="text-base font-semibold text-marine">{textes.titre}</h2>
-            <p className="text-sm text-texte-secondaire">{textes.total(elements.length)}</p>
+            <span className="rounded-md bg-fond px-2 py-0.5 text-sm font-medium tabular-nums text-texte-secondaire ring-1 ring-inset ring-bordure">
+              {textes.total(elements.length)}
+            </span>
           </div>
+          {elements.length > 0 && (
+            <ChampRecherche
+              id="recherche-liste"
+              libelle={TEXTES_LISTE.rechercher}
+              valeur={recherche}
+              onChange={setRecherche}
+              placeholder={TEXTES_LISTE.exempleRecherche}
+              className="w-full sm:w-64"
+            />
+          )}
           <Bouton onClick={() => ouvrir({ type: "creation" })} className="w-full sm:w-fit">
             <Plus className="size-5" aria-hidden="true" />
             {textes.nouveau}
@@ -102,58 +118,19 @@ export function GestionListe<T extends { id: string; nom: string }>({
         </div>
 
         {elements.length === 0 ? (
-          <div className="flex flex-col items-center gap-3 px-6 py-12 text-center">
-            <span className="flex size-12 items-center justify-center rounded-xl bg-ciel text-primaire">
-              <Icone className="size-6" aria-hidden="true" />
-            </span>
-            <p className="text-base font-semibold text-texte">{textes.vide}</p>
-            <p className="text-sm text-texte-secondaire">{textes.videAction}</p>
-          </div>
+          <EtatVide Icone={Icone} titre={textes.vide} detail={textes.videAction} />
+        ) : visibles.length === 0 ? (
+          <EtatVide Icone={SearchX} titre={TEXTES_LISTE.aucunResultat(recherche.trim())} />
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
-              <thead className="border-b border-bordure bg-fond/70 text-texte-secondaire">
-                <tr>
-                  {colonnes.map((colonne) => (
-                    <th key={colonne.titre} scope="col" className={cn("px-5 py-3 font-semibold", colonne.estSecondaire && "hidden md:table-cell")}>
-                      {colonne.titre}
-                    </th>
-                  ))}
-                  <th scope="col" className="px-5 py-3 text-right font-semibold">
-                    <span className="sr-only">{textes.actions}</span>
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-bordure text-texte">
-                {elements.map((element) => (
-                  <tr key={element.id} className={cn("transition-colors duration-150 hover:bg-fond", element.id === idEnEvidence && "bg-ciel/50 hover:bg-ciel/70")}>
-                    {colonnes.map((colonne, index) => (
-                      <td key={colonne.titre} className={cn("px-5 py-3", colonne.estSecondaire && "hidden md:table-cell")}>
-                        {index === 0 ? (
-                          <button
-                            type="button"
-                            onClick={() => ouvrir({ type: "modification", id: element.id })}
-                            className="flex min-h-11 items-center gap-2.5 text-start text-base font-medium text-texte hover:text-primaire focus-visible:outline-2 focus-visible:outline-primaire lg:min-h-9"
-                          >
-                            <Icone className="size-4 shrink-0 text-texte-secondaire" aria-hidden="true" />
-                            {colonne.rendu(element)}
-                          </button>
-                        ) : (
-                          colonne.rendu(element)
-                        )}
-                      </td>
-                    ))}
-                    <td className="px-3 py-1.5">
-                      <div className="flex items-center justify-end gap-0.5">
-                        <BoutonIcone libelle={textes.modifier(element.nom)} Icone={Pencil} onClick={() => ouvrir({ type: "modification", id: element.id })} />
-                        <BoutonIcone libelle={textes.supprimer(element.nom)} Icone={Trash2} onClick={() => ouvrir({ type: "suppression", id: element.id })} estDanger />
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <TableauListe
+            elements={visibles}
+            colonnes={colonnes}
+            icone={Icone}
+            idEnEvidence={idEnEvidence}
+            textes={textes}
+            onModifier={(id) => ouvrir({ type: "modification", id })}
+            onSupprimer={(id) => ouvrir({ type: "suppression", id })}
+          />
         )}
       </section>
 
@@ -164,6 +141,19 @@ export function GestionListe<T extends { id: string; nom: string }>({
           <SuppressionElement id={cible.id} nom={cible.nom} action={actionSupprimer} textes={textes} onTermine={terminer} onAnnuler={fermer} />
         )}
       </FenetreModale>
+    </div>
+  );
+}
+
+/** État vide d'une liste (aucun élément, ou aucun résultat de recherche). */
+function EtatVide({ Icone, titre, detail }: { Icone: LucideIcon; titre: string; detail?: string }) {
+  return (
+    <div className="flex flex-col items-center gap-3 px-6 py-14 text-center">
+      <span className="flex size-12 items-center justify-center rounded-xl bg-ciel text-primaire ring-8 ring-ciel/40">
+        <Icone className="size-6" aria-hidden="true" />
+      </span>
+      <p className="mt-1 text-base font-semibold text-texte">{titre}</p>
+      {detail && <p className="max-w-sm text-sm text-texte-secondaire">{detail}</p>}
     </div>
   );
 }
