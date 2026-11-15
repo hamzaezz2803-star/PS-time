@@ -17,6 +17,7 @@
     "better-auth": "^1.7.23",
     "clsx": "^2.1.1",
     "drizzle-orm": "^0.45.4",
+    "exceljs": "^4.4.0",
     "lucide-react": "^1.72.0",
     "mysql2": "^3.24.6",
     "next": "16.4.6",
@@ -36,5 +37,10 @@
     "eslint-config-next": "16.4.6",
     "tailwindcss": "4.3.3",
     "typescript": "^5"
+  },
+  "overrides": {
+    "exceljs": {
+      "uuid": "^11.1.1"
+    }
   }
 }

@@ -9,6 +9,16 @@ import { affectations, departements, employes, informationsEmployes, postes } fr
 
 /** Une page de la liste, triée par nom puis prénom. */
 export async function listerEmployes(page: number, parPage: number): Promise<EmployeListe[]> {
+  return requeteListeEmployes().limit(parPage).offset((page - 1) * parPage);
+}
+
+/** Toute la liste (export Excel ou PDF), dans le même ordre, bornée par `maximum`. */
+export async function listerEmployesPourExport(maximum: number): Promise<EmployeListe[]> {
+  return requeteListeEmployes().limit(maximum);
+}
+
+/** Colonnes de la liste : jamais de pièce d'identité ni d'e-mail (minimisation). */
+function requeteListeEmployes() {
   return obtenirBase()
     .select({
       id: employes.id,
@@ -25,8 +35,7 @@ export async function listerEmployes(page: number, parPage: number): Promise<Emp
     .innerJoin(departements, eq(departements.id, employes.departementId))
     .leftJoin(postes, eq(postes.id, employes.posteId))
     .orderBy(asc(employes.nom), asc(employes.prenom), asc(employes.matricule))
-    .limit(parPage)
-    .offset((page - 1) * parPage);
+    .$dynamic();
 }
 
 export async function compterEmployes(): Promise<number> {

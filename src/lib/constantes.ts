@@ -38,6 +38,10 @@ export const ORDRE_POSTE_DEFAUT = 99999;
 
 export const CHEMIN_PERSONNES = "/personnel/personnes";
 export const EMPLOYES_PAR_PAGE = 50;
+export const CHEMIN_EXPORT_EXCEL_PERSONNES = "/personnel/personnes/export-excel";
+export const CHEMIN_IMPRESSION_PERSONNES = "/impression/personnes";
+/** Garde-fou : nombre maximal d'employés dans un export (Excel ou PDF). */
+export const EXPORT_EMPLOYES_MAX = 10000;
 export const LONGUEUR_MAX_MATRICULE = 30;
 export const LONGUEUR_MAX_NOM_EMPLOYE = 100;
 /** Indicatif ajouté aux numéros saisis au format national (06..., 07..., 05...). */
