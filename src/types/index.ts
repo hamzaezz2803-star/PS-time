@@ -184,12 +184,29 @@ export type EmployeSelection = {
   groupeId: string | null;
 };
 
+/**
+ * Profil horaire : journée de 00:00 à 24:00 découpée en plages typées (vide pour un repos).
+ * `nom` est le libellé affiché (« Journée 8 h ») ; `code` tient en 3 caractères (« J8 »).
+ */
+export type ProfilHoraire = {
+  id: string;
+  code: string;
+  nom: string;
+  type: "travail" | "repos";
+  /** Faux : l'employé ne badge pas et est considéré présent. */
+  estBadge: boolean;
+  /** Durée de la pause repas : minimum et maximum (null = non contrôlé). */
+  repasMinimumMinutes: number | null;
+  repasMaximumMinutes: number | null;
+  plages: { debut: number; fin: number; type: "interdite" | "neutralisee" | "variable" | "fixe" | "repas" | "retard_tolere" }[];
+};
+
 export type Rotation = {
   id: string;
   nom: string;
   type: "hebdomadaire" | "cycle";
   nombreJours: number;
-  /** Calendrier de chaque jour travaillé (numéro du jour → identifiant) ; absent = repos. */
+  /** Profil horaire de chaque jour (numéro du jour → identifiant) ; absent = repos. */
   jours: Record<number, string>;
 };
 

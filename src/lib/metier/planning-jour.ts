@@ -1,8 +1,8 @@
 /**
  * Planning d'un employé pour un jour : affectation (la sienne avant celle de son groupe),
- * puis rotation, puis calendrier du jour ou repos. Fonctions pures, testées dans planning-jour.test.ts.
+ * puis rotation, puis profil horaire du jour ou repos. Fonctions pures.
  */
-import type { Calendrier, Rotation } from "../../types/index.ts";
+import type { ProfilHoraire, Rotation } from "../../types/index.ts";
 import { numeroJourRotation } from "./programme.ts";
 
 export type AffectationPlanning = {
@@ -17,13 +17,13 @@ export type AffectationPlanning = {
 export type DonneesPlanning = {
   affectations: AffectationPlanning[];
   rotations: Map<string, Rotation>;
-  calendriers: Map<string, Calendrier>;
+  profils: Map<string, ProfilHoraire>;
 };
 
 export type PlanningDuJour =
   | { type: "aucun" }
-  | { type: "repos"; rotation: Rotation }
-  | { type: "travail"; rotation: Rotation; calendrier: Calendrier };
+  | { type: "repos"; rotation: Rotation; profil: ProfilHoraire | null }
+  | { type: "travail"; rotation: Rotation; profil: ProfilHoraire };
 
 const couvre = (affectation: AffectationPlanning, jour: string) =>
   affectation.dateDebut <= jour && (affectation.dateFin === null || jour <= affectation.dateFin);
@@ -40,14 +40,15 @@ export function affectationDuJour(
   return affectations.find((a) => a.groupeId === employe.groupeId && couvre(a, jour)) ?? null;
 }
 
-/** Ce que prévoit le planning de l'employé pour ce jour (travail avec son calendrier, repos, ou rien). */
+/** Ce que prévoit le planning de l'employé pour ce jour : travail (profil), repos, ou rien. */
 export function planningDuJour(employe: { id: string; groupeId: string | null }, jour: string, donnees: DonneesPlanning): PlanningDuJour {
   const affectation = affectationDuJour(employe, jour, donnees.affectations);
   const rotation = affectation ? donnees.rotations.get(affectation.rotationId) : undefined;
   if (!affectation || !rotation) return { type: "aucun" };
 
   const numero = numeroJourRotation(rotation, affectation.dateDebut, jour);
-  const calendrierId = numero === null ? undefined : rotation.jours[numero];
-  const calendrier = calendrierId ? donnees.calendriers.get(calendrierId) : undefined;
-  return calendrier ? { type: "travail", rotation, calendrier } : { type: "repos", rotation };
+  const profilId = numero === null ? undefined : rotation.jours[numero];
+  const profil = profilId ? donnees.profils.get(profilId) : undefined;
+  if (profil?.type === "travail") return { type: "travail", rotation, profil };
+  return { type: "repos", rotation, profil: profil ?? null };
 }

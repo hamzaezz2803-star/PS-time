@@ -45,7 +45,7 @@ export function ChoixTypeRotation({ type, onChange }: { type: TypeRotation; onCh
   );
 }
 
-/** Une liste déroulante par jour : un calendrier, ou « Repos ». */
+/** Une liste déroulante par jour : un profil horaire, ou « Repos » (aucun profil). */
 export function PlanningRotation({
   type,
   nombreJours,

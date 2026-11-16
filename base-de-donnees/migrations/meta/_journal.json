@@ -113,6 +113,20 @@
       "when": 1794837098282,
       "tag": "0015_autorisations_utilisateurs",
       "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "5",
+      "when": 1794838622415,
+      "tag": "0016_profils_horaires",
+      "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "5",
+      "when": 1794838645165,
+      "tag": "0017_retirer_calendriers",
+      "breakpoints": true
     }
   ]
 }

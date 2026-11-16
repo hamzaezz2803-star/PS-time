@@ -17,19 +17,19 @@ import { ChoixTypeRotation, PlanningRotation } from "./planning-rotation";
 
 const textes = TEXTES_PROGRAMME.rotations;
 
-/** Création (sans `element`) ou modification d'une rotation : type, durée et calendrier de chaque jour. */
+/** Création (sans `element`) ou modification d'une rotation : type, durée et profil horaire de chaque jour. */
 export function FormulaireRotation({
   element,
-  optionsCalendriers,
+  optionsProfils,
   onTermine,
   onAnnuler,
-}: ProprietesFormulaireListe<Rotation> & { optionsCalendriers: OptionSelection[] }) {
+}: ProprietesFormulaireListe<Rotation> & { optionsProfils: OptionSelection[] }) {
   const [etat, action, enCours] = useFormulaireListe(enregistrerRotation, onTermine);
 
   return (
     <form action={action} noValidate className="flex min-h-0 flex-1 flex-col">
       {element && <input type="hidden" name="id" value={element.id} />}
-      <ContenuRotation key={etat.numeroReponse} etat={etat} rotation={element} options={optionsCalendriers} />
+      <ContenuRotation key={etat.numeroReponse} etat={etat} rotation={element} options={optionsProfils} />
       <PiedFormulaire
         message={etat.message}
         enCours={enCours}
@@ -85,7 +85,7 @@ function ContenuRotation({ etat, rotation, options }: { etat: EtatFormulaireList
       <fieldset className="flex flex-col gap-3">
         <legend className="mb-1 text-base font-semibold text-marine">{textes.planning}</legend>
         {options.length === 0 ? (
-          <p className="rounded-lg border border-bordure bg-fond p-4 text-sm text-texte-secondaire">{textes.aucunCalendrier}</p>
+          <p className="rounded-lg border border-bordure bg-fond p-4 text-sm text-texte-secondaire">{textes.aucunProfil}</p>
         ) : (
           <PlanningRotation
             type={type}

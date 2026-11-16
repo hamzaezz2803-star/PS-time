@@ -103,8 +103,14 @@ export const LIMITE_INFORMATIONS_EMPLOYE = 20;
 export const LONGUEUR_MAX_LIBELLE_INFORMATION = 60;
 export const LONGUEUR_MAX_VALEUR_INFORMATION = 255;
 
-/** Module Programme (calendriers, groupes, rotations, affectations). */
-export const CHEMIN_CALENDRIERS = "/programme/calendriers";
+/** Module Programme (profils horaires, rotations, groupes, affectations). */
+export const CHEMIN_PROFILS_HORAIRES = "/programme/profils-horaires";
+/** Profil horaire : code de 3 caractères au plus (lettres et chiffres), 24 plages au plus. */
+export const LONGUEUR_MAX_CODE_PROFIL = 3;
+export const PLAGES_PAR_PROFIL_MAX = 24;
+export const TYPES_PROFIL = ["travail", "repos"] as const;
+/** Borne des durées de repas saisies (minutes). */
+export const REPAS_MAX_MINUTES = 720;
 export const CHEMIN_GROUPES = "/programme/groupes";
 export const CHEMIN_ROTATIONS = "/programme/rotations";
 export const CHEMIN_AFFECTATIONS = "/programme/affectations";
@@ -114,31 +120,9 @@ export const LONGUEUR_MAX_DESCRIPTION_GROUPE = 255;
 export const LIMITE_LISTE_PROGRAMME = 500;
 /** Employés proposés dans le choix des membres d'un groupe. */
 export const LIMITE_EMPLOYES_SELECTION = 2000;
-export const FENETRE_POINTAGE_MAX_MINUTES = 720;
-export const TOLERANCE_MAX_MINUTES = 240;
-export const HEURES_SUP_MAX_MINUTES = 1440;
 export const TYPES_ROTATION = ["hebdomadaire", "cycle"] as const;
 export const JOURS_ROTATION_MAX = 31;
 export const JOURS_PAR_SEMAINE = 7;
-/** Valeurs proposées pour un nouveau calendrier (journée de 08:00 à 17:00, pause de 12:00 à 13:00). */
-export const CALENDRIER_PAR_DEFAUT = {
-  debutMinutes: 480,
-  finMinutes: 1020,
-  pauseDebutMinutes: 720,
-  pauseFinMinutes: 780,
-  entreeAvantMinutes: 60,
-  entreeApresMinutes: 60,
-  sortieAvantMinutes: 60,
-  sortieApresMinutes: 60,
-  retardTolereMinutes: 0,
-  departAnticipeTolereMinutes: 0,
-  pointageEntreeObligatoire: true,
-  pointageSortieObligatoire: true,
-  heuresSupActives: false,
-  heuresSupApresMinutes: 0,
-  heuresSupMinimumMinutes: 30,
-  heuresSupMaximumMinutes: 0,
-} as const;
 
 /** Gestion des exceptions : pointages saisis à la main (corrections, tests). */
 export const CHEMIN_POINTAGES_MANUELS = "/exceptions/pointages-manuels";

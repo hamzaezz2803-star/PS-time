@@ -1,132 +1,113 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import type { Calendrier, Rotation } from "../../types/index.ts";
+import type { ProfilHoraire, Rotation } from "../../types/index.ts";
 import { affectationDuJour, planningDuJour, type DonneesPlanning } from "./planning-jour.ts";
+import { PLAGES_JOURNEE_TYPE } from "./profil-horaire.ts";
 import { statutPointage, type EtatPointageEvalue } from "./statut-pointage.ts";
 
 // Données fictives. Fuseau « UTC » : l'heure écrite est l'heure locale.
-const BUREAU: Calendrier = {
-  id: "bureau",
-  nom: "Bureau",
-  debutMinutes: 8 * 60,
-  finMinutes: 17 * 60,
-  pauseDebutMinutes: 12 * 60,
-  pauseFinMinutes: 13 * 60,
-  entreeAvantMinutes: 60,
-  entreeApresMinutes: 60,
-  sortieAvantMinutes: 60,
-  sortieApresMinutes: 60,
-  retardTolereMinutes: 5,
-  departAnticipeTolereMinutes: 5,
-  pointageEntreeObligatoire: true,
-  pointageSortieObligatoire: true,
-  heuresSupActives: true,
-  heuresSupApresMinutes: 15,
-  heuresSupMinimumMinutes: 30,
-  heuresSupMaximumMinutes: 120,
+const JOURNEE: ProfilHoraire = {
+  id: "j8",
+  code: "J8",
+  nom: "Journée 8 h",
+  type: "travail",
+  estBadge: true,
+  repasMinimumMinutes: 45,
+  repasMaximumMinutes: 120,
+  // 07-08 variable, 07:55-08:00 retard toléré n'existe pas ici : voir AVEC_TOLERANCE.
+  plages: PLAGES_JOURNEE_TYPE,
 };
-const NUIT: Calendrier = { ...BUREAU, id: "nuit", nom: "Nuit", debutMinutes: 22 * 60, finMinutes: 6 * 60, pauseDebutMinutes: 2 * 60, pauseFinMinutes: 2 * 60 + 30, heuresSupActives: false };
+const AVEC_TOLERANCE: ProfilHoraire = {
+  ...JOURNEE,
+  id: "tol",
+  plages: [
+    { debut: 0, fin: 420, type: "interdite" },
+    { debut: 420, fin: 480, type: "variable" },
+    { debut: 480, fin: 490, type: "retard_tolere" },
+    { debut: 490, fin: 1020, type: "fixe" },
+    { debut: 1020, fin: 1080, type: "neutralisee" },
+    { debut: 1080, fin: 1440, type: "interdite" },
+  ],
+};
+const NON_BADGE: ProfilHoraire = { ...JOURNEE, id: "nb", estBadge: false };
+const REPOS: ProfilHoraire = { ...JOURNEE, id: "rep", code: "REP", nom: "Repos", type: "repos", plages: [] };
 
-// Semaine type : bureau du lundi au vendredi, repos le week-end.
-const SEMAINE: Rotation = { id: "semaine", nom: "Semaine", type: "hebdomadaire", nombreJours: 7, jours: { 0: "bureau", 1: "bureau", 2: "bureau", 3: "bureau", 4: "bureau" } };
-// Cycle de 2 jours : nuit puis repos.
-const CYCLE_NUIT: Rotation = { id: "cycle", nom: "Nuits", type: "cycle", nombreJours: 2, jours: { 0: "nuit" } };
+// Semaine type : journée du lundi au vendredi, profil « Repos » le samedi, rien le dimanche.
+const SEMAINE: Rotation = { id: "semaine", nom: "Semaine", type: "hebdomadaire", nombreJours: 7, jours: { 0: "j8", 1: "j8", 2: "j8", 3: "j8", 4: "j8", 5: "rep" } };
+const UNE_JOUR: (profil: string) => Rotation = (profil) => ({ id: profil, nom: profil, type: "cycle", nombreJours: 1, jours: { 0: profil } });
 
 const DONNEES: DonneesPlanning = {
   affectations: [
     { rotationId: "semaine", groupeId: "atelier", employeId: null, dateDebut: "2026-01-01", dateFin: null },
-    { rotationId: "cycle", groupeId: null, employeId: "veilleur", dateDebut: "2026-11-02", dateFin: null },
+    { rotationId: "tol", groupeId: null, employeId: "tolere", dateDebut: "2026-01-01", dateFin: null },
+    { rotationId: "nb", groupeId: null, employeId: "libre", dateDebut: "2026-01-01", dateFin: null },
   ],
-  rotations: new Map([[SEMAINE.id, SEMAINE], [CYCLE_NUIT.id, CYCLE_NUIT]]),
-  calendriers: new Map([[BUREAU.id, BUREAU], [NUIT.id, NUIT]]),
+  rotations: new Map([[SEMAINE.id, SEMAINE], ["tol", UNE_JOUR("tol")], ["nb", UNE_JOUR("nb")]]),
+  profils: new Map([JOURNEE, AVEC_TOLERANCE, NON_BADGE, REPOS].map((profil) => [profil.id, profil])),
 };
 
 const OUVRIER = { id: "ouvrier", groupeId: "atelier" };
+const h = (heures: number, minutes = 0) => heures * 60 + minutes;
 // Lundi 16 novembre 2026.
-const statut = (horodatage: string, etat: EtatPointageEvalue, employe: { id: string; groupeId: string | null } = OUVRIER) =>
-  statutPointage({ horodatage: new Date(horodatage), etat }, employe, DONNEES, "UTC");
+const statut = (etat: EtatPointageEvalue, heure: string, employe = OUVRIER, jour = "2026-11-16") =>
+  statutPointage({ horodatage: new Date(`${jour}T${heure}:00Z`), etat }, employe, DONNEES, "UTC");
 
 describe("planningDuJour", () => {
   it("prend l'affectation de l'employé avant celle de son groupe", () => {
-    const veilleurDansAtelier = { id: "veilleur", groupeId: "atelier" };
-    assert.equal(affectationDuJour(veilleurDansAtelier, "2026-11-16", DONNEES.affectations)?.rotationId, "cycle");
+    const affectations = [
+      { rotationId: "groupe", groupeId: "atelier", employeId: null, dateDebut: "2026-01-01", dateFin: null },
+      { rotationId: "perso", groupeId: null, employeId: "ouvrier", dateDebut: "2026-11-01", dateFin: "2026-11-30" },
+    ];
+    assert.equal(affectationDuJour(OUVRIER, "2026-11-16", affectations)?.rotationId, "perso");
+    assert.equal(affectationDuJour(OUVRIER, "2026-12-01", affectations)?.rotationId, "groupe");
   });
 
-  it("suit le cycle depuis le début de l'affectation", () => {
-    const veilleur = { id: "veilleur", groupeId: null };
-    assert.equal(planningDuJour(veilleur, "2026-11-02", DONNEES).type, "travail");
-    assert.equal(planningDuJour(veilleur, "2026-11-03", DONNEES).type, "repos");
-  });
-
-  it("ne trouve rien sans affectation ni avant son début", () => {
+  it("donne le profil de travail, un repos (profil Repos ou jour vide) ou rien", () => {
+    assert.equal(planningDuJour(OUVRIER, "2026-11-16", DONNEES).type, "travail");
+    assert.equal(planningDuJour(OUVRIER, "2026-11-21", DONNEES).type, "repos");
+    assert.equal(planningDuJour(OUVRIER, "2026-11-22", DONNEES).type, "repos");
     assert.equal(planningDuJour({ id: "seul", groupeId: null }, "2026-11-16", DONNEES).type, "aucun");
-    assert.equal(planningDuJour({ id: "veilleur", groupeId: null }, "2026-11-01", DONNEES).type, "aucun");
   });
 });
 
-describe("statutPointage : entrée", () => {
-  it("à l'heure, y compris dans la tolérance", () => {
-    assert.equal(statut("2026-11-16T07:50:00Z", "entree").code, "a_l_heure");
-    assert.equal(statut("2026-11-16T08:05:00Z", "entree").code, "a_l_heure");
-  });
-
-  it("en retard au-delà de la tolérance, avec le nombre de minutes", () => {
-    assert.deepEqual({ ...statut("2026-11-16T08:12:00Z", "entree"), calendrier: undefined }, { code: "retard", minutes: 12, calendrier: undefined, jourService: "2026-11-16" });
-  });
-
-  it("hors fenêtre trop tôt ou trop tard", () => {
-    assert.equal(statut("2026-11-16T06:30:00Z", "entree").code, "hors_fenetre");
-    assert.equal(statut("2026-11-16T09:30:00Z", "entree").code, "hors_fenetre");
-  });
-
-  it("jour de repos et absence de planning", () => {
-    assert.equal(statut("2026-11-15T08:00:00Z", "entree").code, "jour_repos");
-    assert.equal(statut("2026-11-16T08:00:00Z", "entree", { id: "seul", groupeId: null }).code, "aucun_planning");
+describe("statutPointage : exemple du schéma (réel 7:30, 12:00, 13:30, 19:00)", () => {
+  it("valide 08:00, 12:00, 14:00 et 18:00, sans retard", () => {
+    assert.deepEqual([statut("entree", "07:30").code, statut("entree", "07:30").pointValide], ["a_l_heure", h(8)]);
+    assert.deepEqual([statut("debut_pause", "12:00").code, statut("debut_pause", "12:00").pointValide], ["conforme", h(12)]);
+    assert.deepEqual([statut("fin_pause", "13:30").code, statut("fin_pause", "13:30").pointValide], ["conforme", h(14)]);
+    assert.deepEqual([statut("sortie", "19:00").code, statut("sortie", "19:00").pointValide], ["a_l_heure", h(18)]);
   });
 });
 
-describe("statutPointage : sortie", () => {
-  it("départ anticipé au-delà de la tolérance", () => {
-    assert.deepEqual([statut("2026-11-16T16:40:00Z", "sortie").code, statut("2026-11-16T16:40:00Z", "sortie").minutes], ["depart_anticipe", 20]);
-    assert.equal(statut("2026-11-16T16:57:00Z", "sortie").code, "a_l_heure");
+describe("statutPointage : plages fixes", () => {
+  it("compte le retard et le départ anticipé à partir des bornes de la plage fixe", () => {
+    assert.deepEqual(statut("entree", "08:12"), { code: "retard", minutes: 12, pointValide: h(8, 12), profil: JOURNEE });
+    assert.equal(statut("sortie", "17:40").code, "depart_anticipe");
+    assert.equal(statut("sortie", "17:40").minutes, 20);
   });
 
-  it("heures sup. comptées après le délai, à partir du minimum, plafonnées", () => {
-    // 17:40 : 40 min après la fin, moins 15 min de délai = 25 min, sous le minimum de 30.
-    assert.equal(statut("2026-11-16T17:40:00Z", "sortie").code, "a_l_heure");
-    assert.deepEqual([statut("2026-11-16T18:00:00Z", "sortie").code, statut("2026-11-16T18:00:00Z", "sortie").minutes], ["heures_sup", 45]);
-    // 19:30 : 135 min comptables, plafonnées à 120 (fenêtre élargie au-delà du plafond).
-    assert.equal(statut("2026-11-16T19:30:00Z", "sortie").minutes, 120);
-  });
-});
-
-describe("statutPointage : pauses et heures sup.", () => {
-  it("pause anticipée et retour de pause en retard", () => {
-    assert.deepEqual([statut("2026-11-16T11:45:00Z", "debut_pause").code, statut("2026-11-16T11:45:00Z", "debut_pause").minutes], ["pause_anticipee", 15]);
-    assert.equal(statut("2026-11-16T12:05:00Z", "debut_pause").code, "conforme");
-    assert.deepEqual([statut("2026-11-16T13:20:00Z", "fin_pause").code, statut("2026-11-16T13:20:00Z", "fin_pause").minutes], ["retour_pause_retard", 20]);
-  });
-
-  it("heures sup. pointées avant la fin du service", () => {
-    assert.equal(statut("2026-11-16T16:00:00Z", "debut_heures_sup").code, "avant_fin_service");
-    assert.equal(statut("2026-11-16T17:30:00Z", "debut_heures_sup").code, "conforme");
+  it("signale une pause commencée tôt et un retour de pause tardif", () => {
+    assert.equal(statut("debut_pause", "11:50").code, "pause_anticipee");
+    assert.equal(statut("debut_pause", "11:50").minutes, 10);
+    assert.equal(statut("fin_pause", "14:05").code, "retour_pause_retard");
+    assert.equal(statut("fin_pause", "14:05").minutes, 5);
   });
 });
 
-describe("statutPointage : service de nuit", () => {
-  const veilleur = { id: "veilleur", groupeId: null };
-
-  it("rattache la sortie du matin au service commencé la veille", () => {
-    const resultat = statut("2026-11-03T06:00:00Z", "sortie", veilleur);
-    assert.equal(resultat.code, "a_l_heure");
-    assert.equal(resultat.jourService, "2026-11-02");
+describe("statutPointage : autres plages et cas", () => {
+  it("refuse une plage interdite et signale une plage neutralisée", () => {
+    assert.equal(statut("entree", "05:00").code, "plage_interdite");
+    assert.equal(statut("sortie", "17:30", { id: "tolere", groupeId: null }).code, "plage_neutralisee");
   });
 
-  it("place la pause de 02:00 dans le service de la veille", () => {
-    assert.equal(statut("2026-11-03T02:40:00Z", "fin_pause", veilleur).code, "retour_pause_retard");
+  it("tolère un retard dans la plage de retard toléré, validé au début de la plage fixe", () => {
+    const resultat = statut("entree", "08:04", { id: "tolere", groupeId: null });
+    assert.deepEqual([resultat.code, resultat.minutes, resultat.pointValide], ["retard_tolere", 4, h(8, 10)]);
   });
 
-  it("refuse des heures sup. non prévues par le calendrier", () => {
-    assert.equal(statut("2026-11-03T06:30:00Z", "debut_heures_sup", veilleur).code, "heures_sup_non_prevues");
+  it("indique repos, profil non badgé et absence de planning", () => {
+    assert.equal(statut("entree", "08:00", OUVRIER, "2026-11-21").code, "jour_repos");
+    assert.equal(statut("entree", "09:00", { id: "libre", groupeId: null }).code, "non_badge");
+    assert.equal(statut("entree", "08:00", { id: "seul", groupeId: null }).code, "aucun_planning");
   });
 });

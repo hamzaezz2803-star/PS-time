@@ -17,7 +17,7 @@ export const TEXTES_NAVIGATION = {
   postes: "Postes",
   groupeProgramme: "Planning",
   programme: "Programme",
-  calendriers: "Calendriers",
+  profilsHoraires: "Profils horaires",
   rotations: "Rotations",
   groupes: "Groupes",
   affectations: "Affectations",

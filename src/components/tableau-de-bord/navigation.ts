@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import {
   CHEMIN_AFFECTATIONS,
-  CHEMIN_CALENDRIERS,
+  CHEMIN_PROFILS_HORAIRES,
   CHEMIN_DEPARTEMENTS,
   CHEMIN_ESPACE,
   CHEMIN_GROUPES,
@@ -81,7 +81,7 @@ export const GROUPES_NAVIGATION: GroupeNavigation[] = [
         libelle: T.programme,
         icone: CalendarCog,
         sousLiens: [
-          { libelle: T.calendriers, icone: CalendarClock, href: CHEMIN_CALENDRIERS },
+          { libelle: T.profilsHoraires, icone: CalendarClock, href: CHEMIN_PROFILS_HORAIRES },
           { libelle: T.rotations, icone: Repeat, href: CHEMIN_ROTATIONS },
           { libelle: T.groupes, icone: UsersRound, href: CHEMIN_GROUPES },
           { libelle: T.affectations, icone: CalendarRange, href: CHEMIN_AFFECTATIONS },

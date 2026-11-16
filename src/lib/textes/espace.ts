@@ -15,8 +15,8 @@ export const TEXTES_ESPACE = {
   sousTitrePlanning: "Quatre étapes, dans cet ordre, pour organiser les horaires de vos équipes.",
   etape: (numero: number) => `Étape ${numero}`,
   etapes: {
-    calendriers: "Créneaux horaires, pauses, tolérances et heures supplémentaires.",
-    rotations: "Semaine type ou cycle : un calendrier ou un repos pour chaque jour.",
+    profilsHoraires: "La journée découpée en plages : fixe, variable, repas, interdite...",
+    rotations: "Semaine type ou cycle : un profil horaire ou un repos pour chaque jour.",
     groupes: "Rassemblez les employés qui suivent le même planning.",
     affectations: "Attribuez une rotation à un groupe ou à un employé, sur une période.",
   },

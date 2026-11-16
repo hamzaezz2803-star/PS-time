@@ -4,8 +4,8 @@ import { refresh } from "next/cache";
 import { z } from "zod";
 import { peutGererModule } from "@/lib/actions/droits";
 import { indexEnDoublon } from "@/lib/donnees/erreurs";
+import { profilsExistent } from "@/lib/donnees/profils-horaires";
 import {
-  calendriersExistent,
   enregistrerRotation as enregistrerEnBase,
   rotationEstUtilisee,
   supprimerRotationParId,
@@ -29,8 +29,8 @@ export async function enregistrerRotation(_etat: EtatFormulaire, formulaire: For
   if (id && !id.success) return { message: textes.introuvable };
   const validation = validerRotation(formulaire);
   if (!validation.ok) return { erreursChamps: validation.erreursChamps };
-  if (!(await calendriersExistent(Object.values(validation.donnees.jours)))) {
-    return { erreursChamps: { jours: textes.erreurs.calendrierIntrouvable } };
+  if (!(await profilsExistent(Object.values(validation.donnees.jours)))) {
+    return { erreursChamps: { jours: textes.erreurs.profilIntrouvable } };
   }
 
   try {

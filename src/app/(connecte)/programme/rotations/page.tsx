@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { CadrePageProgramme, refusSiNonAutorise } from "@/components/programme/cadre-page-programme";
 import { GestionRotations } from "@/components/programme/gestion-rotations";
-import { listerCalendriers } from "@/lib/donnees/calendriers";
+import { listerProfils } from "@/lib/donnees/profils-horaires";
 import { listerRotations } from "@/lib/donnees/rotations";
 import { TEXTES_PROGRAMME } from "@/lib/textes/programme";
 
@@ -20,6 +20,6 @@ export default function PageRotations() {
 async function ContenuRotations() {
   const refus = await refusSiNonAutorise();
   if (refus) return refus;
-  const [rotations, calendriers] = await Promise.all([listerRotations(), listerCalendriers()]);
-  return <GestionRotations rotations={rotations} calendriers={calendriers} />;
+  const [rotations, profils] = await Promise.all([listerRotations(), listerProfils()]);
+  return <GestionRotations rotations={rotations} profils={profils} />;
 }

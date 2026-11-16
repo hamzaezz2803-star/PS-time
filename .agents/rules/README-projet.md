@@ -54,7 +54,8 @@ Ces règles s'appliquent à **chaque prompt** et à chaque modification du proje
 
 - `src/proxy.ts` redirige vers `/connexion` sans cookie de session (confort seulement). La vraie vérification est faite dans chaque page et action par `obtenirUtilisateurConnecte()` (`src/lib/donnees/session.ts`).
 - Un compte désactivé (`est_actif = 0`) ne peut plus ouvrir de session, et ses sessions existantes sont refusées.
-- Tant que `doit_changer_mot_de_passe = 1`, l'espace renvoie vers `/changer-mot-de-passe`.
+- Tant que `doit_changer_mot_de_passe = 1`, l'espace renvoie vers `/changer-mot-de-passe`. Après tout changement de mot de passe (provisoire ou volontaire), toutes les sessions sont fermées et on revient sur `/connexion?motDePasseChange=1` (message de confirmation) pour se reconnecter avec le nouveau mot de passe ; on arrive alors sur le tableau de bord avec ses seuls modules.
+- Gestion des utilisateurs : colonne « Rôle » (Super administrateur : le premier compte, créé avec `pstime` ; Administrateur : les comptes qu'il crée).
 
 ## Règles métier
 

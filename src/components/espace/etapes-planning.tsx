@@ -1,11 +1,11 @@
 import Link from "next/link";
 import { CalendarClock, CalendarRange, ChevronRight, Repeat, UsersRound, type LucideIcon } from "lucide-react";
-import { CHEMIN_AFFECTATIONS, CHEMIN_CALENDRIERS, CHEMIN_GROUPES, CHEMIN_ROTATIONS } from "@/lib/constantes";
+import { CHEMIN_AFFECTATIONS, CHEMIN_PROFILS_HORAIRES, CHEMIN_GROUPES, CHEMIN_ROTATIONS } from "@/lib/constantes";
 import { TEXTES_ESPACE } from "@/lib/textes/espace";
 import { TEXTES_NAVIGATION } from "@/lib/textes/navigation";
 
 const ETAPES: { href: string; titre: string; description: string; Icone: LucideIcon }[] = [
-  { href: CHEMIN_CALENDRIERS, titre: TEXTES_NAVIGATION.calendriers, description: TEXTES_ESPACE.etapes.calendriers, Icone: CalendarClock },
+  { href: CHEMIN_PROFILS_HORAIRES, titre: TEXTES_NAVIGATION.profilsHoraires, description: TEXTES_ESPACE.etapes.profilsHoraires, Icone: CalendarClock },
   { href: CHEMIN_ROTATIONS, titre: TEXTES_NAVIGATION.rotations, description: TEXTES_ESPACE.etapes.rotations, Icone: Repeat },
   { href: CHEMIN_GROUPES, titre: TEXTES_NAVIGATION.groupes, description: TEXTES_ESPACE.etapes.groupes, Icone: UsersRound },
   { href: CHEMIN_AFFECTATIONS, titre: TEXTES_NAVIGATION.affectations, description: TEXTES_ESPACE.etapes.affectations, Icone: CalendarRange },

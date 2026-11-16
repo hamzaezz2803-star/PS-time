@@ -1,13 +1,13 @@
 import "server-only";
 
-import { asc, count, eq, inArray } from "drizzle-orm";
+import { asc, eq } from "drizzle-orm";
 import { LIMITE_LISTE_PROGRAMME } from "@/lib/constantes";
 import type { DonneesRotation } from "@/lib/validation/rotation";
 import type { Rotation } from "@/types";
 import { obtenirBase } from "./base";
-import { affectations, calendriers, joursRotation, rotations } from "./schema";
+import { affectations, joursRotation, rotations } from "./schema";
 
-/** Rotations triées par nom, avec le calendrier de chaque jour travaillé. */
+/** Rotations triées par nom, avec le profil horaire de chaque jour. */
 export async function listerRotations(): Promise<Rotation[]> {
   const base = obtenirBase();
   const [lignes, jours] = await Promise.all([
@@ -17,24 +17,16 @@ export async function listerRotations(): Promise<Rotation[]> {
       .orderBy(asc(rotations.nom))
       .limit(LIMITE_LISTE_PROGRAMME),
     base
-      .select({ rotationId: joursRotation.rotationId, numeroJour: joursRotation.numeroJour, calendrierId: joursRotation.calendrierId })
+      .select({ rotationId: joursRotation.rotationId, numeroJour: joursRotation.numeroJour, profilId: joursRotation.profilId })
       .from(joursRotation),
   ]);
   return lignes.map((rotation) => ({
     ...rotation,
     type: rotation.type === "cycle" ? "cycle" : "hebdomadaire",
     jours: Object.fromEntries(
-      jours.filter((jour) => jour.rotationId === rotation.id).map((jour) => [jour.numeroJour, jour.calendrierId]),
+      jours.filter((jour) => jour.rotationId === rotation.id).map((jour) => [jour.numeroJour, jour.profilId]),
     ),
   }));
-}
-
-/** Vrai si tous les identifiants désignent des calendriers existants. */
-export async function calendriersExistent(ids: string[]): Promise<boolean> {
-  const uniques = [...new Set(ids)];
-  if (uniques.length === 0) return true;
-  const [resultat] = await obtenirBase().select({ nombre: count() }).from(calendriers).where(inArray(calendriers.id, uniques));
-  return resultat.nombre === uniques.length;
 }
 
 /**
@@ -54,11 +46,11 @@ export async function enregistrerRotation(id: string | null, donnees: DonneesRot
       idRotation = crypto.randomUUID();
       await transaction.insert(rotations).values({ id: idRotation, ...champs });
     }
-    const lignes = Object.entries(jours).map(([numeroJour, calendrierId]) => ({
+    const lignes = Object.entries(jours).map(([numeroJour, profilId]) => ({
       id: crypto.randomUUID(),
       rotationId: idRotation,
       numeroJour: Number(numeroJour),
-      calendrierId,
+      profilId,
     }));
     if (lignes.length > 0) await transaction.insert(joursRotation).values(lignes);
     return idRotation;

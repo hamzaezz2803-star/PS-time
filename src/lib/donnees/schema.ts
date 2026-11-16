@@ -425,52 +425,59 @@ export const pointages = mysqlTable(
 );
 
 /**
- * Calendriers (créneaux horaires). Les heures sont en minutes depuis minuit (0 à 1439) :
- * une fin plus petite que le début signifie un service de nuit qui finit le lendemain.
+ * Profils horaires (modèle d'une journée) : code de 3 caractères, libellé, type « travail » ou
+ * « repos », badgé ou non. Les plages de la journée sont dans `plages_profils`.
  */
-export const calendriers = mysqlTable(
-  "calendriers",
+export const profilsHoraires = mysqlTable(
+  "profils_horaires",
   {
     id: identifiantUnique(),
+    code: varchar("code", { length: 3 }).notNull(),
     nom: varchar("nom", { length: 60 }).notNull(),
-    debutMinutes: int("debut_minutes").notNull(),
-    finMinutes: int("fin_minutes").notNull(),
-    // Pause de … à … (vides toutes les deux = pas de pause), comprise dans le service.
-    pauseDebutMinutes: int("pause_debut_minutes"),
-    pauseFinMinutes: int("pause_fin_minutes"),
-    // Fenêtres où un pointage compte comme entrée ou sortie de ce service.
-    entreeAvantMinutes: int("entree_avant_minutes").notNull().default(60),
-    entreeApresMinutes: int("entree_apres_minutes").notNull().default(60),
-    sortieAvantMinutes: int("sortie_avant_minutes").notNull().default(60),
-    sortieApresMinutes: int("sortie_apres_minutes").notNull().default(60),
-    retardTolereMinutes: int("retard_tolere_minutes").notNull().default(0),
-    departAnticipeTolereMinutes: int("depart_anticipe_tolere_minutes").notNull().default(0),
-    pointageEntreeObligatoire: boolean("pointage_entree_obligatoire").notNull().default(true),
-    pointageSortieObligatoire: boolean("pointage_sortie_obligatoire").notNull().default(true),
-    heuresSupActives: boolean("heures_sup_actives").notNull().default(false),
-    heuresSupApresMinutes: int("heures_sup_apres_minutes").notNull().default(0),
-    heuresSupMinimumMinutes: int("heures_sup_minimum_minutes").notNull().default(30),
-    // 0 = sans limite.
-    heuresSupMaximumMinutes: int("heures_sup_maximum_minutes").notNull().default(0),
+    type: varchar("type", { length: 10 }).notNull().default("travail"),
+    estBadge: boolean("est_badge").notNull().default(true),
+    // Durée de la pause repas : minimum et maximum (vides = non contrôlée).
+    repasMinimumMinutes: int("repas_minimum_minutes"),
+    repasMaximumMinutes: int("repas_maximum_minutes"),
     creeLe: dateCreation(),
     modifieLe: dateModification(),
   },
   (table) => [
-    uniqueIndex("calendriers_nom_idx").on(table.nom),
-    check("calendriers_nom_non_vide", sql`CHAR_LENGTH(TRIM(${table.nom})) > 0`),
-    check("calendriers_heures_valides", sql`${table.debutMinutes} BETWEEN 0 AND 1439 AND ${table.finMinutes} BETWEEN 0 AND 1439 AND ${table.debutMinutes} <> ${table.finMinutes}`),
+    uniqueIndex("profils_horaires_code_idx").on(table.code),
+    uniqueIndex("profils_horaires_nom_idx").on(table.nom),
+    check("profils_horaires_code_valide", sql`${table.code} REGEXP '^[A-Z0-9]{1,3}$'`),
+    check("profils_horaires_nom_non_vide", sql`CHAR_LENGTH(TRIM(${table.nom})) > 0`),
+    check("profils_horaires_type_valide", sql`${table.type} IN ('travail', 'repos')`),
     check(
-      "calendriers_pause_valide",
-      sql`(${table.pauseDebutMinutes} IS NULL AND ${table.pauseFinMinutes} IS NULL) OR (${table.pauseDebutMinutes} BETWEEN 0 AND 1439 AND ${table.pauseFinMinutes} BETWEEN 0 AND 1439 AND ${table.pauseDebutMinutes} <> ${table.pauseFinMinutes})`,
+      "profils_horaires_repas_borne",
+      sql`(${table.repasMinimumMinutes} IS NULL OR ${table.repasMinimumMinutes} BETWEEN 0 AND 720) AND (${table.repasMaximumMinutes} IS NULL OR ${table.repasMaximumMinutes} BETWEEN 0 AND 720)`,
     ),
+  ],
+);
+
+/**
+ * Plages d'un profil : de `debut` à `fin` (minutes depuis minuit, fin exclue, 1440 = 24:00).
+ * Bout à bout de 00:00 à 24:00 (vérifié par l'application). Supprimées avec leur profil.
+ */
+export const plagesProfils = mysqlTable(
+  "plages_profils",
+  {
+    id: identifiantUnique(),
+    profilId: char("profil_id", { length: 36 })
+      .notNull()
+      .references(() => profilsHoraires.id, { onDelete: "cascade" }),
+    debutMinutes: int("debut_minutes").notNull(),
+    finMinutes: int("fin_minutes").notNull(),
+    type: varchar("type", { length: 15 }).notNull(),
+    creeLe: dateCreation(),
+    modifieLe: dateModification(),
+  },
+  (table) => [
+    uniqueIndex("plages_profils_profil_debut_idx").on(table.profilId, table.debutMinutes),
+    check("plages_profils_bornes", sql`${table.debutMinutes} BETWEEN 0 AND 1439 AND ${table.finMinutes} BETWEEN 1 AND 1440 AND ${table.finMinutes} > ${table.debutMinutes}`),
     check(
-      "calendriers_fenetres_bornees",
-      sql`${table.entreeAvantMinutes} BETWEEN 0 AND 720 AND ${table.entreeApresMinutes} BETWEEN 0 AND 720 AND ${table.sortieAvantMinutes} BETWEEN 0 AND 720 AND ${table.sortieApresMinutes} BETWEEN 0 AND 720`,
-    ),
-    check("calendriers_tolerances_bornees", sql`${table.retardTolereMinutes} BETWEEN 0 AND 240 AND ${table.departAnticipeTolereMinutes} BETWEEN 0 AND 240`),
-    check(
-      "calendriers_heures_sup_bornees",
-      sql`${table.heuresSupApresMinutes} BETWEEN 0 AND 720 AND ${table.heuresSupMinimumMinutes} BETWEEN 0 AND 720 AND ${table.heuresSupMaximumMinutes} BETWEEN 0 AND 1440`,
+      "plages_profils_type_valide",
+      sql`${table.type} IN ('interdite', 'neutralisee', 'variable', 'fixe', 'repas', 'retard_tolere')`,
     ),
   ],
 );
@@ -515,7 +522,7 @@ export const rotations = mysqlTable(
   ],
 );
 
-/** Jours travaillés d'une rotation (un jour absent = repos). */
+/** Profil horaire de chaque jour d'une rotation (un jour absent = repos). */
 export const joursRotation = mysqlTable(
   "jours_rotation",
   {
@@ -524,15 +531,16 @@ export const joursRotation = mysqlTable(
       .notNull()
       .references(() => rotations.id, { onDelete: "cascade" }),
     numeroJour: int("numero_jour").notNull(),
-    calendrierId: char("calendrier_id", { length: 36 })
+    // Un profil utilisé par une rotation ne peut pas être supprimé.
+    profilId: char("profil_id", { length: 36 })
       .notNull()
-      .references(() => calendriers.id, { onDelete: "restrict" }),
+      .references(() => profilsHoraires.id, { onDelete: "restrict" }),
     creeLe: dateCreation(),
     modifieLe: dateModification(),
   },
   (table) => [
     uniqueIndex("jours_rotation_rotation_jour_idx").on(table.rotationId, table.numeroJour),
-    index("jours_rotation_calendrier_idx").on(table.calendrierId),
+    index("jours_rotation_profil_idx").on(table.profilId),
     check("jours_rotation_numero_borne", sql`${table.numeroJour} BETWEEN 0 AND 30`),
   ],
 );
