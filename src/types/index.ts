@@ -13,6 +13,8 @@ export type ResultatCodeInstallation = { ok: true; jeton: string } | { ok: false
 export type EtatPremierCompte = {
   erreursChamps?: Record<string, string>;
   message?: string;
+  /** Identifiant saisi, réaffiché après une erreur (les mots de passe ne sont jamais renvoyés). */
+  identifiantSaisi?: string;
   /** Identifiant créé, pré-rempli ensuite dans l'écran de connexion. */
   identifiantCree?: string;
 };

@@ -47,6 +47,7 @@ export function FormulairePremierCompte({
         <ChampFormulaire
           nom="identifiant"
           libelle={textes.identifiant}
+          defaultValue={etat.identifiantSaisi ?? ""}
           placeholder={textes.exempleIdentifiant}
           maxLength={LONGUEUR_MAX_IDENTIFIANT}
           autoComplete="username"

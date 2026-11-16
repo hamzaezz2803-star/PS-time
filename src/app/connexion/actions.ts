@@ -65,7 +65,8 @@ export async function creerPremierCompte(_etat: EtatPremierCompte, formulaire: F
   const validation = validerPremierCompte(formulaire);
   if (!validation.ok) {
     const { jeton, ...erreursChamps } = validation.erreursChamps ?? {};
-    return jeton ? { message: textesInstallation.erreurs.expire } : { erreursChamps };
+    const identifiantSaisi = String(formulaire.get("identifiant") ?? "");
+    return jeton ? { message: textesInstallation.erreurs.expire } : { erreursChamps, identifiantSaisi };
   }
   const { jeton, identifiant, nouveau } = validation.donnees;
 
