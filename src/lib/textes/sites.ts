@@ -22,7 +22,11 @@ export const TEXTES_SITES = {
   fermer: "Fermer",
   colonnes: { nom: "Nom", adresse: "Adresse", rattachements: "Rattachements" },
   rattachements: (departements: number, postes: number, employes: number) =>
-    `${departements} dép. · ${postes} postes · ${employes} employés`,
+    [
+      departements <= 1 ? `${departements} département` : `${departements} départements`,
+      postes <= 1 ? `${postes} poste` : `${postes} postes`,
+      employes <= 1 ? `${employes} employé` : `${employes} employés`,
+    ].join(" · "),
   nom: "Nom du site",
   exempleNom: "Par exemple : Usine de Kénitra",
   adresse: "Adresse",

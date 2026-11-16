@@ -11,6 +11,7 @@ import {
 } from "@/lib/constantes";
 import { datesEmploiCoherentes, estDateValide, normaliserTelephone } from "@/lib/metier/employes";
 import { TEXTES_PERSONNES } from "@/lib/textes/personnes";
+import { siteFacultatif } from "./site";
 
 const { erreurs } = TEXTES_PERSONNES;
 
@@ -48,6 +49,7 @@ const schemaEmploye = z
     nom: nomPersonne(erreurs.nomVide),
     departementId: z.uuid({ error: erreurs.departementVide }),
     posteId: facultatif.pipe(z.uuid({ error: erreurs.posteIntrouvable }).nullable()),
+    siteId: siteFacultatif,
     genre: facultatif.pipe(z.enum(GENRES, { error: erreurs.genreInvalide }).nullable()),
     typePieceIdentite: facultatif.pipe(
       z.enum(TYPES_PIECE_IDENTITE, { error: erreurs.typePieceInvalide }).nullable(),
@@ -106,6 +108,7 @@ export const CHAMPS_EMPLOYE = [
   "nom",
   "departementId",
   "posteId",
+  "siteId",
   "genre",
   "typePieceIdentite",
   "numeroPieceIdentite",

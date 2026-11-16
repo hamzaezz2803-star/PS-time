@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { formaterJour } from "@/lib/formats";
 import { formaterTelephone } from "@/lib/metier/employes";
 import { TEXTES_PERSONNES } from "@/lib/textes/personnes";
+import { TEXTES_SITES } from "@/lib/textes/sites";
 import type { EmployeDetail } from "@/types";
 import { AvatarEmploye } from "./avatar-employe";
 
@@ -50,6 +51,7 @@ export function FicheEmploye({ employe }: { employe: EmployeDetail }) {
         <Element libelle={textes.numeroBadge} valeur={<span className="tabular-nums">{employe.numeroBadge}</span>} />
         <Element libelle={textes.prenom} valeur={employe.prenom} />
         <Element libelle={textes.nom} valeur={employe.nom} />
+        <Element libelle={TEXTES_SITES.champ.libelle} valeur={employe.site} />
         <Element libelle={textes.departement} valeur={employe.departement} />
         <Element libelle={textes.poste} valeur={employe.poste} />
       </Section>

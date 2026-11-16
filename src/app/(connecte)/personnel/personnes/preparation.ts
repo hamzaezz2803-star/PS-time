@@ -6,6 +6,8 @@ import { indexEnDoublon } from "@/lib/donnees/erreurs";
 import type { ChangementPhoto } from "@/lib/donnees/photos-employes";
 import { verifierPhoto } from "@/lib/metier/photo";
 import { listerPostes } from "@/lib/donnees/postes";
+import { listerOptionsSites } from "@/lib/donnees/sites";
+import { TEXTES_SITES } from "@/lib/textes/sites";
 import { validerInformations, type Information } from "@/lib/metier/employes";
 import { TEXTES_PERSONNES } from "@/lib/textes/personnes";
 import { CHAMPS_EMPLOYE, lireTexte, validerEmploye, type DonneesEmploye } from "@/lib/validation/employe";
@@ -52,7 +54,7 @@ type Preparation =
  * supplémentaires, département et poste encore existants. `retour` réaffiche la saisie.
  */
 export async function preparerEmploye(formulaire: FormData): Promise<Preparation> {
-  const [departements, postes] = await Promise.all([listerDepartements(), listerPostes()]);
+  const [departements, postes, sites] = await Promise.all([listerDepartements(), listerPostes(), listerOptionsSites()]);
   const valeurs = Object.fromEntries(CHAMPS_EMPLOYE.map((nom) => [nom, lireTexte(formulaire.get(nom))]));
   const saisieInformations = lireInformations(formulaire);
   const retour = { valeurs, informations: saisieInformations };
@@ -67,7 +69,10 @@ export async function preparerEmploye(formulaire: FormData): Promise<Preparation
     if (erreur.valeur) erreursChamps[`information_${index}_valeur`] = erreurs.informations[erreur.valeur];
   }
   if (validation.ok) {
-    const { departementId, posteId } = validation.donnees;
+    const { departementId, posteId, siteId } = validation.donnees;
+    if (siteId && !sites.some((site) => site.valeur === siteId)) {
+      erreursChamps.siteId = TEXTES_SITES.champ.introuvable;
+    }
     if (!departements.some((departement) => departement.id === departementId)) {
       erreursChamps.departementId = erreurs.departementIntrouvable;
     }

@@ -6,6 +6,7 @@ import {
   CalendarRange,
   ClipboardClock,
   ClockAlert,
+  Factory,
   LayoutDashboard,
   Repeat,
   UserRound,
@@ -23,6 +24,7 @@ import {
   CHEMIN_POINTAGES_MANUELS,
   CHEMIN_POSTES,
   CHEMIN_ROTATIONS,
+  CHEMIN_SITES,
 } from "@/lib/constantes";
 import { TEXTES_NAVIGATION as T } from "@/lib/textes/navigation";
 
@@ -54,9 +56,11 @@ export const GROUPES_NAVIGATION: GroupeNavigation[] = [
         libelle: T.personnel,
         icone: Users,
         sousLiens: [
-          { libelle: T.personnes, icone: UserRound, href: CHEMIN_PERSONNES },
+          // Ordre de saisie : un site, ses départements, ses postes, puis ses employés.
+          { libelle: T.sites, icone: Factory, href: CHEMIN_SITES },
           { libelle: T.departements, icone: Building2, href: CHEMIN_DEPARTEMENTS },
           { libelle: T.postes, icone: Briefcase, href: CHEMIN_POSTES },
+          { libelle: T.personnes, icone: UserRound, href: CHEMIN_PERSONNES },
         ],
       },
     ],

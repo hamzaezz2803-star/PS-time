@@ -3,12 +3,13 @@
 import { useActionState } from "react";
 import { enregistrerDepartement } from "@/app/(connecte)/personnel/departements/actions";
 import { ChampParent, type OptionParent } from "@/components/arbre/champ-parent";
+import { ChampSite } from "@/components/sites/champ-site";
 import { ChampFormulaire } from "@/components/ui/champ-formulaire";
+import type { OptionSelection } from "@/components/ui/champ-selection";
 import { PiedFormulaire } from "@/components/ui/pied-formulaire";
 import { LONGUEUR_MAX_NOM_DEPARTEMENT } from "@/lib/constantes";
-import type { ElementArbre } from "@/lib/metier/arbre";
 import { TEXTES_DEPARTEMENTS } from "@/lib/textes/departements";
-import type { EtatFormulaireDepartement } from "@/types";
+import type { Departement, EtatFormulaireDepartement } from "@/types";
 
 const { formulaire: textes } = TEXTES_DEPARTEMENTS;
 const ETAT_INITIAL: EtatFormulaireDepartement = {};
@@ -18,11 +19,13 @@ type Succes = NonNullable<EtatFormulaireDepartement["succes"]>;
 export function FormulaireDepartement({
   departement,
   optionsParent,
+  sites,
   onTermine,
   onAnnuler,
 }: {
-  departement?: ElementArbre;
+  departement?: Departement;
   optionsParent: OptionParent[];
+  sites: OptionSelection[];
   onTermine: (succes: Succes) => void;
   onAnnuler: () => void;
 }) {
@@ -49,6 +52,7 @@ export function FormulaireDepartement({
           required
           erreur={etat.erreursChamps?.nom}
         />
+        <ChampSite sites={sites} valeurInitiale={departement?.siteId ?? null} erreur={etat.erreursChamps?.siteId} />
         <ChampParent
           libelle={textes.parent}
           aucunParent={textes.aucunParent}

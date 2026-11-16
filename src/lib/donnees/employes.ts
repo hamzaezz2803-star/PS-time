@@ -9,7 +9,7 @@ import type { EmployeDetail, EmployeListe } from "@/types";
 import { obtenirBase } from "./base";
 import type { Information } from "@/lib/metier/employes";
 import { appliquerChangementPhoto, type ChangementPhoto } from "./photos-employes";
-import { affectations, departements, employes, informationsEmployes, photosEmployes, postes } from "./schema";
+import { affectations, departements, employes, informationsEmployes, photosEmployes, postes, sites } from "./schema";
 
 /** Aucun critère : toute la liste. */
 const SANS_RECHERCHE: RechercheEmployes = { nom: "", matricule: "", departementId: null };
@@ -111,6 +111,8 @@ export async function obtenirEmploye(id: string): Promise<EmployeDetail | null> 
       departement: departements.nom,
       posteId: employes.posteId,
       poste: postes.nom,
+      siteId: employes.siteId,
+      site: sites.nom,
       genre: employes.genre,
       typePieceIdentite: employes.typePieceIdentite,
       numeroPieceIdentite: employes.numeroPieceIdentite,
@@ -125,6 +127,7 @@ export async function obtenirEmploye(id: string): Promise<EmployeDetail | null> 
     .from(employes)
     .innerJoin(departements, eq(departements.id, employes.departementId))
     .leftJoin(postes, eq(postes.id, employes.posteId))
+    .leftJoin(sites, eq(sites.id, employes.siteId))
     .leftJoin(photosEmployes, eq(photosEmployes.employeId, employes.id))
     .where(eq(employes.id, id))
     .limit(1);

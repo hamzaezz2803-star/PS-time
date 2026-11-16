@@ -6,6 +6,7 @@ import { EnTetePage } from "@/components/ui/en-tete-page";
 import { listerDepartements } from "@/lib/donnees/departements";
 import { compterEmployesParDepartement } from "@/lib/donnees/employes";
 import { obtenirUtilisateurPourEspace } from "@/lib/donnees/session";
+import { listerOptionsSites } from "@/lib/donnees/sites";
 import { TEXTES_DEPARTEMENTS } from "@/lib/textes/departements";
 
 export const metadata: Metadata = { title: TEXTES_DEPARTEMENTS.titrePage };
@@ -23,9 +24,10 @@ export default function PageDepartements() {
 
 async function ContenuDepartements() {
   await obtenirUtilisateurPourEspace();
-  const [departements, nombresEmployes] = await Promise.all([
+  const [departements, nombresEmployes, sites] = await Promise.all([
     listerDepartements(),
     compterEmployesParDepartement(),
+    listerOptionsSites(),
   ]);
-  return <GestionDepartements departements={departements} nombresEmployes={nombresEmployes} />;
+  return <GestionDepartements departements={departements} nombresEmployes={nombresEmployes} sites={sites} />;
 }

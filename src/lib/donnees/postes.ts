@@ -16,6 +16,7 @@ export async function listerPostes(): Promise<Poste[]> {
       nom: postes.nom,
       ordre: postes.ordre,
       parentId: postes.parentId,
+      siteId: postes.siteId,
     })
     .from(postes)
     .orderBy(asc(postes.ordre), asc(postes.nom))

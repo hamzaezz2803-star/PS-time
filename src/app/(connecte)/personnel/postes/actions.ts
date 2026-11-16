@@ -10,6 +10,8 @@ import {
   supprimerPosteParId,
 } from "@/lib/donnees/postes";
 import { obtenirUtilisateurPourEspace } from "@/lib/donnees/session";
+import { siteExiste } from "@/lib/donnees/sites";
+import { TEXTES_SITES } from "@/lib/textes/sites";
 import { nomDejaPris, peutDeplacer } from "@/lib/metier/arbre";
 import { codeDejaPris } from "@/lib/metier/postes";
 import { TEXTES_POSTES } from "@/lib/textes/postes";
@@ -42,7 +44,10 @@ export async function enregistrerPoste(
   const { id, ...donnees } = validation.donnees;
 
   const liste = await listerPostes();
-  if (donnees.parentId && !liste.some((poste) => poste.id === donnees.parentId)) {
+  if (!(await siteExiste(donnees.siteId))) {
+    return { erreursChamps: { siteId: TEXTES_SITES.champ.introuvable } };
+  }
+  if (donnees.parentId &&!liste.some((poste) => poste.id === donnees.parentId)) {
     return { erreursChamps: { parentId: erreurs.parentIntrouvable } };
   }
   if (id && !liste.some((poste) => poste.id === id)) {

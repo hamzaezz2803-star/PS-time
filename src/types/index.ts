@@ -30,8 +30,8 @@ export type EtatFormulaire<Champ extends string = string> = {
   succes?: { message: string; idSelectionne: string | null };
 };
 
-export type EtatFormulaireDepartement = EtatFormulaire<"nom" | "parentId">;
-export type EtatFormulairePoste = EtatFormulaire<"code" | "nom" | "ordre" | "parentId">;
+export type EtatFormulaireDepartement = EtatFormulaire<"nom" | "parentId" | "siteId">;
+export type EtatFormulairePoste = EtatFormulaire<"code" | "nom" | "ordre" | "parentId" | "siteId">;
 
 /** Site (entreprise ou établissement), avec le nombre d'éléments qui y sont rattachés. */
 export type Site = {

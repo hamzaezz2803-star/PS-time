@@ -2,6 +2,7 @@ import { z } from "zod";
 import { LONGUEUR_MAX_NOM_DEPARTEMENT } from "@/lib/constantes";
 import { TEXTES_DEPARTEMENTS } from "@/lib/textes/departements";
 import type { EtatFormulaireDepartement, Resultat } from "@/types";
+import { siteFacultatif } from "./site";
 
 const { erreurs } = TEXTES_DEPARTEMENTS;
 
@@ -22,6 +23,7 @@ const schemaDepartement = z.object({
     .string()
     .transform((valeur) => (valeur === "" ? null : valeur))
     .pipe(z.uuid({ error: erreurs.parentIntrouvable }).nullable()),
+  siteId: siteFacultatif,
 });
 
 export type DonneesDepartement = z.infer<typeof schemaDepartement>;
@@ -37,6 +39,7 @@ export function validerDepartement(
     id: id === "" ? undefined : id,
     nom: lireTexte(formulaire.get("nom")),
     parentId: lireTexte(formulaire.get("parentId")),
+    siteId: lireTexte(formulaire.get("siteId")),
   });
 
   if (analyse.success) return { ok: true, donnees: analyse.data };
@@ -48,6 +51,7 @@ export function validerDepartement(
     erreursChamps: {
       nom: fieldErrors.nom?.[0],
       parentId: fieldErrors.parentId?.[0] ?? fieldErrors.id?.[0],
+      siteId: fieldErrors.siteId?.[0],
     },
   };
 }

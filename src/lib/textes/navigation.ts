@@ -11,6 +11,7 @@ export const TEXTES_NAVIGATION = {
   groupePersonnel: "Personnel",
   tableauDeBord: "Tableau de bord",
   personnel: "Personnel",
+  sites: "Sites",
   personnes: "Personnes",
   departements: "Départements",
   postes: "Postes",

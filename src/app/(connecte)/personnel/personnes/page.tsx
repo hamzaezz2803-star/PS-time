@@ -9,6 +9,7 @@ import { EMPLOYES_PAR_PAGE } from "@/lib/constantes";
 import { listerDepartements } from "@/lib/donnees/departements";
 import { compterEmployes, listerEmployes } from "@/lib/donnees/employes";
 import { listerPostes } from "@/lib/donnees/postes";
+import { listerOptionsSites } from "@/lib/donnees/sites";
 import { obtenirUtilisateurPourEspace } from "@/lib/donnees/session";
 import {
   aplatirArbre,
@@ -58,9 +59,10 @@ async function ContenuPersonnes({ searchParams }: { searchParams: ParametresRech
 
   const parametres = await searchParams;
   const recherche = lireRechercheEmployes(parametres);
-  const [departements, postes, total] = await Promise.all([
+  const [departements, postes, sites, total] = await Promise.all([
     listerDepartements(),
     listerPostes(),
+    listerOptionsSites(),
     compterEmployes(recherche),
   ]);
   const nombrePages = Math.max(1, Math.ceil(total / EMPLOYES_PAR_PAGE));
@@ -73,6 +75,7 @@ async function ContenuPersonnes({ searchParams }: { searchParams: ParametresRech
       <GestionEmployes
         departements={optionsDepartements}
         postes={versOptions(construireArbre(postes, comparerPostes))}
+        sites={sites}
       >
         <ListeEmployes employes={employes} total={total} page={page} nombrePages={nombrePages} recherche={recherche} departements={optionsDepartements} />
       </GestionEmployes>

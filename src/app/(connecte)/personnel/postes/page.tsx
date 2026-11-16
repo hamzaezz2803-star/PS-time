@@ -6,6 +6,7 @@ import { EnTetePage } from "@/components/ui/en-tete-page";
 import { compterEmployesParPoste } from "@/lib/donnees/employes";
 import { listerPostes } from "@/lib/donnees/postes";
 import { obtenirUtilisateurPourEspace } from "@/lib/donnees/session";
+import { listerOptionsSites } from "@/lib/donnees/sites";
 import { TEXTES_POSTES } from "@/lib/textes/postes";
 
 export const metadata: Metadata = { title: TEXTES_POSTES.titrePage };
@@ -23,6 +24,6 @@ export default function PagePostes() {
 
 async function ContenuPostes() {
   await obtenirUtilisateurPourEspace();
-  const [postes, nombresEmployes] = await Promise.all([listerPostes(), compterEmployesParPoste()]);
-  return <GestionPostes postes={postes} nombresEmployes={nombresEmployes} />;
+  const [postes, nombresEmployes, sites] = await Promise.all([listerPostes(), compterEmployesParPoste(), listerOptionsSites()]);
+  return <GestionPostes postes={postes} nombresEmployes={nombresEmployes} sites={sites} />;
 }

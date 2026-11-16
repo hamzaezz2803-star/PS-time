@@ -3,6 +3,7 @@
 import { useActionState, useState } from "react";
 import { LoaderCircle } from "lucide-react";
 import { creerEmploye, modifierEmploye } from "@/app/(connecte)/personnel/personnes/actions";
+import { ChampSite } from "@/components/sites/champ-site";
 import { Bouton } from "@/components/ui/bouton";
 import { ChampFormulaire } from "@/components/ui/champ-formulaire";
 import { ChampSelection, type OptionSelection } from "@/components/ui/champ-selection";
@@ -24,10 +25,11 @@ const ETAT_CREATION: EtatFormulaire = { numeroReponse: 0 };
 
 /** Valeurs initiales du formulaire en modification (les champs vides deviennent « »). */
 function etatModification(employe: EmployeDetail): EtatFormulaire {
-  const { id, departement, poste, informations, ...champs } = employe;
+  const { id, departement, poste, site, informations, ...champs } = employe;
   void id;
   void departement;
   void poste;
+  void site;
   const valeurs = Object.fromEntries(
     Object.entries(champs).map(([nom, valeur]) => [nom, typeof valeur === "string" ? valeur : ""]),
   );
@@ -63,12 +65,14 @@ function compterErreurs(erreurs: EtatFormulaireEmploye["erreursChamps"]): Record
 export function FormulaireEmploye({
   departements,
   postes,
+  sites,
   employe,
   onReussite,
   onAnnuler,
 }: {
   departements: OptionSelection[];
   postes: OptionSelection[];
+  sites: OptionSelection[];
   employe?: EmployeDetail;
   onReussite: (message: string, continuer: boolean) => void;
   onAnnuler: () => void;
@@ -121,7 +125,8 @@ export function FormulaireEmploye({
           <ChampFormulaire nom="numeroBadge" libelle={obligatoire(textes.numeroBadge)} defaultValue={valeurs.numeroBadge ?? ""} maxLength={LONGUEUR_MAX_NUMERO_BADGE} autoComplete="off" spellCheck={false} required aide={textes.aideBadge} erreur={erreurs?.numeroBadge} />
           <ChampFormulaire nom="prenom" libelle={obligatoire(textes.prenom)} defaultValue={valeurs.prenom ?? ""} maxLength={LONGUEUR_MAX_NOM_EMPLOYE} autoComplete="off" required erreur={erreurs?.prenom} />
           <ChampFormulaire nom="nom" libelle={obligatoire(textes.nom)} defaultValue={valeurs.nom ?? ""} maxLength={LONGUEUR_MAX_NOM_EMPLOYE} autoComplete="off" required erreur={erreurs?.nom} />
-          <ChampSelection nom="departementId" libelle={obligatoire(textes.departement)} options={departements} optionVide={textes.choisirDepartement} defaultValue={valeurs.departementId ?? ""} required erreur={erreurs?.departementId} />
+          <ChampSite sites={sites} valeurInitiale={valeurs.siteId || null} erreur={erreurs?.siteId} />
+          <ChampSelection nom="departementId"libelle={obligatoire(textes.departement)} options={departements} optionVide={textes.choisirDepartement} defaultValue={valeurs.departementId ?? ""} required erreur={erreurs?.departementId} />
           <ChampSelection nom="posteId" libelle={textes.poste} options={postes} optionVide={textes.aucunPoste} defaultValue={valeurs.posteId ?? ""} erreur={erreurs?.posteId} />
         </fieldset>
 

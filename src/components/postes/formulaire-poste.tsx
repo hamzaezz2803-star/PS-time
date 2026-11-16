@@ -3,7 +3,9 @@
 import { useActionState } from "react";
 import { enregistrerPoste } from "@/app/(connecte)/personnel/postes/actions";
 import { ChampParent, type OptionParent } from "@/components/arbre/champ-parent";
+import { ChampSite } from "@/components/sites/champ-site";
 import { ChampFormulaire } from "@/components/ui/champ-formulaire";
+import type { OptionSelection } from "@/components/ui/champ-selection";
 import { PiedFormulaire } from "@/components/ui/pied-formulaire";
 import {
   LONGUEUR_MAX_CODE_POSTE,
@@ -23,11 +25,13 @@ type Succes = NonNullable<EtatFormulairePoste["succes"]>;
 export function FormulairePoste({
   poste,
   optionsParent,
+  sites,
   onTermine,
   onAnnuler,
 }: {
   poste?: Poste;
   optionsParent: OptionParent[];
+  sites: OptionSelection[];
   onTermine: (succes: Succes) => void;
   onAnnuler: () => void;
 }) {
@@ -80,6 +84,7 @@ export function FormulairePoste({
           aide={textes.aideOrdre(ORDRE_POSTE_MIN, ORDRE_POSTE_MAX)}
           erreur={erreurs?.ordre}
         />
+        <ChampSite sites={sites} valeurInitiale={poste?.siteId ?? null} erreur={erreurs?.siteId} />
         <ChampParent
           libelle={textes.parent}
           aucunParent={textes.aucunParent}

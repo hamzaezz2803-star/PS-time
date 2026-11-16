@@ -8,6 +8,7 @@ import {
 } from "@/lib/constantes";
 import { TEXTES_POSTES } from "@/lib/textes/postes";
 import type { EtatFormulairePoste, Resultat } from "@/types";
+import { siteFacultatif } from "./site";
 
 const { erreurs } = TEXTES_POSTES;
 const erreurOrdre = erreurs.ordreInvalide(ORDRE_POSTE_MIN, ORDRE_POSTE_MAX);
@@ -41,6 +42,7 @@ const schemaPoste = z.object({
     .string()
     .transform((valeur) => (valeur === "" ? null : valeur))
     .pipe(z.uuid({ error: erreurs.parentIntrouvable }).nullable()),
+  siteId: siteFacultatif,
 });
 
 export type DonneesFormulairePoste = z.infer<typeof schemaPoste>;
@@ -58,6 +60,7 @@ export function validerPoste(
     nom: lireTexte(formulaire.get("nom")),
     ordre: lireTexte(formulaire.get("ordre")),
     parentId: lireTexte(formulaire.get("parentId")),
+    siteId: lireTexte(formulaire.get("siteId")),
   });
 
   if (analyse.success) return { ok: true, donnees: analyse.data };
@@ -71,6 +74,7 @@ export function validerPoste(
       nom: fieldErrors.nom?.[0],
       ordre: fieldErrors.ordre?.[0],
       parentId: fieldErrors.parentId?.[0] ?? fieldErrors.id?.[0],
+      siteId: fieldErrors.siteId?.[0],
     },
   };
 }

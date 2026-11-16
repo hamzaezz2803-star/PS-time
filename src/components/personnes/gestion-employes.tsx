@@ -29,10 +29,12 @@ type Fenetre =
 export function GestionEmployes({
   departements,
   postes,
+  sites,
   children,
 }: {
   departements: OptionSelection[];
   postes: OptionSelection[];
+  sites: OptionSelection[];
   children: ReactNode;
 }) {
   const [fenetre, setFenetre] = useState<Fenetre | null>(null);
@@ -110,7 +112,7 @@ export function GestionEmployes({
         {fenetre?.type === "creation" && (
           <>
             {messageSucces && <MessageSucces message={messageSucces} className="mx-5 mt-4 sm:mx-6" />}
-            <FormulaireEmploye key={numeroSaisie} departements={departements} postes={postes} onReussite={terminer} onAnnuler={fermer} />
+            <FormulaireEmploye key={numeroSaisie} departements={departements} postes={postes} sites={sites} onReussite={terminer} onAnnuler={fermer} />
           </>
         )}
         {fenetre?.type === "fiche" && (
@@ -125,7 +127,7 @@ export function GestionEmployes({
         )}
         {fenetre?.type === "modification" && (
           detailCharge ? (
-            <FormulaireEmploye departements={departements} postes={postes} employe={detailCharge} onReussite={terminer} onAnnuler={fermer} />
+            <FormulaireEmploye departements={departements} postes={postes} sites={sites} employe={detailCharge} onReussite={terminer} onAnnuler={fermer} />
           ) : (
             <FenetreFiche employe={null} enChargement={enChargement} erreur={erreurChargement} onFermer={fermer} />
           )

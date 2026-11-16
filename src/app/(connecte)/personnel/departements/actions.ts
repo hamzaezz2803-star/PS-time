@@ -10,6 +10,8 @@ import {
 } from "@/lib/donnees/departements";
 import { estEncoreReference, indexEnDoublon } from "@/lib/donnees/erreurs";
 import { obtenirUtilisateurPourEspace } from "@/lib/donnees/session";
+import { siteExiste } from "@/lib/donnees/sites";
+import { TEXTES_SITES } from "@/lib/textes/sites";
 import { nomDejaPris, peutDeplacer } from "@/lib/metier/arbre";
 import { TEXTES_DEPARTEMENTS } from "@/lib/textes/departements";
 import { validerDepartement } from "@/lib/validation/departement";
@@ -38,9 +40,12 @@ export async function enregistrerDepartement(
 
   const validation = validerDepartement(formulaire);
   if (!validation.ok) return { erreursChamps: validation.erreursChamps };
-  const { id, nom, parentId } = validation.donnees;
+  const { id, nom, parentId, siteId } = validation.donnees;
 
   const liste = await listerDepartements();
+  if (!(await siteExiste(siteId))) {
+    return { erreursChamps: { siteId: TEXTES_SITES.champ.introuvable } };
+  }
   if (parentId && !liste.some((departement) => departement.id === parentId)) {
     return { erreursChamps: { parentId: erreurs.parentIntrouvable } };
   }
@@ -58,10 +63,10 @@ export async function enregistrerDepartement(
   let idSelectionne: string;
   try {
     if (id) {
-      await mettreAJourDepartement(id, nom, parentId);
+      await mettreAJourDepartement(id, { nom, parentId, siteId });
       idSelectionne = id;
     } else {
-      idSelectionne = await insererDepartement(nom, parentId);
+      idSelectionne = await insererDepartement({ nom, parentId, siteId });
     }
   } catch (erreur) {
     if (indexEnDoublon(erreur) !== null) return { erreursChamps: { nom: erreurs.nomDejaPris } };
