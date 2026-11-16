@@ -18,6 +18,7 @@ export const TEXTES_CONNEXION = {
       masquer: "Masquer le mot de passe",
     },
   },
+  motDePasseChange: "Mot de passe modifié. Connectez-vous avec votre identifiant et votre nouveau mot de passe.",
   boutonConnexion: "Se connecter",
   boutonConnexionEnCours: "Connexion en cours...",
   aide: "Un problème pour vous connecter ? Contactez l'administrateur de votre entreprise.",

@@ -3,7 +3,7 @@
 import { APIError } from "better-auth/api";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { CHEMIN_ESPACE } from "@/lib/constantes";
+import { CHEMIN_CONNEXION, PARAMETRE_MOT_DE_PASSE_CHANGE } from "@/lib/constantes";
 import { auth } from "@/lib/donnees/authentification";
 import { obtenirUtilisateurConnecte } from "@/lib/donnees/session";
 import { marquerMotDePasseChange } from "@/lib/donnees/utilisateurs";
@@ -25,8 +25,6 @@ export async function changerMotDePasse(
 
   const entetes = await headers();
   try {
-    // La session courante est conservée : la remplacer ferait réafficher la page
-    // avec l'ancien cookie (déjà révoqué) et renverrait vers la connexion.
     await auth.api.changePassword({
       body: {
         currentPassword: validation.donnees.actuel,
@@ -48,5 +46,14 @@ export async function changerMotDePasse(
   }
 
   await marquerMotDePasseChange(utilisateur.id);
-  redirect(CHEMIN_ESPACE);
+  // Puis retour à la connexion : on se reconnecte avec le nouveau mot de passe, comme après
+  // la création du premier compte. La fermeture de session ne doit pas bloquer ce retour.
+  try {
+    await auth.api.signOut({ headers: entetes });
+  } catch (erreur) {
+    console.error("Échec de la déconnexion après changement de mot de passe", {
+      type: erreur instanceof Error ? erreur.name : "inconnu",
+    });
+  }
+  redirect(`${CHEMIN_CONNEXION}?${PARAMETRE_MOT_DE_PASSE_CHANGE}=1`);
 }

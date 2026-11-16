@@ -84,24 +84,6 @@
     }
   }
 
-  @keyframes palette-haut {
-    from {
-      transform: rotateX(0deg);
-    }
-    to {
-      transform: rotateX(-90deg);
-    }
-  }
-
-  @keyframes palette-bas {
-    from {
-      transform: rotateX(90deg);
-    }
-    to {
-      transform: rotateX(0deg);
-    }
-  }
-
   @keyframes orbite {
     from {
       transform: rotate(0deg) translateY(calc(var(--rayon) * 1px)) rotate(0deg);
@@ -120,6 +102,28 @@
     50% {
       transform: translate(-50%, -50%) scale(0.94);
     }
+  }
+}
+
+/*
+ * Horloge à palettes. Hors de @theme : Tailwind n'y émet une animation que s'il la relie
+ * à une classe connue, et ces deux-là étaient omises (palettes figées à mi-chemin).
+ */
+@keyframes palette-haut {
+  from {
+    transform: rotateX(0deg);
+  }
+  to {
+    transform: rotateX(-90deg);
+  }
+}
+
+@keyframes palette-bas {
+  from {
+    transform: rotateX(90deg);
+  }
+  to {
+    transform: rotateX(0deg);
   }
 }
 

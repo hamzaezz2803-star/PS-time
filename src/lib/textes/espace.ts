@@ -28,8 +28,8 @@ export const TEXTES_MOT_DE_PASSE = {
   titrePage: "Changer le mot de passe",
   titre: "Choisissez un nouveau mot de passe",
   obligatoire:
-    "Votre mot de passe a été créé par un administrateur. Remplacez-le avant de continuer.",
-  volontaire: "Saisissez votre mot de passe actuel puis le nouveau.",
+    "Votre mot de passe provisoire a été créé par le super administrateur. Choisissez le vôtre : vous vous reconnecterez ensuite avec ce nouveau mot de passe.",
+  volontaire: "Saisissez votre mot de passe actuel puis le nouveau. Vous vous reconnecterez ensuite avec ce nouveau mot de passe.",
   chargement: "Chargement...",
   champs: {
     actuel: "Mot de passe actuel",

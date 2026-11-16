@@ -21,8 +21,16 @@ function Compte({ utilisateur, estVous }: { utilisateur: UtilisateurListe; estVo
   );
 }
 
+function Role({ utilisateur }: { utilisateur: UtilisateurListe }) {
+  return utilisateur.estSuperAdmin ? (
+    <Pastille Icone={ShieldCheck}>{textes.roles.superAdmin}</Pastille>
+  ) : (
+    <Pastille ton="neutre" Icone={UserCog}>{textes.roles.admin}</Pastille>
+  );
+}
+
 function Modules({ utilisateur }: { utilisateur: UtilisateurListe }) {
-  if (utilisateur.estSuperAdmin) return <Pastille Icone={ShieldCheck}>{textes.roles.superAdmin}</Pastille>;
+  if (utilisateur.estSuperAdmin) return <Pastille ton="neutre">{textes.tousLesModules}</Pastille>;
   if (utilisateur.modules.length === 0) return <Pastille ton="neutre">{textes.aucunModule}</Pastille>;
   return (
     <span className="flex flex-wrap gap-1.5">
@@ -43,6 +51,7 @@ function Etat({ utilisateur }: { utilisateur: UtilisateurListe }) {
 export function GestionUtilisateurs({ utilisateurs, idConnecte }: { utilisateurs: UtilisateurListe[]; idConnecte: string }) {
   const colonnes: ColonneListe<UtilisateurListe>[] = [
     { titre: textes.colonnes.compte, rendu: (u) => <Compte utilisateur={u} estVous={u.id === idConnecte} /> },
+    { titre: textes.colonnes.role, rendu: (u) => <Role utilisateur={u} /> },
     { titre: textes.colonnes.modules, rendu: (u) => <Modules utilisateur={u} /> },
     { titre: textes.colonnes.etat, rendu: (u) => <Etat utilisateur={u} /> },
     {

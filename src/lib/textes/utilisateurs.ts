@@ -21,7 +21,7 @@ export const TEXTES_UTILISATEURS = {
   supprimer: (identifiant: string) => `Supprimer ${identifiant}`,
   actions: "Actions",
   fermer: "Fermer",
-  colonnes: { compte: "Compte", modules: "Modules autorisés", etat: "État", modifie: "Modifié le" },
+  colonnes: { compte: "Compte", role: "Rôle", modules: "Modules autorisés", etat: "État", modifie: "Modifié le" },
   roles: { superAdmin: "Super administrateur", admin: "Administrateur" },
   tousLesModules: "Tous les modules",
   aucunModule: "Aucun module",

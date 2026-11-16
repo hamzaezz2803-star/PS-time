@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Image from "next/image";
+import { Suspense } from "react";
 import { FormulaireConnexion } from "@/components/connexion/formulaire-connexion";
+import { MessageMotDePasseChange } from "@/components/connexion/message-mot-de-passe-change";
 import { PanneauMarque } from "@/components/connexion/panneau-marque";
 import { TEXTES_CONNEXION } from "@/lib/textes/connexion";
 
@@ -32,6 +34,9 @@ export default function PageConnexion() {
             <p className="mb-8 mt-2 text-base text-texte-secondaire">
               {TEXTES_CONNEXION.sousTitre}
             </p>
+            <Suspense>
+              <MessageMotDePasseChange />
+            </Suspense>
             <FormulaireConnexion />
           </div>
 

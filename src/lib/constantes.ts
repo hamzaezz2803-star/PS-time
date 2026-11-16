@@ -43,6 +43,8 @@ export const LIMITE_UTILISATEURS = 500;
 
 /** Pages accessibles uniquement après connexion. */
 export const CHEMIN_CONNEXION = "/connexion";
+/** Ajouté à l'adresse de connexion après un changement de mot de passe (message de confirmation). */
+export const PARAMETRE_MOT_DE_PASSE_CHANGE = "motDePasseChange";
 export const CHEMIN_ESPACE = "/espace";
 export const CHEMIN_CHANGER_MOT_DE_PASSE = "/changer-mot-de-passe";
 export const CHEMIN_DEPARTEMENTS = "/personnel/departements";
