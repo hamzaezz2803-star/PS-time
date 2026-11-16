@@ -31,6 +31,16 @@ export const DUREE_JETON_INSTALLATION_SECONDES = 10 * 60;
 export const TENTATIVES_INSTALLATION_MAX_PAR_JOUR = 30;
 export const UN_JOUR_MILLISECONDES = 24 * 60 * 60 * 1000;
 
+/**
+ * Modules qu'un super administrateur peut confier à un administrateur :
+ * personnel (sites, départements, postes, personnes), planning (calendriers, rotations,
+ * groupes, affectations), présence (pointages). Même liste que la contrainte de la base.
+ */
+export const MODULES = ["personnel", "planning", "presence"] as const;
+export const CHEMIN_UTILISATEURS = "/administration/utilisateurs";
+export const LONGUEUR_MAX_NOM_UTILISATEUR = 100;
+export const LIMITE_UTILISATEURS = 500;
+
 /** Pages accessibles uniquement après connexion. */
 export const CHEMIN_CONNEXION = "/connexion";
 export const CHEMIN_ESPACE = "/espace";

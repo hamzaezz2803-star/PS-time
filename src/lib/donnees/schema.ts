@@ -132,6 +132,25 @@ export const comptes = mysqlTable(
   ],
 );
 
+/**
+ * Modules qu'un administrateur a le droit de gérer (une ligne par module accordé).
+ * Un super administrateur a tous les droits sans ligne ici. Supprimées avec l'utilisateur.
+ */
+export const autorisationsUtilisateurs = mysqlTable(
+  "autorisations_utilisateurs",
+  {
+    id: identifiantUnique(),
+    utilisateurId: referenceUtilisateur(),
+    module: varchar("module", { length: 20 }).notNull(),
+    creeLe: dateCreation(),
+    modifieLe: dateModification(),
+  },
+  (table) => [
+    uniqueIndex("autorisations_utilisateur_module_idx").on(table.utilisateurId, table.module),
+    check("autorisations_module_valide", sql`${table.module} IN ('personnel', 'planning', 'presence')`),
+  ],
+);
+
 /** Jetons temporaires (réinitialisation de mot de passe, vérification d'e-mail). */
 export const verifications = mysqlTable(
   "verifications",
