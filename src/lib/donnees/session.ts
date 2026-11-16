@@ -28,7 +28,8 @@ export async function obtenirUtilisateurConnecte(): Promise<UtilisateurConnecte>
     id: user.id,
     nom: user.name,
     email: user.email,
-    identifiant: user.username,
+    // Toujours renseigné : la colonne `identifiant` est obligatoire en base.
+    identifiant: user.username ?? "",
     doitChangerMotDePasse: user.doitChangerMotDePasse,
     estSuperAdmin: user.estSuperAdmin,
   };
