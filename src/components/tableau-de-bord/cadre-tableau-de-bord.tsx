@@ -9,7 +9,6 @@ import { cn } from "@/lib/utils";
 import { ContexteMenu, useMenu, type EtatMenu } from "./contexte-menu";
 import { FilAriane } from "./fil-ariane";
 import { Horloge } from "./horloge";
-import { MenuLateral } from "./menu-lateral";
 import { Notifications } from "./notifications";
 import {
   abonnerPreferenceMenu,
@@ -39,13 +38,13 @@ function Marque() {
   );
 }
 
-function ContenuMenu({ pied }: { pied: ReactNode }) {
+function ContenuMenu({ menu, pied }: { menu: ReactNode; pied: ReactNode }) {
   const { estReplie } = useMenu();
   return (
     <>
       <Marque />
       <div className={cn("flex-1 px-2 py-4", estReplie ? "lg:overflow-visible" : "overflow-y-auto")}>
-        <MenuLateral />
+        {menu}
       </div>
       <div className="border-t border-menu-bordure p-2">{pied}</div>
     </>
@@ -56,7 +55,7 @@ function ContenuMenu({ pied }: { pied: ReactNode }) {
  * Cadre des pages connectées : menu latéral sombre (repliable en icônes, Ctrl+B),
  * barre du haut blanche et zone de travail claire, tiroir sur mobile.
  */
-export function CadreTableauDeBord({ pied, children }: { pied: ReactNode; children: ReactNode }) {
+export function CadreTableauDeBord({ menu, pied, children }: { menu: ReactNode; pied: ReactNode; children: ReactNode }) {
   const estReplie = useSyncExternalStore(abonnerPreferenceMenu, lirePreferenceMenu, lirePreferenceMenuServeur);
   const [estOuvertMobile, setEstOuvertMobile] = useState(false);
 
@@ -95,7 +94,7 @@ export function CadreTableauDeBord({ pied, children }: { pied: ReactNode; childr
             estReplie ? "w-[4.5rem]" : "w-64",
           )}
         >
-          <ContenuMenu pied={pied} />
+          <ContenuMenu menu={menu} pied={pied} />
         </aside>
 
         {estOuvertMobile && (
@@ -105,7 +104,7 @@ export function CadreTableauDeBord({ pied, children }: { pied: ReactNode; childr
               <button type="button" onClick={fermerMobile} aria-label={TEXTES_NAVIGATION.fermerMenu} autoFocus className={cn(BOUTON_ICONE_MENU, "absolute end-2 top-2.5")}>
                 <X className="size-5" aria-hidden="true" />
               </button>
-              <ContenuMenu pied={pied} />
+              <ContenuMenu menu={menu} pied={pied} />
             </aside>
           </div>
         )}

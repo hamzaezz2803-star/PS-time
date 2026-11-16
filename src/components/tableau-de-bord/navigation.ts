@@ -9,6 +9,7 @@ import {
   Factory,
   LayoutDashboard,
   Repeat,
+  ShieldCheck,
   UserRound,
   Users,
   UsersRound,
@@ -25,7 +26,9 @@ import {
   CHEMIN_POSTES,
   CHEMIN_ROTATIONS,
   CHEMIN_SITES,
+  CHEMIN_UTILISATEURS,
 } from "@/lib/constantes";
+import { peutGerer, type Droits, type Module } from "@/lib/metier/droits";
 import { TEXTES_NAVIGATION as T } from "@/lib/textes/navigation";
 
 /** Sans `href` : fonctionnalité pas encore développée, affichée « Bientôt » et non cliquable. */
@@ -42,6 +45,10 @@ export type ElementNavigation = LienNavigation & {
 export type GroupeNavigation = {
   titre: string;
   elements: ElementNavigation[];
+  /** Module requis pour voir le groupe (absent : visible par tous). */
+  module?: Module;
+  /** Vrai : visible seulement par un super administrateur (gestion des utilisateurs). */
+  reserveSuperAdmin?: boolean;
 };
 
 export const GROUPES_NAVIGATION: GroupeNavigation[] = [
@@ -51,6 +58,7 @@ export const GROUPES_NAVIGATION: GroupeNavigation[] = [
   },
   {
     titre: T.groupePersonnel,
+    module: "personnel",
     elements: [
       {
         libelle: T.personnel,
@@ -67,6 +75,7 @@ export const GROUPES_NAVIGATION: GroupeNavigation[] = [
   },
   {
     titre: T.groupeProgramme,
+    module: "planning",
     elements: [
       {
         libelle: T.programme,
@@ -82,6 +91,7 @@ export const GROUPES_NAVIGATION: GroupeNavigation[] = [
   },
   {
     titre: T.groupePresence,
+    module: "presence",
     elements: [
       {
         libelle: T.gestionExceptions,
@@ -90,7 +100,20 @@ export const GROUPES_NAVIGATION: GroupeNavigation[] = [
       },
     ],
   },
+  {
+    titre: T.groupeAdministration,
+    reserveSuperAdmin: true,
+    elements: [{ libelle: T.utilisateurs, icone: ShieldCheck, href: CHEMIN_UTILISATEURS }],
+  },
 ];
+
+/** Groupes du menu que ce compte peut voir (la vraie vérification reste faite par chaque page). */
+export function groupesVisibles(droits: Droits): GroupeNavigation[] {
+  return GROUPES_NAVIGATION.filter((groupe) => {
+    if (groupe.reserveSuperAdmin) return droits.estSuperAdmin;
+    return groupe.module ? peutGerer(droits, groupe.module) : true;
+  });
+}
 
 /** Libellés du fil d'Ariane pour un chemin : groupe puis page (ex. Personnel, Départements). */
 export function cheminVersFilAriane(chemin: string): string[] {

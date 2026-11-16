@@ -24,6 +24,8 @@ export const TEXTES_NAVIGATION = {
   groupePresence: "Présence",
   gestionExceptions: "Gestion des exceptions",
   pointagesManuels: "Pointage manuel",
+  groupeAdministration: "Administration",
+  utilisateurs: "Utilisateurs",
   heureActuelle: "Date et heure actuelles",
   notifications: {
     ouvrir: "Notifications",

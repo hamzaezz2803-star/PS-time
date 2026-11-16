@@ -7,7 +7,8 @@ import { ChevronDown } from "lucide-react";
 import { TEXTES_NAVIGATION } from "@/lib/textes/navigation";
 import { cn } from "@/lib/utils";
 import { useMenu } from "./contexte-menu";
-import { GROUPES_NAVIGATION, type ElementNavigation, type LienNavigation } from "./navigation";
+import type { Droits } from "@/lib/metier/droits";
+import { groupesVisibles, type ElementNavigation, type LienNavigation } from "./navigation";
 
 const LIGNE =
   "group/ligne relative flex min-h-11 w-full items-center gap-3 rounded-lg px-3 text-sm transition-[background-color,box-shadow,color] duration-150 lg:min-h-10 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primaire";
@@ -131,14 +132,14 @@ function Element({ element, chemin }: { element: ElementNavigation; chemin: stri
   );
 }
 
-/** Groupes de liens du menu latéral (ordinateur et tiroir mobile). */
-export function MenuLateral() {
+/** Groupes de liens du menu latéral (ordinateur et tiroir mobile), selon les droits du compte. */
+export function MenuLateral({ droits }: { droits: Droits }) {
   const chemin = usePathname();
   const { estReplie } = useMenu();
 
   return (
     <nav aria-label={TEXTES_NAVIGATION.menuPrincipal} className="flex flex-col gap-6">
-      {GROUPES_NAVIGATION.map((groupe) => (
+      {groupesVisibles(droits).map((groupe) => (
         <div key={groupe.titre} className="flex flex-col gap-1">
           <p
             className={cn(
