@@ -1,0 +1,33 @@
+/** Textes du tableau de bord : pointages en direct et statistiques de présence (aperçu). */
+export const TEXTES_PRESENCE = {
+  direct: {
+    titre: "Pointages en direct",
+    sousTitre: "Les derniers pointages des badgeuses et des saisies manuelles.",
+    enDirect: "En direct",
+    misAJour: (heure: string) => `Mis à jour à ${heure}`,
+    actualisation: "Actualisation automatique toutes les 15 secondes.",
+    vide: "Aucun pointage pour l'instant.",
+    videAide: "Les pointages apparaîtront ici dès que les badgeuses seront reliées, ou après une saisie manuelle.",
+    voirTout: "Voir les pointages manuels",
+    exemple: "Exemple",
+    aideExemple: "Lignes d'exemple affichées pour la présentation, en attendant les badgeuses. Elles ne sont pas enregistrées.",
+    sources: { badgeuse: "Badgeuse", manuel: "Saisie manuelle" },
+    badgeuseExemple: "Badgeuse · Entrée principale",
+    ilYA: (minutes: number) => (minutes < 1 ? "à l'instant" : minutes < 60 ? `il y a ${minutes} min` : `il y a ${Math.floor(minutes / 60)} h ${String(minutes % 60).padStart(2, "0")}`),
+    erreur: "Impossible d'actualiser les pointages. Nouvel essai dans quelques secondes.",
+  },
+  statistiques: {
+    titre: "Statistiques de présence",
+    apercu: "Aperçu de démonstration",
+    aideApercu: "Ces chiffres sont des exemples pour présenter l'écran. Ils seront calculés à partir des vrais pointages quand les badgeuses seront reliées.",
+    presents: "Présents aujourd'hui",
+    surEffectif: (presents: number, effectif: number) => `${presents} sur ${effectif}`,
+    retards: "Retards",
+    absents: "Absents",
+    heuresSup: "Heures sup. (semaine)",
+    tauxSemaine: "Taux de présence, 7 derniers jours",
+    repartition: "Répartition du jour",
+    statuts: { a_l_heure: "À l'heure", retard: "En retard", absent: "Absent" },
+    tableau: { jour: "Jour", taux: "Taux de présence" },
+  },
+} as const;

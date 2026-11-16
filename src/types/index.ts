@@ -46,6 +46,16 @@ export type EtatFormulaire<Champ extends string = string> = {
 export type EtatFormulaireDepartement = EtatFormulaire<"nom" | "parentId" | "siteId">;
 export type EtatFormulairePoste = EtatFormulaire<"code" | "nom" | "ordre" | "parentId" | "siteId">;
 
+/** Pointage affiché en direct sur le tableau de bord (jamais de pièce d'identité ni de contact). */
+export type PointageDirect = {
+  id: string;
+  nomComplet: string;
+  departement: string;
+  horodatage: Date;
+  etat: string;
+  source: string;
+};
+
 /** Ligne de la gestion des utilisateurs (jamais de mot de passe ni d'e-mail interne). */
 export type UtilisateurListe = {
   id: string;

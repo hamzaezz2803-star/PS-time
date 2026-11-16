@@ -4,9 +4,12 @@ import { Briefcase, Building2, Users } from "lucide-react";
 import { BanniereAccueil } from "@/components/espace/banniere-accueil";
 import { CarteCompteur, CarteCompteurSquelette } from "@/components/espace/carte-compteur";
 import { EtapesPlanning } from "@/components/espace/etapes-planning";
-import { CHEMIN_DEPARTEMENTS, CHEMIN_PERSONNES, CHEMIN_POSTES } from "@/lib/constantes";
+import { PointagesDirect } from "@/components/espace/pointages-direct";
+import { StatistiquesApercu } from "@/components/espace/statistiques-apercu";
+import { CHEMIN_DEPARTEMENTS, CHEMIN_PERSONNES, CHEMIN_POSTES, POINTAGES_DIRECT_MAX } from "@/lib/constantes";
 import { compterDepartements } from "@/lib/donnees/departements";
 import { compterEmployes } from "@/lib/donnees/employes";
+import { listerDerniersPointages } from "@/lib/donnees/pointages";
 import { compterPostes } from "@/lib/donnees/postes";
 import { obtenirUtilisateurPourEspace } from "@/lib/donnees/session";
 import { peutGerer } from "@/lib/metier/droits";
@@ -43,7 +46,11 @@ async function ContenuTableauDeBord() {
   const utilisateur = await obtenirUtilisateurPourEspace();
   // Chaque bloc n'apparaît que si le compte a le module correspondant.
   const aPersonnel = peutGerer(utilisateur, "personnel");
-  const chiffres = aPersonnel ? await Promise.all([compterEmployes(), compterDepartements(), compterPostes()]) : null;
+  const aPresence = peutGerer(utilisateur, "presence");
+  const [chiffres, derniersPointages] = await Promise.all([
+    aPersonnel ? Promise.all([compterEmployes(), compterDepartements(), compterPostes()]) : null,
+    aPresence ? listerDerniersPointages(POINTAGES_DIRECT_MAX) : null,
+  ]);
 
   return (
     <>
@@ -51,6 +58,14 @@ async function ContenuTableauDeBord() {
 
       {utilisateur.modules.length === 0 && (
         <p className="rounded-xl border border-bordure bg-surface p-5 text-base text-texte shadow-carte">{TEXTES_ESPACE.aucunModule}</p>
+      )}
+
+      {/* Présence : statistiques (aperçu de démonstration) et pointages en direct. */}
+      {derniersPointages && (
+        <div className="grid gap-6 xl:grid-cols-[3fr_2fr]">
+          <StatistiquesApercu />
+          <PointagesDirect initiaux={derniersPointages} />
+        </div>
       )}
 
       {chiffres && (

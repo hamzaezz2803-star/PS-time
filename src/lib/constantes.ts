@@ -132,6 +132,9 @@ export const SOURCES_POINTAGE = ["manuel", "badgeuse"] as const;
 export const POINTAGES_PAR_PAGE = 50;
 /** Nombre maximal d'employés pointés en une seule saisie. */
 export const LIMITE_EMPLOYES_POINTAGE = 500;
+/** Carte « Pointages en direct » du tableau de bord : nombre de lignes et fréquence d'actualisation. */
+export const POINTAGES_DIRECT_MAX = 6;
+export const INTERVALLE_DIRECT_MS = 15_000;
 export const LONGUEUR_MAX_REMARQUE_POINTAGE = 255;
 /** Un pointage manuel ne peut pas être dans le futur (petite marge pour l'horloge du poste). */
 export const TOLERANCE_POINTAGE_FUTUR_MINUTES = 5;
