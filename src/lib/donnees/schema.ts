@@ -147,6 +147,29 @@ export const verifications = mysqlTable(
 );
 
 /**
+ * Sites (entreprises ou établissements gérés par l'installation). Un département, un poste
+ * ou un employé peut être rattaché à un site ; un site encore utilisé ne peut pas être supprimé.
+ */
+export const sites = mysqlTable(
+  "sites",
+  {
+    id: identifiantUnique(),
+    nom: varchar("nom", { length: 100 }).notNull(),
+    adresse: varchar("adresse", { length: 255 }),
+    creeLe: dateCreation(),
+    modifieLe: dateModification(),
+  },
+  (table) => [
+    uniqueIndex("sites_nom_idx").on(table.nom),
+    check("sites_nom_non_vide", sql`CHAR_LENGTH(TRIM(${table.nom})) > 0`),
+  ],
+);
+
+/** Site facultatif d'un département, d'un poste ou d'un employé. */
+const referenceSite = () =>
+  char("site_id", { length: 36 }).references(() => sites.id, { onDelete: "restrict" });
+
+/**
  * Départements de l'entreprise, organisés en arbre (un parent, plusieurs enfants).
  * Un département qui a des sous-départements ne peut pas être supprimé (restrict).
  */
@@ -159,6 +182,7 @@ export const departements = mysqlTable(
       (): AnyMySqlColumn => departements.id,
       { onDelete: "restrict" },
     ),
+    siteId: referenceSite(),
     creeLe: dateCreation(),
     modifieLe: dateModification(),
   },
@@ -167,6 +191,7 @@ export const departements = mysqlTable(
     // (À la racine, parent_id est NULL : l'application fait la vérification.)
     uniqueIndex("departements_parent_nom_idx").on(table.parentId, table.nom),
     index("departements_parent_idx").on(table.parentId),
+    index("departements_site_idx").on(table.siteId),
     check("departements_nom_non_vide", sql`CHAR_LENGTH(TRIM(${table.nom})) > 0`),
     check(
       "departements_pas_son_propre_parent",
@@ -190,6 +215,7 @@ export const postes = mysqlTable(
       (): AnyMySqlColumn => postes.id,
       { onDelete: "restrict" },
     ),
+    siteId: referenceSite(),
     creeLe: dateCreation(),
     modifieLe: dateModification(),
   },
@@ -197,6 +223,7 @@ export const postes = mysqlTable(
     uniqueIndex("postes_code_idx").on(table.code),
     uniqueIndex("postes_parent_nom_idx").on(table.parentId, table.nom),
     index("postes_parent_idx").on(table.parentId),
+    index("postes_site_idx").on(table.siteId),
     check("postes_code_non_vide", sql`CHAR_LENGTH(TRIM(${table.code})) > 0`),
     check("postes_nom_non_vide", sql`CHAR_LENGTH(TRIM(${table.nom})) > 0`),
     check("postes_ordre_borne", sql`${table.ordre} BETWEEN 0 AND 99999`),
@@ -231,6 +258,7 @@ export const employes = mysqlTable(
     groupeId: char("groupe_id", { length: 36 }).references((): AnyMySqlColumn => groupes.id, {
       onDelete: "set null",
     }),
+    siteId: referenceSite(),
     // Format international E.164 (+212612345678).
     telephone: varchar("telephone", { length: 16 }),
     email: varchar("email", { length: 254 }),
@@ -254,6 +282,7 @@ export const employes = mysqlTable(
     index("employes_departement_idx").on(table.departementId),
     index("employes_poste_idx").on(table.posteId),
     index("employes_groupe_idx").on(table.groupeId),
+    index("employes_site_idx").on(table.siteId),
     index("employes_nom_idx").on(table.nom, table.prenom),
     check("employes_matricule_non_vide", sql`CHAR_LENGTH(TRIM(${table.matricule})) > 0`),
     check("employes_prenom_non_vide", sql`CHAR_LENGTH(TRIM(${table.prenom})) > 0`),

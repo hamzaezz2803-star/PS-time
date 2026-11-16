@@ -33,6 +33,24 @@ export type EtatFormulaire<Champ extends string = string> = {
 export type EtatFormulaireDepartement = EtatFormulaire<"nom" | "parentId">;
 export type EtatFormulairePoste = EtatFormulaire<"code" | "nom" | "ordre" | "parentId">;
 
+/** Site (entreprise ou établissement), avec le nombre d'éléments qui y sont rattachés. */
+export type Site = {
+  id: string;
+  nom: string;
+  adresse: string | null;
+  nombreDepartements: number;
+  nombrePostes: number;
+  nombreEmployes: number;
+};
+
+/** Département : élément d'arbre, rattaché ou non à un site. */
+export type Departement = {
+  id: string;
+  nom: string;
+  parentId: string | null;
+  siteId: string | null;
+};
+
 /** Poste (fonction) : élément d'arbre avec un numéro unique et un ordre d'affichage. */
 export type Poste = {
   id: string;
@@ -40,6 +58,7 @@ export type Poste = {
   nom: string;
   ordre: number;
   parentId: string | null;
+  siteId: string | null;
 };
 
 export type TypeEmploi = "cdi" | "cdd" | "interim" | "stage";
@@ -82,6 +101,8 @@ export type EmployeDetail = {
   departement: string;
   posteId: string | null;
   poste: string | null;
+  siteId: string | null;
+  site: string | null;
   genre: string | null;
   typePieceIdentite: string | null;
   numeroPieceIdentite: string | null;

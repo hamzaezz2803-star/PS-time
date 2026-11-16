@@ -19,6 +19,12 @@ export const CHEMIN_ESPACE = "/espace";
 export const CHEMIN_CHANGER_MOT_DE_PASSE = "/changer-mot-de-passe";
 export const CHEMIN_DEPARTEMENTS = "/personnel/departements";
 
+/** Sites (entreprises ou établissements) gérés par l'installation. */
+export const CHEMIN_SITES = "/personnel/sites";
+export const LIMITE_SITES = 500;
+export const LONGUEUR_MAX_NOM_SITE = 100;
+export const LONGUEUR_MAX_ADRESSE_SITE = 255;
+
 /** Garde-fou de lecture : une entreprise a rarement plus de quelques dizaines de départements. */
 export const LIMITE_DEPARTEMENTS = 1000;
 export const LONGUEUR_MAX_NOM_DEPARTEMENT = 100;

@@ -1,0 +1,52 @@
+/** Textes de la gestion des sites (entreprises ou établissements). */
+export const TEXTES_SITES = {
+  titrePage: "Sites",
+  sousTitre:
+    "Ajoutez les entreprises ou établissements que vous gérez, puis rattachez-y départements, postes et employés.",
+  chargement: "Chargement des sites...",
+  titre: "Sites",
+  total: (n: number) => (n <= 1 ? `${n} site` : `${n} sites`),
+  nouveau: "Nouveau site",
+  vide: "Aucun site pour l'instant.",
+  videAction: "Créez le premier avec « Nouveau site ».",
+  titreCreation: "Nouveau site",
+  titreModification: (nom: string) => `Modifier « ${nom} »`,
+  titreSuppression: "Supprimer le site",
+  explicationSuppression: "Cette action ne peut pas être annulée.",
+  confirmerSuppression: (nom: string) => `Supprimer définitivement « ${nom} » ?`,
+  oui: "Supprimer définitivement",
+  annuler: "Annuler",
+  modifier: (nom: string) => `Modifier ${nom}`,
+  supprimer: (nom: string) => `Supprimer ${nom}`,
+  actions: "Actions",
+  fermer: "Fermer",
+  colonnes: { nom: "Nom", adresse: "Adresse", rattachements: "Rattachements" },
+  rattachements: (departements: number, postes: number, employes: number) =>
+    `${departements} dép. · ${postes} postes · ${employes} employés`,
+  nom: "Nom du site",
+  exempleNom: "Par exemple : Usine de Kénitra",
+  adresse: "Adresse",
+  exempleAdresse: "Par exemple : Zone industrielle, Kénitra",
+  enregistrer: "Enregistrer",
+  enregistrementEnCours: "Enregistrement...",
+  cree: "Site créé.",
+  modifie: "Modifications enregistrées.",
+  supprime: "Site supprimé.",
+  droits: "La gestion des sites est réservée aux super administrateurs.",
+  echec: "L'opération a échoué. Réessayez dans un instant.",
+  introuvable: "Ce site n'existe plus. La liste a été actualisée.",
+  /** Champ « Site » des formulaires Départements, Postes et Personnes. */
+  champ: {
+    libelle: "Site",
+    aucun: "Aucun site",
+    introuvable: "Le site choisi n'existe plus.",
+  },
+  erreurs: {
+    nomVide: "Saisissez le nom du site.",
+    nomTropLong: "Ce nom est trop long (100 caractères maximum).",
+    nomDejaPris: "Un site porte déjà ce nom.",
+    adresseTropLongue: "Cette adresse est trop longue (255 caractères maximum).",
+    encoreUtilise:
+      "Des départements, postes ou employés sont rattachés à ce site. Rattachez-les à un autre site d'abord.",
+  },
+} as const;
