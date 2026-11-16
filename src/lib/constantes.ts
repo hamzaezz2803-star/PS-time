@@ -13,6 +13,24 @@ export const PROLONGATION_SESSION_SECONDES = 60 * 60;
 export const TENTATIVES_CONNEXION_MAX = 5;
 export const FENETRE_TENTATIVES_SECONDES = 60;
 
+/** Identifiant de connexion : lettres minuscules, chiffres, « . », « - », « _ ». */
+export const LONGUEUR_MIN_IDENTIFIANT = 3;
+export const LONGUEUR_MAX_IDENTIFIANT = 50;
+export const FORMAT_IDENTIFIANT = /^[a-z0-9._-]+$/;
+/** La connexion se fait par identifiant : l'e-mail exigé par Better Auth est interne, jamais utilisé. */
+export const DOMAINE_EMAIL_INTERNE = "utilisateurs.ps-time.invalid";
+
+/**
+ * Compte d'installation : « pstime » + mot de passe du jour (lib/metier/mot-de-passe-du-jour.ts).
+ * Valable seulement tant qu'aucun utilisateur n'existe ; il ouvre la création du premier
+ * administrateur, sans ouvrir de session.
+ */
+export const IDENTIFIANT_INSTALLATION = "pstime";
+export const DUREE_JETON_INSTALLATION_SECONDES = 10 * 60;
+/** Plafond commun à toutes les adresses IP : le mot de passe du jour n'a que 10 000 valeurs. */
+export const TENTATIVES_INSTALLATION_MAX_PAR_JOUR = 30;
+export const UN_JOUR_MILLISECONDES = 24 * 60 * 60 * 1000;
+
 /** Pages accessibles uniquement après connexion. */
 export const CHEMIN_CONNEXION = "/connexion";
 export const CHEMIN_ESPACE = "/espace";
