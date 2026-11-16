@@ -7,6 +7,9 @@ export const TEXTES_ESPACE = {
   introduction:
     "Retrouvez ici l'essentiel de votre organisation : personnel, structure et planning des équipes. Les écrans de pointage arrivent dans les prochaines étapes.",
   titreChiffres: "Vue d'ensemble",
+  heureCasablanca: "Heure de Casablanca",
+  aucunModule:
+    "Aucun module ne vous est encore attribué. Demandez au super administrateur de vous donner accès aux parties de l'application dont vous avez besoin.",
   voir: (libelle: string) => `Ouvrir ${libelle.toLocaleLowerCase("fr")}`,
   titrePlanning: "Mettre en place le planning",
   sousTitrePlanning: "Quatre étapes, dans cet ordre, pour organiser les horaires de vos équipes.",

@@ -64,6 +64,9 @@
 @theme {
   --animate-ondulation: ondulation 6s ease-in-out infinite;
   --animate-apparition: apparition 150ms ease-out;
+  /* Horloge à palettes : la moitié haute tombe, puis la moitié basse se rabat (2 × 150 ms). */
+  --animate-palette-haut: palette-haut 150ms ease-in forwards;
+  --animate-palette-bas: palette-bas 150ms ease-out 150ms both;
 
   /* Ombres : une seule échelle pour toute l'application. */
   --shadow-carte: 0 1px 2px rgb(15 27 51 / 0.04), 0 1px 3px rgb(15 27 51 / 0.04);
@@ -78,6 +81,24 @@
     to {
       opacity: 1;
       transform: translateY(0);
+    }
+  }
+
+  @keyframes palette-haut {
+    from {
+      transform: rotateX(0deg);
+    }
+    to {
+      transform: rotateX(-90deg);
+    }
+  }
+
+  @keyframes palette-bas {
+    from {
+      transform: rotateX(90deg);
+    }
+    to {
+      transform: rotateX(0deg);
     }
   }
 

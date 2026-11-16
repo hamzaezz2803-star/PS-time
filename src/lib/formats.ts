@@ -16,6 +16,20 @@ const formatHeure = new Intl.DateTimeFormat(LANGUE_FORMATS, {
   timeZone: FUSEAU_HORAIRE,
 });
 
+const formatHeureSecondes = new Intl.DateTimeFormat(LANGUE_FORMATS, {
+  hour: "2-digit",
+  minute: "2-digit",
+  second: "2-digit",
+  hourCycle: "h23",
+  timeZone: FUSEAU_HORAIRE,
+});
+
+/** Heures, minutes et secondes (deux chiffres chacune) à Casablanca, pour l'horloge à palettes. */
+export function heureEnChiffres(date: Date): { heures: string; minutes: string; secondes: string } {
+  const parties = Object.fromEntries(formatHeureSecondes.formatToParts(date).map((partie) => [partie.type, partie.value]));
+  return { heures: parties.hour ?? "00", minutes: parties.minute ?? "00", secondes: parties.second ?? "00" };
+}
+
 export function formaterDate(date: Date): string {
   return formatDate.format(date);
 }

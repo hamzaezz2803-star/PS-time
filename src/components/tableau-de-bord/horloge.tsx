@@ -1,7 +1,9 @@
 "use client";
 
 import { useSyncExternalStore } from "react";
+import { usePathname } from "next/navigation";
 import { Clock } from "lucide-react";
+import { CHEMIN_ESPACE } from "@/lib/constantes";
 import { formaterDate, formaterHeure } from "@/lib/formats";
 import { TEXTES_NAVIGATION } from "@/lib/textes/navigation";
 
@@ -17,10 +19,12 @@ function abonner(rappel: () => void) {
 const minuteActuelle = () => Math.floor(Date.now() / MILLISECONDES_PAR_MINUTE);
 const minuteServeur = () => null;
 
-/** Date et heure en direct (fuseau de Casablanca), au cœur d'un outil de pointage. */
+/** Date et heure en direct (fuseau de Casablanca). Masquée sur le tableau de bord, qui a sa grande horloge. */
 export function Horloge() {
   const minute = useSyncExternalStore(abonner, minuteActuelle, minuteServeur);
   const maintenant = minute === null ? null : new Date(minute * MILLISECONDES_PAR_MINUTE);
+  const chemin = usePathname();
+  if (chemin === CHEMIN_ESPACE) return null;
 
   return (
     <p

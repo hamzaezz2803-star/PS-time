@@ -30,16 +30,15 @@ Ces règles s'appliquent à **chaque prompt** et à chaque modification du proje
 | --- | --- | --- |
 | Connexion | `/connexion` | Tout le monde |
 | Tableau de bord | `/espace` | Tout utilisateur connecté et actif |
-| Personnel > Sites | `/personnel/sites` | Super administrateur |
-| Personnel > Départements | `/personnel/departements` | Lecture : tout utilisateur connecté. Modification : super administrateur |
-| Personnel > Postes | `/personnel/postes` | Lecture : tout utilisateur connecté. Modification : super administrateur |
-| Personnel > Personnes | `/personnel/personnes` | Super administrateur (lecture et création : données personnelles) |
-| Export des personnes | `/personnel/personnes/export-excel` (fichier .xlsx), `/impression/personnes` (version imprimable, enregistrable en PDF) | Super administrateur. Colonnes de la liste seulement (ni pièce d'identité, ni e-mail), 10 000 lignes au plus, chaque export tracé dans le journal du serveur (utilisateur, format, nombre de lignes) |
-| Programme > Calendriers, Rotations, Groupes, Affectations | `/programme/...` | Super administrateur (les groupes et affectations contiennent des noms d'employés) |
-| Présence > Gestion des exceptions > Pointage manuel | `/exceptions/pointages-manuels` | Super administrateur (noms d'employés et heures de présence) |
+| Personnel > Sites, Départements, Postes, Personnes | `/personnel/...` | Module **Personnel** (super administrateur, ou administrateur à qui il est accordé). Départements et Postes restent lisibles par tout compte connecté ; la modification exige le module |
+| Export des personnes | `/personnel/personnes/export-excel` (fichier .xlsx), `/impression/personnes` (version imprimable, enregistrable en PDF) | Module Personnel. Colonnes de la liste seulement (ni pièce d'identité, ni e-mail), 10 000 lignes au plus, chaque export tracé dans le journal du serveur (utilisateur, format, nombre de lignes) |
+| Planning > Calendriers, Rotations, Groupes, Affectations | `/programme/...` | Module **Planning** |
+| Présence > Gestion des exceptions > Pointage manuel | `/exceptions/pointages-manuels` | Module **Présence** |
+| Administration > Utilisateurs | `/administration/utilisateurs` | Super administrateur uniquement |
 | Changement de mot de passe | `/changer-mot-de-passe` | Tout utilisateur connecté et actif |
 
 - Les pages du tableau de bord sont dans le groupe de routes `src/app/(connecte)/`, qui partage le menu latéral (`src/components/tableau-de-bord/`).
+- Rôles et modules (`lib/metier/droits.ts`) : le **super administrateur** (créé par `pstime` ou `admin:creer`) a tout, plus Administration > Utilisateurs. Il crée des **administrateurs** (nom, identifiant, mot de passe provisoire à changer à la première connexion) et coche leurs modules : Personnel, Planning, Présence, ou « Tout ». Un administrateur ne voit dans le menu et le tableau de bord que ses modules ; chaque page et chaque action serveur revérifie le module (`peutGererModule`, `peutGerer`). Les droits sont relus à chaque requête : un module retiré disparaît aussitôt. Modification : nom, modules, compte actif, nouveau mot de passe provisoire facultatif (désactivation ou nouveau mot de passe ferment les sessions). On ne peut ni se désactiver soi-même, ni supprimer un super administrateur. Création, modification et suppression tracées dans le journal du serveur (auteur, compte, modules, jamais le mot de passe).
 - Recherche : Départements et Postes filtrent l'arbre dans le navigateur (parents gardés, tout déplié ; postes aussi par numéro). Personnes : filtres nom ou prénom, matricule ou badge, département (sous-départements compris), dans l'URL ; la pagination et les exports suivent les filtres.
 - Menu Présence > Gestion des exceptions > Pointage manuel : liste paginée des pointages saisis à la main (filtres employé et jour), fenêtre de saisie pour un ou plusieurs employés (filtre par département, recherche, tout cocher), date et heure locales, état (Entrée/Check In, Sortie/Check Out, Début de pause/Break Out, Fin de pause/Break In, Début et fin d'heures sup./Overtime In et Out), remarque. « Enregistrer et nouveau » garde les employés cochés pour enchaîner. Suppression avec confirmation.
 - Résultat d'un pointage (colonne « Résultat » et message après l'enregistrement), calculé à l'affichage d'après le planning, jamais stocké : affectation de l'employé (sinon celle de son groupe) qui couvre le jour, jour de la rotation (semaine type ou cycle depuis le début de l'affectation), calendrier du jour ou repos. Un pointage de fin de nuit se rattache au service de nuit commencé la veille s'il tombe dans ses fenêtres. Règles (`lib/metier/statut-pointage.ts`) :
@@ -70,6 +69,7 @@ Ces règles s'appliquent à **chaque prompt** et à chaque modification du proje
   - `utilisateurs` : identifiant (sert à la connexion) et e-mail uniques en minuscules, nom, compte actif, super administrateur, mot de passe à changer. Le premier compte créé par `pstime` reçoit un e-mail interne non utilisé (`<identifiant>@utilisateurs.ps-time.invalid`, exigé par Better Auth) ;
   - `sites` : entreprises ou établissements gérés, nom unique, adresse facultative. `departements`, `postes` et `employes` ont un `site_id` facultatif (`restrict` : un site utilisé ne peut pas être supprimé) ;
   - `comptes` : moyen de connexion (empreinte du mot de passe, fournisseur `credential`) ;
+  - `autorisations_utilisateurs` : modules accordés à un administrateur (une ligne par module : `personnel`, `planning`, `presence`, contrainte `check`, unique par compte, `cascade`). Aucune ligne pour un super administrateur, qui a tout ;
   - `sessions` : sessions ouvertes (jeton, expiration, IP et navigateur pour la sécurité) ;
   - `verifications` : jetons temporaires (réinitialisation, vérification d'e-mail, jeton d'installation `installation`) ;
   - `departements` : arbre parent/enfants (`parent_id`). Nom unique parmi les départements d'un même parent ; un département qui a des sous-départements ou des employés ne peut pas être supprimé (clé étrangère `restrict`).
@@ -97,7 +97,7 @@ Ces règles s'appliquent à **chaque prompt** et à chaque modification du proje
 - Police : Hanken Grotesk (OFL), via `next/font` ; chiffres à chasse fixe (`tabular-nums`) pour les heures.
 - Cadre des pages connectées : menu latéral sombre (marine `#0a2463`, page active repérée par une barre accent et un fond plus clair) repliable en icônes (Ctrl+B, préférence gardée dans le navigateur), barre du haut blanche avec fil d'Ariane et horloge en direct (fuseau Africa/Casablanca), zone de travail sur fond `#f6f9fd`, compte utilisateur en pied de menu.
 - Échelle d'ombres unique (`shadow-carte`, `shadow-survol`, `shadow-flottant`) et en-tête de page commun (`components/ui/en-tete-page.tsx`).
-- Tableau de bord : bannière d'accueil, chiffres réels (personnes pour les super administrateurs, départements, postes), puis les quatre étapes du planning (super administrateurs). Pas de cloche de notifications ni de thème sombre tant que ces fonctions n'existent pas.
+- Tableau de bord : bannière d'accueil avec **horloge à palettes** (heures, minutes, secondes à Casablanca, `components/ui/horloge-palettes.tsx` : sans bibliothèque, animation de 2 × 150 ms coupée si « réduire les animations », `role="timer"` sans annonce à chaque seconde) et date du jour ; la petite horloge de la barre du haut est masquée sur cette page. Puis chiffres réels (personnes, départements, postes : module Personnel) et les quatre étapes du planning (module Planning) ; un compte sans module voit un message l'invitant à demander un accès. Pas de cloche de notifications ni de thème sombre tant que ces fonctions n'existent pas.
 - Priorité d'affichage : [mobile d'abord pour l'espace X, ordinateur pour l'espace Y].
 - Thème sombre : [oui / non].
 
@@ -120,7 +120,8 @@ src/
   app/                  pages et Server Actions (connexion, espace, changer-mot-de-passe, api/auth)
   components/ui/        composants réutilisables (bouton, champs, champ-recherche, pastille, en-tete-page, messages, chargement, fenetre-modale, onglets, pied-fenetre)
   components/connexion/ composants de l'écran de connexion
-  components/espace/    tableau de bord (bannière, cartes chiffrées, étapes du planning) et changement de mot de passe
+  components/espace/    tableau de bord (bannière avec horloge, cartes chiffrées, étapes du planning) et changement de mot de passe
+  components/utilisateurs/     gestion des comptes : liste, formulaire, choix des modules
   components/tableau-de-bord/  cadre et menu latéral des pages connectées
   components/sites/            liste et formulaire des sites, champ « Site » partagé
   components/departements/     arbre et formulaires des départements
