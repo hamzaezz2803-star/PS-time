@@ -6,7 +6,7 @@ import { obtenirUtilisateurPourEspace } from "@/lib/donnees/session";
 /** Compte connecté, lu à la requête (donc sous <Suspense>). */
 async function CompteUtilisateur() {
   const utilisateur = await obtenirUtilisateurPourEspace();
-  return <MenuUtilisateur nom={utilisateur.nom} email={utilisateur.email} />;
+  return <MenuUtilisateur nom={utilisateur.nom} identifiant={utilisateur.identifiant} />;
 }
 
 function CompteEnChargement() {

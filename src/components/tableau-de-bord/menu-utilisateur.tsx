@@ -15,7 +15,7 @@ const ENTREE =
   "flex min-h-11 w-full items-center gap-2.5 rounded-md px-2.5 text-sm text-texte transition-colors duration-150 hover:bg-canevas focus-visible:outline-2 focus-visible:outline-primaire lg:min-h-9";
 
 /** Compte connecté en pied de menu : nom, e-mail, mot de passe et déconnexion. */
-export function MenuUtilisateur({ nom, email }: { nom: string; email: string }) {
+export function MenuUtilisateur({ nom, identifiant }: { nom: string; identifiant: string }) {
   const { estReplie } = useMenu();
   const { estOuvert, basculer, conteneur } = useMenuDeroulant();
 
@@ -31,7 +31,7 @@ export function MenuUtilisateur({ nom, email }: { nom: string; email: string }) 
         >
           <div className="px-2.5 py-2">
             <p className="truncate text-sm font-semibold text-texte">{nom}</p>
-            <p className="truncate text-sm text-texte-secondaire">{email}</p>
+            <p className="truncate text-sm text-texte-secondaire">{identifiant}</p>
           </div>
           <div className="my-1 h-px bg-bordure" />
           <Link href={CHEMIN_CHANGER_MOT_DE_PASSE} className={ENTREE}>
@@ -59,7 +59,7 @@ export function MenuUtilisateur({ nom, email }: { nom: string; email: string }) 
         </span>
         <span className={cn("min-w-0 flex-1", estReplie && "lg:sr-only")}>
           <span className="block truncate text-sm font-semibold text-menu-texte">{nom}</span>
-          <span className="block truncate text-sm text-menu-texte-secondaire">{email}</span>
+          <span className="block truncate text-sm text-menu-texte-secondaire">{identifiant}</span>
         </span>
         <ChevronsUpDown
           className={cn("size-4 shrink-0 text-menu-texte-secondaire", estReplie && "lg:hidden")}

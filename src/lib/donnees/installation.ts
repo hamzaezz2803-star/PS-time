@@ -2,7 +2,7 @@ import "server-only";
 
 import { createHash, randomBytes } from "node:crypto";
 import { hashPassword } from "better-auth/crypto";
-import { and, count, eq, gt } from "drizzle-orm";
+import { and, count, eq, gt, lt } from "drizzle-orm";
 import { DOMAINE_EMAIL_INTERNE, DUREE_JETON_INSTALLATION_SECONDES } from "@/lib/constantes";
 import { obtenirBase } from "./base";
 import { comptes, utilisateurs, verifications } from "./schema";
@@ -25,7 +25,10 @@ export async function installationTerminee(): Promise<boolean> {
 /** Crée un jeton à usage unique, valable quelques minutes, qui autorise la création du premier compte. */
 export async function creerJetonInstallation(): Promise<string> {
   const jeton = randomBytes(OCTETS_JETON).toString("base64url");
-  await obtenirBase()
+  const base = obtenirBase();
+  // Ménage : les jetons expirés ne servent plus.
+  await base.delete(verifications).where(and(eq(verifications.identifiant, TYPE_JETON), lt(verifications.expireLe, new Date())));
+  await base
     .insert(verifications)
     .values({
       id: crypto.randomUUID(),
