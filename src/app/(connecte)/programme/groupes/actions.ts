@@ -2,7 +2,7 @@
 
 import { refresh } from "next/cache";
 import { z } from "zod";
-import { estSuperAdministrateur } from "@/lib/actions/droits";
+import { peutGererModule } from "@/lib/actions/droits";
 import { indexEnDoublon } from "@/lib/donnees/erreurs";
 import { employesExistent, enregistrerGroupe as enregistrerEnBase, supprimerGroupeParId } from "@/lib/donnees/groupes";
 import { TEXTES_PROGRAMME } from "@/lib/textes/programme";
@@ -18,7 +18,7 @@ function journaliserEchec(operation: string, erreur: unknown) {
 
 /** Crée un groupe (sans `id`) ou le modifie (avec `id`), membres compris. */
 export async function enregistrerGroupe(_etat: EtatFormulaire, formulaire: FormData): Promise<EtatFormulaire> {
-  if (!(await estSuperAdministrateur())) return { message: textes.droits };
+  if (!(await peutGererModule("planning"))) return { message: textes.droits };
 
   const id = formulaire.get("id") ? identifiant.safeParse(formulaire.get("id")) : null;
   if (id && !id.success) return { message: textes.introuvable };
@@ -39,7 +39,7 @@ export async function enregistrerGroupe(_etat: EtatFormulaire, formulaire: FormD
 }
 
 export async function supprimerGroupe(_etat: EtatFormulaire, formulaire: FormData): Promise<EtatFormulaire> {
-  if (!(await estSuperAdministrateur())) return { message: textes.droits };
+  if (!(await peutGererModule("planning"))) return { message: textes.droits };
 
   const id = identifiant.safeParse(formulaire.get("id"));
   if (!id.success) return { message: textes.introuvable };

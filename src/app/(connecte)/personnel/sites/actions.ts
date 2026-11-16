@@ -2,7 +2,7 @@
 
 import { refresh } from "next/cache";
 import { z } from "zod";
-import { estSuperAdministrateur } from "@/lib/actions/droits";
+import { peutGererModule } from "@/lib/actions/droits";
 import { estEncoreReference, indexEnDoublon } from "@/lib/donnees/erreurs";
 import { enregistrerSite as enregistrerEnBase, supprimerSiteParId } from "@/lib/donnees/sites";
 import { TEXTES_SITES as textes } from "@/lib/textes/sites";
@@ -17,7 +17,7 @@ function journaliserEchec(operation: string, erreur: unknown) {
 
 /** Crée un site (sans `id`) ou le modifie (avec `id`). */
 export async function enregistrerSite(_etat: EtatFormulaire, formulaire: FormData): Promise<EtatFormulaire> {
-  if (!(await estSuperAdministrateur())) return { message: textes.droits };
+  if (!(await peutGererModule("personnel"))) return { message: textes.droits };
 
   const id = formulaire.get("id") ? identifiant.safeParse(formulaire.get("id")) : null;
   if (id && !id.success) return { message: textes.introuvable };
@@ -37,7 +37,7 @@ export async function enregistrerSite(_etat: EtatFormulaire, formulaire: FormDat
 }
 
 export async function supprimerSite(_etat: EtatFormulaire, formulaire: FormData): Promise<EtatFormulaire> {
-  if (!(await estSuperAdministrateur())) return { message: textes.droits };
+  if (!(await peutGererModule("personnel"))) return { message: textes.droits };
 
   const id = identifiant.safeParse(formulaire.get("id"));
   if (!id.success) return { message: textes.introuvable };

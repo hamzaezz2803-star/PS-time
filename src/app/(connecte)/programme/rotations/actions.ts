@@ -2,7 +2,7 @@
 
 import { refresh } from "next/cache";
 import { z } from "zod";
-import { estSuperAdministrateur } from "@/lib/actions/droits";
+import { peutGererModule } from "@/lib/actions/droits";
 import { indexEnDoublon } from "@/lib/donnees/erreurs";
 import {
   calendriersExistent,
@@ -23,7 +23,7 @@ function journaliserEchec(operation: string, erreur: unknown) {
 
 /** Crée une rotation (sans `id`) ou la modifie (avec `id`), jours compris. */
 export async function enregistrerRotation(_etat: EtatFormulaire, formulaire: FormData): Promise<EtatFormulaire> {
-  if (!(await estSuperAdministrateur())) return { message: textes.droits };
+  if (!(await peutGererModule("planning"))) return { message: textes.droits };
 
   const id = formulaire.get("id") ? identifiant.safeParse(formulaire.get("id")) : null;
   if (id && !id.success) return { message: textes.introuvable };
@@ -46,7 +46,7 @@ export async function enregistrerRotation(_etat: EtatFormulaire, formulaire: For
 }
 
 export async function supprimerRotation(_etat: EtatFormulaire, formulaire: FormData): Promise<EtatFormulaire> {
-  if (!(await estSuperAdministrateur())) return { message: textes.droits };
+  if (!(await peutGererModule("planning"))) return { message: textes.droits };
 
   const id = identifiant.safeParse(formulaire.get("id"));
   if (!id.success) return { message: textes.introuvable };

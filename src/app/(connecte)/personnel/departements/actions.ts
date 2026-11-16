@@ -10,6 +10,7 @@ import {
 } from "@/lib/donnees/departements";
 import { estEncoreReference, indexEnDoublon } from "@/lib/donnees/erreurs";
 import { obtenirUtilisateurPourEspace } from "@/lib/donnees/session";
+import { peutGerer } from "@/lib/metier/droits";
 import { siteExiste } from "@/lib/donnees/sites";
 import { TEXTES_SITES } from "@/lib/textes/sites";
 import { nomDejaPris, peutDeplacer } from "@/lib/metier/arbre";
@@ -19,10 +20,10 @@ import type { EtatFormulaireDepartement } from "@/types";
 
 const { erreurs, formulaire: textes } = TEXTES_DEPARTEMENTS;
 
-/** Les droits viennent toujours de la session. Pour l'instant : super administrateur uniquement. */
+/** Les droits viennent toujours de la session : module Personnel requis. */
 async function aLesDroits(): Promise<boolean> {
   const utilisateur = await obtenirUtilisateurPourEspace();
-  return utilisateur.estSuperAdmin;
+  return peutGerer(utilisateur, "personnel");
 }
 
 function journaliserEchec(operation: string, erreur: unknown) {

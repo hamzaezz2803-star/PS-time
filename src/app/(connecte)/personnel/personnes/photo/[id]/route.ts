@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { obtenirPhotoEmploye } from "@/lib/donnees/photos-employes";
 import { obtenirUtilisateurPourEspace } from "@/lib/donnees/session";
+import { peutGerer } from "@/lib/metier/droits";
 
 const identifiantEmploye = z.uuid();
 
@@ -10,7 +11,7 @@ const identifiantEmploye = z.uuid();
  */
 export async function GET(_requete: Request, { params }: RouteContext<"/personnel/personnes/photo/[id]">) {
   const utilisateur = await obtenirUtilisateurPourEspace();
-  if (!utilisateur.estSuperAdmin) return new Response(null, { status: 403 });
+  if (!peutGerer(utilisateur, "personnel")) return new Response(null, { status: 403 });
 
   const id = identifiantEmploye.safeParse((await params).id);
   if (!id.success) return new Response(null, { status: 404 });

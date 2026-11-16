@@ -2,7 +2,8 @@
 
 import { refresh } from "next/cache";
 import { z } from "zod";
-import { estSuperAdministrateur } from "@/lib/actions/droits";
+import { peutGererModule } from "@/lib/actions/droits";
+import { peutGerer } from "@/lib/metier/droits";
 import { employesExistent } from "@/lib/donnees/groupes";
 import { evaluerPointages, groupesDesEmployes } from "@/lib/donnees/planning";
 import { insererPointagesManuels, supprimerPointageManuel } from "@/lib/donnees/pointages";
@@ -38,7 +39,7 @@ async function resultatDuTest(donnees: { employeIds: string[]; horodatage: Date;
 export async function creerPointagesManuels(_etat: EtatFormulaire, formulaire: FormData): Promise<EtatFormulaire> {
   // Les droits et l'auteur viennent de la session, jamais du formulaire.
   const utilisateur = await obtenirUtilisateurPourEspace();
-  if (!utilisateur.estSuperAdmin) return { message: textes.droits };
+  if (!peutGerer(utilisateur, "presence")) return { message: textes.droits };
 
   const validation = validerPointages(formulaire, new Date());
   if (!validation.ok) return { erreursChamps: validation.erreursChamps };
@@ -59,7 +60,7 @@ export async function creerPointagesManuels(_etat: EtatFormulaire, formulaire: F
 }
 
 export async function supprimerPointage(_etat: EtatFormulaire, formulaire: FormData): Promise<EtatFormulaire> {
-  if (!(await estSuperAdministrateur())) return { message: textes.droits };
+  if (!(await peutGererModule("presence"))) return { message: textes.droits };
 
   const id = identifiant.safeParse(formulaire.get("id"));
   if (!id.success) return { message: textes.erreurs.introuvable };

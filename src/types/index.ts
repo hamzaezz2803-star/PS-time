@@ -46,6 +46,20 @@ export type EtatFormulaire<Champ extends string = string> = {
 export type EtatFormulaireDepartement = EtatFormulaire<"nom" | "parentId" | "siteId">;
 export type EtatFormulairePoste = EtatFormulaire<"code" | "nom" | "ordre" | "parentId" | "siteId">;
 
+/** Ligne de la gestion des utilisateurs (jamais de mot de passe ni d'e-mail interne). */
+export type UtilisateurListe = {
+  id: string;
+  /** Identifiant, repris comme nom affiché dans les titres de fenêtre. */
+  nom: string;
+  identifiant: string;
+  nomComplet: string;
+  estSuperAdmin: boolean;
+  estActif: boolean;
+  doitChangerMotDePasse: boolean;
+  modifieLe: Date;
+  modules: ("personnel" | "planning" | "presence")[];
+};
+
 /** Site (entreprise ou établissement), avec le nombre d'éléments qui y sont rattachés. */
 export type Site = {
   id: string;

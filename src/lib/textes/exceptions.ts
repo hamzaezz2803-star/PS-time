@@ -5,7 +5,7 @@ export const TEXTES_EXCEPTIONS = {
     sousTitre:
       "Ajoutez à la main une entrée, une sortie ou une pause pour un ou plusieurs employés : oubli de badge, correction ou test.",
     chargement: "Chargement des pointages...",
-    droits: "La saisie des pointages est réservée aux super administrateurs.",
+    droits: "Votre compte n'a pas accès au module Présence. Demandez-le au super administrateur.",
     titreListe: "Pointages saisis à la main",
     total: (n: number) => (n <= 1 ? `${n} pointage` : `${n} pointages`),
     nouveau: "Nouveau pointage",

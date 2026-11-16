@@ -3,6 +3,7 @@ import { Chargement } from "@/components/ui/chargement";
 import { EnTetePage } from "@/components/ui/en-tete-page";
 import { MessageErreur } from "@/components/ui/message-erreur";
 import { obtenirUtilisateurPourEspace } from "@/lib/donnees/session";
+import { peutGerer } from "@/lib/metier/droits";
 import { TEXTES_PROGRAMME } from "@/lib/textes/programme";
 
 /** Titre, sous-titre et contenu chargé d'une page du module Programme. */
@@ -31,6 +32,6 @@ export function CadrePageProgramme({
  */
 export async function refusSiNonAutorise(): Promise<ReactNode | null> {
   const utilisateur = await obtenirUtilisateurPourEspace();
-  if (utilisateur.estSuperAdmin) return null;
+  if (peutGerer(utilisateur, "planning")) return null;
   return <MessageErreur message={TEXTES_PROGRAMME.commun.droits} className="text-base" />;
 }

@@ -3,6 +3,7 @@ import "server-only";
 import { EXPORT_EMPLOYES_MAX, FUSEAU_HORAIRE } from "@/lib/constantes";
 import { listerEmployesPourExport } from "@/lib/donnees/employes";
 import { obtenirUtilisateurPourEspace } from "@/lib/donnees/session";
+import { peutGerer } from "@/lib/metier/droits";
 import { formaterDate, formaterHeure, formaterJour } from "@/lib/formats";
 import { jourDansFuseau } from "@/lib/metier/dates";
 import { versLigneExport, type LigneExportEmploye } from "@/lib/metier/export-employes";
@@ -25,7 +26,7 @@ export type ExportEmployes = {
  */
 export async function preparerExportEmployes(format: "excel" | "pdf", recherche: RechercheEmployes): Promise<ExportEmployes | null> {
   const utilisateur = await obtenirUtilisateurPourEspace();
-  if (!utilisateur.estSuperAdmin) return null;
+  if (!peutGerer(utilisateur, "personnel")) return null;
 
   // Une ligne de plus que le maximum : savoir si la liste a été coupée.
   const employes = await listerEmployesPourExport(EXPORT_EMPLOYES_MAX + 1, recherche);

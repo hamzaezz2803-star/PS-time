@@ -11,6 +11,7 @@ import { listerEmployesSelection } from "@/lib/donnees/groupes";
 import { evaluerPointages } from "@/lib/donnees/planning";
 import { compterPointagesManuels, listerPointagesManuels } from "@/lib/donnees/pointages";
 import { obtenirUtilisateurPourEspace } from "@/lib/donnees/session";
+import { peutGerer } from "@/lib/metier/droits";
 import { TEXTES_EXCEPTIONS } from "@/lib/textes/exceptions";
 import { lireRecherchePointages } from "@/lib/validation/pointage";
 
@@ -40,7 +41,7 @@ function lirePage(valeur: string | string[] | undefined, nombrePages: number): n
 async function ContenuPointages({ searchParams }: { searchParams: ParametresRecherche }) {
   const utilisateur = await obtenirUtilisateurPourEspace();
   // Pointages et noms d'employés : réservés aux super administrateurs (moindre privilège).
-  if (!utilisateur.estSuperAdmin) return <MessageErreur message={textes.droits} className="text-base" />;
+  if (!peutGerer(utilisateur, "presence")) return <MessageErreur message={textes.droits} className="text-base" />;
 
   const parametres = await searchParams;
   const recherche = lireRecherchePointages(parametres);

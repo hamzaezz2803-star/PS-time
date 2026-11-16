@@ -2,7 +2,7 @@
 
 import { refresh } from "next/cache";
 import { z } from "zod";
-import { estSuperAdministrateur } from "@/lib/actions/droits";
+import { peutGererModule } from "@/lib/actions/droits";
 import {
   calendrierEstUtilise,
   insererCalendrier,
@@ -23,7 +23,7 @@ function journaliserEchec(operation: string, erreur: unknown) {
 
 /** Crée un calendrier (sans `id`) ou modifie un calendrier existant (avec `id`). */
 export async function enregistrerCalendrier(_etat: EtatFormulaire, formulaire: FormData): Promise<EtatFormulaire> {
-  if (!(await estSuperAdministrateur())) return { message: textes.droits };
+  if (!(await peutGererModule("planning"))) return { message: textes.droits };
 
   const id = formulaire.get("id") ? identifiant.safeParse(formulaire.get("id")) : null;
   if (id && !id.success) return { message: textes.introuvable };
@@ -50,7 +50,7 @@ export async function enregistrerCalendrier(_etat: EtatFormulaire, formulaire: F
 }
 
 export async function supprimerCalendrier(_etat: EtatFormulaire, formulaire: FormData): Promise<EtatFormulaire> {
-  if (!(await estSuperAdministrateur())) return { message: textes.droits };
+  if (!(await peutGererModule("planning"))) return { message: textes.droits };
 
   const id = identifiant.safeParse(formulaire.get("id"));
   if (!id.success) return { message: textes.introuvable };

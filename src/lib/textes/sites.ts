@@ -36,7 +36,7 @@ export const TEXTES_SITES = {
   cree: "Site créé.",
   modifie: "Modifications enregistrées.",
   supprime: "Site supprimé.",
-  droits: "La gestion des sites est réservée aux super administrateurs.",
+  droits: "Votre compte n'a pas accès au module Personnel. Demandez-le au super administrateur.",
   echec: "L'opération a échoué. Réessayez dans un instant.",
   introuvable: "Ce site n'existe plus. La liste a été actualisée.",
   /** Champ « Site » des formulaires Départements, Postes et Personnes. */
