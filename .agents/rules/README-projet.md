@@ -19,7 +19,8 @@ Ces règles s'appliquent à **chaque prompt** et à chaque modification du proje
 
 - Framework : Next.js 16 (App Router, dossier `src/`), React 19, TypeScript strict, Tailwind CSS v4.
 - Base de données : MySQL 8.0.16+ ou MariaDB 10.4+, **une base par client** (l'application est installée chez chaque client, avec sa propre base). Accès via Drizzle ORM (`mysql2`), uniquement côté serveur (`src/lib/donnees/base.ts`). Développement : XAMPP, base `ps-time`.
-- Authentification : Better Auth (`src/lib/donnees/authentification.ts`) : e-mail et mot de passe (hachage scrypt), sessions en base dans un cookie httpOnly, 5 tentatives de connexion par minute et par IP, inscription libre désactivée. Les comptes sont créés par un administrateur.
+- Authentification : Better Auth (`src/lib/donnees/authentification.ts`) : **identifiant** et mot de passe (plugin `username` relié à la colonne `identifiant` ; 3 à 50 caractères `a-z 0-9 . - _`, sans tenir compte des majuscules), hachage scrypt, sessions en base dans un cookie httpOnly, 5 tentatives de connexion par minute et par IP, inscription libre désactivée. Routes coupées : `/sign-in/email`, `/update-user`, `/is-username-available`. Les comptes sont créés par un administrateur.
+- Première installation (`src/app/connexion/actions.ts`, `lib/donnees/installation.ts`) : tant qu'**aucun utilisateur** n'existe, l'identifiant `pstime` + le mot de passe du jour (`lib/metier/mot-de-passe-du-jour.ts` : JJMM + quatre chiffres partant du numéro du jour, lundi = 1 ... dimanche = 7, additionnés chiffre par chiffre sans retenue ; ex. lundi 16/11 : 1611 + 1234 = 2845, dimanche 15/11 : 1511 + 7890 = 8301, date de Casablanca) n'ouvre **pas** de session : il ouvre une fenêtre de création du premier super administrateur (identifiant, mot de passe, confirmation), autorisée par un jeton à usage unique de 10 minutes (empreinte SHA-256 dans `verifications`). On revient ensuite à la connexion avec ce nouveau compte. Dès qu'un utilisateur existe, `pstime` est refusé avec le même message qu'un mauvais mot de passe. Limites : 5 essais par minute et par IP, 30 essais par jour toutes adresses confondues, comparaison en temps constant, création journalisée.
 - Hébergement : [Vercel / autre].
 - Services externes : [WhatsApp, SMS, e-mail, paiement, IA...].
 
@@ -29,6 +30,7 @@ Ces règles s'appliquent à **chaque prompt** et à chaque modification du proje
 | --- | --- | --- |
 | Connexion | `/connexion` | Tout le monde |
 | Tableau de bord | `/espace` | Tout utilisateur connecté et actif |
+| Personnel > Sites | `/personnel/sites` | Super administrateur |
 | Personnel > Départements | `/personnel/departements` | Lecture : tout utilisateur connecté. Modification : super administrateur |
 | Personnel > Postes | `/personnel/postes` | Lecture : tout utilisateur connecté. Modification : super administrateur |
 | Personnel > Personnes | `/personnel/personnes` | Super administrateur (lecture et création : données personnelles) |
@@ -47,7 +49,8 @@ Ces règles s'appliquent à **chaque prompt** et à chaque modification du proje
   - Heures sup. (début, fin) : non prévues si le calendrier ne les compte pas ; avant la fin du service = signalé.
   - Jour de repos ou aucune affectation : signalé tel quel.
 - Barre du haut : cloche de notifications (panneau vide tant que le pointage n'existe pas, sans chiffre inventé).
-- Toutes les entrées du menu Personnel (Personnes, Départements, Postes) sont développées. Personnes : liste paginée, puis création, fiche, modification et suppression (avec confirmation) dans des fenêtres modales. Départements et Postes : arbre sur toute la largeur (icône distincte pour un parent et pour un enfant, nombre d'employés par ligne : sous-départements compris pour un département, occupants exacts pour un poste), bouton « Nouveau » en haut, création, modification et suppression en fenêtre (composant commun `components/arbre/gestion-arbre.tsx`).
+- Menu Personnel, dans l'ordre de saisie : Sites, Départements, Postes, Personnes. Sites : liste simple (nom unique, adresse facultative, nombre de départements, postes et employés rattachés), création, modification et suppression en fenêtre ; un site encore utilisé ne peut pas être supprimé. Chaque département, poste et employé a un champ « Site » facultatif (nom du site affiché dans l'arbre et sur la fiche).
+- Toutes les entrées du menu Personnel (Sites, Départements, Postes, Personnes) sont développées. Personnes : liste paginée, puis création, fiche, modification et suppression (avec confirmation) dans des fenêtres modales. Départements et Postes : arbre sur toute la largeur (icône distincte pour un parent et pour un enfant, nombre d'employés par ligne : sous-départements compris pour un département, occupants exacts pour un poste), bouton « Nouveau » en haut, création, modification et suppression en fenêtre (composant commun `components/arbre/gestion-arbre.tsx`).
 - Menu Planning > Programme : liste simple + fenêtres (composant commun `components/liste/gestion-liste.tsx`). Ordre d'utilisation : 1. Calendriers (créneau horaire, temps de travail calculé en direct, service de nuit, fenêtres de pointage, tolérances, heures supplémentaires) ; 2. Rotations (semaine type du lundi au dimanche, ou cycle de 1 à 31 jours ; un calendrier ou « Repos » par jour) ; 3. Groupes (nom, description, membres cochés dans une liste avec recherche) ; 4. Affectations (une rotation pour un groupe ou un employé, de telle date à telle date ou sans fin).
 
 - `src/proxy.ts` redirige vers `/connexion` sans cookie de session (confort seulement). La vraie vérification est faite dans chaque page et action par `obtenirUtilisateurConnecte()` (`src/lib/donnees/session.ts`).
@@ -64,10 +67,11 @@ Ces règles s'appliquent à **chaque prompt** et à chaque modification du proje
 
 - Schéma : `src/lib/donnees/schema.ts` ; migrations SQL : `base-de-donnees/migrations/`.
 - Tables principales :
-  - `utilisateurs` : identifiant et e-mail uniques en minuscules, nom, compte actif, super administrateur, mot de passe à changer ;
+  - `utilisateurs` : identifiant (sert à la connexion) et e-mail uniques en minuscules, nom, compte actif, super administrateur, mot de passe à changer. Le premier compte créé par `pstime` reçoit un e-mail interne non utilisé (`<identifiant>@utilisateurs.ps-time.invalid`, exigé par Better Auth) ;
+  - `sites` : entreprises ou établissements gérés, nom unique, adresse facultative. `departements`, `postes` et `employes` ont un `site_id` facultatif (`restrict` : un site utilisé ne peut pas être supprimé) ;
   - `comptes` : moyen de connexion (empreinte du mot de passe, fournisseur `credential`) ;
   - `sessions` : sessions ouvertes (jeton, expiration, IP et navigateur pour la sécurité) ;
-  - `verifications` : jetons temporaires (réinitialisation, vérification d'e-mail) ;
+  - `verifications` : jetons temporaires (réinitialisation, vérification d'e-mail, jeton d'installation `installation`) ;
   - `departements` : arbre parent/enfants (`parent_id`). Nom unique parmi les départements d'un même parent ; un département qui a des sous-départements ou des employés ne peut pas être supprimé (clé étrangère `restrict`).
   - `postes` : arbre parent/enfants, numéro (`code`) unique, ordre d'affichage.
   - `employes` : matricule et numéro de badge obligatoires et uniques, prénom, nom, département (obligatoire, `restrict`), poste (facultatif, `set null`), genre (`homme`, `femme`), pièce d'identité (type `cin`, `passeport` ou `carte_sejour` + numéro, renseignés ensemble, uniques), téléphone E.164, e-mail unique en minuscules, type d'emploi (`cdi`, `cdd`, `interim`, `stage`), dates d'embauche, de début et de fin d'emploi (type `date`, fin ≥ embauche et fin ≥ début) ;
@@ -118,6 +122,7 @@ src/
   components/connexion/ composants de l'écran de connexion
   components/espace/    tableau de bord (bannière, cartes chiffrées, étapes du planning) et changement de mot de passe
   components/tableau-de-bord/  cadre et menu latéral des pages connectées
+  components/sites/            liste et formulaire des sites, champ « Site » partagé
   components/departements/     arbre et formulaires des départements
   components/postes/           arbre et formulaires des postes
   components/personnes/        gestion des employés : fenêtres de création, fiche, modification, suppression ; liste paginée
@@ -128,7 +133,7 @@ src/
   lib/actions/          Server Actions partagées (déconnexion)
   lib/export/           exports serveur (classeur Excel des employés, préparation et contrôle des droits)
   app/impression/       pages imprimables hors du cadre du tableau de bord (liste des employés en PDF)
-  lib/donnees/          accès aux données : base, schéma, authentification, session, utilisateurs, départements, postes, employés, calendriers, rotations, groupes, affectations
+  lib/donnees/          accès aux données : base, schéma, authentification, installation (compte pstime), session, utilisateurs, sites, départements, postes, employés, calendriers, rotations, groupes, affectations
   lib/metier/           règles métier pures et leurs tests (*.test.ts, lancés par npm test)
   lib/client-authentification.ts  client Better Auth du navigateur
   proxy.ts              redirection rapide des pages connectées
@@ -158,6 +163,7 @@ Lister ici, de façon explicite, toute règle commune volontairement non appliqu
 | Double authentification (MFA) des administrateurs | Pas encore en place | Première version de la connexion | Avant la mise en production chez un client |
 | Minimisation des données personnelles | Photo de profil, facultative | Demandé par le responsable du projet (reconnaître l'employé, future badgeuse) | À confirmer avant la mise en production |
 | Limitation de tentatives partagée | Compteur en mémoire du serveur (remis à zéro au redémarrage) | Une installation = un seul serveur | Si un client utilise plusieurs serveurs |
+| Pas de système d'authentification maison ; mot de passe non devinable | Compte d'installation `pstime` + mot de passe du jour calculé (10 000 valeurs, règle connue de l'installateur) | Demandé par le responsable du projet (16/11/2026) : l'installateur ouvre l'application chez le client sans script. Limité à une base **sans aucun utilisateur**, n'ouvre jamais de session (seulement la création du premier administrateur, jeton à usage unique de 10 min), 5 essais/min/IP et 30 essais/jour au total | Définitif, tant que `pstime` reste limité à la première installation |
 
 ## Installation et lancement
 
@@ -165,9 +171,11 @@ Lister ici, de façon explicite, toute règle commune volontairement non appliqu
 npm install
 cp .env.example .env.local   # puis remplir DATABASE_URL, BETTER_AUTH_SECRET et BETTER_AUTH_URL
 npm run db:migrer            # crée ou met à jour les tables
-npm run admin:creer -- --identifiant admin --email admin@client.ma --nom "Nom Prénom"
 npm run dev
 ```
+
+- Premier compte : sur `/connexion`, identifiant `pstime` et mot de passe du jour, puis choisir l'identifiant et le mot de passe de l'administrateur dans la fenêtre qui s'ouvre, et se reconnecter avec. Ne fonctionne que sur une base sans utilisateur.
+- Alternative en ligne de commande : `npm run admin:creer -- --identifiant admin --email admin@client.ma --nom "Nom Prénom"`.
 
 - `BETTER_AUTH_SECRET` est différent pour chaque client (commande de génération dans `.env.example`).
 - `admin:creer` affiche une seule fois un mot de passe temporaire, à changer à la première connexion.
