@@ -1,8 +1,18 @@
 import "server-only";
 
-import { eq } from "drizzle-orm";
+import { hashPassword } from "better-auth/crypto";
+import { and, asc, desc, eq } from "drizzle-orm";
+import { DOMAINE_EMAIL_INTERNE, LIMITE_UTILISATEURS } from "@/lib/constantes";
+import { nettoyerModules, type Module } from "@/lib/metier/droits";
+import type { UtilisateurListe } from "@/types";
 import { obtenirBase } from "./base";
-import { utilisateurs } from "./schema";
+import { autorisationsUtilisateurs, comptes, sessions, utilisateurs } from "./schema";
+
+/** Nom imposé par Better Auth pour une connexion par mot de passe. */
+const FOURNISSEUR_MOT_DE_PASSE = "credential";
+
+type Base = ReturnType<typeof obtenirBase>;
+type Transaction = Parameters<Parameters<Base["transaction"]>[0]>[0];
 
 export async function estUtilisateurActif(utilisateurId: string): Promise<boolean> {
   const [utilisateur] = await obtenirBase()
@@ -19,4 +29,136 @@ export async function marquerMotDePasseChange(utilisateurId: string): Promise<vo
     .update(utilisateurs)
     .set({ doitChangerMotDePasse: false })
     .where(eq(utilisateurs.id, utilisateurId));
+}
+
+/** Modules accordés à un administrateur (vide pour un super administrateur, qui a tout). */
+export async function listerModulesAccordes(utilisateurId: string): Promise<Module[]> {
+  const lignes = await obtenirBase()
+    .select({ module: autorisationsUtilisateurs.module })
+    .from(autorisationsUtilisateurs)
+    .where(eq(autorisationsUtilisateurs.utilisateurId, utilisateurId));
+  return nettoyerModules(lignes.map((ligne) => ligne.module));
+}
+
+/** Comptes triés (super administrateurs d'abord, puis par identifiant), avec leurs modules. */
+export async function listerUtilisateurs(): Promise<UtilisateurListe[]> {
+  const base = obtenirBase();
+  const [lignes, autorisations] = await Promise.all([
+    base
+      .select({
+        id: utilisateurs.id,
+        identifiant: utilisateurs.identifiant,
+        nomComplet: utilisateurs.nom,
+        estSuperAdmin: utilisateurs.estSuperAdmin,
+        estActif: utilisateurs.estActif,
+        doitChangerMotDePasse: utilisateurs.doitChangerMotDePasse,
+        modifieLe: utilisateurs.modifieLe,
+      })
+      .from(utilisateurs)
+      .orderBy(desc(utilisateurs.estSuperAdmin), asc(utilisateurs.identifiant))
+      .limit(LIMITE_UTILISATEURS),
+    base.select({ utilisateurId: autorisationsUtilisateurs.utilisateurId, module: autorisationsUtilisateurs.module }).from(autorisationsUtilisateurs),
+  ]);
+  return lignes
+    .map((ligne) => ({
+      ...ligne,
+      // `nom` sert aux titres des fenêtres de la liste : l'identifiant, unique et toujours connu.
+      nom: ligne.identifiant,
+      modules: nettoyerModules(autorisations.filter((a) => a.utilisateurId === ligne.id).map((a) => a.module)),
+    }));
+}
+
+/** Remplace les modules accordés à un administrateur. */
+async function fixerModules(transaction: Transaction, utilisateurId: string, modules: Module[]): Promise<void> {
+  await transaction.delete(autorisationsUtilisateurs).where(eq(autorisationsUtilisateurs.utilisateurId, utilisateurId));
+  if (modules.length > 0) {
+    await transaction.insert(autorisationsUtilisateurs).values(modules.map((module) => ({ utilisateurId, module })));
+  }
+}
+
+export type NouvelUtilisateur = {
+  identifiant: string;
+  nom: string;
+  motDePasse: string;
+  estSuperAdmin: boolean;
+  /** Vrai : le mot de passe est provisoire et devra être changé à la première connexion. */
+  doitChangerMotDePasse: boolean;
+  modules: Module[];
+};
+
+/** Crée un compte et son mot de passe (empreinte scrypt) dans la transaction donnée. */
+export async function insererUtilisateur(transaction: Transaction, nouveau: NouvelUtilisateur): Promise<string> {
+  const id = crypto.randomUUID();
+  await transaction.insert(utilisateurs).values({
+    id,
+    identifiant: nouveau.identifiant,
+    // La connexion se fait par identifiant : e-mail interne exigé par Better Auth, jamais utilisé.
+    email: `${nouveau.identifiant}@${DOMAINE_EMAIL_INTERNE}`,
+    nom: nouveau.nom,
+    estSuperAdmin: nouveau.estSuperAdmin,
+    doitChangerMotDePasse: nouveau.doitChangerMotDePasse,
+  });
+  await transaction.insert(comptes).values({
+    id: crypto.randomUUID(),
+    utilisateurId: id,
+    fournisseurId: FOURNISSEUR_MOT_DE_PASSE,
+    compteId: id,
+    motDePasse: await hashPassword(nouveau.motDePasse),
+  });
+  if (!nouveau.estSuperAdmin) await fixerModules(transaction, id, nouveau.modules);
+  return id;
+}
+
+/** Crée un administrateur (mot de passe provisoire) avec ses modules. */
+export async function creerAdministrateur(donnees: Omit<NouvelUtilisateur, "estSuperAdmin" | "doitChangerMotDePasse">): Promise<string> {
+  return obtenirBase().transaction((transaction) =>
+    insererUtilisateur(transaction, { ...donnees, estSuperAdmin: false, doitChangerMotDePasse: true }),
+  );
+}
+
+export type ModificationUtilisateur = {
+  nom: string;
+  estActif: boolean;
+  modules: Module[];
+  /** Nouveau mot de passe provisoire, ou null pour garder l'actuel. */
+  motDePasse: string | null;
+};
+
+/**
+ * Modifie un compte dans une transaction. Les modules d'un super administrateur ne changent pas
+ * (il a tout). Un nouveau mot de passe est provisoire ; désactivation ou nouveau mot de passe
+ * ferment les sessions ouvertes. Renvoie false si le compte n'existe plus.
+ */
+export async function modifierUtilisateur(id: string, modification: ModificationUtilisateur): Promise<boolean> {
+  return obtenirBase().transaction(async (transaction) => {
+    const [existant] = await transaction
+      .select({ estSuperAdmin: utilisateurs.estSuperAdmin })
+      .from(utilisateurs)
+      .where(eq(utilisateurs.id, id))
+      .limit(1)
+      .for("update");
+    if (!existant) return false;
+
+    const { motDePasse } = modification;
+    await transaction
+      .update(utilisateurs)
+      .set({ nom: modification.nom, estActif: modification.estActif, ...(motDePasse ? { doitChangerMotDePasse: true } : {}) })
+      .where(eq(utilisateurs.id, id));
+    if (motDePasse) {
+      await transaction
+        .update(comptes)
+        .set({ motDePasse: await hashPassword(motDePasse) })
+        .where(and(eq(comptes.utilisateurId, id), eq(comptes.fournisseurId, FOURNISSEUR_MOT_DE_PASSE)));
+    }
+    if (motDePasse || !modification.estActif) await transaction.delete(sessions).where(eq(sessions.utilisateurId, id));
+    if (!existant.estSuperAdmin) await fixerModules(transaction, id, modification.modules);
+    return true;
+  });
+}
+
+/** Supprime un administrateur (jamais un super administrateur) ; sessions et droits partent avec lui. */
+export async function supprimerAdministrateur(id: string): Promise<void> {
+  await obtenirBase()
+    .delete(utilisateurs)
+    .where(and(eq(utilisateurs.id, id), eq(utilisateurs.estSuperAdmin, false)));
 }
