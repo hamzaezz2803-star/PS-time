@@ -2,8 +2,19 @@
 export type Resultat<T> = { ok: true; donnees: T } | { ok: false; erreur: string };
 
 export type IdentifiantsConnexion = {
-  email: string;
+  identifiant: string;
   motDePasse: string;
+};
+
+/** Réponse de la vérification « pstime » + mot de passe du jour (jamais de mot de passe). */
+export type ResultatCodeInstallation = { ok: true; jeton: string } | { ok: false; message: string };
+
+/** État de la fenêtre de création du premier compte. */
+export type EtatPremierCompte = {
+  erreursChamps?: Record<string, string>;
+  message?: string;
+  /** Identifiant créé, pré-rempli ensuite dans l'écran de connexion. */
+  identifiantCree?: string;
 };
 
 export type ErreursChampsConnexion = Partial<
