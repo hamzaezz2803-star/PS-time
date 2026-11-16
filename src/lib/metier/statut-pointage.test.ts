@@ -46,7 +46,7 @@ const DONNEES: DonneesPlanning = {
   profils: new Map([JOURNEE, AVEC_TOLERANCE, NON_BADGE, REPOS].map((profil) => [profil.id, profil])),
 };
 
-const OUVRIER = { id: "ouvrier", groupeId: "atelier" };
+const OUVRIER: { id: string; groupeId: string | null } = { id: "ouvrier", groupeId: "atelier" };
 const h = (heures: number, minutes = 0) => heures * 60 + minutes;
 // Lundi 16 novembre 2026.
 const statut = (etat: EtatPointageEvalue, heure: string, employe = OUVRIER, jour = "2026-11-16") =>

@@ -5,20 +5,20 @@ import { ETATS_POINTAGE, FUSEAU_HORAIRE } from "@/lib/constantes";
 import type { DonneesPlanning } from "@/lib/metier/planning-jour";
 import { statutPointage, type EtatPointageEvalue, type StatutPointage } from "@/lib/metier/statut-pointage";
 import { obtenirBase } from "./base";
-import { listerCalendriers } from "./calendriers";
+import { listerProfils } from "./profils-horaires";
 import { listerRotations } from "./rotations";
 import { affectations, employes } from "./schema";
 
 /**
  * Planning des employés donnés : leurs affectations et celles de leurs groupes, avec toutes
- * les rotations et tous les calendriers (peu nombreux). Sert à évaluer leurs pointages.
+ * les rotations et tous les profils horaires (peu nombreux). Sert à évaluer leurs pointages.
  */
 export async function chargerPlanning(employesConcernes: { id: string; groupeId: string | null }[]): Promise<DonneesPlanning> {
   const employeIds = [...new Set(employesConcernes.map((employe) => employe.id))];
   const groupeIds = [...new Set(employesConcernes.flatMap((employe) => (employe.groupeId ? [employe.groupeId] : [])))];
-  if (employeIds.length === 0) return { affectations: [], rotations: new Map(), calendriers: new Map() };
+  if (employeIds.length === 0) return { affectations: [], rotations: new Map(), profils: new Map() };
 
-  const [lignes, rotations, calendriers] = await Promise.all([
+  const [lignes, rotations, profils] = await Promise.all([
     obtenirBase()
       .select({
         rotationId: affectations.rotationId,
@@ -30,12 +30,12 @@ export async function chargerPlanning(employesConcernes: { id: string; groupeId:
       .from(affectations)
       .where(groupeIds.length > 0 ? or(inArray(affectations.employeId, employeIds), inArray(affectations.groupeId, groupeIds)) : inArray(affectations.employeId, employeIds)),
     listerRotations(),
-    listerCalendriers(),
+    listerProfils(),
   ]);
   return {
     affectations: lignes,
     rotations: new Map(rotations.map((rotation) => [rotation.id, rotation])),
-    calendriers: new Map(calendriers.map((calendrier) => [calendrier.id, calendrier])),
+    profils: new Map(profils.map((profil) => [profil.id, profil])),
   };
 }
 

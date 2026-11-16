@@ -9,20 +9,20 @@ type Ton = "succes" | "info" | "attention" | "neutre";
 const APPARENCE: Record<CodeStatut, { ton: Ton; Icone: LucideIcon }> = {
   a_l_heure: { ton: "succes", Icone: CircleCheck },
   conforme: { ton: "succes", Icone: CircleCheck },
-  heures_sup: { ton: "info", Icone: Clock4 },
+  retard_tolere: { ton: "info", Icone: Clock4 },
   retard: { ton: "attention", Icone: CircleAlert },
   depart_anticipe: { ton: "attention", Icone: CircleAlert },
   pause_anticipee: { ton: "attention", Icone: CircleAlert },
   retour_pause_retard: { ton: "attention", Icone: CircleAlert },
-  avant_fin_service: { ton: "attention", Icone: CircleAlert },
-  hors_fenetre: { ton: "attention", Icone: CircleAlert },
-  heures_sup_non_prevues: { ton: "attention", Icone: CircleAlert },
+  plage_interdite: { ton: "attention", Icone: CircleAlert },
+  plage_neutralisee: { ton: "attention", Icone: CircleAlert },
   pause_non_prevue: { ton: "attention", Icone: CircleAlert },
+  non_badge: { ton: "neutre", Icone: CircleHelp },
   jour_repos: { ton: "neutre", Icone: MoonStar },
   aucun_planning: { ton: "neutre", Icone: CircleHelp },
 };
 
-/** Résultat d'un pointage comparé au planning, avec le calendrier de référence en dessous. */
+/** Résultat d'un pointage comparé au profil horaire, avec le profil et l'heure validée en dessous. */
 export function ResultatPointage({ statut }: { statut: StatutPointage }) {
   const { ton, Icone } = APPARENCE[statut.code];
   const service = libelleService(statut);
