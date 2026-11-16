@@ -27,12 +27,6 @@ export const TEXTES_NAVIGATION = {
   groupeAdministration: "Administration",
   utilisateurs: "Utilisateurs",
   heureActuelle: "Date et heure actuelles",
-  notifications: {
-    ouvrir: "Notifications",
-    titre: "Notifications",
-    vide: "Aucune notification pour le moment.",
-    aide: "Les alertes de pointage (retards, oublis de pointage) s'afficheront ici.",
-  },
   compte: {
     ouvrir: "Ouvrir le menu du compte",
     changerMotDePasse: "Changer le mot de passe",

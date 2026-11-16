@@ -46,6 +46,18 @@ export type EtatFormulaire<Champ extends string = string> = {
 export type EtatFormulaireDepartement = EtatFormulaire<"nom" | "parentId" | "siteId">;
 export type EtatFormulairePoste = EtatFormulaire<"code" | "nom" | "ordre" | "parentId" | "siteId">;
 
+/** Notification de la cloche : qui a fait quoi, sur quel élément, et quand. */
+export type Notification = {
+  id: string;
+  action: "creation" | "modification" | "suppression";
+  objet: "site" | "departement" | "poste" | "employe" | "profil_horaire" | "rotation" | "groupe" | "affectation" | "pointage" | "utilisateur" | "mot_de_passe";
+  libelle: string | null;
+  lien: string | null;
+  auteurId: string | null;
+  auteurNom: string;
+  creeLe: Date;
+};
+
 /** Pointage affiché en direct sur le tableau de bord (jamais de pièce d'identité ni de contact). */
 export type PointageDirect = {
   id: string;

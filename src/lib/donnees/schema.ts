@@ -64,6 +64,8 @@ export const utilisateurs = mysqlTable(
       .default(true),
     estActif: boolean("est_actif").notNull().default(true),
     estSuperAdmin: boolean("est_super_admin").notNull().default(false),
+    // Dernière ouverture des notifications : les plus récentes sont « non lues ».
+    notificationsLuesLe: date("notifications_lues_le"),
     creeLe: dateCreation(),
     modifieLe: dateModification(),
   },
@@ -148,6 +150,35 @@ export const autorisationsUtilisateurs = mysqlTable(
   (table) => [
     uniqueIndex("autorisations_utilisateur_module_idx").on(table.utilisateurId, table.module),
     check("autorisations_module_valide", sql`${table.module} IN ('personnel', 'planning', 'presence')`),
+  ],
+);
+
+/**
+ * Journal des actions, affiché dans la cloche de notifications. Chaque ligne dit qui a fait
+ * quoi sur quel élément (`libelle` : nom affiché, jamais de pièce d'identité ni de contact).
+ * Visible selon le module ; `administration` est réservé au super administrateur.
+ */
+export const notifications = mysqlTable(
+  "notifications",
+  {
+    id: identifiantUnique(),
+    module: varchar("module", { length: 20 }).notNull(),
+    action: varchar("action", { length: 20 }).notNull(),
+    objet: varchar("objet", { length: 30 }).notNull(),
+    libelle: varchar("libelle", { length: 150 }),
+    lien: varchar("lien", { length: 200 }),
+    // Auteur : gardé par son nom si le compte est supprimé ensuite.
+    auteurId: char("auteur_id", { length: 36 }).references(() => utilisateurs.id, { onDelete: "set null" }),
+    auteurNom: varchar("auteur_nom", { length: 100 }).notNull(),
+    creeLe: dateCreation(),
+    modifieLe: dateModification(),
+  },
+  (table) => [
+    index("notifications_module_date_idx").on(table.module, table.creeLe),
+    index("notifications_date_idx").on(table.creeLe),
+    index("notifications_auteur_idx").on(table.auteurId),
+    check("notifications_module_valide", sql`${table.module} IN ('personnel', 'planning', 'presence', 'administration')`),
+    check("notifications_action_valide", sql`${table.action} IN ('creation', 'modification', 'suppression')`),
   ],
 );
 

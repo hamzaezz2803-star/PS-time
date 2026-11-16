@@ -3,6 +3,9 @@
 import { refresh } from "next/cache";
 import { z } from "zod";
 import { peutGererModule } from "@/lib/actions/droits";
+import { notifier } from "@/lib/actions/notifier";
+import { CHEMIN_AFFECTATIONS } from "@/lib/constantes";
+import { formaterJour } from "@/lib/formats";
 import { enregistrerAffectation as enregistrerEnBase, supprimerAffectationParId } from "@/lib/donnees/affectations";
 import { TEXTES_PROGRAMME } from "@/lib/textes/programme";
 import { validerAffectation } from "@/lib/validation/affectation";
@@ -32,6 +35,8 @@ export async function enregistrerAffectation(_etat: EtatFormulaire, formulaire: 
       return { message: resultat.erreur === "introuvable" ? textes.introuvable : textes.erreurs.introuvables };
     }
     refresh();
+    const { dateDebut, dateFin } = validation.donnees;
+    await notifier("affectation", id ? "modification" : "creation", dateFin ? `${formaterJour(dateDebut)} → ${formaterJour(dateFin)}` : formaterJour(dateDebut), CHEMIN_AFFECTATIONS);
     return { succes: { message: id ? textes.modifie : textes.cree, idSelectionne: resultat.id } };
   } catch (erreur) {
     journaliserEchec("de l'enregistrement", erreur);
@@ -51,5 +56,6 @@ export async function supprimerAffectation(_etat: EtatFormulaire, formulaire: Fo
     return { message: textes.echec };
   }
   refresh();
+  await notifier("affectation", "suppression", null, CHEMIN_AFFECTATIONS);
   return { succes: { message: textes.supprime, idSelectionne: null } };
 }

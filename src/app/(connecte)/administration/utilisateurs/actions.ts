@@ -2,6 +2,8 @@
 
 import { refresh } from "next/cache";
 import { z } from "zod";
+import { notifier } from "@/lib/actions/notifier";
+import { CHEMIN_UTILISATEURS } from "@/lib/constantes";
 import { indexEnDoublon } from "@/lib/donnees/erreurs";
 import { obtenirUtilisateurPourEspace, type UtilisateurConnecte } from "@/lib/donnees/session";
 import { creerAdministrateur, listerUtilisateurs, modifierUtilisateur, supprimerAdministrateur } from "@/lib/donnees/utilisateurs";
@@ -32,6 +34,7 @@ export async function creerUtilisateur(_etat: EtatFormulaire, formulaire: FormDa
     const id = await creerAdministrateur({ identifiant, nom, motDePasse, modules });
     // Journal d'audit : création d'un compte et droits accordés (jamais le mot de passe).
     console.info("Compte administrateur créé", { par: auteur.identifiant, identifiant, modules });
+    await notifier("utilisateur", "creation", identifiant, CHEMIN_UTILISATEURS);
     refresh();
     return { succes: { message: textes.cree, idSelectionne: id } };
   } catch (erreur) {
@@ -64,6 +67,8 @@ export async function modifierCompte(_etat: EtatFormulaire, formulaire: FormData
     return { message: textes.echec };
   }
   console.info("Compte modifié", { par: auteur.identifiant, compte: id, estActif, modules, nouveauMotDePasse: motDePasse !== null });
+  const cible = (await listerUtilisateurs()).find((utilisateur) => utilisateur.id === id);
+  await notifier("utilisateur", "modification", cible?.identifiant ?? null, CHEMIN_UTILISATEURS);
   refresh();
   return { succes: { message: textes.modifie, idSelectionne: id } };
 }
@@ -90,6 +95,7 @@ export async function supprimerCompte(_etat: EtatFormulaire, formulaire: FormDat
     return { message: textes.echec };
   }
   console.info("Compte supprimé", { par: auteur.identifiant, identifiant: cible.identifiant });
+  await notifier("utilisateur", "suppression", cible.identifiant, CHEMIN_UTILISATEURS);
   refresh();
   return { succes: { message: textes.supprime, idSelectionne: null } };
 }

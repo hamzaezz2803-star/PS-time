@@ -9,6 +9,8 @@ import {
   mettreAJourPoste,
   supprimerPosteParId,
 } from "@/lib/donnees/postes";
+import { notifier } from "@/lib/actions/notifier";
+import { CHEMIN_POSTES } from "@/lib/constantes";
 import { obtenirUtilisateurPourEspace } from "@/lib/donnees/session";
 import { peutGerer } from "@/lib/metier/droits";
 import { siteExiste } from "@/lib/donnees/sites";
@@ -82,6 +84,7 @@ export async function enregistrerPoste(
     return { message: erreurs.echec };
   }
 
+  await notifier("poste", id ? "modification" : "creation", `${donnees.code} · ${donnees.nom}`, CHEMIN_POSTES);
   refresh();
   return { succes: { message: id ? textes.modifie : textes.cree, idSelectionne } };
 }
@@ -114,6 +117,7 @@ export async function supprimerPoste(
     return { message: erreurs.echec };
   }
 
+  await notifier("poste", "suppression", `${poste.code} · ${poste.nom}`, CHEMIN_POSTES);
   refresh();
   return { succes: { message: textes.supprime, idSelectionne: poste.parentId } };
 }

@@ -8,6 +8,8 @@ import {
   obtenirEmploye,
   supprimerEmployeParId,
 } from "@/lib/donnees/employes";
+import { notifier } from "@/lib/actions/notifier";
+import { CHEMIN_PERSONNES } from "@/lib/constantes";
 import { obtenirUtilisateurPourEspace } from "@/lib/donnees/session";
 import { peutGerer } from "@/lib/metier/droits";
 import { TEXTES_PERSONNES } from "@/lib/textes/personnes";
@@ -41,6 +43,7 @@ export async function creerEmploye(
 
   refresh();
   const { prenom, nom } = preparation.donnees;
+  await notifier("employe", "creation", `${prenom} ${nom}`, CHEMIN_PERSONNES);
   return { succes: textes.cree(`${prenom} ${nom}`) };
 }
 
@@ -69,6 +72,7 @@ export async function modifierEmploye(
 
   refresh();
   const { prenom, nom } = preparation.donnees;
+  await notifier("employe", "modification", `${prenom} ${nom}`, CHEMIN_PERSONNES);
   return { succes: modification.modifie(`${prenom} ${nom}`) };
 }
 
@@ -106,6 +110,7 @@ export async function supprimerEmploye(id: string): Promise<Resultat<{ message: 
     return { ok: false, erreur: erreurs.echec };
   }
 
+  await notifier("employe", "suppression", `${employe.prenom} ${employe.nom}`, CHEMIN_PERSONNES);
   refresh();
   return { ok: true, donnees: { message: suppression.supprime(`${employe.prenom} ${employe.nom}`) } };
 }

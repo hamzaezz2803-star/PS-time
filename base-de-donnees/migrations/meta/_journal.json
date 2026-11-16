@@ -127,6 +127,13 @@
       "when": 1794838645165,
       "tag": "0017_retirer_calendriers",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "5",
+      "when": 1794840978822,
+      "tag": "0018_notifications",
+      "breakpoints": true
     }
   ]
 }

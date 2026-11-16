@@ -9,6 +9,8 @@ import {
   supprimerDepartementParId,
 } from "@/lib/donnees/departements";
 import { estEncoreReference, indexEnDoublon } from "@/lib/donnees/erreurs";
+import { notifier } from "@/lib/actions/notifier";
+import { CHEMIN_DEPARTEMENTS } from "@/lib/constantes";
 import { obtenirUtilisateurPourEspace } from "@/lib/donnees/session";
 import { peutGerer } from "@/lib/metier/droits";
 import { siteExiste } from "@/lib/donnees/sites";
@@ -75,6 +77,7 @@ export async function enregistrerDepartement(
     return { message: erreurs.echec };
   }
 
+  await notifier("departement", id ? "modification" : "creation", nom, CHEMIN_DEPARTEMENTS);
   refresh();
   return {
     succes: { message: id ? textes.modifie : textes.cree, idSelectionne },
@@ -111,6 +114,7 @@ export async function supprimerDepartement(
     return { message: erreurs.echec };
   }
 
+  await notifier("departement", "suppression", departement.nom, CHEMIN_DEPARTEMENTS);
   refresh();
   return {
     succes: { message: textes.supprime, idSelectionne: departement.parentId },

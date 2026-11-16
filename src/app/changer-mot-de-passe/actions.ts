@@ -4,6 +4,7 @@ import { APIError } from "better-auth/api";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { CHEMIN_CONNEXION, PARAMETRE_MOT_DE_PASSE_CHANGE } from "@/lib/constantes";
+import { notifier } from "@/lib/actions/notifier";
 import { auth } from "@/lib/donnees/authentification";
 import { obtenirUtilisateurConnecte } from "@/lib/donnees/session";
 import { marquerMotDePasseChange } from "@/lib/donnees/utilisateurs";
@@ -46,6 +47,7 @@ export async function changerMotDePasse(
   }
 
   await marquerMotDePasseChange(utilisateur.id);
+  await notifier("mot_de_passe", "modification", null);
   // Puis retour à la connexion : on se reconnecte avec le nouveau mot de passe, comme après
   // la création du premier compte. La fermeture de session ne doit pas bloquer ce retour.
   try {

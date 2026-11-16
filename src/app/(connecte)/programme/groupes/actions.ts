@@ -3,8 +3,10 @@
 import { refresh } from "next/cache";
 import { z } from "zod";
 import { peutGererModule } from "@/lib/actions/droits";
+import { notifier } from "@/lib/actions/notifier";
+import { CHEMIN_GROUPES } from "@/lib/constantes";
 import { indexEnDoublon } from "@/lib/donnees/erreurs";
-import { employesExistent, enregistrerGroupe as enregistrerEnBase, supprimerGroupeParId } from "@/lib/donnees/groupes";
+import { employesExistent, enregistrerGroupe as enregistrerEnBase, listerGroupes, supprimerGroupeParId } from "@/lib/donnees/groupes";
 import { TEXTES_PROGRAMME } from "@/lib/textes/programme";
 import { validerGroupe } from "@/lib/validation/groupe";
 import type { EtatFormulaire } from "@/types";
@@ -30,6 +32,7 @@ export async function enregistrerGroupe(_etat: EtatFormulaire, formulaire: FormD
     const idGroupe = await enregistrerEnBase(id ? id.data : null, validation.donnees);
     refresh();
     if (!idGroupe) return { message: textes.introuvable };
+    await notifier("groupe", id ? "modification" : "creation", validation.donnees.nom, CHEMIN_GROUPES);
     return { succes: { message: id ? textes.modifie : textes.cree, idSelectionne: idGroupe } };
   } catch (erreur) {
     if (indexEnDoublon(erreur) !== null) return { erreursChamps: { nom: textes.erreurs.nomDejaPris } };
@@ -43,12 +46,15 @@ export async function supprimerGroupe(_etat: EtatFormulaire, formulaire: FormDat
 
   const id = identifiant.safeParse(formulaire.get("id"));
   if (!id.success) return { message: textes.introuvable };
+  let nom: string | null = null;
   try {
+    nom = (await listerGroupes()).find((element) => element.id === id.data)?.nom ?? null;
     await supprimerGroupeParId(id.data);
   } catch (erreur) {
     journaliserEchec("de la suppression", erreur);
     return { message: textes.echec };
   }
+  await notifier("groupe", "suppression", nom, CHEMIN_GROUPES);
   refresh();
   return { succes: { message: textes.supprime, idSelectionne: null } };
 }

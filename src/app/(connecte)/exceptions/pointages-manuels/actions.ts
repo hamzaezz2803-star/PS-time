@@ -3,6 +3,8 @@
 import { refresh } from "next/cache";
 import { z } from "zod";
 import { peutGererModule } from "@/lib/actions/droits";
+import { notifier } from "@/lib/actions/notifier";
+import { CHEMIN_POINTAGES_MANUELS } from "@/lib/constantes";
 import { peutGerer } from "@/lib/metier/droits";
 import { employesExistent } from "@/lib/donnees/groupes";
 import { evaluerPointages, groupesDesEmployes } from "@/lib/donnees/planning";
@@ -10,6 +12,7 @@ import { insererPointagesManuels, supprimerPointageManuel } from "@/lib/donnees/
 import { obtenirUtilisateurPourEspace } from "@/lib/donnees/session";
 import { bilanPointages } from "@/lib/metier/pointages";
 import { TEXTES_EXCEPTIONS } from "@/lib/textes/exceptions";
+import { TEXTES_NOTIFICATIONS } from "@/lib/textes/notifications";
 import { libelleService, libelleStatut, resumerStatuts } from "@/lib/textes/statut-pointage";
 import { validerPointages } from "@/lib/validation/pointage";
 import type { EtatFormulaire } from "@/types";
@@ -50,6 +53,9 @@ export async function creerPointagesManuels(_etat: EtatFormulaire, formulaire: F
     const enregistres = await insererPointagesManuels(donnees, utilisateur.id);
     // Journal d'audit : qui, combien, quel état. Aucune donnée d'employé.
     console.info("Pointages manuels ajoutés", { utilisateurId: utilisateur.id, etat: donnees.etat, employes: donnees.employeIds.length, enregistres });
+    if (enregistres > 0) {
+      await notifier("pointage", "creation", TEXTES_NOTIFICATIONS.libellePointages(textes.etats[donnees.etat], enregistres), CHEMIN_POINTAGES_MANUELS);
+    }
     refresh();
     const bilan = bilanPointages(donnees.employeIds.length, enregistres);
     return { succes: { message: `${textes.cree(bilan.enregistres, bilan.doublons)} ${await resultatDuTest(donnees)}`, idSelectionne: null } };
@@ -68,6 +74,7 @@ export async function supprimerPointage(_etat: EtatFormulaire, formulaire: FormD
     const existait = await supprimerPointageManuel(id.data);
     refresh();
     if (!existait) return { message: textes.erreurs.introuvable };
+    await notifier("pointage", "suppression", null, CHEMIN_POINTAGES_MANUELS);
   } catch (erreur) {
     journaliserEchec("de la suppression", erreur);
     return { message: textes.erreurs.echecSuppression };
