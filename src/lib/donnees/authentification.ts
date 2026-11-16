@@ -4,9 +4,13 @@ import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { APIError } from "better-auth/api";
 import { nextCookies } from "better-auth/next-js";
+import { username } from "better-auth/plugins";
 import {
   DUREE_SESSION_SECONDES,
   FENETRE_TENTATIVES_SECONDES,
+  FORMAT_IDENTIFIANT,
+  LONGUEUR_MAX_IDENTIFIANT,
+  LONGUEUR_MIN_IDENTIFIANT,
   LONGUEUR_MAX_MOT_DE_PASSE,
   LONGUEUR_MIN_MOT_DE_PASSE,
   PROLONGATION_SESSION_SECONDES,
@@ -45,7 +49,6 @@ export const auth = betterAuth({
     modelName: "utilisateurs",
     fields: { name: "nom", emailVerified: "emailVerifie", ...dates },
     additionalFields: {
-      identifiant: { type: "string", required: true, input: false },
       doitChangerMotDePasse: {
         type: "boolean",
         required: true,
@@ -103,12 +106,15 @@ export const auth = betterAuth({
     // Actif aussi en développement. Stockage en mémoire : une installation = un serveur.
     enabled: true,
     customRules: {
-      "/sign-in/email": {
+      "/sign-in/username": {
         window: FENETRE_TENTATIVES_SECONDES,
         max: TENTATIVES_CONNEXION_MAX,
       },
     },
   },
+  // Connexion par identifiant uniquement. Les comptes sont gérés par un administrateur :
+  // pas de modification de profil par l'utilisateur, ni de test de disponibilité d'un identifiant.
+  disabledPaths: ["/sign-in/email", "/update-user", "/is-username-available"],
   databaseHooks: {
     session: {
       create: {
@@ -120,7 +126,18 @@ export const auth = betterAuth({
       },
     },
   },
-  plugins: [nextCookies()], // doit rester le dernier plugin
+  plugins: [
+    // Connexion par identifiant (colonne `identifiant`, en minuscules).
+    username({
+      displayUsername: false,
+      minUsernameLength: LONGUEUR_MIN_IDENTIFIANT,
+      maxUsernameLength: LONGUEUR_MAX_IDENTIFIANT,
+      usernameValidator: (identifiant) => FORMAT_IDENTIFIANT.test(identifiant),
+      validationOrder: { username: "post-normalization" },
+      schema: { user: { fields: { username: "identifiant" } } },
+    }),
+    nextCookies(), // doit rester le dernier plugin
+  ],
 });
 
 export type SessionAuthentifiee = typeof auth.$Infer.Session;

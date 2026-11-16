@@ -28,7 +28,7 @@ export async function obtenirUtilisateurConnecte(): Promise<UtilisateurConnecte>
     id: user.id,
     nom: user.name,
     email: user.email,
-    identifiant: user.identifiant,
+    identifiant: user.username,
     doitChangerMotDePasse: user.doitChangerMotDePasse,
     estSuperAdmin: user.estSuperAdmin,
   };
