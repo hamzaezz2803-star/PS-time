@@ -162,3 +162,18 @@ describe("calcul des compteurs", () => {
     assert.equal(cache.size, 1);
   });
 });
+
+describe("historique journalier", () => {
+  it("calcule chaque jour les seuls compteurs journaliers", async () => {
+    const { historiqueJournalier } = await import("./calcul.ts");
+    const compteurs: DefinitionCompteur[] = [
+      { id: "RETARD", version: 1, formule: "RETARD_MIN", periodicites: ["JOUR", "MOIS"] },
+      { id: "ABSENCES", version: 1, formule: "NB_ABSENCES", periodicites: ["MOIS"] },
+    ];
+    const historique = historiqueJournalier(compteurs, [jour("2026-11-16", [h(8, 10), h(18)]), jour("2026-11-17", [])]);
+    assert.deepEqual(historique.map((j) => [j.jour, j.valeurs.map((v) => [v.idCompteur, v.ok ? v.valeur : v.erreur.code])]), [
+      ["2026-11-16", [["RETARD", 10]]],
+      ["2026-11-17", [["RETARD", "DONNEE_MANQUANTE"]]],
+    ]);
+  });
+});

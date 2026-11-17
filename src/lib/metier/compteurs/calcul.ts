@@ -67,3 +67,17 @@ export function calculerCompteurs(
       }),
   );
 }
+
+export type JourHistorique = { jour: string; valeurs: ValeurCompteur[] };
+
+/**
+ * Valeurs journalières des compteurs qui ont la périodicité « Jour », pour chaque journée
+ * donnée (tendances et tableau d'historique). Les journées sont prises dans l'ordre reçu.
+ */
+export function historiqueJournalier(compteurs: readonly DefinitionCompteur[], jours: readonly JourService[], cache: CacheFormules = new Map()): JourHistorique[] {
+  const journaliers = compteurs.filter((compteur) => compteur.periodicites.includes("JOUR"));
+  return jours.map((jour) => ({
+    jour: jour.jour,
+    valeurs: calculerCompteurs(journaliers, [{ periodicite: "JOUR", debut: jour.jour, fin: jour.jour, finCalcul: jour.jour }], [jour], cache),
+  }));
+}

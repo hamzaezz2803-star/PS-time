@@ -1,10 +1,9 @@
 import Link from "next/link";
-import { ChevronLeft, ChevronRight, ClipboardClock, Coffee, LogIn, LogOut, Search, SearchX, Timer, TimerOff, X, type LucideIcon } from "lucide-react";
+import { ChevronLeft, ChevronRight, ClipboardClock, Search, SearchX, X } from "lucide-react";
 import { AvatarEmploye } from "@/components/personnes/avatar-employe";
 import { Bouton } from "@/components/ui/bouton";
 import { ChampFormulaire } from "@/components/ui/champ-formulaire";
-import { Pastille } from "@/components/ui/pastille";
-import { CHEMIN_POINTAGES_MANUELS, ETATS_POINTAGE, LONGUEUR_MAX_RECHERCHE } from "@/lib/constantes";
+import { CHEMIN_POINTAGES_MANUELS, LONGUEUR_MAX_RECHERCHE } from "@/lib/constantes";
 import { formaterDate, formaterHeure } from "@/lib/formats";
 import { chaineRecherche } from "@/lib/metier/recherche";
 import { TEXTES_EXCEPTIONS } from "@/lib/textes/exceptions";
@@ -12,33 +11,13 @@ import type { RecherchePointages } from "@/lib/validation/pointage";
 import type { StatutPointage } from "@/lib/metier/statut-pointage";
 import { TEXTES_STATUT_POINTAGE } from "@/lib/textes/statut-pointage";
 import type { PointageListe } from "@/types";
+import { PastilleEtat } from "./pastille-etat";
 import { ResultatPointage } from "./resultat-pointage";
 import { BoutonSupprimerPointage } from "./gestion-pointages";
 
 const textes = TEXTES_EXCEPTIONS.pointages;
-type Etat = (typeof ETATS_POINTAGE)[number];
-
-const ICONES_ETAT: Record<Etat, LucideIcon> = {
-  entree: LogIn,
-  sortie: LogOut,
-  debut_pause: Coffee,
-  fin_pause: Coffee,
-  debut_heures_sup: Timer,
-  fin_heures_sup: TimerOff,
-};
-const estEtat = (valeur: string): valeur is Etat => (ETATS_POINTAGE as readonly string[]).includes(valeur);
-
 const STYLE_LIEN_PAGE =
   "inline-flex min-h-11 items-center gap-1 rounded-lg border border-bordure-champ bg-surface px-3 text-sm font-semibold text-texte hover:bg-ciel focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primaire lg:min-h-10";
-
-function PastilleEtat({ etat }: { etat: string }) {
-  if (!estEtat(etat)) return <Pastille ton="neutre">{etat}</Pastille>;
-  return (
-    <Pastille Icone={ICONES_ETAT[etat]} ton={etat === "entree" || etat === "fin_pause" || etat === "debut_heures_sup" ? "info" : "neutre"}>
-      {textes.etats[etat]}
-    </Pastille>
-  );
-}
 
 /** Filtres de la liste : formulaire GET (critères dans l'URL, repris par la pagination). */
 function FiltresPointages({ recherche }: { recherche: RecherchePointages }) {
