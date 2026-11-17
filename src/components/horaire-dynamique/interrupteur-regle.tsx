@@ -31,7 +31,7 @@ export function InterrupteurRegle({ id, estActif }: { id: string; estActif: bool
         <span className={cn("relative h-6 w-10 shrink-0 rounded-md transition-colors duration-150", estActif ? "bg-succes" : "bg-bordure-champ")}>
           <span
             className={cn(
-              "absolute top-1 size-4 rounded-sm bg-white shadow-carte transition-transform duration-150 motion-reduce:transition-none",
+              "absolute top-1 left-0 size-4 rounded-sm bg-white shadow-carte transition-transform duration-150 motion-reduce:transition-none",
               estActif ? "translate-x-5" : "translate-x-1",
             )}
           />

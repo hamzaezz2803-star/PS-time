@@ -9,6 +9,8 @@
 START TRANSACTION;
 
 -- 1. Retrait des données de test précédentes (enfants avant parents).
+-- Règles d'horaire dynamique de test, et celles saisies dans l'application sur un profil de test.
+DELETE FROM regles_horaires WHERE id LIKE '00000000-0000-4000-8000-%' OR profil_id LIKE '00000000-0000-4000-8000-%';
 DELETE FROM affectations WHERE id LIKE '00000000-0000-4000-8000-%';
 DELETE FROM employes WHERE id LIKE '00000000-0000-4000-8000-%';
 DELETE FROM groupes WHERE id LIKE '00000000-0000-4000-8000-%';
@@ -168,5 +170,12 @@ UPDATE postes SET site_id = '00000000-0000-4000-8000-000000000901'
 UPDATE employes e JOIN departements d ON d.id = e.departement_id
   SET e.site_id = d.site_id
   WHERE e.id LIKE '00000000-0000-4000-8000-%';
+
+-- 10. Horaire dynamique : premier pointage du matin → Matin, de l'après-midi → Après-midi (lundi à vendredi).
+INSERT INTO regles_horaires (id, debut_minutes, fin_minutes, jours_semaine, profil_id, est_actif) VALUES
+  ('00000000-0000-4000-8000-000000000501', 300, 480, '12345', '00000000-0000-4000-8000-000000000402', 1),
+  ('00000000-0000-4000-8000-000000000502', 720, 900, '12345', '00000000-0000-4000-8000-000000000403', 1);
+-- Youssef Amrani (T003) a son horaire reconnu d'après son premier pointage.
+UPDATE employes SET horaire_dynamique = 1 WHERE id = '00000000-0000-4000-8000-000000000303';
 
 COMMIT;

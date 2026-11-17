@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 export function JoursSemaine({ jours }: { jours: number[] }) {
   const noms = JOURS_ISO.filter((jour) => jours.includes(jour)).map((jour) => textes.joursLongs[jour - 1]);
   return (
-    <span className="inline-flex gap-1">
+    <span className="relative inline-flex gap-1">
       <span className="sr-only">{textes.joursActifs(noms)}</span>
       {JOURS_ISO.map((jour) => {
         const estActif = jours.includes(jour);

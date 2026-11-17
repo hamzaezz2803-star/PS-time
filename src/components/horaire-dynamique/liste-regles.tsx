@@ -15,7 +15,7 @@ import { JoursSemaine } from "./jours-semaine";
 const COLONNES: ColonneListe<RegleHoraireListe>[] = [
   {
     titre: textes.colonnes.fenetre,
-    rendu: (regle) => <span className="tabular-nums">{textes.fenetre(minutesVersHeure(regle.debut), minutesVersHeure(regle.fin))}</span>,
+    rendu: (regle) => <span className="whitespace-nowrap tabular-nums">{textes.fenetre(minutesVersHeure(regle.debut), minutesVersHeure(regle.fin))}</span>,
   },
   {
     titre: textes.colonnes.profil,

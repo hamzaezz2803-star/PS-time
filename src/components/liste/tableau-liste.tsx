@@ -24,7 +24,7 @@ export function TableauListe<T extends { id: string; nom: string }>({
   onSupprimer: (id: string) => void;
 }) {
   return (
-    <div className="overflow-x-auto">
+    <div className="relative overflow-x-auto">
       <table className="w-full text-left text-sm">
         <thead className="border-b border-bordure bg-fond/70 text-texte-secondaire">
           <tr>

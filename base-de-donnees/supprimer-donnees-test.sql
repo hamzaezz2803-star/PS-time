@@ -3,6 +3,8 @@
 
 START TRANSACTION;
 
+-- Règles d'horaire dynamique de test, et celles saisies dans l'application sur un profil de test.
+DELETE FROM regles_horaires WHERE id LIKE '00000000-0000-4000-8000-%' OR profil_id LIKE '00000000-0000-4000-8000-%';
 DELETE FROM affectations WHERE id LIKE '00000000-0000-4000-8000-%';
 DELETE FROM employes WHERE id LIKE '00000000-0000-4000-8000-%';
 DELETE FROM groupes WHERE id LIKE '00000000-0000-4000-8000-%';

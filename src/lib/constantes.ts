@@ -144,3 +144,9 @@ export const LONGUEUR_MAX_LIBELLE_NOTIFICATION = 150;
 export const LONGUEUR_MAX_REMARQUE_POINTAGE = 255;
 /** Un pointage manuel ne peut pas être dans le futur (petite marge pour l'horloge du poste). */
 export const TOLERANCE_POINTAGE_FUTUR_MINUTES = 5;
+/** Formules des compteurs : longueur, profondeur d'imbrication et nombre d'éléments maximum. */
+export const FORMULE_LONGUEUR_MAX = 2000;
+export const FORMULE_PROFONDEUR_MAX = 40;
+export const FORMULE_NOEUDS_MAX = 500;
+/** ROUND(x, n) : nombre de décimales accepté. */
+export const FORMULE_DECIMALES_MAX = 10;
