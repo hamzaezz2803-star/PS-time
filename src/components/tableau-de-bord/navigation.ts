@@ -5,6 +5,9 @@ import {
   CalendarCog,
   CalendarRange,
   ClockArrowUp,
+  Gauge,
+  ListChecks,
+  CalendarSearch,
   ClipboardClock,
   ClockAlert,
   Factory,
@@ -18,6 +21,7 @@ import {
 } from "lucide-react";
 import {
   CHEMIN_AFFECTATIONS,
+  CHEMIN_COMPTEURS,
   CHEMIN_PROFILS_HORAIRES,
   CHEMIN_DEPARTEMENTS,
   CHEMIN_ESPACE,
@@ -100,6 +104,14 @@ export const GROUPES_NAVIGATION: GroupeNavigation[] = [
         libelle: T.gestionExceptions,
         icone: ClockAlert,
         sousLiens: [{ libelle: T.pointagesManuels, icone: ClipboardClock, href: CHEMIN_POINTAGES_MANUELS }],
+      },
+      {
+        libelle: T.compteurs,
+        icone: Gauge,
+        sousLiens: [
+          { libelle: T.gestionCompteurs, icone: ListChecks, href: CHEMIN_COMPTEURS },
+          { libelle: T.detailJour, icone: CalendarSearch },
+        ],
       },
     ],
   },
