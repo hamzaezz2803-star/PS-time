@@ -15,7 +15,7 @@ export function JoursSemaine({ jours }: { jours: number[] }) {
             key={jour}
             aria-hidden="true"
             className={cn(
-              "flex size-6 items-center justify-center rounded-md text-xs font-semibold",
+              "flex size-6 items-center justify-center rounded-md text-sm font-semibold",
               estActif ? "bg-primaire text-white" : "bg-fond text-texte-secondaire/60 ring-1 ring-inset ring-bordure line-through",
             )}
           >
