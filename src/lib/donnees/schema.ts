@@ -320,6 +320,8 @@ export const employes = mysqlTable(
     dateEmbauche: jour("date_embauche"),
     dateDebutEmploi: jour("date_debut_emploi"),
     dateFinEmploi: jour("date_fin_emploi"),
+    // Vrai : son horaire du jour est reconnu d'après son premier pointage (règles horaires).
+    horaireDynamique: boolean("horaire_dynamique").notNull().default(false),
     creeLe: dateCreation(),
     modifieLe: dateModification(),
   },
@@ -603,5 +605,33 @@ export const affectations = mysqlTable(
     index("affectations_employe_idx").on(table.employeId, table.dateDebut),
     check("affectations_une_seule_cible", sql`(${table.groupeId} IS NULL) <> (${table.employeId} IS NULL)`),
     check("affectations_dates_coherentes", sql`${table.dateFin} IS NULL OR ${table.dateFin} >= ${table.dateDebut}`),
+  ],
+);
+
+/**
+ * Règles de l'horaire dynamique : si le premier pointage du jour tombe entre `debut` et `fin`
+ * (minutes depuis minuit, fin exclue) un des jours indiqués, l'employé suit ce profil horaire.
+ * Jours : chiffres de 1 (lundi) à 7 (dimanche), ex. « 12345 ». Pas de fenêtre après minuit
+ * (pas de service de nuit pour l'instant). Le non-chevauchement est vérifié par l'application.
+ */
+export const reglesHoraires = mysqlTable(
+  "regles_horaires",
+  {
+    id: identifiantUnique(),
+    debutMinutes: int("debut_minutes").notNull(),
+    finMinutes: int("fin_minutes").notNull(),
+    joursSemaine: varchar("jours_semaine", { length: 7 }).notNull().default("1234567"),
+    // Un profil utilisé par une règle ne peut pas être supprimé.
+    profilId: char("profil_id", { length: 36 })
+      .notNull()
+      .references(() => profilsHoraires.id, { onDelete: "restrict" }),
+    estActif: boolean("est_actif").notNull().default(true),
+    creeLe: dateCreation(),
+    modifieLe: dateModification(),
+  },
+  (table) => [
+    index("regles_horaires_profil_idx").on(table.profilId),
+    check("regles_horaires_bornes", sql`${table.debutMinutes} BETWEEN 0 AND 1439 AND ${table.finMinutes} BETWEEN 1 AND 1440 AND ${table.finMinutes} > ${table.debutMinutes}`),
+    check("regles_horaires_jours_valides", sql`${table.joursSemaine} REGEXP '^[1-7]{1,7}$'`),
   ],
 );
