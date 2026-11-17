@@ -152,3 +152,7 @@ export const FORMULE_NOEUDS_MAX = 500;
 export const FORMULE_DECIMALES_MAX = 10;
 /** Compteurs : nombre maximal de jours chargés en une fois (une période d'historique). */
 export const COMPTEURS_JOURS_MAX = 62;
+export const CHEMIN_COMPTEURS = "/presence/compteurs";
+export const LIMITE_COMPTEURS = 500;
+export const LONGUEUR_MAX_LIBELLE_COMPTEUR = 100;
+export const LONGUEUR_MAX_DESCRIPTION_COMPTEUR = 500;

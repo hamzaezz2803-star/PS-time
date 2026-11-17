@@ -635,3 +635,71 @@ export const reglesHoraires = mysqlTable(
     check("regles_horaires_jours_valides", sql`${table.joursSemaine} REGEXP '^[1-7]{1,7}$'`),
   ],
 );
+
+/** Auteur d'une création ou d'une modification : gardé vide si le compte est supprimé. */
+const referenceAuteur = (nom: string) => char(nom, { length: 36 }).references(() => utilisateurs.id, { onDelete: "set null" });
+
+/**
+ * Compteurs (retard, heures sup., absences du mois...) : une formule calculée sur les variables
+ * d'une journée, d'une semaine ou d'un mois. Les valeurs sont calculées à la demande, jamais
+ * stockées. On ne supprime pas un compteur, on le désactive (ses versions restent l'historique).
+ */
+export const compteurs = mysqlTable(
+  "compteurs",
+  {
+    id: identifiantUnique(),
+    // Identifiant lisible, en majuscules (ex. RETARD_JOUR).
+    code: varchar("code", { length: 30 }).notNull(),
+    // Unique sans tenir compte des majuscules ni des accents (interclassement *_ci de la base).
+    libelle: varchar("libelle", { length: 100 }).notNull(),
+    formule: varchar("formule", { length: 2000 }).notNull(),
+    journalier: boolean("journalier").notNull().default(false),
+    hebdomadaire: boolean("hebdomadaire").notNull().default(false),
+    mensuel: boolean("mensuel").notNull().default(false),
+    unite: varchar("unite", { length: 12 }).notNull(),
+    description: varchar("description", { length: 500 }),
+    estActif: boolean("est_actif").notNull().default(true),
+    // Augmente à chaque changement de formule, d'unité ou de périodicité.
+    version: int("version").notNull().default(1),
+    creePar: referenceAuteur("cree_par"),
+    modifiePar: referenceAuteur("modifie_par"),
+    creeLe: dateCreation(),
+    modifieLe: dateModification(),
+  },
+  (table) => [
+    uniqueIndex("compteurs_code_idx").on(table.code),
+    uniqueIndex("compteurs_libelle_idx").on(table.libelle),
+    index("compteurs_cree_par_idx").on(table.creePar),
+    index("compteurs_modifie_par_idx").on(table.modifiePar),
+    check("compteurs_code_valide", sql`${table.code} REGEXP '^[A-Z0-9][A-Z0-9_-]{0,29}$'`),
+    check("compteurs_libelle_non_vide", sql`CHAR_LENGTH(TRIM(${table.libelle})) > 0`),
+    check("compteurs_formule_non_vide", sql`CHAR_LENGTH(TRIM(${table.formule})) > 0`),
+    check("compteurs_une_periodicite", sql`${table.journalier} OR ${table.hebdomadaire} OR ${table.mensuel}`),
+    check("compteurs_unite_valide", sql`${table.unite} IN ('minutes', 'heures', 'jours', 'nombre', 'pourcentage')`),
+    check("compteurs_version_positive", sql`${table.version} >= 1`),
+  ],
+);
+
+/** Versions successives d'un compteur (piste d'audit) : formule, unité et périodicités de chaque version. */
+export const compteursVersions = mysqlTable(
+  "compteurs_versions",
+  {
+    id: identifiantUnique(),
+    compteurId: char("compteur_id", { length: 36 })
+      .notNull()
+      .references(() => compteurs.id, { onDelete: "restrict" }),
+    version: int("version").notNull(),
+    formule: varchar("formule", { length: 2000 }).notNull(),
+    journalier: boolean("journalier").notNull(),
+    hebdomadaire: boolean("hebdomadaire").notNull(),
+    mensuel: boolean("mensuel").notNull(),
+    unite: varchar("unite", { length: 12 }).notNull(),
+    modifiePar: referenceAuteur("modifie_par"),
+    creeLe: dateCreation(),
+    modifieLe: dateModification(),
+  },
+  (table) => [
+    uniqueIndex("compteurs_versions_compteur_version_idx").on(table.compteurId, table.version),
+    index("compteurs_versions_modifie_par_idx").on(table.modifiePar),
+  ],
+);

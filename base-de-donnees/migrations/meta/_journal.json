@@ -141,6 +141,13 @@
       "when": 1794913540949,
       "tag": "0019_horaire_dynamique",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "5",
+      "when": 1794915750165,
+      "tag": "0020_compteurs",
+      "breakpoints": true
     }
   ]
 }

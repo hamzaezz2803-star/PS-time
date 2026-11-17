@@ -39,3 +39,32 @@ export function messageErreurFormule(erreur: ErreurFormule): string {
   if (erreur.position !== undefined) parties.push(`(caractère ${erreur.position + 1})`);
   return parties.join(" ");
 }
+
+/** Aide de l'éditeur : fonctions (texte inséré, syntaxe, explication). */
+export const AIDE_FONCTIONS = [
+  { nom: "IF", insertion: "IF(, , )", syntaxe: "IF(condition, si vrai, si faux)", description: "Choisit une valeur selon une condition." },
+  { nom: "MIN", insertion: "MIN(, )", syntaxe: "MIN(a, b, ...)", description: "La plus petite valeur." },
+  { nom: "MAX", insertion: "MAX(, )", syntaxe: "MAX(a, b, ...)", description: "La plus grande valeur." },
+  { nom: "ABS", insertion: "ABS()", syntaxe: "ABS(x)", description: "Valeur sans signe." },
+  { nom: "ROUND", insertion: "ROUND(, 0)", syntaxe: "ROUND(x, décimales)", description: "Arrondi (0 à 10 décimales)." },
+  { nom: "FLOOR", insertion: "FLOOR()", syntaxe: "FLOOR(x)", description: "Arrondi vers le bas." },
+  { nom: "CEIL", insertion: "CEIL()", syntaxe: "CEIL(x)", description: "Arrondi vers le haut." },
+  { nom: "COALESCE", insertion: "COALESCE(, 0)", syntaxe: "COALESCE(a, b, ...)", description: "Première valeur connue : remplace une donnée manquante." },
+] as const;
+
+/** Aide de l'éditeur : opérateurs et mots-clés. */
+export const AIDE_OPERATEURS = [
+  { symbole: "+", description: "addition" },
+  { symbole: "-", description: "soustraction" },
+  { symbole: "*", description: "multiplication" },
+  { symbole: "/", description: "division" },
+  { symbole: ">", description: "plus grand" },
+  { symbole: ">=", description: "plus grand ou égal" },
+  { symbole: "<", description: "plus petit" },
+  { symbole: "<=", description: "plus petit ou égal" },
+  { symbole: "=", description: "égal" },
+  { symbole: "!=", description: "différent" },
+  { symbole: "AND", description: "et" },
+  { symbole: "OR", description: "ou" },
+  { symbole: "NOT", description: "non" },
+] as const;

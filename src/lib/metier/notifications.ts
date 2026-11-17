@@ -23,6 +23,7 @@ export const MODULE_DE_L_OBJET = {
   regle_horaire: "planning",
   horaire_dynamique: "planning",
   pointage: "presence",
+  compteur: "presence",
   utilisateur: "administration",
   mot_de_passe: "administration",
 } as const satisfies Record<string, ModuleNotification>;

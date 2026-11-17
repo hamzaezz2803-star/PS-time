@@ -61,7 +61,8 @@ export function GestionListe<T extends { id: string; nom: string }>({
   textes: TextesGestionListe;
   icone: LucideIcon;
   rendreFormulaire: (proprietes: ProprietesFormulaireListe<T>) => ReactNode;
-  actionSupprimer: (etat: EtatFormulaire, formulaire: FormData) => Promise<EtatFormulaire>;
+  /** Absent : la liste ne propose pas de suppression. */
+  actionSupprimer?: (etat: EtatFormulaire, formulaire: FormData) => Promise<EtatFormulaire>;
 }) {
   const [fenetre, setFenetre] = useState<Fenetre | null>(null);
   const [messageSucces, setMessageSucces] = useState<string>();
@@ -129,7 +130,7 @@ export function GestionListe<T extends { id: string; nom: string }>({
             idEnEvidence={idEnEvidence}
             textes={textes}
             onModifier={(id) => ouvrir({ type: "modification", id })}
-            onSupprimer={(id) => ouvrir({ type: "suppression", id })}
+            onSupprimer={actionSupprimer && ((id) => ouvrir({ type: "suppression", id }))}
           />
         )}
       </section>
@@ -137,7 +138,7 @@ export function GestionListe<T extends { id: string; nom: string }>({
       <FenetreModale ouverte={fenetre !== null} onFermer={fermer} titre={titreFenetre} libelleFermer={textes.fermer}>
         {fenetre?.type === "creation" && rendreFormulaire({ onTermine: terminer, onAnnuler: fermer })}
         {fenetre?.type === "modification" && cible && rendreFormulaire({ element: cible, onTermine: terminer, onAnnuler: fermer })}
-        {fenetre?.type === "suppression" && cible && (
+        {fenetre?.type === "suppression" && cible && actionSupprimer && (
           <SuppressionElement id={cible.id} nom={cible.nom} action={actionSupprimer} textes={textes} onTermine={terminer} onAnnuler={fermer} />
         )}
       </FenetreModale>

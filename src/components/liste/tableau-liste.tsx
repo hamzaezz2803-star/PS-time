@@ -21,7 +21,8 @@ export function TableauListe<T extends { id: string; nom: string }>({
   idEnEvidence: string | null;
   textes: { actions: string; modifier: (nom: string) => string; supprimer: (nom: string) => string };
   onModifier: (id: string) => void;
-  onSupprimer: (id: string) => void;
+  /** Absent : pas de suppression (ex. élément qu'on désactive au lieu de le supprimer). */
+  onSupprimer?: (id: string) => void;
 }) {
   return (
     <div className="relative overflow-x-auto">
@@ -69,7 +70,7 @@ export function TableauListe<T extends { id: string; nom: string }>({
                 {/* Toujours visibles au clavier et sur mobile ; plus discrètes sur ordinateur hors survol. */}
                 <div className="flex items-center justify-end gap-0.5 transition-opacity duration-150 lg:opacity-60 lg:group-hover/ligne:opacity-100 lg:group-focus-within/ligne:opacity-100">
                   <BoutonIcone libelle={textes.modifier(element.nom)} Icone={Pencil} onClick={() => onModifier(element.id)} />
-                  <BoutonIcone libelle={textes.supprimer(element.nom)} Icone={Trash2} onClick={() => onSupprimer(element.id)} estDanger />
+                  {onSupprimer && <BoutonIcone libelle={textes.supprimer(element.nom)} Icone={Trash2} onClick={() => onSupprimer(element.id)} estDanger />}
                 </div>
               </td>
             </tr>
