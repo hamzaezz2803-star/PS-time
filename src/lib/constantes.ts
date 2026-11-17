@@ -114,6 +114,7 @@ export const REPAS_MAX_MINUTES = 720;
 export const CHEMIN_GROUPES = "/programme/groupes";
 export const CHEMIN_ROTATIONS = "/programme/rotations";
 export const CHEMIN_AFFECTATIONS = "/programme/affectations";
+export const CHEMIN_HORAIRE_DYNAMIQUE = "/programme/horaire-dynamique";
 export const LONGUEUR_MAX_NOM_PROGRAMME = 60;
 export const LONGUEUR_MAX_DESCRIPTION_GROUPE = 255;
 /** Garde-fou de lecture pour les listes du module (quelques dizaines en pratique). */
