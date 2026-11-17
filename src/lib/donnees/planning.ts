@@ -5,6 +5,7 @@ import { ETATS_POINTAGE, FUSEAU_HORAIRE } from "@/lib/constantes";
 import type { DonneesPlanning } from "@/lib/metier/planning-jour";
 import { statutPointage, type EtatPointageEvalue, type StatutPointage } from "@/lib/metier/statut-pointage";
 import { obtenirBase } from "./base";
+import { chargerHoraireDynamique } from "./horaire-dynamique";
 import { listerProfils } from "./profils-horaires";
 import { listerRotations } from "./rotations";
 import { affectations, employes } from "./schema";
@@ -54,7 +55,11 @@ const estEtatConnu = (etat: string): etat is EtatPointageEvalue => (ETATS_POINTA
 export async function evaluerPointages(
   liste: { employeId: string; groupeId: string | null; horodatage: Date; etat: string }[],
 ): Promise<StatutPointage[]> {
-  const planning = await chargerPlanning(liste.map((pointage) => ({ id: pointage.employeId, groupeId: pointage.groupeId })));
+  const [planningRotations, horaireDynamique] = await Promise.all([
+    chargerPlanning(liste.map((pointage) => ({ id: pointage.employeId, groupeId: pointage.groupeId }))),
+    chargerHoraireDynamique(liste),
+  ]);
+  const planning = { ...planningRotations, horaireDynamique };
   return liste.map((pointage) =>
     estEtatConnu(pointage.etat)
       ? statutPointage({ horodatage: pointage.horodatage, etat: pointage.etat }, { id: pointage.employeId, groupeId: pointage.groupeId }, planning, FUSEAU_HORAIRE)
