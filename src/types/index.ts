@@ -277,3 +277,27 @@ export type RegleHoraireListe = {
   profilCode: string;
   estActif: boolean;
 };
+
+/** Compteur tel qu'affiché dans la liste et le formulaire. */
+export type Compteur = {
+  id: string;
+  code: string;
+  /** Libellé (sert aussi de nom dans la liste commune). */
+  nom: string;
+  formule: string;
+  periodicites: ("JOUR" | "SEMAINE" | "MOIS")[];
+  unite: "minutes" | "heures" | "jours" | "nombre" | "pourcentage";
+  description: string | null;
+  estActif: boolean;
+  version: number;
+};
+
+/** Version passée ou actuelle d'un compteur (historique). */
+export type VersionCompteur = {
+  version: number;
+  formule: string;
+  periodicites: ("JOUR" | "SEMAINE" | "MOIS")[];
+  unite: string;
+  auteur: string | null;
+  date: string;
+};

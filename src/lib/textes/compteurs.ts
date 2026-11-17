@@ -1,0 +1,101 @@
+/** Textes de la page Présence > Compteurs > Gestion des compteurs. */
+
+export const TEXTES_COMPTEURS = {
+  titrePage: "Gestion des compteurs",
+  sousTitre: "Définissez vos indicateurs (retards, heures, absences...) par une formule. Les valeurs sont calculées à partir des pointages et de l'horaire prévu.",
+  chargement: "Chargement des compteurs...",
+  droits: "Votre compte n'a pas accès au module Présence. Demandez-le au super administrateur.",
+  echec: "L'opération a échoué. Réessayez dans un instant.",
+  introuvable: "Ce compteur n'existe plus. La liste a été actualisée.",
+
+  // Liste (composant commun)
+  titre: "Compteurs",
+  total: (n: number) => (n <= 1 ? `${n} compteur` : `${n} compteurs`),
+  nouveau: "Nouveau compteur",
+  vide: "Aucun compteur pour l'instant.",
+  videAction: "Créez le premier, par exemple « Retard du jour » avec la formule RETARD_MIN.",
+  aucunFiltre: "Aucun compteur ne correspond à ces filtres.",
+  titreCreation: "Nouveau compteur",
+  titreModification: (nom: string) => `Modifier « ${nom} »`,
+  // Exigés par la liste commune mais jamais affichés : un compteur se désactive, il ne se supprime pas.
+  titreSuppression: "",
+  explicationSuppression: "",
+  confirmerSuppression: () => "",
+  oui: "",
+  modifier: (nom: string) => `Modifier ${nom}`,
+  supprimer: () => "",
+  actions: "Actions",
+  fermer: "Fermer",
+  annuler: "Annuler",
+  colonnes: { compteur: "Compteur", periodicites: "Périodicités", unite: "Unité", etat: "État" },
+  filtres: { libelle: "Filtrer les compteurs", periodicite: "Périodicité", toutes: "Toutes", etat: "État", tous: "Tous", actifs: "Actifs", inactifs: "Inactifs" },
+  actif: "Actif",
+  inactif: "Inactif",
+  activer: (nom: string) => `Activer ${nom}`,
+  desactiver: (nom: string) => `Désactiver ${nom}`,
+  active: "Compteur activé.",
+  desactive: "Compteur désactivé. Il n'est plus calculé, son historique de versions est gardé.",
+
+  // Formulaire
+  sectionIdentite: "Identité",
+  sectionFormule: "Formule",
+  code: "Identifiant",
+  aideCode: "Majuscules, chiffres, « _ » ou « - » (30 caractères au plus). Ne change plus après la création.",
+  libelle: "Libellé",
+  exempleLibelle: "Par exemple : Retard du jour",
+  periodicites: "Calculé pour",
+  aidePeriodicites: "Semaine : du lundi au dimanche. Seuls les jours écoulés comptent.",
+  unite: "Unité du résultat",
+  unites: { minutes: "Minutes (affichées en heures et minutes)", heures: "Heures", jours: "Jours", nombre: "Nombre", pourcentage: "Pourcentage" },
+  unitesCourtes: { minutes: "Minutes", heures: "Heures", jours: "Jours", nombre: "Nombre", pourcentage: "%" },
+  description: "Description (facultative)",
+  estActif: "Compteur actif",
+  aideActif: "Un compteur inactif n'est plus calculé.",
+  formule: "Formule",
+  exempleFormule: "Par exemple : IF(RETARD_MIN > 5, RETARD_MIN, 0)",
+  formuleValide: "Formule valide",
+  formuleValidePour: (periodes: string) => `Formule valide pour : ${periodes}.`,
+  erreurPour: (periode: string, message: string) => `${periode} : ${message}`,
+  choisirPeriodicite: "Cochez au moins une périodicité pour vérifier la formule.",
+  versionChangera: "Formule, unité ou périodicités modifiées : une nouvelle version sera créée.",
+  enregistrer: "Enregistrer",
+  enregistrementEnCours: "Enregistrement...",
+  cree: "Compteur créé.",
+  modifie: "Modifications enregistrées.",
+  modifieVersion: (version: number) => `Modifications enregistrées (version ${version}).`,
+
+  // Aide
+  aide: { titre: "Aide", variables: "Variables", fonctions: "Fonctions", operateurs: "Opérateurs", inserer: (nom: string) => `Insérer ${nom}`, indisponible: "Pas disponible pour les périodicités cochées" },
+
+  // Test
+  test: {
+    titre: "Tester la formule",
+    aide: "Saisissez des valeurs d'essai. Un champ vide = donnée manquante.",
+    periodicite: "Variables de",
+    aucuneVariable: "Cette formule n'utilise aucune variable.",
+    resultat: "Résultat",
+    formuleInvalide: "Corrigez d'abord la formule.",
+  },
+
+  // Versions
+  versions: {
+    titre: "Historique des versions",
+    chargement: "Chargement des versions...",
+    erreur: "Impossible de charger l'historique. Réessayez.",
+    version: (numero: number) => `Version ${numero}`,
+    actuelle: "Actuelle",
+    par: (nom: string) => `par ${nom}`,
+    auteurInconnu: "compte supprimé",
+  },
+
+  erreurs: {
+    codeInvalide: "Identifiant invalide : majuscules, chiffres, « _ » ou « - », 30 caractères au plus, sans espace.",
+    codeDejaPris: "Un compteur utilise déjà cet identifiant.",
+    libelleVide: "Saisissez le libellé.",
+    libelleTropLong: "Ce libellé est trop long (100 caractères maximum).",
+    libelleDejaPris: "Un compteur porte déjà ce libellé (majuscules et accents ne comptent pas).",
+    periodicitesVides: "Cochez au moins une périodicité.",
+    uniteInvalide: "Choisissez une unité.",
+    descriptionTropLongue: "Cette description est trop longue (500 caractères maximum).",
+  },
+} as const;
