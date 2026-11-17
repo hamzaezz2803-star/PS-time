@@ -34,7 +34,7 @@ export function BarreSelection({ employes, departements, aujourdhui }: { employe
   const estAujourdhui = selection.date >= aujourdhui;
 
   return (
-    <section aria-label={textes.libelle} className="grid gap-4 rounded-xl border border-bordure bg-surface p-4 shadow-carte sm:p-5 lg:grid-cols-[minmax(0,1fr)_auto]">
+    <section aria-label={textes.libelle} className="grid gap-4 rounded-xl border border-bordure bg-surface p-4 shadow-carte sm:p-5 xl:grid-cols-[minmax(0,1fr)_auto]">
       <div className="grid gap-3 sm:grid-cols-3">
         <div className="flex flex-col gap-2">
           <Etiquette htmlFor="filtre-departement">{textes.departement}</Etiquette>

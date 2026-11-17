@@ -69,7 +69,7 @@ export function HistoriqueCompteurs({ detail }: { detail: DetailJour }) {
                         type="button"
                         onClick={() => naviguer({ date: jour.jour })}
                         aria-label={estAffiche ? `${formaterJour(jour.jour)}, ${textes.jourAffiche}` : textes.afficherJour(formaterJour(jour.jour))}
-                        className="min-h-11 rounded-md text-start font-medium capitalize text-texte tabular-nums hover:text-primaire focus-visible:outline-2 focus-visible:outline-primaire lg:min-h-9"
+                        className="min-h-11 rounded-md text-start font-medium text-texte tabular-nums hover:text-primaire focus-visible:outline-2 focus-visible:outline-primaire lg:min-h-9"
                       >
                         {formaterJour(jour.jour)}
                       </button>

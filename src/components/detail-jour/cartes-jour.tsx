@@ -41,7 +41,7 @@ export function EnTeteEmploye({ detail }: { detail: DetailJour }) {
           <span className="font-mono tabular-nums">{employe.matricule}</span> · {employe.departement}
         </p>
       </div>
-      <p className="rounded-lg bg-ciel px-3 py-1.5 text-base font-semibold capitalize text-marine tabular-nums">{formaterJour(detail.date)}</p>
+      <p className="rounded-lg bg-ciel px-3 py-1.5 text-base font-semibold text-marine tabular-nums">{formaterJour(detail.date)}</p>
     </div>
   );
 }
