@@ -70,7 +70,7 @@ export function BarreSelection({ employes, departements, aujourdhui }: { employe
             value={selection.date}
             max={aujourdhui}
             onChange={(e) => e.target.value && e.target.value <= aujourdhui && naviguer({ date: e.target.value })}
-            className={`${CHAMP} w-auto min-w-0 flex-1 tabular-nums sm:flex-none`}
+            className={`${CHAMP} w-auto min-w-38 flex-1 tabular-nums sm:flex-none`}
           />
           <BoutonIcone libelle={textes.jourSuivant} Icone={ChevronRight} onClick={() => naviguer({ date: ajouterJours(selection.date, 1) })} disabled={estAujourdhui} />
           <button
