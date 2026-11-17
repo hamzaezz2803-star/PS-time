@@ -156,3 +156,7 @@ export const CHEMIN_COMPTEURS = "/presence/compteurs";
 export const LIMITE_COMPTEURS = 500;
 export const LONGUEUR_MAX_LIBELLE_COMPTEUR = 100;
 export const LONGUEUR_MAX_DESCRIPTION_COMPTEUR = 500;
+export const CHEMIN_DETAIL_JOUR = "/presence/detail-jour";
+/** Détail jour : pointages affichés au plus, et longueurs d'historique proposées (jours). */
+export const DETAIL_POINTAGES_MAX = 200;
+export const DUREES_HISTORIQUE = [7, 14, 30] as const;

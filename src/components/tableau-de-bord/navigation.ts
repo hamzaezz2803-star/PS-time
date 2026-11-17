@@ -22,6 +22,7 @@ import {
 import {
   CHEMIN_AFFECTATIONS,
   CHEMIN_COMPTEURS,
+  CHEMIN_DETAIL_JOUR,
   CHEMIN_PROFILS_HORAIRES,
   CHEMIN_DEPARTEMENTS,
   CHEMIN_ESPACE,
@@ -110,7 +111,7 @@ export const GROUPES_NAVIGATION: GroupeNavigation[] = [
         icone: Gauge,
         sousLiens: [
           { libelle: T.gestionCompteurs, icone: ListChecks, href: CHEMIN_COMPTEURS },
-          { libelle: T.detailJour, icone: CalendarSearch },
+          { libelle: T.detailJour, icone: CalendarSearch, href: CHEMIN_DETAIL_JOUR },
         ],
       },
     ],

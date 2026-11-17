@@ -301,3 +301,29 @@ export type VersionCompteur = {
   auteur: string | null;
   date: string;
 };
+
+/** Valeur d'un compteur prête à afficher : un nombre, ou le message expliquant pourquoi il n'y en a pas. */
+export type ValeurAffichee = { idCompteur: string; valeur: number | null; message: string | null };
+
+/** Tout ce que montre l'écran Détail jour pour un employé et une date. */
+export type DetailJour = {
+  date: string;
+  employe: { id: string; nomComplet: string; matricule: string; departement: string };
+  horaire: {
+    profilCode: string;
+    profilNom: string;
+    estDynamique: boolean;
+    debutPrevu: number;
+    finPrevue: number;
+    dureePrevue: number;
+    entree: number | null;
+    sortie: number | null;
+  } | null;
+  pointages: { id: string; horodatage: string; etat: string; source: string; statut: import("@/lib/metier/statut-pointage").StatutPointage }[];
+  compteurs: Compteur[];
+  /** Valeurs par périodicité ; un compteur absent n'a pas cette périodicité. */
+  valeurs: Record<"JOUR" | "SEMAINE" | "MOIS", ValeurAffichee[]>;
+  periodes: Record<"JOUR" | "SEMAINE" | "MOIS", { debut: string; fin: string; finCalcul: string }>;
+  /** Valeurs journalières des jours précédents (le plus ancien d'abord), date comprise. */
+  historique: { jour: string; valeurs: ValeurAffichee[] }[];
+};

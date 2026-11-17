@@ -2,8 +2,7 @@ import "server-only";
 
 import { and, asc, eq, gte, lt } from "drizzle-orm";
 import { COMPTEURS_JOURS_MAX, FUSEAU_HORAIRE, UN_JOUR_MILLISECONDES } from "@/lib/constantes";
-import { calculerCompteurs, type CacheFormules, type DefinitionCompteur, type ValeurCompteur } from "@/lib/metier/compteurs/calcul";
-import { joursEntre, periodesDeLaDate } from "@/lib/metier/compteurs/periodes";
+import { joursEntre } from "@/lib/metier/compteurs/periodes";
 import { horaireDuProfil, type JourService } from "@/lib/metier/compteurs/variables";
 import { jourDansFuseau, jourEtMinuteLocaux } from "@/lib/metier/dates";
 import { planningDuJour } from "@/lib/metier/planning-jour";
@@ -13,7 +12,7 @@ import { chargerPlanning, groupesDesEmployes } from "./planning";
 import { pointages } from "./schema";
 
 const FORMAT_JOUR = /^\d{4}-\d{2}-\d{2}$/;
-const estJourValide = (jour: string) => FORMAT_JOUR.test(jour) && new Date(`${jour}T00:00:00Z`).toISOString().startsWith(jour);
+export const estJourValide = (jour: string) => FORMAT_JOUR.test(jour) && new Date(`${jour}T00:00:00Z`).toISOString().startsWith(jour);
 
 export type ResultatJours = { ok: true; jours: JourService[] } | { ok: false; erreur: "dates" | "employe" };
 
@@ -54,6 +53,7 @@ export async function chargerJoursService(employeId: string, debut: string, fin:
       return {
         jour,
         horaire: prevu.type === "travail" ? horaireDuProfil(prevu.profil) : null,
+        profil: prevu.type === "travail" ? { code: prevu.profil.code, nom: prevu.profil.nom, estDynamique: prevu.rotation === null } : null,
         pointages: locaux.filter((pointage) => pointage.jour === jour).map((pointage) => pointage.minutes),
       };
     }),
@@ -62,24 +62,3 @@ export async function chargerJoursService(employeId: string, debut: string, fin:
 
 /** Aujourd'hui à Casablanca (AAAA-MM-JJ). */
 export const aujourdhuiLocal = () => jourDansFuseau(new Date(), FUSEAU_HORAIRE);
-
-/**
- * Valeurs des compteurs d'un employé pour une date : jour, semaine et mois qui la contiennent,
- * sur les jours écoulés. Rien pour une date future. `cache` se partage entre employés.
- */
-export async function calculerCompteursEmploye(
-  employeId: string,
-  date: string,
-  compteurs: readonly DefinitionCompteur[],
-  cache: CacheFormules = new Map(),
-): Promise<{ ok: true; valeurs: ValeurCompteur[] } | { ok: false; erreur: "dates" | "employe" }> {
-  if (!estJourValide(date)) return { ok: false, erreur: "dates" };
-  const periodes = periodesDeLaDate(date, aujourdhuiLocal());
-  if (periodes.length === 0 || compteurs.length === 0) return { ok: true, valeurs: [] };
-
-  const debut = periodes.reduce((plusTot, periode) => (periode.debut < plusTot ? periode.debut : plusTot), date);
-  const fin = periodes.reduce((plusTard, periode) => (periode.finCalcul > plusTard ? periode.finCalcul : plusTard), date);
-  const chargement = await chargerJoursService(employeId, debut, fin);
-  if (!chargement.ok) return chargement;
-  return { ok: true, valeurs: calculerCompteurs(compteurs, periodes, chargement.jours, cache) };
-}

@@ -44,7 +44,13 @@ export type ValeursVariables = Record<string, number | null>;
 export type HorairePrevu = { debutPrevu: number; finPrevue: number; dureePrevue: number; estBadge: boolean };
 
 /** Journée de service : horaire prévu (null = repos ou aucun planning) et pointages (minutes locales). */
-export type JourService = { jour: string; horaire: HorairePrevu | null; pointages: number[] };
+export type JourService = {
+  jour: string;
+  horaire: HorairePrevu | null;
+  pointages: number[];
+  /** Profil appliqué, pour l'affichage (absent dans les calculs purs). */
+  profil?: { code: string; nom: string; estDynamique: boolean } | null;
+};
 
 /** Horaire prévu d'un profil de travail : de la première à la dernière plage fixe ; durée = somme des plages fixes. */
 export function horaireDuProfil(profil: ProfilHoraire): HorairePrevu | null {
