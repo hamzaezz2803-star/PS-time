@@ -11,6 +11,8 @@ const OBJETS: Record<Notification["objet"], { avec: string; sans: string }> = {
   rotation: { avec: "la rotation", sans: "une rotation" },
   groupe: { avec: "le groupe", sans: "un groupe" },
   affectation: { avec: "l'affectation", sans: "une affectation" },
+  regle_horaire: { avec: "la règle horaire", sans: "une règle horaire" },
+  horaire_dynamique: { avec: "les employés en horaire dynamique", sans: "les employés en horaire dynamique" },
   pointage: { avec: "le pointage", sans: "un pointage" },
   utilisateur: { avec: "le compte", sans: "un compte" },
   mot_de_passe: { avec: "son mot de passe", sans: "son mot de passe" },

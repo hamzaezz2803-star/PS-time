@@ -50,7 +50,7 @@ export type EtatFormulairePoste = EtatFormulaire<"code" | "nom" | "ordre" | "par
 export type Notification = {
   id: string;
   action: "creation" | "modification" | "suppression";
-  objet: "site" | "departement" | "poste" | "employe" | "profil_horaire" | "rotation" | "groupe" | "affectation" | "pointage" | "utilisateur" | "mot_de_passe";
+  objet: "site" | "departement" | "poste" | "employe" | "profil_horaire" | "rotation" | "groupe" | "affectation" | "regle_horaire" | "horaire_dynamique" | "pointage" | "utilisateur" | "mot_de_passe";
   libelle: string | null;
   lien: string | null;
   auteurId: string | null;
@@ -262,4 +262,18 @@ export type PointageListe = {
   remarque: string | null;
   /** Nom du compte qui l'a saisi (null si ce compte a été supprimé). */
   saisiPar: string | null;
+};
+
+/** Règle de l'horaire dynamique, telle qu'affichée dans la liste. */
+export type RegleHoraireListe = {
+  id: string;
+  /** Résumé lisible (« De 06:00 à 09:00 : Journée 8 h »), sert au titre et à la recherche. */
+  nom: string;
+  debut: number;
+  fin: number;
+  jours: number[];
+  profilId: string;
+  profilNom: string;
+  profilCode: string;
+  estActif: boolean;
 };

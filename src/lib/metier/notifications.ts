@@ -20,6 +20,8 @@ export const MODULE_DE_L_OBJET = {
   rotation: "planning",
   groupe: "planning",
   affectation: "planning",
+  regle_horaire: "planning",
+  horaire_dynamique: "planning",
   pointage: "presence",
   utilisateur: "administration",
   mot_de_passe: "administration",
