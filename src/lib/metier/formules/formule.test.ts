@@ -193,3 +193,20 @@ describe("formules : robustesse", () => {
     }
   });
 });
+
+describe("formules : coloration de l'éditeur", () => {
+  it("reconnaît chaque morceau sans jamais échouer, et redonne le texte exact", async () => {
+    const { colorerFormule } = await import("./coloration.ts");
+    const formule = "IF(retard_min >= 5 AND x, 1.5, 0) @";
+    const morceaux = colorerFormule(formule, new Set(["RETARD_MIN"]));
+    assert.equal(morceaux.map((m) => m.texte).join(""), formule);
+    const types = Object.fromEntries(morceaux.filter((m) => m.texte.trim()).map((m) => [m.texte, m.type]));
+    assert.equal(types.IF, "fonction");
+    assert.equal(types.retard_min, "variable");
+    assert.equal(types[">="], "operateur");
+    assert.equal(types.AND, "mot_cle");
+    assert.equal(types.x, "variable_inconnue");
+    assert.equal(types["1.5"], "nombre");
+    assert.equal(types["@"], "invalide");
+  });
+});
