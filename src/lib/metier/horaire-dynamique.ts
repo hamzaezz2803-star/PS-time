@@ -41,7 +41,7 @@ export function reglesSeChevauchent(a: RegleHoraire, b: RegleHoraire): boolean {
 }
 
 /** Première règle existante (autre que `regle` elle-même) qui chevauche `regle`, ou null. */
-export function regleEnConflit(regle: RegleHoraire, existantes: readonly RegleHoraire[]): RegleHoraire | null {
+export function regleEnConflit<T extends RegleHoraire>(regle: RegleHoraire, existantes: readonly T[]): T | null {
   return existantes.find((autre) => autre.id !== regle.id && reglesSeChevauchent(regle, autre)) ?? null;
 }
 
