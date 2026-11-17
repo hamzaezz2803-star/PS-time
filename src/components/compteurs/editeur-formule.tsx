@@ -79,6 +79,8 @@ export function EditeurFormule({
       <p id="etat-formule" aria-live="polite" className={cn("flex items-start gap-2 text-sm", erreur ? "text-erreur" : "text-succes")}>
         {!estVerifiable ? (
           <span className="text-texte-secondaire">{textes.choisirPeriodicite}</span>
+        ) : valeur.trim() === "" && !erreur ? (
+          <span className="text-texte-secondaire">{textes.aideFormuleVide}</span>
         ) : erreur ? (
           <>
             <CircleAlert className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
