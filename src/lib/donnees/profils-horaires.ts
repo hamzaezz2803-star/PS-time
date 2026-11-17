@@ -6,7 +6,7 @@ import { TYPES_PLAGE, type TypePlage } from "@/lib/metier/profil-horaire";
 import type { DonneesProfil } from "@/lib/validation/profil-horaire";
 import type { ProfilHoraire } from "@/types";
 import { obtenirBase } from "./base";
-import { joursRotation, plagesProfils, profilsHoraires } from "./schema";
+import { joursRotation, plagesProfils, profilsHoraires, reglesHoraires } from "./schema";
 
 const estTypePlage = (valeur: string): valeur is TypePlage => (TYPES_PLAGE as readonly string[]).includes(valeur);
 
@@ -73,10 +73,14 @@ export async function enregistrerProfil(id: string | null, donnees: DonneesProfi
   });
 }
 
-/** Vrai si une rotation utilise ce profil (la suppression serait refusée par la base). */
+/** Vrai si une rotation ou une règle horaire utilise ce profil (la suppression serait refusée par la base). */
 export async function profilEstUtilise(id: string): Promise<boolean> {
-  const [ligne] = await obtenirBase().select({ id: joursRotation.id }).from(joursRotation).where(eq(joursRotation.profilId, id)).limit(1);
-  return ligne !== undefined;
+  const base = obtenirBase();
+  const [[jour], [regle]] = await Promise.all([
+    base.select({ id: joursRotation.id }).from(joursRotation).where(eq(joursRotation.profilId, id)).limit(1),
+    base.select({ id: reglesHoraires.id }).from(reglesHoraires).where(eq(reglesHoraires.profilId, id)).limit(1),
+  ]);
+  return jour !== undefined || regle !== undefined;
 }
 
 /** Supprime un profil ; ses plages partent avec lui (clé « cascade »). */

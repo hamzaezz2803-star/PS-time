@@ -74,6 +74,6 @@ export const TEXTES_PROFILS = {
     },
     repasInvalide: (maximum: number) => `Saisissez un nombre de minutes entre 0 et ${maximum}.`,
     repasIncoherent: "Le minimum ne peut pas dépasser le maximum.",
-    utilise: "Ce profil est utilisé par une rotation. Retirez-le d'abord de la rotation.",
+    utilise: "Ce profil est utilisé par une rotation ou une règle d'horaire dynamique. Retirez-le d'abord.",
   },
 };
