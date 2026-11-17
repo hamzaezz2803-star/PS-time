@@ -34,8 +34,8 @@ export function BarreSelection({ employes, departements, aujourdhui }: { employe
   const estAujourdhui = selection.date >= aujourdhui;
 
   return (
-    <section aria-label={textes.libelle} className="grid gap-4 rounded-xl border border-bordure bg-surface p-4 shadow-carte sm:p-5 xl:grid-cols-[minmax(0,1fr)_auto]">
-      <div className="grid gap-3 sm:grid-cols-3">
+    <section aria-label={textes.libelle} className="grid grid-cols-[minmax(0,1fr)] gap-4 rounded-xl border border-bordure bg-surface p-4 shadow-carte sm:p-5 xl:grid-cols-[minmax(0,1fr)_auto]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-3 sm:grid-cols-3">
         <div className="flex flex-col gap-2">
           <Etiquette htmlFor="filtre-departement">{textes.departement}</Etiquette>
           <select id="filtre-departement" value={departementId} onChange={(e) => setDepartementId(e.target.value)} className={CHAMP}>
@@ -62,7 +62,7 @@ export function BarreSelection({ employes, departements, aujourdhui }: { employe
 
       <div className="flex flex-col gap-2">
         <Etiquette htmlFor="choix-date">{textes.date}</Etiquette>
-        <div className="flex items-center gap-1">
+        <div className="flex flex-wrap items-center gap-1">
           <BoutonIcone libelle={textes.jourPrecedent} Icone={ChevronLeft} onClick={() => naviguer({ date: ajouterJours(selection.date, -1) })} />
           <input
             id="choix-date"
@@ -70,7 +70,7 @@ export function BarreSelection({ employes, departements, aujourdhui }: { employe
             value={selection.date}
             max={aujourdhui}
             onChange={(e) => e.target.value && e.target.value <= aujourdhui && naviguer({ date: e.target.value })}
-            className={`${CHAMP} w-auto tabular-nums`}
+            className={`${CHAMP} w-auto min-w-0 flex-1 tabular-nums sm:flex-none`}
           />
           <BoutonIcone libelle={textes.jourSuivant} Icone={ChevronRight} onClick={() => naviguer({ date: ajouterJours(selection.date, 1) })} disabled={estAujourdhui} />
           <button

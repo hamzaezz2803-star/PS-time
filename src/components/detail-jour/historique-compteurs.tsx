@@ -80,7 +80,7 @@ export function HistoriqueCompteurs({ detail }: { detail: DetailJour }) {
                       return (
                         <td key={compteur.id} className="px-4 py-1.5" title={valeur?.message ?? undefined}>
                           <span className="flex items-center gap-2">
-                            <span className="w-16 shrink-0 tabular-nums text-texte">{nombre === null ? <span className="text-texte-secondaire">{TEXTES_DETAIL_JOUR.compteurs.sansValeur}</span> : formaterValeur(nombre, compteur.unite)}</span>
+                            <span className="w-20 shrink-0 whitespace-nowrap tabular-nums text-texte">{nombre === null ? <span className="text-texte-secondaire">{TEXTES_DETAIL_JOUR.compteurs.sansValeur}</span> : formaterValeur(nombre, compteur.unite)}</span>
                             {nombre !== null && (
                               <span className="h-2 flex-1 overflow-hidden rounded-sm bg-fond" aria-hidden="true">
                                 <span className="block h-full rounded-sm bg-primaire/60" style={{ width: `${(Math.abs(nombre) / (maximums.get(compteur.id) ?? 1)) * 100}%` }} />

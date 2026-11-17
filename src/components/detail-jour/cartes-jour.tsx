@@ -35,8 +35,8 @@ export function EnTeteEmploye({ detail }: { detail: DetailJour }) {
       <span className="flex size-12 items-center justify-center rounded-xl bg-primaire text-lg font-semibold text-white" aria-hidden="true">
         {initiales(employe.nomComplet)}
       </span>
-      <div className="flex min-w-0 flex-1 flex-col">
-        <h2 className="truncate text-xl font-semibold text-marine">{employe.nomComplet}</h2>
+      <div className="flex min-w-40 flex-1 flex-col">
+        <h2 className="text-xl font-semibold text-marine">{employe.nomComplet}</h2>
         <p className="text-sm text-texte-secondaire">
           <span className="font-mono tabular-nums">{employe.matricule}</span> · {employe.departement}
         </p>
