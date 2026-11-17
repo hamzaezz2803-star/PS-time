@@ -96,7 +96,7 @@ function GroupePeriode({ detail, periodicite }: { detail: DetailJour; periodicit
       {valeurs.length === 0 ? (
         <p className="text-sm text-texte-secondaire">{textes.aucunPourPeriode}</p>
       ) : (
-        <div className="-mx-1 flex snap-x gap-3 overflow-x-auto px-1 pb-2" tabIndex={0} role="group" aria-label={textes.periodes[periodicite]}>
+        <div className="relative -mx-1 flex snap-x gap-3 overflow-x-auto px-1 pb-2" tabIndex={0} role="group" aria-label={textes.periodes[periodicite]}>
           {valeurs.map((valeur) => {
             const compteur = detail.compteurs.find((element) => element.id === valeur.idCompteur);
             return compteur ? (

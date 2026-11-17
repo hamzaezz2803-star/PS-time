@@ -49,7 +49,7 @@ export function HistoriqueCompteurs({ detail }: { detail: DetailJour }) {
       {journaliers.length === 0 ? (
         <p className="text-base text-texte-secondaire">{textes.aucun}</p>
       ) : (
-        <div className="-m-4 overflow-x-auto sm:-m-5">
+        <div className="relative -m-4 overflow-x-auto sm:-m-5">
           <table className="w-full text-left text-sm">
             <thead className="border-b border-bordure bg-fond/70 text-texte-secondaire">
               <tr>
