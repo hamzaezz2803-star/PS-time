@@ -55,7 +55,7 @@ export function VersionsCompteur({ compteurId, versionActuelle }: { compteurId: 
                 </div>
                 <code className="block whitespace-pre-wrap break-words rounded-md bg-fond px-2.5 py-1.5 font-mono text-sm text-texte">{version.formule}</code>
                 <span className="text-sm text-texte-secondaire">
-                  {version.periodicites.map((periodicite) => TEXTES_PERIODICITES[periodicite]).join(" · ")} · {version.unite}
+                  {version.periodicites.map((periodicite) => TEXTES_PERIODICITES[periodicite]).join(" · ")} · {TEXTES_COMPTEURS.unitesCourtes[version.unite as keyof typeof TEXTES_COMPTEURS.unitesCourtes] ?? version.unite}
                 </span>
               </li>
             ))}

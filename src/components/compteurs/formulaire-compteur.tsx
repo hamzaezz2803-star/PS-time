@@ -75,7 +75,7 @@ function ContenuCompteur({ etat, compteur }: { etat: EtatFormulaireListe; compte
       <div className="flex min-w-0 flex-col gap-5">
         <div className="grid gap-4 sm:grid-cols-[12rem_minmax(0,1fr)]">
           <ChampFormulaire nom="code" libelle={textes.code} defaultValue={valeurSaisie(etat, "code", compteur?.code ?? "")} readOnly={compteur !== undefined} aide={textes.aideCode} erreur={erreurs?.code} className="font-mono uppercase read-only:bg-fond" maxLength={30} required />
-          <ChampFormulaire nom="libelle" libelle={textes.libelle} defaultValue={valeurSaisie(etat, "libelle", compteur?.nom ?? "")} placeholder={textes.exempleLibelle} erreur={erreurs?.libelle} maxLength={100} required />
+          <ChampFormulaire nom="libelle" libelle={textes.libelle} defaultValue={valeurSaisie(etat, "libelle", compteur?.nom ?? "")} placeholder={textes.exempleLibelle} erreur={erreurs?.libelle} data-focus-initial={compteur ? true : undefined} maxLength={100} required />
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2">
