@@ -1,0 +1,55 @@
+/** Textes du Rapport des présences (Planning > Horaire dynamique). */
+
+export const TEXTES_RAPPORT = {
+  titrePage: "Rapport des présences",
+  sousTitre: "Pour les employés en horaire dynamique : le premier pointage de chaque jour et l'horaire reconnu par les règles.",
+  chargement: "Chargement du rapport...",
+  droits: "Votre compte n'a pas accès au module Planning. Demandez-le au super administrateur.",
+  echec: "Le rapport n'a pas pu être chargé. Réessayez dans un instant.",
+
+  filtres: {
+    titre: "Filtrer le rapport",
+    du: "Du",
+    au: "Au",
+    departement: "Département",
+    tousDepartements: "Tous les départements",
+    rechercher: "Rechercher",
+    periodeRapide: "Période rapide",
+    ceMois: "Ce mois",
+    septJours: "7 derniers jours",
+    trenteJours: "30 derniers jours",
+    aideLimite: (jours: number) => `${jours} jours au plus par recherche.`,
+    filtrer: "Filtrer par nom ou matricule",
+    exempleFiltre: "Nom ou matricule",
+  },
+  exporter: { excel: "Export Excel", pdf: "Export PDF" },
+
+  tableau: {
+    titre: "Données de pointage et horaires affectés",
+    total: (n: number) => (n <= 1 ? `${n} ligne` : `${n} lignes`),
+    actualiser: "Actualiser",
+    matricule: "Matricule",
+    employe: "Employé",
+    departement: "Département",
+    date: "Date",
+    premierPointage: "Premier pointage",
+    horaire: "Horaire affecté",
+    aucunHoraire: "Aucune règle reconnue",
+    vide: "Aucun pointage d'employé en horaire dynamique sur cette période.",
+    videAction: "Élargissez la période, ou cochez des employés dans Horaire dynamique > Employés concernés.",
+    aucunResultat: (recherche: string) => `Aucune ligne ne correspond à « ${recherche} ».`,
+    tropDeLignes: (maximum: number) => `Seules les ${maximum} lignes les plus récentes sont affichées. Réduisez la période.`,
+  },
+
+  document: {
+    titre: "Rapport des présences",
+    periode: (du: string, au: string) => `Du ${du} au ${au}`,
+    genereLe: (date: string, heure: string) => `Généré le ${date} à ${heure}`,
+    nomFeuille: "Présences",
+    nomFichier: (du: string, au: string) => `rapport-presences-${du}-au-${au}`,
+    retour: "Retour au rapport",
+    confidentiel: "Document interne. Contient des données personnelles : ne pas diffuser.",
+    page: "Page",
+    echec: "L'export n'a pas pu être généré. Réessayez dans un instant.",
+  },
+} as const;

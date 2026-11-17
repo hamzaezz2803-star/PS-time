@@ -160,3 +160,10 @@ export const CHEMIN_DETAIL_JOUR = "/presence/detail-jour";
 /** Détail jour : pointages affichés au plus, et longueurs d'historique proposées (jours). */
 export const DETAIL_POINTAGES_MAX = 200;
 export const DUREES_HISTORIQUE = [7, 14, 30] as const;
+/** Rapport des présences (horaire dynamique) : chemins, période par défaut et maximale, lignes au plus. */
+export const CHEMIN_RAPPORT_PRESENCES = "/programme/rapport-presences";
+export const CHEMIN_EXPORT_RAPPORT_PRESENCES = "/programme/rapport-presences/export-excel";
+export const CHEMIN_IMPRESSION_RAPPORT_PRESENCES = "/impression/rapport-presences";
+export const RAPPORT_JOURS_DEFAUT = 30;
+export const RAPPORT_JOURS_MAX = 93;
+export const RAPPORT_LIGNES_MAX = 5000;

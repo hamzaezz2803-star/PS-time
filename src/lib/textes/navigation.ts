@@ -22,6 +22,7 @@ export const TEXTES_NAVIGATION = {
   groupes: "Groupes",
   affectations: "Affectations",
   horaireDynamique: "Horaire dynamique",
+  rapportPresences: "Rapport des présences",
   groupePresence: "Présence",
   gestionExceptions: "Gestion des exceptions",
   pointagesManuels: "Pointage manuel",

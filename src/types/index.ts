@@ -327,3 +327,15 @@ export type DetailJour = {
   /** Valeurs journalières des jours précédents (le plus ancien d'abord), date comprise. */
   historique: { jour: string; valeurs: ValeurAffichee[] }[];
 };
+
+/** Ligne du Rapport des présences : premier pointage d'un employé un jour donné, et horaire reconnu. */
+export type LigneRapportPresence = {
+  employeId: string;
+  matricule: string;
+  nomComplet: string;
+  departement: string;
+  jour: string;
+  /** Premier pointage, en minutes depuis minuit (heure de Casablanca). */
+  minutes: number;
+  profil: { code: string; nom: string } | null;
+};

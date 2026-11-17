@@ -99,6 +99,12 @@ export async function supprimerRegleParId(id: string): Promise<void> {
   await obtenirBase().delete(reglesHoraires).where(eq(reglesHoraires.id, id));
 }
 
+/** Règles actives (celles qui reconnaissent un horaire). */
+export async function listerReglesActives(): Promise<RegleHoraire[]> {
+  const lignes = await obtenirBase().select(colonnesRegle).from(reglesHoraires).where(eq(reglesHoraires.estActif, true));
+  return lignes.map(versRegle);
+}
+
 /** Identifiants des employés qui ont l'horaire dynamique. */
 export async function listerEmployesHoraireDynamique(): Promise<string[]> {
   const lignes = await obtenirBase().select({ id: employes.id }).from(employes).where(eq(employes.horaireDynamique, true));
@@ -137,7 +143,7 @@ export async function chargerHoraireDynamique(
   const base = obtenirBase();
   const [actifs, lignesRegles] = await Promise.all([
     base.select({ id: employes.id }).from(employes).where(and(inArray(employes.id, ids), eq(employes.horaireDynamique, true))),
-    base.select(colonnesRegle).from(reglesHoraires).where(eq(reglesHoraires.estActif, true)),
+    listerReglesActives(),
   ]);
   if (actifs.length === 0 || lignesRegles.length === 0) return undefined;
 
@@ -153,5 +159,5 @@ export async function chargerHoraireDynamique(
     .where(and(inArray(pointages.employeId, idsActifs), gte(pointages.horodatage, debut), lt(pointages.horodatage, fin)));
 
   const locaux = [...enBase, ...concernes].map((pointage) => ({ employeId: pointage.employeId, ...jourEtMinuteLocaux(pointage.horodatage, FUSEAU_HORAIRE) }));
-  return { regles: lignesRegles.map(versRegle), premiersPointages: premiersPointages(locaux) };
+  return { regles: lignesRegles, premiersPointages: premiersPointages(locaux) };
 }
