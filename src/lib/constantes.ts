@@ -150,3 +150,5 @@ export const FORMULE_PROFONDEUR_MAX = 40;
 export const FORMULE_NOEUDS_MAX = 500;
 /** ROUND(x, n) : nombre de décimales accepté. */
 export const FORMULE_DECIMALES_MAX = 10;
+/** Compteurs : nombre maximal de jours chargés en une fois (une période d'historique). */
+export const COMPTEURS_JOURS_MAX = 62;
