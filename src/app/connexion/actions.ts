@@ -10,10 +10,12 @@ import {
   UN_JOUR_MILLISECONDES,
 } from "@/lib/constantes";
 import { indexEnDoublon } from "@/lib/donnees/erreurs";
+import { enregistrerTrace } from "@/lib/actions/notifier";
 import { creerJetonInstallation, creerPremierAdministrateur, installationTerminee } from "@/lib/donnees/installation";
 import { creerLimiteur } from "@/lib/metier/limiteur";
 import { motDePasseDuJour } from "@/lib/metier/mot-de-passe-du-jour";
 import { TEXTES_CONNEXION } from "@/lib/textes/connexion";
+import { TEXTES_HISTORIQUE } from "@/lib/textes/historique";
 import { validerPremierCompte } from "@/lib/validation/connexion";
 import type { EtatPremierCompte, ResultatCodeInstallation } from "@/types";
 
@@ -81,5 +83,6 @@ export async function creerPremierCompte(_etat: EtatPremierCompte, formulaire: F
   }
   // Journal d'audit : création d'un compte administrateur (jamais le mot de passe).
   console.info("Installation : premier super administrateur créé", { identifiant });
+  await enregistrerTrace({ action: "creation", objet: "utilisateur", libelle: identifiant, lien: null, auteur: { id: null, nom: TEXTES_HISTORIQUE.installation, identifiant: null } });
   return { identifiantCree: identifiant };
 }

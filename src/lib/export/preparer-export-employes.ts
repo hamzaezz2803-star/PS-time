@@ -1,12 +1,14 @@
 import "server-only";
 
-import { EXPORT_EMPLOYES_MAX, FUSEAU_HORAIRE } from "@/lib/constantes";
+import { tracer } from "@/lib/actions/notifier";
+import { CHEMIN_PERSONNES, EXPORT_EMPLOYES_MAX, FUSEAU_HORAIRE } from "@/lib/constantes";
 import { listerEmployesPourExport } from "@/lib/donnees/employes";
 import { obtenirUtilisateurPourEspace } from "@/lib/donnees/session";
 import { peutAcceder } from "@/lib/metier/droits";
 import { formaterDate, formaterHeure, formaterJour } from "@/lib/formats";
 import { jourDansFuseau } from "@/lib/metier/dates";
 import { versLigneExport, type LigneExportEmploye } from "@/lib/metier/export-employes";
+import { TEXTES_HISTORIQUE } from "@/lib/textes/historique";
 import { TEXTES_PERSONNES } from "@/lib/textes/personnes";
 import { aDesCriteres, type RechercheEmployes } from "@/lib/validation/recherche-employes";
 
@@ -35,6 +37,7 @@ export async function preparerExportEmployes(format: "excel" | "pdf", recherche:
 
   // Journal d'audit (action sensible) : qui, quoi, combien. Aucune donnée d'employé.
   console.info("Export de la liste des employés", { utilisateurId: utilisateur.id, format, lignes: lignes.length, filtre: aDesCriteres(recherche) });
+  await tracer("export", "employe", TEXTES_HISTORIQUE.libelleExport(format, lignes.length), CHEMIN_PERSONNES);
 
   const maintenant = new Date();
   return {

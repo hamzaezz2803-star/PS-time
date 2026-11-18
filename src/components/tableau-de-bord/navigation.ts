@@ -10,6 +10,7 @@ import {
   ClockArrowUp,
   Factory,
   FileClock,
+  History,
   LayoutDashboard,
   ListChecks,
   Palette,
@@ -28,6 +29,7 @@ import {
   CHEMIN_DETAIL_JOUR,
   CHEMIN_ESPACE,
   CHEMIN_GROUPES,
+  CHEMIN_HISTORIQUE,
   CHEMIN_HORAIRE_DYNAMIQUE,
   CHEMIN_PERSONNES,
   CHEMIN_POINTAGES_MANUELS,
@@ -118,6 +120,7 @@ export const MENUS_NAVIGATION: MenuNavigation[] = [
       {
         liens: [
           { libelle: T.utilisateurs, icone: ShieldCheck, href: CHEMIN_UTILISATEURS, reserveSuperAdmin: true },
+          { libelle: T.historique, icone: History, href: CHEMIN_HISTORIQUE, reserveSuperAdmin: true },
           { libelle: T.apparence, icone: Palette, href: CHEMIN_APPARENCE, reserveSuperAdmin: true },
         ],
       },

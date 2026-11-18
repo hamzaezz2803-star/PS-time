@@ -183,6 +183,12 @@ export const FORMULE_NOEUDS_MAX = 500;
 export const FORMULE_DECIMALES_MAX = 10;
 /** Compteurs : nombre maximal de jours chargés en une fois (une période d'historique). */
 export const COMPTEURS_JOURS_MAX = 62;
+/** Statistiques de présence du tableau de bord : périodes proposées (jours, aujourd'hui compris) et plafond d'employés. */
+export const STATISTIQUES_PERIODES = [7, 14, 30] as const;
+export const STATISTIQUES_PERIODE_DEFAUT = 7;
+export const STATISTIQUES_EMPLOYES_MAX = 2000;
+/** Nombre de départements affichés dans le graphique ; les autres sont regroupés. */
+export const STATISTIQUES_DEPARTEMENTS_MAX = 8;
 export const CHEMIN_COMPTEURS = "/presence/compteurs";
 export const LIMITE_COMPTEURS = 500;
 export const LONGUEUR_MAX_LIBELLE_COMPTEUR = 100;

@@ -1,10 +1,13 @@
 import "server-only";
 
+import { tracer } from "@/lib/actions/notifier";
+import { CHEMIN_RAPPORT_PRESENCES } from "@/lib/constantes";
 import { chargerRapport } from "@/lib/donnees/rapport-presences";
 import { obtenirUtilisateurPourEspace } from "@/lib/donnees/session";
 import { formaterDate, formaterHeure, formaterJour } from "@/lib/formats";
 import { peutAcceder } from "@/lib/metier/droits";
 import { minutesVersHeure } from "@/lib/metier/programme";
+import { TEXTES_HISTORIQUE } from "@/lib/textes/historique";
 import { TEXTES_RAPPORT } from "@/lib/textes/rapport-presences";
 import type { RechercheRapport } from "@/lib/validation/rapport-presences";
 import { genererClasseur, type ColonneClasseur } from "./classeur";
@@ -24,7 +27,7 @@ export type ExportRapport = { titre: string; sousTitre: string; nomFichier: stri
 
 /**
  * Vérifie les droits (page Rapport des présences), lit le rapport, le met en lignes de texte et trace
- * l'export dans le journal du serveur. Null si l'utilisateur n'y a pas droit.
+ * l'export dans le journal du serveur et l'historique. Null si l'utilisateur n'y a pas droit.
  */
 export async function preparerExportRapport(format: "excel" | "pdf", recherche: RechercheRapport): Promise<ExportRapport | null> {
   const utilisateur = await obtenirUtilisateurPourEspace();
@@ -33,6 +36,8 @@ export async function preparerExportRapport(format: "excel" | "pdf", recherche: 
   const rapport = await chargerRapport(recherche);
   // Journal d'audit (action sensible) : qui, quoi, combien. Aucune donnée d'employé.
   console.info("Export du rapport des présences", { utilisateurId: utilisateur.id, format, lignes: rapport.lignes.length, du: recherche.du, au: recherche.au });
+  const periode = document.periode(formaterJour(recherche.du), formaterJour(recherche.au));
+  await tracer("export", "rapport_presences", `${TEXTES_HISTORIQUE.libelleExport(format, rapport.lignes.length)} · ${periode}`, CHEMIN_RAPPORT_PRESENCES);
 
   const maintenant = new Date();
   return {

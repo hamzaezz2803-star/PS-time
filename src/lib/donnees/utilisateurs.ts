@@ -23,6 +23,16 @@ export async function estUtilisateurActif(utilisateurId: string): Promise<boolea
   return utilisateur?.estActif === true;
 }
 
+/** Nom et identifiant d'un compte (auteur d'une ligne d'historique), ou null s'il n'existe plus. */
+export async function lireIdentite(utilisateurId: string): Promise<{ nom: string; identifiant: string } | null> {
+  const [utilisateur] = await obtenirBase()
+    .select({ nom: utilisateurs.nom, identifiant: utilisateurs.identifiant })
+    .from(utilisateurs)
+    .where(eq(utilisateurs.id, utilisateurId))
+    .limit(1);
+  return utilisateur ?? null;
+}
+
 /** Appelée uniquement après un changement de mot de passe réussi. */
 export async function marquerMotDePasseChange(utilisateurId: string): Promise<void> {
   await obtenirBase()

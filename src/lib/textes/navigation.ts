@@ -27,6 +27,7 @@ export const TEXTES_NAVIGATION = {
   detailJour: "Détail jour",
   administration: "Administration",
   utilisateurs: "Utilisateurs",
+  historique: "Historique",
   apparence: "Apparence",
   heureActuelle: "Date et heure actuelles",
   compte: {

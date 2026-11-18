@@ -47,6 +47,13 @@ export function initiales(nom: string): string {
     .join("");
 }
 
+const formatJourCourt = new Intl.DateTimeFormat(LANGUE_FORMATS, { weekday: "short", day: "numeric", timeZone: FUSEAU_HORAIRE });
+
+/** Jour court pour l'axe d'un graphique : « mer. 18 ». */
+export function formaterJourCourt(jour: string): string {
+  return formatJourCourt.format(new Date(`${jour}T12:00:00Z`));
+}
+
 /** Jour du calendrier (AAAA-MM-JJ) : midi UTC évite tout décalage de jour avec le fuseau. */
 export function formaterJour(jour: string): string {
   return formatDate.format(new Date(`${jour}T12:00:00Z`));

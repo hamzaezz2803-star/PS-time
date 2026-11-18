@@ -60,6 +60,15 @@
   --couleur-succes: #15803d;
   --couleur-attention: #b45309;
   --couleur-erreur: #b91c1c;
+
+  /* Graphiques de présence (vérifiés : lisibles sur blanc, distincts en daltonisme avec
+     légende, espaces de 2 px et tableau des valeurs). Toujours avec une icône ou un libellé. */
+  --couleur-graphe-a-l-heure: #15803d;
+  --couleur-graphe-retard: #d97706;
+  --couleur-graphe-absent: #b91c1c;
+  --couleur-graphe-attente: #94a3b8;
+  --couleur-graphe-reference: #7f93b3; /* « prévu » : gris voulu, référence discrète (3:1 sur blanc) */
+  --couleur-graphe-grille: #eef1f5;
 }
 
 /* Taille du texte (data-taille) : toutes les tailles sont en rem, elles suivent la page entière. */
@@ -108,6 +117,12 @@ html[data-taille="tres_grande"] {
   --color-succes: var(--couleur-succes);
   --color-attention: var(--couleur-attention);
   --color-erreur: var(--couleur-erreur);
+  --color-graphe-a-l-heure: var(--couleur-graphe-a-l-heure);
+  --color-graphe-retard: var(--couleur-graphe-retard);
+  --color-graphe-absent: var(--couleur-graphe-absent);
+  --color-graphe-attente: var(--couleur-graphe-attente);
+  --color-graphe-reference: var(--couleur-graphe-reference);
+  --color-graphe-grille: var(--couleur-graphe-grille);
 
   --font-sans: var(--font-texte), ui-sans-serif, system-ui, sans-serif;
 

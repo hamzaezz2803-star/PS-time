@@ -18,7 +18,8 @@ import {
 } from "@/lib/constantes";
 import { obtenirBase } from "./base";
 import { comptes, sessions, utilisateurs, verifications } from "./schema";
-import { estUtilisateurActif } from "./utilisateurs";
+import { enregistrerHistorique } from "./historique";
+import { estUtilisateurActif, lireIdentite } from "./utilisateurs";
 
 /** Code renvoyé au navigateur quand un compte désactivé tente de se connecter. */
 export const CODE_COMPTE_DESACTIVE = "COMPTE_DESACTIVE";
@@ -121,6 +122,17 @@ export const auth = betterAuth({
         before: async (session) => {
           if (!(await estUtilisateurActif(session.userId))) {
             throw new APIError("FORBIDDEN", { code: CODE_COMPTE_DESACTIVE });
+          }
+        },
+        // Historique : chaque ouverture de session est une connexion. Un échec n'empêche jamais de se connecter.
+        after: async (session) => {
+          try {
+            const identite = await lireIdentite(session.userId);
+            if (identite) {
+              await enregistrerHistorique({ action: "connexion", objet: "session", libelle: null, lien: null, auteur: { id: session.userId, ...identite } });
+            }
+          } catch (erreur) {
+            console.error("Échec de l'enregistrement d'une connexion", { type: erreur instanceof Error ? erreur.name : "inconnu" });
           }
         },
       },
