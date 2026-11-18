@@ -4,7 +4,7 @@ export const TEXTES_DETAIL_JOUR = {
   titrePage: "Détail jour",
   sousTitre: "Pour un employé et une date : son horaire, ses pointages et ses compteurs du jour, de la semaine et du mois.",
   chargement: "Chargement du détail...",
-  droits: "Votre compte n'a pas accès au module Présence. Demandez-le au super administrateur.",
+  droits: "Votre compte n'a pas accès à cette page. Demandez-la au super administrateur.",
   echec: "Le détail n'a pas pu être chargé. Réessayez dans un instant.",
   miseAJour: "Mise à jour du détail...",
 

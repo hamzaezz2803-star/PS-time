@@ -60,7 +60,7 @@ export async function creerPremierAdministrateur(jeton: string, identifiant: str
       estSuperAdmin: true,
       // Le mot de passe vient d'être choisi par l'administrateur lui-même.
       doitChangerMotDePasse: false,
-      modules: [],
+      pages: [],
     });
     return true;
   });

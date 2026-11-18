@@ -16,7 +16,7 @@ import { listerDepartements } from "@/lib/donnees/departements";
 import { chargerDetailJour } from "@/lib/donnees/detail-jour";
 import { listerEmployesSelection } from "@/lib/donnees/groupes";
 import { obtenirUtilisateurPourEspace } from "@/lib/donnees/session";
-import { peutGerer } from "@/lib/metier/droits";
+import { peutAcceder } from "@/lib/metier/droits";
 import { TEXTES_DETAIL_JOUR as textes } from "@/lib/textes/detail-jour";
 
 export const metadata: Metadata = { title: textes.titrePage };
@@ -48,7 +48,7 @@ export default function PageDetailJour({ searchParams }: { searchParams: Paramet
 
 async function ContenuDetailJour({ searchParams }: { searchParams: ParametresRecherche }) {
   const utilisateur = await obtenirUtilisateurPourEspace();
-  if (!peutGerer(utilisateur, "presence")) return <MessageErreur message={textes.droits} className="text-base" />;
+  if (!peutAcceder(utilisateur, "detail_jour")) return <MessageErreur message={textes.droits} className="text-base" />;
 
   const aujourdhui = aujourdhuiLocal();
   const selection = lireSelection(await searchParams, aujourdhui);

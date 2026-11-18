@@ -18,7 +18,7 @@ export default function PageRotations() {
 }
 
 async function ContenuRotations() {
-  const refus = await refusSiNonAutorise();
+  const refus = await refusSiNonAutorise("rotations");
   if (refus) return refus;
   const [rotations, profils] = await Promise.all([listerRotations(), listerProfils()]);
   return <GestionRotations rotations={rotations} profils={profils} />;

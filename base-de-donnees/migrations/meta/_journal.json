@@ -148,6 +148,20 @@
       "when": 1794915750165,
       "tag": "0020_compteurs",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "5",
+      "when": 1795008059334,
+      "tag": "0021_autorisations_pages_et_parametres",
+      "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "5",
+      "when": 1795008074938,
+      "tag": "0022_retirer_autorisations_modules",
+      "breakpoints": true
     }
   ]
 }

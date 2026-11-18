@@ -17,7 +17,7 @@ export default function PageGroupes() {
 }
 
 async function ContenuGroupes() {
-  const refus = await refusSiNonAutorise();
+  const refus = await refusSiNonAutorise("groupes");
   if (refus) return refus;
   const [groupes, employes] = await Promise.all([listerGroupes(), listerEmployesSelection()]);
   return <GestionGroupes groupes={groupes} employes={employes} />;

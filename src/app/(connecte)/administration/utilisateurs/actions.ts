@@ -21,19 +21,19 @@ function journaliserEchec(operation: string, erreur: unknown) {
   console.error(`Échec ${operation} d'un compte`, { type: erreur instanceof Error ? erreur.name : "inconnu" });
 }
 
-/** Crée un administrateur avec un mot de passe provisoire et ses modules. */
+/** Crée un administrateur avec un mot de passe provisoire et ses pages accordées. */
 export async function creerUtilisateur(_etat: EtatFormulaire, formulaire: FormData): Promise<EtatFormulaire> {
   const auteur = await superAdministrateur();
   if (!auteur) return { message: textes.droits };
 
   const validation = validerCreationUtilisateur(formulaire);
   if (!validation.ok) return { erreursChamps: validation.erreursChamps };
-  const { identifiant, nom, motDePasse, modules } = validation.donnees;
+  const { identifiant, nom, motDePasse, pages } = validation.donnees;
 
   try {
-    const id = await creerAdministrateur({ identifiant, nom, motDePasse, modules });
+    const id = await creerAdministrateur({ identifiant, nom, motDePasse, pages });
     // Journal d'audit : création d'un compte et droits accordés (jamais le mot de passe).
-    console.info("Compte administrateur créé", { par: auteur.identifiant, identifiant, modules });
+    console.info("Compte administrateur créé", { par: auteur.identifiant, identifiant, pages });
     await notifier("utilisateur", "creation", identifiant, CHEMIN_UTILISATEURS);
     refresh();
     return { succes: { message: textes.cree, idSelectionne: id } };
@@ -44,7 +44,7 @@ export async function creerUtilisateur(_etat: EtatFormulaire, formulaire: FormDa
   }
 }
 
-/** Modifie nom, état, modules et, au besoin, le mot de passe provisoire d'un compte. */
+/** Modifie nom, état, pages accordées et, au besoin, le mot de passe provisoire d'un compte. */
 export async function modifierCompte(_etat: EtatFormulaire, formulaire: FormData): Promise<EtatFormulaire> {
   const auteur = await superAdministrateur();
   if (!auteur) return { message: textes.droits };
@@ -54,11 +54,11 @@ export async function modifierCompte(_etat: EtatFormulaire, formulaire: FormData
     if (validation.erreursChamps?.id) return { message: textes.introuvable };
     return { erreursChamps: validation.erreursChamps };
   }
-  const { id, nom, estActif, modules, motDePasse } = validation.donnees;
+  const { id, nom, estActif, pages, motDePasse } = validation.donnees;
   if (id === auteur.id && !estActif) return { erreursChamps: { estActif: textes.erreurs.pasSoiMeme } };
 
   try {
-    if (!(await modifierUtilisateur(id, { nom, estActif, modules, motDePasse }))) {
+    if (!(await modifierUtilisateur(id, { nom, estActif, pages, motDePasse }))) {
       refresh();
       return { message: textes.introuvable };
     }
@@ -66,7 +66,7 @@ export async function modifierCompte(_etat: EtatFormulaire, formulaire: FormData
     journaliserEchec("de la modification", erreur);
     return { message: textes.echec };
   }
-  console.info("Compte modifié", { par: auteur.identifiant, compte: id, estActif, modules, nouveauMotDePasse: motDePasse !== null });
+  console.info("Compte modifié", { par: auteur.identifiant, compte: id, estActif, pages, nouveauMotDePasse: motDePasse !== null });
   const cible = (await listerUtilisateurs()).find((utilisateur) => utilisateur.id === id);
   await notifier("utilisateur", "modification", cible?.identifiant ?? null, CHEMIN_UTILISATEURS);
   refresh();

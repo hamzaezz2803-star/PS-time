@@ -3,7 +3,7 @@ import "server-only";
 import { chargerRapport } from "@/lib/donnees/rapport-presences";
 import { obtenirUtilisateurPourEspace } from "@/lib/donnees/session";
 import { formaterDate, formaterHeure, formaterJour } from "@/lib/formats";
-import { peutGerer } from "@/lib/metier/droits";
+import { peutAcceder } from "@/lib/metier/droits";
 import { minutesVersHeure } from "@/lib/metier/programme";
 import { TEXTES_RAPPORT } from "@/lib/textes/rapport-presences";
 import type { RechercheRapport } from "@/lib/validation/rapport-presences";
@@ -23,12 +23,12 @@ export const COLONNES_RAPPORT: ColonneClasseur[] = [
 export type ExportRapport = { titre: string; sousTitre: string; nomFichier: string; lignes: string[][]; estTronque: boolean };
 
 /**
- * Vérifie les droits (module Planning), lit le rapport, le met en lignes de texte et trace
+ * Vérifie les droits (page Rapport des présences), lit le rapport, le met en lignes de texte et trace
  * l'export dans le journal du serveur. Null si l'utilisateur n'y a pas droit.
  */
 export async function preparerExportRapport(format: "excel" | "pdf", recherche: RechercheRapport): Promise<ExportRapport | null> {
   const utilisateur = await obtenirUtilisateurPourEspace();
-  if (!peutGerer(utilisateur, "planning")) return null;
+  if (!peutAcceder(utilisateur, "rapport_presences")) return null;
 
   const rapport = await chargerRapport(recherche);
   // Journal d'audit (action sensible) : qui, quoi, combien. Aucune donnée d'employé.

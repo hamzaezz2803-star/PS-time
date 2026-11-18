@@ -4,6 +4,7 @@ import { CircleCheck, CircleSlash, KeyRound, ShieldCheck, UserCog } from "lucide
 import { supprimerCompte } from "@/app/(connecte)/administration/utilisateurs/actions";
 import { GestionListe, type ColonneListe } from "@/components/liste/gestion-liste";
 import { Pastille } from "@/components/ui/pastille";
+import { MODULES, PAGES_PAR_MODULE } from "@/lib/constantes";
 import { formaterDate } from "@/lib/formats";
 import { TEXTES_UTILISATEURS as textes } from "@/lib/textes/utilisateurs";
 import type { UtilisateurListe } from "@/types";
@@ -29,13 +30,19 @@ function Role({ utilisateur }: { utilisateur: UtilisateurListe }) {
   );
 }
 
-function Modules({ utilisateur }: { utilisateur: UtilisateurListe }) {
-  if (utilisateur.estSuperAdmin) return <Pastille ton="neutre">{textes.tousLesModules}</Pastille>;
-  if (utilisateur.modules.length === 0) return <Pastille ton="neutre">{textes.aucunModule}</Pastille>;
+/** Résumé des pages accordées, module par module (« Personnel : tout », « Planning : 2 sur 6 »). */
+function Autorisations({ utilisateur }: { utilisateur: UtilisateurListe }) {
+  if (utilisateur.estSuperAdmin) return <Pastille ton="neutre">{textes.toutesLesPages}</Pastille>;
+  const resumes = MODULES.flatMap((module) => {
+    const pages = PAGES_PAR_MODULE[module];
+    const accordees = pages.filter((page) => utilisateur.pages.includes(page)).length;
+    return accordees > 0 ? [{ module, texte: textes.resumeModule(textes.modules[module], accordees, pages.length) }] : [];
+  });
+  if (resumes.length === 0) return <Pastille ton="neutre">{textes.aucunePage}</Pastille>;
   return (
     <span className="flex flex-wrap gap-1.5">
-      {utilisateur.modules.map((module) => (
-        <Pastille key={module} ton="neutre">{textes.modules[module].libelle}</Pastille>
+      {resumes.map(({ module, texte }) => (
+        <Pastille key={module} ton="neutre">{texte}</Pastille>
       ))}
     </span>
   );
@@ -47,12 +54,12 @@ function Etat({ utilisateur }: { utilisateur: UtilisateurListe }) {
   return <Pastille ton="succes" Icone={CircleCheck}>{textes.etats.actif}</Pastille>;
 }
 
-/** Comptes de l'installation : création d'administrateurs, modules autorisés, état et suppression. */
+/** Comptes de l'installation : création d'administrateurs, pages autorisées, état et suppression. */
 export function GestionUtilisateurs({ utilisateurs, idConnecte }: { utilisateurs: UtilisateurListe[]; idConnecte: string }) {
   const colonnes: ColonneListe<UtilisateurListe>[] = [
     { titre: textes.colonnes.compte, rendu: (u) => <Compte utilisateur={u} estVous={u.id === idConnecte} /> },
     { titre: textes.colonnes.role, rendu: (u) => <Role utilisateur={u} /> },
-    { titre: textes.colonnes.modules, rendu: (u) => <Modules utilisateur={u} /> },
+    { titre: textes.colonnes.pages, rendu: (u) => <Autorisations utilisateur={u} /> },
     { titre: textes.colonnes.etat, rendu: (u) => <Etat utilisateur={u} /> },
     {
       titre: textes.colonnes.modifie,

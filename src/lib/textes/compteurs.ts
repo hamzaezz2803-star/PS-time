@@ -4,7 +4,7 @@ export const TEXTES_COMPTEURS = {
   titrePage: "Gestion des compteurs",
   sousTitre: "Définissez vos indicateurs (retards, heures, absences...) par une formule. Les valeurs sont calculées à partir des pointages et de l'horaire prévu.",
   chargement: "Chargement des compteurs...",
-  droits: "Votre compte n'a pas accès au module Présence. Demandez-le au super administrateur.",
+  droits: "Votre compte n'a pas accès à cette page. Demandez-la au super administrateur.",
   echec: "L'opération a échoué. Réessayez dans un instant.",
   introuvable: "Ce compteur n'existe plus. La liste a été actualisée.",
 

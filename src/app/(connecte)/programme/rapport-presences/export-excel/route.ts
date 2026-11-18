@@ -6,7 +6,7 @@ import { lireRechercheRapport } from "@/lib/validation/rapport-presences";
 
 const TYPE_XLSX = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 
-/** Téléchargement du rapport des présences au format Excel (module Planning). */
+/** Téléchargement du rapport des présences au format Excel (page Rapport des présences). */
 export async function GET(requete: NextRequest) {
   const recherche = lireRechercheRapport(Object.fromEntries(requete.nextUrl.searchParams), aujourdhuiLocal());
   try {

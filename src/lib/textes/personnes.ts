@@ -4,7 +4,7 @@ export const TEXTES_PERSONNES = {
   sousTitre:
     "Enregistrez les employés à pointer. Seuls le matricule, le nom, le prénom et le département sont obligatoires.",
   chargement: "Chargement des employés...",
-  droits: "Votre compte n'a pas accès au module Personnel. Demandez-le au super administrateur.",
+  droits: "Votre compte n'a pas accès à cette page. Demandez-la au super administrateur.",
   formulaire: {
     titre: "Nouvel employé",
     ouvrir: "Nouvel employé",
@@ -34,7 +34,7 @@ export const TEXTES_PERSONNES = {
     aucunePiece: "Aucune",
     typesPiece: { cin: "CIN", passeport: "Passeport", carte_sejour: "Carte de séjour" },
     numeroPiece: "Numéro de pièce",
-    aidePiece: "Utile pour la déclaration CNSS. Visible seulement par les comptes autorisés pour le module Personnel.",
+    aidePiece: "Utile pour la déclaration CNSS. Visible seulement par les comptes autorisés pour la page Personnes.",
     telephone: "Téléphone portable",
     exempleTelephone: "06 12 34 56 78",
     email: "E-mail",

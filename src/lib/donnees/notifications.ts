@@ -11,7 +11,6 @@ import {
   estActionNotification,
   estObjetNotification,
   type ActionNotification,
-  type ModuleNotification,
   type ObjetNotification,
 } from "@/lib/metier/notifications";
 import type { Notification } from "@/types";
@@ -44,12 +43,12 @@ export async function enregistrerNotification(nouvelle: NouvelleNotification): P
   await base.delete(notifications).where(lt(notifications.creeLe, limite));
 }
 
-/** Notifications visibles : celles des modules du compte. */
-const visibles = (modules: ModuleNotification[]): SQL => inArray(notifications.module, modules);
+/** Notifications visibles : celles des objets que le compte a le droit de voir. */
+const visibles = (objets: ObjetNotification[]): SQL => inArray(notifications.objet, objets);
 
-/** Dernières notifications des modules du compte, de la plus récente à la plus ancienne. */
-export async function listerNotifications(modules: ModuleNotification[]): Promise<Notification[]> {
-  if (modules.length === 0) return [];
+/** Dernières notifications visibles par le compte, de la plus récente à la plus ancienne. */
+export async function listerNotifications(objets: ObjetNotification[]): Promise<Notification[]> {
+  if (objets.length === 0) return [];
   const lignes = await obtenirBase()
     .select({
       id: notifications.id,
@@ -62,7 +61,7 @@ export async function listerNotifications(modules: ModuleNotification[]): Promis
       creeLe: notifications.creeLe,
     })
     .from(notifications)
-    .where(visibles(modules))
+    .where(visibles(objets))
     .orderBy(desc(notifications.creeLe))
     .limit(NOTIFICATIONS_AFFICHEES_MAX);
   return lignes.flatMap(({ action, objet, ...reste }) =>
@@ -71,15 +70,15 @@ export async function listerNotifications(modules: ModuleNotification[]): Promis
 }
 
 /** Nombre de notifications non lues : arrivées depuis la dernière ouverture, hors actions du compte lui-même. */
-export async function compterNonLues(utilisateurId: string, modules: ModuleNotification[]): Promise<number> {
-  if (modules.length === 0) return 0;
+export async function compterNonLues(utilisateurId: string, objets: ObjetNotification[]): Promise<number> {
+  if (objets.length === 0) return 0;
   const base = obtenirBase();
   const [compte] = await base.select({ luesLe: utilisateurs.notificationsLuesLe }).from(utilisateurs).where(eq(utilisateurs.id, utilisateurId)).limit(1);
   const depuis = compte?.luesLe ? gt(notifications.creeLe, compte.luesLe) : undefined;
   const [resultat] = await base
     .select({ total: count() })
     .from(notifications)
-    .where(and(visibles(modules), depuis, or(isNull(notifications.auteurId), ne(notifications.auteurId, utilisateurId))));
+    .where(and(visibles(objets), depuis, or(isNull(notifications.auteurId), ne(notifications.auteurId, utilisateurId))));
   return resultat?.total ?? 0;
 }
 

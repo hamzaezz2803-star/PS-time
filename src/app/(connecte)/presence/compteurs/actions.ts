@@ -6,7 +6,7 @@ import { notifier } from "@/lib/actions/notifier";
 import { CHEMIN_COMPTEURS } from "@/lib/constantes";
 import { changerEtatCompteur as changerEtatEnBase, enregistrerCompteur as enregistrerEnBase, listerVersions, supprimerCompteurParId } from "@/lib/donnees/compteurs";
 import { obtenirUtilisateurPourEspace } from "@/lib/donnees/session";
-import { peutGerer } from "@/lib/metier/droits";
+import { peutAcceder } from "@/lib/metier/droits";
 import { TEXTES_COMPTEURS as textes } from "@/lib/textes/compteurs";
 import { validerCompteur } from "@/lib/validation/compteur";
 import type { EtatFormulaire, VersionCompteur } from "@/types";
@@ -17,10 +17,10 @@ function journaliserEchec(operation: string, erreur: unknown) {
   console.error(`Échec ${operation} d'un compteur`, { type: erreur instanceof Error ? erreur.name : "inconnu" });
 }
 
-/** Compte connecté s'il a le module Présence, sinon null. Les droits viennent toujours de la session. */
+/** Compte connecté s'il a la page Compteurs, sinon null. Les droits viennent toujours de la session. */
 async function auteurAutorise() {
   const utilisateur = await obtenirUtilisateurPourEspace();
-  return peutGerer(utilisateur, "presence") ? utilisateur : null;
+  return peutAcceder(utilisateur, "compteurs") ? utilisateur : null;
 }
 
 /** Crée un compteur (sans `id`) ou le modifie ; une nouvelle version est créée si la formule, l'unité ou les périodicités changent. */

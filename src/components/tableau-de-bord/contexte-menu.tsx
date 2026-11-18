@@ -3,11 +3,9 @@
 import { createContext, use } from "react";
 
 export type EtatMenu = {
-  /** Ordinateur : menu réduit aux icônes. */
-  estReplie: boolean;
-  /** Mobile : tiroir ouvert. */
+  /** Mobile et tablette : tiroir de navigation ouvert. */
   estOuvertMobile: boolean;
-  basculer: () => void;
+  basculerMobile: () => void;
   fermerMobile: () => void;
 };
 

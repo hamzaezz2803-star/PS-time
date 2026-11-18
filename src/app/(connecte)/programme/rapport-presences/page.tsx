@@ -22,7 +22,7 @@ export default function PageRapportPresences({ searchParams }: { searchParams: P
 }
 
 async function ContenuRapport({ searchParams }: { searchParams: ParametresRecherche }) {
-  const refus = await refusSiNonAutorise();
+  const refus = await refusSiNonAutorise("rapport_presences");
   if (refus) return refus;
 
   const aujourdhui = aujourdhuiLocal();

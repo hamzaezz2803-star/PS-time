@@ -23,5 +23,5 @@ export function useMenuDeroulant() {
     };
   }, [estOuvert]);
 
-  return { estOuvert, basculer: () => setEstOuvert((ouvert) => !ouvert), conteneur };
+  return { estOuvert, basculer: () => setEstOuvert((ouvert) => !ouvert), fermer: () => setEstOuvert(false), conteneur };
 }

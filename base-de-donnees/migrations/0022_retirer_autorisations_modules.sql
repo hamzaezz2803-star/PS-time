@@ -1,0 +1,1 @@
+DROP TABLE `autorisations_utilisateurs`;

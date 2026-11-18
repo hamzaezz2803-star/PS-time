@@ -1,7 +1,7 @@
 import "server-only";
 
 import { obtenirUtilisateurPourEspace } from "@/lib/donnees/session";
-import { peutGerer, type Module } from "@/lib/metier/droits";
+import { peutAcceder, type Page } from "@/lib/metier/droits";
 
 /**
  * Vrai si l'utilisateur connecté est super administrateur. Les droits viennent toujours
@@ -12,7 +12,7 @@ export async function estSuperAdministrateur(): Promise<boolean> {
   return utilisateur.estSuperAdmin;
 }
 
-/** Vrai si l'utilisateur connecté peut gérer ce module (super administrateur ou module accordé). */
-export async function peutGererModule(module: Module): Promise<boolean> {
-  return peutGerer(await obtenirUtilisateurPourEspace(), module);
+/** Vrai si l'utilisateur connecté peut voir et gérer cette page (super administrateur ou page accordée). */
+export async function peutAccederPage(page: Page): Promise<boolean> {
+  return peutAcceder(await obtenirUtilisateurPourEspace(), page);
 }

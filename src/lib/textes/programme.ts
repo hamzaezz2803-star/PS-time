@@ -12,7 +12,7 @@ const commun = {
   enregistrer: "Enregistrer",
   enregistrementEnCours: "Enregistrement...",
   minutes: "minutes",
-  droits: "Votre compte n'a pas accès au module Planning. Demandez-le au super administrateur.",
+  droits: "Votre compte n'a pas accès à cette page. Demandez-la au super administrateur.",
   echec: "L'opération a échoué. Réessayez dans un instant.",
   introuvable: "Cet élément n'existe plus. La liste a été actualisée.",
   nomVide: "Saisissez le nom.",

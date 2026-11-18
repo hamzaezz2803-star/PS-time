@@ -5,7 +5,7 @@ import { Chargement } from "@/components/ui/chargement";
 import { EnTetePage } from "@/components/ui/en-tete-page";
 import { MessageErreur } from "@/components/ui/message-erreur";
 import { obtenirUtilisateurPourEspace } from "@/lib/donnees/session";
-import { peutGerer } from "@/lib/metier/droits";
+import { peutAcceder } from "@/lib/metier/droits";
 import { listerSites } from "@/lib/donnees/sites";
 import { TEXTES_SITES } from "@/lib/textes/sites";
 
@@ -24,6 +24,6 @@ export default function PageSites() {
 
 async function ContenuSites() {
   const utilisateur = await obtenirUtilisateurPourEspace();
-  if (!peutGerer(utilisateur, "personnel")) return <MessageErreur message={TEXTES_SITES.droits} className="text-base" />;
+  if (!peutAcceder(utilisateur, "sites")) return <MessageErreur message={TEXTES_SITES.droits} className="text-base" />;
   return <GestionSites sites={await listerSites()} />;
 }

@@ -1,6 +1,6 @@
 import { Suspense, type ReactNode } from "react";
+import { BarreNavigation } from "@/components/tableau-de-bord/barre-navigation";
 import { CadreTableauDeBord } from "@/components/tableau-de-bord/cadre-tableau-de-bord";
-import { MenuLateral } from "@/components/tableau-de-bord/menu-lateral";
 import { MenuUtilisateur } from "@/components/tableau-de-bord/menu-utilisateur";
 import { obtenirUtilisateurPourEspace } from "@/lib/donnees/session";
 
@@ -10,26 +10,21 @@ async function CompteUtilisateur() {
   return <MenuUtilisateur nom={utilisateur.nom} identifiant={utilisateur.identifiant} />;
 }
 
-/** Menu limité aux modules du compte (relu à chaque requête : un droit retiré disparaît aussitôt). */
-async function MenuSelonDroits() {
-  const { estSuperAdmin, modules } = await obtenirUtilisateurPourEspace();
-  return <MenuLateral droits={{ estSuperAdmin, modules }} />;
+/** Menus limités aux pages du compte (relues à chaque requête : un droit retiré disparaît aussitôt). */
+async function NavigationSelonDroits() {
+  const { estSuperAdmin, pages } = await obtenirUtilisateurPourEspace();
+  return <BarreNavigation droits={{ estSuperAdmin, pages }} />;
 }
 
 function CompteEnChargement() {
-  return (
-    <div className="flex min-h-12 items-center gap-2.5 p-1.5" aria-hidden="true">
-      <span className="size-8 shrink-0 rounded-md bg-menu-survol" />
-      <span className="h-4 flex-1 rounded bg-menu-survol" />
-    </div>
-  );
+  return <span className="size-9 shrink-0 rounded-md bg-canevas" aria-hidden="true" />;
 }
 
-function MenuEnChargement() {
+function NavigationEnChargement() {
   return (
-    <div className="flex flex-col gap-2 px-1" aria-hidden="true">
+    <div className="hidden items-center gap-2 lg:flex" aria-hidden="true">
       {[0, 1, 2, 3].map((rang) => (
-        <span key={rang} className="h-9 rounded-lg bg-menu-survol" />
+        <span key={rang} className="h-8 w-24 rounded-lg bg-canevas" />
       ))}
     </div>
   );
@@ -38,12 +33,12 @@ function MenuEnChargement() {
 export default function LayoutConnecte({ children }: { children: ReactNode }) {
   return (
     <CadreTableauDeBord
-      menu={
-        <Suspense fallback={<MenuEnChargement />}>
-          <MenuSelonDroits />
+      navigation={
+        <Suspense fallback={<NavigationEnChargement />}>
+          <NavigationSelonDroits />
         </Suspense>
       }
-      pied={
+      compte={
         <Suspense fallback={<CompteEnChargement />}>
           <CompteUtilisateur />
         </Suspense>

@@ -1,3 +1,5 @@
+import type { Page } from "@/lib/metier/droits";
+
 /** Résultat explicite d'une opération qui peut échouer. */
 export type Resultat<T> = { ok: true; donnees: T } | { ok: false; erreur: string };
 
@@ -50,7 +52,7 @@ export type EtatFormulairePoste = EtatFormulaire<"code" | "nom" | "ordre" | "par
 export type Notification = {
   id: string;
   action: "creation" | "modification" | "suppression";
-  objet: "site" | "departement" | "poste" | "employe" | "profil_horaire" | "rotation" | "groupe" | "affectation" | "regle_horaire" | "horaire_dynamique" | "pointage" | "compteur" | "utilisateur" | "mot_de_passe";
+  objet: "site" | "departement" | "poste" | "employe" | "profil_horaire" | "rotation" | "groupe" | "affectation" | "regle_horaire" | "horaire_dynamique" | "pointage" | "compteur" | "utilisateur" | "mot_de_passe" | "apparence";
   libelle: string | null;
   lien: string | null;
   auteurId: string | null;
@@ -59,15 +61,6 @@ export type Notification = {
 };
 
 /** Pointage affiché en direct sur le tableau de bord (jamais de pièce d'identité ni de contact). */
-export type PointageDirect = {
-  id: string;
-  nomComplet: string;
-  departement: string;
-  horodatage: Date;
-  etat: string;
-  source: string;
-};
-
 /** Ligne de la gestion des utilisateurs (jamais de mot de passe ni d'e-mail interne). */
 export type UtilisateurListe = {
   id: string;
@@ -79,7 +72,7 @@ export type UtilisateurListe = {
   estActif: boolean;
   doitChangerMotDePasse: boolean;
   modifieLe: Date;
-  modules: ("personnel" | "planning" | "presence")[];
+  pages: Page[];
 };
 
 /** Site (entreprise ou établissement), avec le nombre d'éléments qui y sont rattachés. */

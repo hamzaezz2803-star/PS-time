@@ -11,7 +11,7 @@ import { compterEmployes, listerEmployes } from "@/lib/donnees/employes";
 import { listerPostes } from "@/lib/donnees/postes";
 import { listerOptionsSites } from "@/lib/donnees/sites";
 import { obtenirUtilisateurPourEspace } from "@/lib/donnees/session";
-import { peutGerer } from "@/lib/metier/droits";
+import { peutAcceder } from "@/lib/metier/droits";
 import {
   aplatirArbre,
   construireArbre,
@@ -54,7 +54,7 @@ function lirePage(valeur: string | string[] | undefined, nombrePages: number): n
 async function ContenuPersonnes({ searchParams }: { searchParams: ParametresRecherche }) {
   const utilisateur = await obtenirUtilisateurPourEspace();
   // Données personnelles : réservées aux super administrateurs (moindre privilège).
-  if (!peutGerer(utilisateur, "personnel")) {
+  if (!peutAcceder(utilisateur, "personnes")) {
     return <MessageErreur message={TEXTES_PERSONNES.droits} className="text-base" />;
   }
 

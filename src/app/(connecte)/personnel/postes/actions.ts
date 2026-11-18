@@ -12,7 +12,7 @@ import {
 import { notifier } from "@/lib/actions/notifier";
 import { CHEMIN_POSTES } from "@/lib/constantes";
 import { obtenirUtilisateurPourEspace } from "@/lib/donnees/session";
-import { peutGerer } from "@/lib/metier/droits";
+import { peutAcceder } from "@/lib/metier/droits";
 import { siteExiste } from "@/lib/donnees/sites";
 import { TEXTES_SITES } from "@/lib/textes/sites";
 import { nomDejaPris, peutDeplacer } from "@/lib/metier/arbre";
@@ -23,10 +23,10 @@ import type { EtatFormulairePoste } from "@/types";
 
 const { erreurs, formulaire: textes } = TEXTES_POSTES;
 
-/** Les droits viennent toujours de la session : module Personnel requis. */
+/** Les droits viennent toujours de la session : page accordée requise. */
 async function aLesDroits(): Promise<boolean> {
   const utilisateur = await obtenirUtilisateurPourEspace();
-  return peutGerer(utilisateur, "personnel");
+  return peutAcceder(utilisateur, "postes");
 }
 
 function journaliserEchec(operation: string, erreur: unknown) {

@@ -1,8 +1,8 @@
 /**
- * Notifications : à quel module appartient chaque objet, et qui peut les voir.
+ * Notifications : à quel module et à quelle page appartient chaque objet, et qui peut les voir.
  * Fonctions pures, testées dans notifications.test.ts.
  */
-import { modulesAccessibles, type Droits, type Module } from "./droits.ts";
+import { peutAcceder, type Droits, type Module, type Page } from "./droits.ts";
 
 export const ACTIONS_NOTIFICATION = ["creation", "modification", "suppression"] as const;
 export type ActionNotification = (typeof ACTIONS_NOTIFICATION)[number];
@@ -26,6 +26,7 @@ export const MODULE_DE_L_OBJET = {
   compteur: "presence",
   utilisateur: "administration",
   mot_de_passe: "administration",
+  apparence: "administration",
 } as const satisfies Record<string, ModuleNotification>;
 
 export type ObjetNotification = keyof typeof MODULE_DE_L_OBJET;
@@ -34,8 +35,29 @@ export const estObjetNotification = (valeur: string): valeur is ObjetNotificatio
 export const estActionNotification = (valeur: string): valeur is ActionNotification =>
   (ACTIONS_NOTIFICATION as readonly string[]).includes(valeur);
 
-/** Modules dont ce compte voit les notifications. */
-export function modulesNotifications(droits: Droits): ModuleNotification[] {
-  const modules: ModuleNotification[] = modulesAccessibles(droits);
-  return droits.estSuperAdmin ? [...modules, "administration"] : modules;
+/** Page qui donne le droit de voir chaque objet (absente : administration, super administrateur seulement). */
+const PAGE_DE_L_OBJET: Record<ObjetNotification, Page | null> = {
+  site: "sites",
+  departement: "departements",
+  poste: "postes",
+  employe: "personnes",
+  profil_horaire: "profils_horaires",
+  rotation: "rotations",
+  groupe: "groupes",
+  affectation: "affectations",
+  regle_horaire: "horaire_dynamique",
+  horaire_dynamique: "horaire_dynamique",
+  pointage: "pointages_manuels",
+  compteur: "compteurs",
+  utilisateur: null,
+  mot_de_passe: null,
+  apparence: null,
+};
+
+/** Objets dont ce compte voit les notifications : ceux de ses pages, plus l'administration pour un super administrateur. */
+export function objetsNotifications(droits: Droits): ObjetNotification[] {
+  return (Object.keys(PAGE_DE_L_OBJET) as ObjetNotification[]).filter((objet) => {
+    const page = PAGE_DE_L_OBJET[objet];
+    return page ? peutAcceder(droits, page) : droits.estSuperAdmin;
+  });
 }

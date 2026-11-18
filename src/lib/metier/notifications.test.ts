@@ -1,14 +1,17 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { MODULE_DE_L_OBJET, estObjetNotification, modulesNotifications } from "./notifications.ts";
+import { MODULE_DE_L_OBJET, estObjetNotification, objetsNotifications } from "./notifications.ts";
 
-describe("modulesNotifications", () => {
+describe("objetsNotifications", () => {
   it("donne tout au super administrateur, administration comprise", () => {
-    assert.deepEqual(modulesNotifications({ estSuperAdmin: true, modules: [] }), ["personnel", "planning", "presence", "administration"]);
+    const objets = objetsNotifications({ estSuperAdmin: true, pages: [] });
+    assert.equal(objets.length, Object.keys(MODULE_DE_L_OBJET).length);
+    assert.ok(objets.includes("utilisateur"));
   });
 
-  it("limite un administrateur à ses modules, sans l'administration", () => {
-    assert.deepEqual(modulesNotifications({ estSuperAdmin: false, modules: ["presence"] }), ["presence"]);
+  it("limite un administrateur aux objets de ses pages, sans l'administration", () => {
+    assert.deepEqual(objetsNotifications({ estSuperAdmin: false, pages: ["pointages_manuels"] }), ["pointage"]);
+    assert.deepEqual(objetsNotifications({ estSuperAdmin: false, pages: ["horaire_dynamique"] }), ["regle_horaire", "horaire_dynamique"]);
   });
 });
 

@@ -19,7 +19,7 @@ export default function PageAffectations() {
 }
 
 async function ContenuAffectations() {
-  const refus = await refusSiNonAutorise();
+  const refus = await refusSiNonAutorise("affectations");
   if (refus) return refus;
   const [affectations, rotations, groupes, employes] = await Promise.all([
     listerAffectations(),

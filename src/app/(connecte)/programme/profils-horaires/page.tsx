@@ -15,7 +15,7 @@ export default function PageProfilsHoraires() {
 }
 
 async function ContenuProfils() {
-  const refus = await refusSiNonAutorise();
+  const refus = await refusSiNonAutorise("profils_horaires");
   if (refus) return refus;
   return <GestionProfils profils={await listerProfils()} />;
 }

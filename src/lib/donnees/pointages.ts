@@ -5,7 +5,7 @@ import { FUSEAU_HORAIRE } from "@/lib/constantes";
 import { heureLocaleVersUtc } from "@/lib/metier/pointages";
 import { motifContient } from "@/lib/metier/recherche";
 import type { DonneesPointages, RecherchePointages } from "@/lib/validation/pointage";
-import type { PointageDirect, PointageListe } from "@/types";
+import type { PointageListe } from "@/types";
 import { obtenirBase } from "./base";
 import { departements, employes, photosEmployes, pointages, utilisateurs } from "./schema";
 
@@ -104,22 +104,3 @@ export async function supprimerPointageManuel(id: string): Promise<boolean> {
   return resultat.affectedRows > 0;
 }
 
-/** Derniers pointages, toutes sources (badgeuse et saisie manuelle), du plus récent au plus ancien. */
-export async function listerDerniersPointages(limite: number): Promise<PointageDirect[]> {
-  const lignes = await obtenirBase()
-    .select({
-      id: pointages.id,
-      prenom: employes.prenom,
-      nom: employes.nom,
-      departement: departements.nom,
-      horodatage: pointages.horodatage,
-      etat: pointages.etat,
-      source: pointages.source,
-    })
-    .from(pointages)
-    .innerJoin(employes, eq(employes.id, pointages.employeId))
-    .innerJoin(departements, eq(departements.id, employes.departementId))
-    .orderBy(desc(pointages.horodatage), desc(pointages.creeLe))
-    .limit(limite);
-  return lignes.map(({ prenom, nom, ...reste }) => ({ ...reste, nomComplet: `${prenom} ${nom}` }));
-}

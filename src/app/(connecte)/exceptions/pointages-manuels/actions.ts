@@ -2,10 +2,10 @@
 
 import { refresh } from "next/cache";
 import { z } from "zod";
-import { peutGererModule } from "@/lib/actions/droits";
+import { peutAccederPage } from "@/lib/actions/droits";
 import { notifier } from "@/lib/actions/notifier";
 import { CHEMIN_POINTAGES_MANUELS } from "@/lib/constantes";
-import { peutGerer } from "@/lib/metier/droits";
+import { peutAcceder } from "@/lib/metier/droits";
 import { employesExistent } from "@/lib/donnees/groupes";
 import { evaluerPointages, groupesDesEmployes } from "@/lib/donnees/planning";
 import { insererPointagesManuels, supprimerPointageManuel } from "@/lib/donnees/pointages";
@@ -42,7 +42,7 @@ async function resultatDuTest(donnees: { employeIds: string[]; horodatage: Date;
 export async function creerPointagesManuels(_etat: EtatFormulaire, formulaire: FormData): Promise<EtatFormulaire> {
   // Les droits et l'auteur viennent de la session, jamais du formulaire.
   const utilisateur = await obtenirUtilisateurPourEspace();
-  if (!peutGerer(utilisateur, "presence")) return { message: textes.droits };
+  if (!peutAcceder(utilisateur, "pointages_manuels")) return { message: textes.droits };
 
   const validation = validerPointages(formulaire, new Date());
   if (!validation.ok) return { erreursChamps: validation.erreursChamps };
@@ -66,7 +66,7 @@ export async function creerPointagesManuels(_etat: EtatFormulaire, formulaire: F
 }
 
 export async function supprimerPointage(_etat: EtatFormulaire, formulaire: FormData): Promise<EtatFormulaire> {
-  if (!(await peutGererModule("presence"))) return { message: textes.droits };
+  if (!(await peutAccederPage("pointages_manuels"))) return { message: textes.droits };
 
   const id = identifiant.safeParse(formulaire.get("id"));
   if (!id.success) return { message: textes.erreurs.introuvable };

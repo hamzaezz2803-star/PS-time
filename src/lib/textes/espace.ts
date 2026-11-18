@@ -9,7 +9,7 @@ export const TEXTES_ESPACE = {
   titreChiffres: "Vue d'ensemble",
   heureCasablanca: "Heure de Casablanca",
   aucunModule:
-    "Aucun module ne vous est encore attribué. Demandez au super administrateur de vous donner accès aux parties de l'application dont vous avez besoin.",
+    "Aucune page ne vous est encore attribuée. Demandez au super administrateur de vous donner accès aux pages dont vous avez besoin.",
   voir: (libelle: string) => `Ouvrir ${libelle.toLocaleLowerCase("fr")}`,
   titrePlanning: "Mettre en place le planning",
   sousTitrePlanning: "Quatre étapes, dans cet ordre, pour organiser les horaires de vos équipes.",

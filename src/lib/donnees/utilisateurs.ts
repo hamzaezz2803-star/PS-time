@@ -3,10 +3,10 @@ import "server-only";
 import { hashPassword } from "better-auth/crypto";
 import { and, asc, desc, eq } from "drizzle-orm";
 import { DOMAINE_EMAIL_INTERNE, LIMITE_UTILISATEURS } from "@/lib/constantes";
-import { nettoyerModules, type Module } from "@/lib/metier/droits";
+import { nettoyerPages, type Page } from "@/lib/metier/droits";
 import type { UtilisateurListe } from "@/types";
 import { obtenirBase } from "./base";
-import { autorisationsUtilisateurs, comptes, sessions, utilisateurs } from "./schema";
+import { autorisationsPages, comptes, sessions, utilisateurs } from "./schema";
 
 /** Nom imposé par Better Auth pour une connexion par mot de passe. */
 const FOURNISSEUR_MOT_DE_PASSE = "credential";
@@ -31,16 +31,16 @@ export async function marquerMotDePasseChange(utilisateurId: string): Promise<vo
     .where(eq(utilisateurs.id, utilisateurId));
 }
 
-/** Modules accordés à un administrateur (vide pour un super administrateur, qui a tout). */
-export async function listerModulesAccordes(utilisateurId: string): Promise<Module[]> {
+/** Pages accordées à un administrateur (vide pour un super administrateur, qui a tout). */
+export async function listerPagesAccordees(utilisateurId: string): Promise<Page[]> {
   const lignes = await obtenirBase()
-    .select({ module: autorisationsUtilisateurs.module })
-    .from(autorisationsUtilisateurs)
-    .where(eq(autorisationsUtilisateurs.utilisateurId, utilisateurId));
-  return nettoyerModules(lignes.map((ligne) => ligne.module));
+    .select({ page: autorisationsPages.page })
+    .from(autorisationsPages)
+    .where(eq(autorisationsPages.utilisateurId, utilisateurId));
+  return nettoyerPages(lignes.map((ligne) => ligne.page));
 }
 
-/** Comptes triés (super administrateurs d'abord, puis par identifiant), avec leurs modules. */
+/** Comptes triés (super administrateurs d'abord, puis par identifiant), avec leurs pages accordées. */
 export async function listerUtilisateurs(): Promise<UtilisateurListe[]> {
   const base = obtenirBase();
   const [lignes, autorisations] = await Promise.all([
@@ -57,22 +57,22 @@ export async function listerUtilisateurs(): Promise<UtilisateurListe[]> {
       .from(utilisateurs)
       .orderBy(desc(utilisateurs.estSuperAdmin), asc(utilisateurs.identifiant))
       .limit(LIMITE_UTILISATEURS),
-    base.select({ utilisateurId: autorisationsUtilisateurs.utilisateurId, module: autorisationsUtilisateurs.module }).from(autorisationsUtilisateurs),
+    base.select({ utilisateurId: autorisationsPages.utilisateurId, page: autorisationsPages.page }).from(autorisationsPages),
   ]);
   return lignes
     .map((ligne) => ({
       ...ligne,
       // `nom` sert aux titres des fenêtres de la liste : l'identifiant, unique et toujours connu.
       nom: ligne.identifiant,
-      modules: nettoyerModules(autorisations.filter((a) => a.utilisateurId === ligne.id).map((a) => a.module)),
+      pages: nettoyerPages(autorisations.filter((a) => a.utilisateurId === ligne.id).map((a) => a.page)),
     }));
 }
 
-/** Remplace les modules accordés à un administrateur. */
-async function fixerModules(transaction: Transaction, utilisateurId: string, modules: Module[]): Promise<void> {
-  await transaction.delete(autorisationsUtilisateurs).where(eq(autorisationsUtilisateurs.utilisateurId, utilisateurId));
-  if (modules.length > 0) {
-    await transaction.insert(autorisationsUtilisateurs).values(modules.map((module) => ({ utilisateurId, module })));
+/** Remplace les pages accordées à un administrateur. */
+async function fixerPages(transaction: Transaction, utilisateurId: string, pages: Page[]): Promise<void> {
+  await transaction.delete(autorisationsPages).where(eq(autorisationsPages.utilisateurId, utilisateurId));
+  if (pages.length > 0) {
+    await transaction.insert(autorisationsPages).values(pages.map((page) => ({ utilisateurId, page })));
   }
 }
 
@@ -83,7 +83,7 @@ export type NouvelUtilisateur = {
   estSuperAdmin: boolean;
   /** Vrai : le mot de passe est provisoire et devra être changé à la première connexion. */
   doitChangerMotDePasse: boolean;
-  modules: Module[];
+  pages: Page[];
 };
 
 /** Crée un compte et son mot de passe (empreinte scrypt) dans la transaction donnée. */
@@ -105,11 +105,11 @@ export async function insererUtilisateur(transaction: Transaction, nouveau: Nouv
     compteId: id,
     motDePasse: await hashPassword(nouveau.motDePasse),
   });
-  if (!nouveau.estSuperAdmin) await fixerModules(transaction, id, nouveau.modules);
+  if (!nouveau.estSuperAdmin) await fixerPages(transaction, id, nouveau.pages);
   return id;
 }
 
-/** Crée un administrateur (mot de passe provisoire) avec ses modules. */
+/** Crée un administrateur (mot de passe provisoire) avec ses pages accordées. */
 export async function creerAdministrateur(donnees: Omit<NouvelUtilisateur, "estSuperAdmin" | "doitChangerMotDePasse">): Promise<string> {
   return obtenirBase().transaction((transaction) =>
     insererUtilisateur(transaction, { ...donnees, estSuperAdmin: false, doitChangerMotDePasse: true }),
@@ -119,13 +119,13 @@ export async function creerAdministrateur(donnees: Omit<NouvelUtilisateur, "estS
 export type ModificationUtilisateur = {
   nom: string;
   estActif: boolean;
-  modules: Module[];
+  pages: Page[];
   /** Nouveau mot de passe provisoire, ou null pour garder l'actuel. */
   motDePasse: string | null;
 };
 
 /**
- * Modifie un compte dans une transaction. Les modules d'un super administrateur ne changent pas
+ * Modifie un compte dans une transaction. Les pages d'un super administrateur ne changent pas
  * (il a tout). Un nouveau mot de passe est provisoire ; désactivation ou nouveau mot de passe
  * ferment les sessions ouvertes. Renvoie false si le compte n'existe plus.
  */
@@ -151,7 +151,7 @@ export async function modifierUtilisateur(id: string, modification: Modification
         .where(and(eq(comptes.utilisateurId, id), eq(comptes.fournisseurId, FOURNISSEUR_MOT_DE_PASSE)));
     }
     if (motDePasse || !modification.estActif) await transaction.delete(sessions).where(eq(sessions.utilisateurId, id));
-    if (!existant.estSuperAdmin) await fixerModules(transaction, id, modification.modules);
+    if (!existant.estSuperAdmin) await fixerPages(transaction, id, modification.pages);
     return true;
   });
 }

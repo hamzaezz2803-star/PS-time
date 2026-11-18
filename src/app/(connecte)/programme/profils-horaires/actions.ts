@@ -2,7 +2,7 @@
 
 import { refresh } from "next/cache";
 import { z } from "zod";
-import { peutGererModule } from "@/lib/actions/droits";
+import { peutAccederPage } from "@/lib/actions/droits";
 import { notifier } from "@/lib/actions/notifier";
 import { CHEMIN_PROFILS_HORAIRES } from "@/lib/constantes";
 import { estEncoreReference, indexEnDoublon } from "@/lib/donnees/erreurs";
@@ -19,7 +19,7 @@ function journaliserEchec(operation: string, erreur: unknown) {
 
 /** Crée un profil horaire (sans `id`) ou le modifie (avec `id`), plages comprises. */
 export async function enregistrerProfil(_etat: EtatFormulaire, formulaire: FormData): Promise<EtatFormulaire> {
-  if (!(await peutGererModule("planning"))) return { message: textes.droits };
+  if (!(await peutAccederPage("profils_horaires"))) return { message: textes.droits };
 
   const id = formulaire.get("id") ? identifiant.safeParse(formulaire.get("id")) : null;
   if (id && !id.success) return { message: textes.introuvable };
@@ -42,7 +42,7 @@ export async function enregistrerProfil(_etat: EtatFormulaire, formulaire: FormD
 }
 
 export async function supprimerProfil(_etat: EtatFormulaire, formulaire: FormData): Promise<EtatFormulaire> {
-  if (!(await peutGererModule("planning"))) return { message: textes.droits };
+  if (!(await peutAccederPage("profils_horaires"))) return { message: textes.droits };
 
   const id = identifiant.safeParse(formulaire.get("id"));
   if (!id.success) return { message: textes.introuvable };

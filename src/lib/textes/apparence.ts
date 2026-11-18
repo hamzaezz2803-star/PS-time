@@ -1,0 +1,37 @@
+/** Textes de la page Administration > Thème et police (réservée au super administrateur). */
+export const TEXTES_APPARENCE = {
+  titrePage: "Thème et police",
+  sousTitre: "Choisissez les couleurs et la police de l'application. Le changement s'applique à tous les comptes.",
+  chargement: "Chargement de l'apparence...",
+  titreThemes: "Thème de couleurs",
+  aideThemes: "Couleurs des boutons, des liens, des titres et des repères de la page active.",
+  titrePolices: "Police",
+  aidePolices: "Police de tous les textes de l'application, chiffres des heures compris.",
+  actuel: "Actuel",
+  apercu: "Aperçu",
+  exempleTitre: "Pointage du jour",
+  exempleTexte: "Arrivée 08:00, départ 17:30",
+  exempleBouton: "Enregistrer",
+  exemplePolice: "Aa 08:30",
+  themes: {
+    bleu: { libelle: "Bleu PS Time", detail: "Les couleurs du logo (par défaut)" },
+    emeraude: { libelle: "Émeraude", detail: "Vert profond et reposant" },
+    ocean: { libelle: "Océan", detail: "Bleu-vert, sobre et lumineux" },
+    ardoise: { libelle: "Ardoise", detail: "Gris anthracite, très neutre" },
+  },
+  polices: {
+    hanken: { libelle: "Hanken Grotesk", detail: "Police d'origine, moderne (par défaut)" },
+    inter: { libelle: "Inter", detail: "Très lisible sur écran" },
+    source_sans: { libelle: "Source Sans 3", detail: "Classique et compacte" },
+    atkinson: { libelle: "Atkinson Hyperlegible", detail: "Pensée pour les personnes malvoyantes" },
+  },
+  enregistrer: "Enregistrer l'apparence",
+  enregistrementEnCours: "Enregistrement...",
+  enregistre: "Apparence enregistrée. Elle s'applique maintenant à tous les comptes.",
+  droits: "Le choix de l'apparence est réservé au super administrateur.",
+  echec: "L'enregistrement a échoué. Réessayez dans un instant.",
+  erreurs: {
+    theme: "Choisissez un des thèmes proposés.",
+    police: "Choisissez une des polices proposées.",
+  },
+} as const;

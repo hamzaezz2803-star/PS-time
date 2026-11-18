@@ -6,7 +6,7 @@ import { EnTetePage } from "@/components/ui/en-tete-page";
 import { MessageErreur } from "@/components/ui/message-erreur";
 import { listerCompteurs } from "@/lib/donnees/compteurs";
 import { obtenirUtilisateurPourEspace } from "@/lib/donnees/session";
-import { peutGerer } from "@/lib/metier/droits";
+import { peutAcceder } from "@/lib/metier/droits";
 import { TEXTES_COMPTEURS as textes } from "@/lib/textes/compteurs";
 
 export const metadata: Metadata = { title: textes.titrePage };
@@ -24,6 +24,6 @@ export default function PageCompteurs() {
 
 async function ContenuCompteurs() {
   const utilisateur = await obtenirUtilisateurPourEspace();
-  if (!peutGerer(utilisateur, "presence")) return <MessageErreur message={textes.droits} className="text-base" />;
+  if (!peutAcceder(utilisateur, "compteurs")) return <MessageErreur message={textes.droits} className="text-base" />;
   return <GestionCompteurs compteurs={await listerCompteurs()} />;
 }

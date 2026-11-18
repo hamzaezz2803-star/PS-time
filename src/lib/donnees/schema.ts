@@ -14,6 +14,7 @@ import {
   uniqueIndex,
   varchar,
 } from "drizzle-orm/mysql-core";
+import { PAGES, POLICES, THEMES } from "../constantes.ts";
 
 /**
  * Schéma de la base. Toute modification passe par une migration :
@@ -32,6 +33,9 @@ const identifiantUnique = () =>
     .primaryKey()
     .default(sql`(uuid())`)
     .$defaultFn(() => crypto.randomUUID());
+
+/** Liste SQL `'a', 'b'` tirée d'une constante de l'application (valeurs fixes, jamais saisies). */
+const listeSql = (valeurs: readonly string[]) => sql.raw(valeurs.map((valeur) => `'${valeur}'`).join(", "));
 
 const referenceUtilisateur = () =>
   char("utilisateur_id", { length: 36 })
@@ -135,21 +139,45 @@ export const comptes = mysqlTable(
 );
 
 /**
- * Modules qu'un administrateur a le droit de gérer (une ligne par module accordé).
+ * Pages qu'un administrateur a le droit de voir et de gérer (une ligne par page accordée).
  * Un super administrateur a tous les droits sans ligne ici. Supprimées avec l'utilisateur.
  */
-export const autorisationsUtilisateurs = mysqlTable(
-  "autorisations_utilisateurs",
+export const autorisationsPages = mysqlTable(
+  "autorisations_pages",
   {
     id: identifiantUnique(),
     utilisateurId: referenceUtilisateur(),
-    module: varchar("module", { length: 20 }).notNull(),
+    page: varchar("page", { length: 30 }).notNull(),
     creeLe: dateCreation(),
     modifieLe: dateModification(),
   },
   (table) => [
-    uniqueIndex("autorisations_utilisateur_module_idx").on(table.utilisateurId, table.module),
-    check("autorisations_module_valide", sql`${table.module} IN ('personnel', 'planning', 'presence')`),
+    uniqueIndex("autorisations_pages_utilisateur_page_idx").on(table.utilisateurId, table.page),
+    check("autorisations_pages_page_valide", sql`${table.page} IN (${listeSql(PAGES)})`),
+  ],
+);
+
+/**
+ * Réglages de l'installation (une ligne par réglage), modifiés par le super administrateur :
+ * thème de couleurs et police. La base n'accepte que les valeurs connues de l'application.
+ */
+export const parametres = mysqlTable(
+  "parametres",
+  {
+    id: identifiantUnique(),
+    cle: varchar("cle", { length: 30 }).notNull(),
+    valeur: varchar("valeur", { length: 50 }).notNull(),
+    modifiePar: char("modifie_par", { length: 36 }).references(() => utilisateurs.id, { onDelete: "set null" }),
+    creeLe: dateCreation(),
+    modifieLe: dateModification(),
+  },
+  (table) => [
+    uniqueIndex("parametres_cle_idx").on(table.cle),
+    index("parametres_modifie_par_idx").on(table.modifiePar),
+    check(
+      "parametres_valeur_valide",
+      sql`(${table.cle} = 'theme' AND ${table.valeur} IN (${listeSql(THEMES)})) OR (${table.cle} = 'police' AND ${table.valeur} IN (${listeSql(POLICES)}))`,
+    ),
   ],
 );
 

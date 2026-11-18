@@ -8,7 +8,7 @@ import {
   LONGUEUR_MIN_IDENTIFIANT,
   LONGUEUR_MIN_MOT_DE_PASSE,
 } from "@/lib/constantes";
-import { nettoyerModules } from "@/lib/metier/droits";
+import { nettoyerPages } from "@/lib/metier/droits";
 import { TEXTES_UTILISATEURS } from "@/lib/textes/utilisateurs";
 import type { Resultat } from "@/types";
 import { lireTexte, nomObligatoire, premieresErreurs } from "./commun";
@@ -23,8 +23,8 @@ const motDePasse = z
 
 const champsCommuns = {
   nom: nomObligatoire(LONGUEUR_MAX_NOM_UTILISATEUR, erreurs.nomVide, erreurs.nomTropLong),
-  // Cases cochées « modules » : seules les valeurs connues sont gardées.
-  modules: z.array(z.string()).transform(nettoyerModules),
+  // Cases cochées « pages » : seules les valeurs connues sont gardées.
+  pages: z.array(z.string()).transform(nettoyerPages),
   confirmation: z.string(),
 };
 
@@ -65,7 +65,7 @@ type ResultatValidation<T> = Resultat<T> & { erreursChamps?: Record<string, stri
 function lireCommuns(formulaire: FormData) {
   return {
     nom: lireTexte(formulaire.get("nom")),
-    modules: formulaire.getAll("modules").map(lireTexte),
+    pages: formulaire.getAll("pages").map(lireTexte),
     motDePasse: lireTexte(formulaire.get("motDePasse")),
     confirmation: lireTexte(formulaire.get("confirmation")),
   };

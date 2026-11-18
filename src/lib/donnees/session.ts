@@ -4,9 +4,9 @@ import { cache } from "react";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { CHEMIN_CHANGER_MOT_DE_PASSE, CHEMIN_CONNEXION } from "@/lib/constantes";
-import { modulesAccessibles, type Module } from "@/lib/metier/droits";
+import { modulesAccessibles, pagesAccessibles, type Module, type Page } from "@/lib/metier/droits";
 import { auth } from "./authentification";
-import { listerModulesAccordes } from "./utilisateurs";
+import { listerPagesAccordees } from "./utilisateurs";
 
 export type UtilisateurConnecte = {
   id: string;
@@ -15,7 +15,9 @@ export type UtilisateurConnecte = {
   identifiant: string;
   doitChangerMotDePasse: boolean;
   estSuperAdmin: boolean;
-  /** Modules que ce compte peut gérer (tous pour un super administrateur), relus à chaque requête. */
+  /** Pages que ce compte peut voir et gérer (toutes pour un super administrateur), relues à chaque requête. */
+  pages: Page[];
+  /** Modules dont le compte a au moins une page (menu, tableau de bord). */
   modules: Module[];
 };
 
@@ -30,7 +32,8 @@ export const obtenirUtilisateurConnecte = cache(async (): Promise<UtilisateurCon
   if (!session || !session.user.estActif) redirect(CHEMIN_CONNEXION);
 
   const { user } = session;
-  const accordes = user.estSuperAdmin ? [] : await listerModulesAccordes(user.id);
+  const accordees = user.estSuperAdmin ? [] : await listerPagesAccordees(user.id);
+  const droits = { estSuperAdmin: user.estSuperAdmin, pages: accordees };
   return {
     id: user.id,
     nom: user.name,
@@ -39,7 +42,8 @@ export const obtenirUtilisateurConnecte = cache(async (): Promise<UtilisateurCon
     identifiant: user.username ?? "",
     doitChangerMotDePasse: user.doitChangerMotDePasse,
     estSuperAdmin: user.estSuperAdmin,
-    modules: modulesAccessibles({ estSuperAdmin: user.estSuperAdmin, modules: accordes }),
+    pages: pagesAccessibles(droits),
+    modules: modulesAccessibles(droits),
   };
 });
 

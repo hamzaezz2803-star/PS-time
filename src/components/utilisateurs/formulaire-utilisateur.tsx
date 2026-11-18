@@ -16,11 +16,11 @@ import {
   LONGUEUR_MIN_IDENTIFIANT,
   LONGUEUR_MIN_MOT_DE_PASSE,
 } from "@/lib/constantes";
-import { nettoyerModules } from "@/lib/metier/droits";
+import { nettoyerPages } from "@/lib/metier/droits";
 import { lireTexte } from "@/lib/validation/commun";
 import { TEXTES_UTILISATEURS } from "@/lib/textes/utilisateurs";
 import type { UtilisateurListe } from "@/types";
-import { ChoixModules } from "./choix-modules";
+import { ChoixPages } from "./choix-pages";
 
 const { champs } = TEXTES_UTILISATEURS;
 
@@ -56,7 +56,7 @@ function ChampsMotDePasse({ libelle, aide, erreurs }: { libelle: string; aide: s
 export function FormulaireUtilisateur({ element, onTermine, onAnnuler }: ProprietesFormulaireListe<UtilisateurListe>) {
   const [etat, action, enCours] = useFormulaireListe(element ? modifierCompte : creerUtilisateur, onTermine);
   const erreurs = etat.erreursChamps;
-  const modules = etat.saisie ? nettoyerModules(etat.saisie.getAll("modules").map(lireTexte)) : (element?.modules ?? []);
+  const pages = etat.saisie ? nettoyerPages(etat.saisie.getAll("pages").map(lireTexte)) : (element?.pages ?? []);
 
   return (
     <form action={action} noValidate className="flex min-h-0 flex-1 flex-col">
@@ -108,7 +108,7 @@ export function FormulaireUtilisateur({ element, onTermine, onAnnuler }: Proprie
             {champs.superAdmin}
           </p>
         ) : (
-          <ChoixModules initiaux={modules} erreur={erreurs?.modules} />
+          <ChoixPages initiales={pages} erreur={erreurs?.pages} />
         )}
 
         {element && (

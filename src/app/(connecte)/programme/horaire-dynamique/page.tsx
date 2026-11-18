@@ -18,7 +18,7 @@ export default function PageHoraireDynamique() {
 }
 
 async function ContenuHoraireDynamique() {
-  const refus = await refusSiNonAutorise();
+  const refus = await refusSiNonAutorise("horaire_dynamique");
   if (refus) return refus;
   const [regles, profils, employes, departements, selection] = await Promise.all([
     listerRegles(),

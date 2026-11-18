@@ -17,6 +17,7 @@ const OBJETS: Record<Notification["objet"], { avec: string; sans: string }> = {
   compteur: { avec: "le compteur", sans: "un compteur" },
   utilisateur: { avec: "le compte", sans: "un compte" },
   mot_de_passe: { avec: "son mot de passe", sans: "son mot de passe" },
+  apparence: { avec: "l'apparence de l'application", sans: "l'apparence de l'application" },
 };
 
 const VERBES: Record<Notification["action"], string> = {
@@ -31,11 +32,12 @@ export const TEXTES_NOTIFICATIONS = {
   titre: "Notifications",
   nonLues: (nombre: number) => (nombre === 0 ? "Tout est lu" : nombre === 1 ? "1 nouvelle" : `${nombre} nouvelles`),
   vide: "Aucune notification pour le moment.",
-  aide: "Chaque création, modification ou suppression dans vos modules apparaîtra ici.",
+  aide: "Chaque création, modification ou suppression dans vos pages apparaîtra ici.",
   vous: "Vous",
+  ilYA: (minutes: number) => (minutes < 1 ? "à l'instant" : minutes < 60 ? `il y a ${minutes} min` : `il y a ${Math.floor(minutes / 60)} h ${String(minutes % 60).padStart(2, "0")}`),
   nouveau: "Nouveau",
   erreur: "Impossible de charger les notifications. Nouvel essai dans quelques secondes.",
-  aideConservation: (jours: number) => `Les ${jours} derniers jours, selon vos modules.`,
+  aideConservation: (jours: number) => `Les ${jours} derniers jours, selon vos pages.`,
   /** « Salma a créé le site « Usine » » ; pour un pointage, le libellé dit l'état et le nombre. */
   phrase: (notification: Pick<Notification, "action" | "objet" | "libelle">, auteur: string) => {
     if (notification.objet === "mot_de_passe") return `${auteur} a changé son mot de passe`;

@@ -31,13 +31,25 @@ export const DUREE_JETON_INSTALLATION_SECONDES = 10 * 60;
 export const TENTATIVES_INSTALLATION_MAX_PAR_JOUR = 30;
 export const UN_JOUR_MILLISECONDES = 24 * 60 * 60 * 1000;
 
-/**
- * Modules qu'un super administrateur peut confier à un administrateur :
- * personnel (sites, départements, postes, personnes), planning (calendriers, rotations,
- * groupes, affectations), présence (pointages). Même liste que la contrainte de la base.
- */
+/** Grandes parties de l'application (menu, tableau de bord, notifications). */
 export const MODULES = ["personnel", "planning", "presence"] as const;
+/**
+ * Pages qu'un super administrateur peut accorder une par une à un administrateur, rangées
+ * par module dans l'ordre du menu. Même liste que la contrainte de la base (`autorisations_pages`).
+ */
+export const PAGES_PAR_MODULE = {
+  personnel: ["sites", "departements", "postes", "personnes"],
+  planning: ["profils_horaires", "rotations", "groupes", "affectations", "horaire_dynamique", "rapport_presences"],
+  presence: ["pointages_manuels", "compteurs", "detail_jour"],
+} as const;
+export const PAGES = [...PAGES_PAR_MODULE.personnel, ...PAGES_PAR_MODULE.planning, ...PAGES_PAR_MODULE.presence] as const;
 export const CHEMIN_UTILISATEURS = "/administration/utilisateurs";
+export const CHEMIN_APPARENCE = "/administration/apparence";
+/** Apparence de l'application, choisie par le super administrateur (même liste que la base). */
+export const THEMES = ["bleu", "emeraude", "ocean", "ardoise"] as const;
+export const POLICES = ["hanken", "inter", "source_sans", "atkinson"] as const;
+export const THEME_PAR_DEFAUT = "bleu";
+export const POLICE_PAR_DEFAUT = "hanken";
 export const LONGUEUR_MAX_NOM_UTILISATEUR = 100;
 export const LIMITE_UTILISATEURS = 500;
 
@@ -133,9 +145,6 @@ export const SOURCES_POINTAGE = ["manuel", "badgeuse"] as const;
 export const POINTAGES_PAR_PAGE = 50;
 /** Nombre maximal d'employés pointés en une seule saisie. */
 export const LIMITE_EMPLOYES_POINTAGE = 500;
-/** Carte « Pointages en direct » du tableau de bord : nombre de lignes et fréquence d'actualisation. */
-export const POINTAGES_DIRECT_MAX = 6;
-export const INTERVALLE_DIRECT_MS = 15_000;
 /** Cloche de notifications : nombre affiché, actualisation, durée de conservation. */
 export const NOTIFICATIONS_AFFICHEES_MAX = 30;
 export const INTERVALLE_NOTIFICATIONS_MS = 30_000;

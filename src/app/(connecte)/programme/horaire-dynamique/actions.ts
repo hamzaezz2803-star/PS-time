@@ -2,7 +2,7 @@
 
 import { refresh } from "next/cache";
 import { z } from "zod";
-import { peutGererModule } from "@/lib/actions/droits";
+import { peutAccederPage } from "@/lib/actions/droits";
 import { notifier } from "@/lib/actions/notifier";
 import { CHEMIN_HORAIRE_DYNAMIQUE, LIMITE_EMPLOYES_SELECTION } from "@/lib/constantes";
 import {
@@ -33,7 +33,7 @@ function messageRefus(erreur: Exclude<ResultatRegle, { ok: true }>["erreur"]): E
 
 /** Crée une règle (sans `id`) ou la modifie (avec `id`), sans chevauchement avec une règle active. */
 export async function enregistrerRegle(_etat: EtatFormulaire, formulaire: FormData): Promise<EtatFormulaire> {
-  if (!(await peutGererModule("planning"))) return { message: textes.droits };
+  if (!(await peutAccederPage("horaire_dynamique"))) return { message: textes.droits };
 
   const id = formulaire.get("id") ? identifiant.safeParse(formulaire.get("id")) : null;
   if (id && !id.success) return { message: textes.introuvable };
@@ -58,7 +58,7 @@ export async function enregistrerRegle(_etat: EtatFormulaire, formulaire: FormDa
 
 /** Active ou désactive une règle (interrupteur de la liste). */
 export async function changerEtatRegle(id: string, estActif: boolean): Promise<EtatFormulaire> {
-  if (!(await peutGererModule("planning"))) return { message: textes.droits };
+  if (!(await peutAccederPage("horaire_dynamique"))) return { message: textes.droits };
   const analyse = identifiant.safeParse(id);
   if (!analyse.success || typeof estActif !== "boolean") return { message: textes.introuvable };
 
@@ -75,7 +75,7 @@ export async function changerEtatRegle(id: string, estActif: boolean): Promise<E
 }
 
 export async function supprimerRegle(_etat: EtatFormulaire, formulaire: FormData): Promise<EtatFormulaire> {
-  if (!(await peutGererModule("planning"))) return { message: textes.droits };
+  if (!(await peutAccederPage("horaire_dynamique"))) return { message: textes.droits };
 
   const id = identifiant.safeParse(formulaire.get("id"));
   if (!id.success) return { message: textes.introuvable };
@@ -92,7 +92,7 @@ export async function supprimerRegle(_etat: EtatFormulaire, formulaire: FormData
 
 /** Fixe la liste des employés en horaire dynamique (cases cochées) ; les autres gardent leur rotation. */
 export async function enregistrerEmployes(_etat: EtatFormulaire, formulaire: FormData): Promise<EtatFormulaire> {
-  if (!(await peutGererModule("planning"))) return { message: textes.droits };
+  if (!(await peutAccederPage("horaire_dynamique"))) return { message: textes.droits };
 
   const analyse = listeEmployes.safeParse(formulaire.getAll("employes"));
   if (!analyse.success) return { message: textes.erreurs.employesIntrouvables };

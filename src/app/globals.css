@@ -1,35 +1,79 @@
 @import "tailwindcss";
 
-/* Couleurs de la marque PS Time, tirées du logo. Définies une seule fois ici. */
-:root {
+/*
+ * Couleurs, définies une seule fois ici. Thème par défaut : la marque PS Time (tirée du logo).
+ * Le thème choisi par le super administrateur (data-theme sur <html>) remplace les couleurs de
+ * marque ; textes, bordures et statuts restent neutres pour garder les contrastes vérifiés.
+ */
+:root,
+[data-theme="bleu"] {
   --couleur-marine: #0a2463;
   --couleur-primaire: #0b4fb3;
   --couleur-primaire-survol: #093f8f;
   --couleur-accent: #1aa3e8;
   --couleur-ciel: #e8f3fd;
+  --couleur-fond: #f6f9fd;
+  /* Canevas : survols et zones de chargement. */
+  --couleur-canevas: #eef2f7;
+}
 
+/* Primaire sur blanc : 5,5:1 minimum pour chaque thème (texte et boutons). */
+[data-theme="emeraude"] {
+  --couleur-marine: #064e3b;
+  --couleur-primaire: #047857;
+  --couleur-primaire-survol: #065f46;
+  --couleur-accent: #10b981;
+  --couleur-ciel: #e6f4ee;
+  --couleur-fond: #f5faf7;
+  --couleur-canevas: #ecf3ef;
+}
+
+[data-theme="ocean"] {
+  --couleur-marine: #134e4a;
+  --couleur-primaire: #0f766e;
+  --couleur-primaire-survol: #115e59;
+  --couleur-accent: #14b8a6;
+  --couleur-ciel: #e3f4f2;
+  --couleur-fond: #f4faf9;
+  --couleur-canevas: #eaf2f1;
+}
+
+[data-theme="ardoise"] {
+  --couleur-marine: #1e293b;
+  --couleur-primaire: #334155;
+  --couleur-primaire-survol: #1e293b;
+  --couleur-accent: #64748b;
+  --couleur-ciel: #eef1f5;
+  --couleur-fond: #f7f8fa;
+  --couleur-canevas: #eef0f3;
+}
+
+:root {
   --couleur-texte: #0f1b33;
   --couleur-texte-secondaire: #55627c;
   --couleur-bordure: #e2e8f1;
   /* Bordure des champs : contraste 3:1 minimum sur fond blanc. */
   --couleur-bordure-champ: #7487a6;
-  --couleur-fond: #f6f9fd;
-  /* Canevas du tableau de bord : derrière le menu et la zone de travail. */
-  --couleur-canevas: #eef2f7;
   --couleur-surface: #ffffff;
-
-  /* Menu latéral clair : survol et page active en blanc. Contrastes vérifiés sur
-     --couleur-menu-fond : texte 15:1, texte secondaire 5,5:1. */
-  --couleur-menu-fond: #f0f3f8;
-  --couleur-menu-texte: #0f1b33;
-  --couleur-menu-texte-secondaire: #55627c;
-  --couleur-menu-survol: #ffffff;
-  --couleur-menu-actif: #ffffff;
-  --couleur-menu-bordure: #d5dce7;
 
   --couleur-succes: #15803d;
   --couleur-attention: #b45309;
   --couleur-erreur: #b91c1c;
+}
+
+/* Police choisie (data-police) : les familles sont chargées par next/font dans app/layout.tsx. */
+:root,
+[data-police="hanken"] {
+  --font-texte: var(--font-hanken);
+}
+[data-police="inter"] {
+  --font-texte: var(--font-inter);
+}
+[data-police="source_sans"] {
+  --font-texte: var(--font-source-sans);
+}
+[data-police="atkinson"] {
+  --font-texte: var(--font-atkinson);
 }
 
 @theme inline {
@@ -45,12 +89,6 @@
   --color-fond: var(--couleur-fond);
   --color-canevas: var(--couleur-canevas);
   --color-surface: var(--couleur-surface);
-  --color-menu-fond: var(--couleur-menu-fond);
-  --color-menu-texte: var(--couleur-menu-texte);
-  --color-menu-texte-secondaire: var(--couleur-menu-texte-secondaire);
-  --color-menu-survol: var(--couleur-menu-survol);
-  --color-menu-actif: var(--couleur-menu-actif);
-  --color-menu-bordure: var(--couleur-menu-bordure);
   --color-succes: var(--couleur-succes);
   --color-attention: var(--couleur-attention);
   --color-erreur: var(--couleur-erreur);

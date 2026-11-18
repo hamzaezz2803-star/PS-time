@@ -3,7 +3,7 @@ import { Chargement } from "@/components/ui/chargement";
 import { EnTetePage } from "@/components/ui/en-tete-page";
 import { MessageErreur } from "@/components/ui/message-erreur";
 import { obtenirUtilisateurPourEspace } from "@/lib/donnees/session";
-import { peutGerer } from "@/lib/metier/droits";
+import { peutAcceder, type Page } from "@/lib/metier/droits";
 import { TEXTES_PROGRAMME } from "@/lib/textes/programme";
 
 /** Titre, sous-titre et contenu chargé d'une page du module Programme. */
@@ -27,11 +27,11 @@ export function CadrePageProgramme({
 }
 
 /**
- * Le module Programme est réservé aux super administrateurs (moindre privilège : les groupes
+ * Chaque page du planning exige d'avoir été accordée au compte (moindre privilège : les groupes
  * et affectations contiennent des noms d'employés). Renvoie le message à afficher sinon.
  */
-export async function refusSiNonAutorise(): Promise<ReactNode | null> {
+export async function refusSiNonAutorise(page: Page): Promise<ReactNode | null> {
   const utilisateur = await obtenirUtilisateurPourEspace();
-  if (peutGerer(utilisateur, "planning")) return null;
+  if (peutAcceder(utilisateur, page)) return null;
   return <MessageErreur message={TEXTES_PROGRAMME.commun.droits} className="text-base" />;
 }

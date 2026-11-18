@@ -8,7 +8,6 @@ import { lireNotifications, marquerLues, type EtatNotifications } from "@/lib/ac
 import { CONSERVATION_NOTIFICATIONS_JOURS, INTERVALLE_NOTIFICATIONS_MS } from "@/lib/constantes";
 import { formaterDate, formaterHeure } from "@/lib/formats";
 import { TEXTES_NOTIFICATIONS as textes } from "@/lib/textes/notifications";
-import { TEXTES_PRESENCE } from "@/lib/textes/presence";
 import { cn } from "@/lib/utils";
 import type { Notification } from "@/types";
 
@@ -26,7 +25,7 @@ const ICONES: Record<Notification["action"], { Icone: LucideIcon; teinte: string
 /** « il y a 5 min », puis la date et l'heure au-delà d'un jour. */
 function quand(date: Date, maintenant: number): string {
   const minutes = Math.max(0, Math.floor((maintenant - date.getTime()) / MILLISECONDES_PAR_MINUTE));
-  return minutes < MINUTES_PAR_JOUR ? TEXTES_PRESENCE.direct.ilYA(minutes) : `${formaterDate(date)} · ${formaterHeure(date)}`;
+  return minutes < MINUTES_PAR_JOUR ? textes.ilYA(minutes) : `${formaterDate(date)} · ${formaterHeure(date)}`;
 }
 
 function Element({ notification, estNouvelle, estDeMoi, maintenant, onOuvrir }: { notification: Notification; estNouvelle: boolean; estDeMoi: boolean; maintenant: number; onOuvrir: () => void }) {

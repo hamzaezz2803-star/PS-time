@@ -2,7 +2,7 @@
 
 import { refresh } from "next/cache";
 import { z } from "zod";
-import { peutGererModule } from "@/lib/actions/droits";
+import { peutAccederPage } from "@/lib/actions/droits";
 import { notifier } from "@/lib/actions/notifier";
 import { CHEMIN_ROTATIONS } from "@/lib/constantes";
 import { indexEnDoublon } from "@/lib/donnees/erreurs";
@@ -26,7 +26,7 @@ function journaliserEchec(operation: string, erreur: unknown) {
 
 /** Crée une rotation (sans `id`) ou la modifie (avec `id`), jours compris. */
 export async function enregistrerRotation(_etat: EtatFormulaire, formulaire: FormData): Promise<EtatFormulaire> {
-  if (!(await peutGererModule("planning"))) return { message: textes.droits };
+  if (!(await peutAccederPage("rotations"))) return { message: textes.droits };
 
   const id = formulaire.get("id") ? identifiant.safeParse(formulaire.get("id")) : null;
   if (id && !id.success) return { message: textes.introuvable };
@@ -50,7 +50,7 @@ export async function enregistrerRotation(_etat: EtatFormulaire, formulaire: For
 }
 
 export async function supprimerRotation(_etat: EtatFormulaire, formulaire: FormData): Promise<EtatFormulaire> {
-  if (!(await peutGererModule("planning"))) return { message: textes.droits };
+  if (!(await peutAccederPage("rotations"))) return { message: textes.droits };
 
   const id = identifiant.safeParse(formulaire.get("id"));
   if (!id.success) return { message: textes.introuvable };

@@ -11,7 +11,7 @@ import {
 import { notifier } from "@/lib/actions/notifier";
 import { CHEMIN_PERSONNES } from "@/lib/constantes";
 import { obtenirUtilisateurPourEspace } from "@/lib/donnees/session";
-import { peutGerer } from "@/lib/metier/droits";
+import { peutAcceder } from "@/lib/metier/droits";
 import { TEXTES_PERSONNES } from "@/lib/textes/personnes";
 import type { EmployeDetail, EtatFormulaireEmploye, Resultat } from "@/types";
 import { etatApresEchec, preparerEmploye } from "./preparation";
@@ -21,7 +21,7 @@ const { erreurs, formulaire: textes, modification, suppression } = TEXTES_PERSON
 /** Les droits viennent toujours de la session. Données personnelles : super administrateur uniquement. */
 async function aLesDroits(): Promise<boolean> {
   const utilisateur = await obtenirUtilisateurPourEspace();
-  return peutGerer(utilisateur, "personnel");
+  return peutAcceder(utilisateur, "personnes");
 }
 
 const identifiantEmploye = z.uuid();

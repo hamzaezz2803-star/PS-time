@@ -12,7 +12,7 @@ import { estEncoreReference, indexEnDoublon } from "@/lib/donnees/erreurs";
 import { notifier } from "@/lib/actions/notifier";
 import { CHEMIN_DEPARTEMENTS } from "@/lib/constantes";
 import { obtenirUtilisateurPourEspace } from "@/lib/donnees/session";
-import { peutGerer } from "@/lib/metier/droits";
+import { peutAcceder } from "@/lib/metier/droits";
 import { siteExiste } from "@/lib/donnees/sites";
 import { TEXTES_SITES } from "@/lib/textes/sites";
 import { nomDejaPris, peutDeplacer } from "@/lib/metier/arbre";
@@ -22,10 +22,10 @@ import type { EtatFormulaireDepartement } from "@/types";
 
 const { erreurs, formulaire: textes } = TEXTES_DEPARTEMENTS;
 
-/** Les droits viennent toujours de la session : module Personnel requis. */
+/** Les droits viennent toujours de la session : page accordée requise. */
 async function aLesDroits(): Promise<boolean> {
   const utilisateur = await obtenirUtilisateurPourEspace();
-  return peutGerer(utilisateur, "personnel");
+  return peutAcceder(utilisateur, "departements");
 }
 
 function journaliserEchec(operation: string, erreur: unknown) {
