@@ -9,6 +9,9 @@
 START TRANSACTION;
 
 -- 1. Retrait des données de test précédentes (enfants avant parents).
+-- Compteurs de test et leurs versions (avant les comptes et profils).
+DELETE FROM compteurs_versions WHERE compteur_id LIKE '00000000-0000-4000-8000-%';
+DELETE FROM compteurs WHERE id LIKE '00000000-0000-4000-8000-%';
 -- Règles d'horaire dynamique de test, et celles saisies dans l'application sur un profil de test.
 DELETE FROM regles_horaires WHERE id LIKE '00000000-0000-4000-8000-%' OR profil_id LIKE '00000000-0000-4000-8000-%';
 DELETE FROM affectations WHERE id LIKE '00000000-0000-4000-8000-%';
@@ -175,7 +178,70 @@ UPDATE employes e JOIN departements d ON d.id = e.departement_id
 INSERT INTO regles_horaires (id, debut_minutes, fin_minutes, jours_semaine, profil_id, est_actif) VALUES
   ('00000000-0000-4000-8000-000000000501', 300, 480, '12345', '00000000-0000-4000-8000-000000000402', 1),
   ('00000000-0000-4000-8000-000000000502', 720, 900, '12345', '00000000-0000-4000-8000-000000000403', 1);
--- Youssef Amrani (T003) a son horaire reconnu d'après son premier pointage.
-UPDATE employes SET horaire_dynamique = 1 WHERE id = '00000000-0000-4000-8000-000000000303';
+-- Employés en horaire dynamique : Salma Idrissi (T002, après-midi), Youssef Amrani (T003, matin),
+-- Nadia Tazi (T004, un jour le matin, un jour l'après-midi). Les autres gardent leur rotation.
+UPDATE employes SET horaire_dynamique = 1
+  WHERE id IN ('00000000-0000-4000-8000-000000000302', '00000000-0000-4000-8000-000000000303', '00000000-0000-4000-8000-000000000304');
+
+-- 11. Pointages de badgeuse des 14 derniers jours (hors samedi et dimanche), calculés depuis
+-- la date du jour : les données restent récentes quel que soit le jour où le script est rejoué.
+-- Heures écrites en heure de Casablanca puis ramenées en UTC : - 60 min d'avril à octobre (heure
+-- d'été), 0 sinon. Approximation (dates exactes de changement d'heure non suivies), suffisante pour des
+-- données de test : les heures choisies restent loin des bornes des règles.
+-- Cas particuliers voulus, liés au jour de la semaine pour toujours apparaître : Karim en retard
+-- (09:05) le lundi ; Salma sans sortie le mercredi (jour incomplet) ; Nadia arrivée à 10:30 le
+-- jeudi (aucune règle reconnue) ; Youssef absent le vendredi. Karim (T001) n'est pas en horaire
+-- dynamique : il suit sa rotation.
+INSERT INTO pointages (id, employe_id, horodatage, etat, source)
+SELECT
+  CONCAT('00000000-0000-4000-8000-', LPAD(30000 + p.n * 100 + p.d * 2 + p.k, 12, '0')),
+  p.id,
+  DATE_SUB(UTC_DATE(), INTERVAL p.d DAY) + INTERVAL (p.minutes - IF(MONTH(DATE_SUB(UTC_DATE(), INTERVAL p.d DAY)) BETWEEN 4 AND 10, 60, 0)) MINUTE,
+  IF(p.k = 0, 'entree', 'sortie'),
+  'badgeuse'
+FROM (
+  SELECT e.n, e.id, j.d, s.k,
+    -- Jour de la semaine (1 = dimanche ... 7 = samedi) × 10 + numéro de l'employé : cas particuliers.
+    CASE DAYOFWEEK(DATE_SUB(UTC_DATE(), INTERVAL j.d DAY)) * 10 + e.n
+      WHEN 61 THEN NULL
+      WHEN 42 THEN IF(s.k = 0, 820 + MOD(j.d * 13, 45), NULL)
+      WHEN 53 THEN IF(s.k = 0, 630, 1080)
+      WHEN 24 THEN IF(s.k = 0, 545, 1020 + MOD(j.d * 3, 40))
+      ELSE CASE IF(e.modele = 'alterne', IF(MOD(j.d, 2) = 0, 'matin', 'apm'), e.modele)
+        WHEN 'matin' THEN IF(s.k = 0, 345 + MOD(j.d * 17, 50), 840 + MOD(j.d * 7, 30))
+        WHEN 'apm' THEN IF(s.k = 0, 820 + MOD(j.d * 13, 45), 1320 + MOD(j.d * 5, 20))
+        ELSE IF(s.k = 0, 470 + MOD(j.d * 11, 35), 1020 + MOD(j.d * 3, 40))
+      END
+    END AS minutes
+  FROM (
+    SELECT 1 AS n, '00000000-0000-4000-8000-000000000303' AS id, 'matin' AS modele
+    UNION ALL SELECT 2, '00000000-0000-4000-8000-000000000302', 'apm'
+    UNION ALL SELECT 3, '00000000-0000-4000-8000-000000000304', 'alterne'
+    UNION ALL SELECT 4, '00000000-0000-4000-8000-000000000301', 'bureau'
+  ) e
+  CROSS JOIN (
+    SELECT 1 AS d UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5
+    UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9 UNION ALL SELECT 10
+    UNION ALL SELECT 11 UNION ALL SELECT 12 UNION ALL SELECT 13 UNION ALL SELECT 14
+  ) j
+  CROSS JOIN (SELECT 0 AS k UNION ALL SELECT 1) s
+) p
+WHERE p.minutes IS NOT NULL
+  AND DAYOFWEEK(DATE_SUB(UTC_DATE(), INTERVAL p.d DAY)) NOT IN (1, 7);
+
+-- 12. Compteurs (formules d'exemple) et leur première version. Un compteur inactif pour le filtre.
+INSERT INTO compteurs (id, code, libelle, formule, journalier, hebdomadaire, mensuel, unite, description, est_actif) VALUES
+  ('00000000-0000-4000-8000-000000001601', 'RETARD', 'Retard', 'RETARD_MIN', 1, 1, 1, 'minutes', 'Minutes de retard à l''arrivée.', 1),
+  ('00000000-0000-4000-8000-000000001602', 'TEMPS_TRAVAILLE', 'Temps travaillé', 'DUREE_TRAVAILLEE_MIN', 1, 1, 1, 'minutes', 'Du premier au dernier pointage.', 1),
+  ('00000000-0000-4000-8000-000000001603', 'HEURES_SUP', 'Heures supplémentaires', 'IF(DEPASSEMENT_MIN > 15, DEPASSEMENT_MIN, 0)', 1, 1, 1, 'minutes', 'Dépassement compté au-delà de 15 minutes.', 1),
+  ('00000000-0000-4000-8000-000000001604', 'ABSENCES', 'Absences', 'NB_ABSENCES', 0, 1, 1, 'jours', 'Jours planifiés sans pointage.', 1),
+  ('00000000-0000-4000-8000-000000001605', 'TAUX_PRESENCE', 'Taux de présence', 'ROUND(NB_JOURS_TRAVAILLES / NB_JOURS_PLANIFIES * 100, 1)', 0, 1, 1, 'pourcentage', 'Jours travaillés sur jours planifiés.', 1),
+  ('00000000-0000-4000-8000-000000001606', 'JOURS_INCOMPLETS', 'Jours incomplets', 'NB_JOURS_INCOMPLETS', 0, 1, 1, 'jours', 'Présent sans sortie pointée.', 1),
+  ('00000000-0000-4000-8000-000000001607', 'RETARDS_5MIN', 'Retards de plus de 5 min', 'IF(COALESCE(RETARD_MIN, 0) > 5, 1, 0)', 1, 0, 0, 'nombre', NULL, 1),
+  ('00000000-0000-4000-8000-000000001608', 'RETARD_HEURES', 'Retard en heures', 'ROUND(RETARD_MIN / 60, 2)', 1, 0, 0, 'heures', 'Exemple de compteur désactivé.', 0);
+
+INSERT INTO compteurs_versions (id, compteur_id, version, formule, journalier, hebdomadaire, mensuel, unite)
+SELECT CONCAT('00000000-0000-4000-8000-0000000017', RIGHT(id, 2)), id, 1, formule, journalier, hebdomadaire, mensuel, unite
+FROM compteurs WHERE id LIKE '00000000-0000-4000-8000-%';
 
 COMMIT;

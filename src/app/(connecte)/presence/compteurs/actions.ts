@@ -4,7 +4,7 @@ import { refresh } from "next/cache";
 import { z } from "zod";
 import { notifier } from "@/lib/actions/notifier";
 import { CHEMIN_COMPTEURS } from "@/lib/constantes";
-import { changerEtatCompteur as changerEtatEnBase, enregistrerCompteur as enregistrerEnBase, listerVersions } from "@/lib/donnees/compteurs";
+import { changerEtatCompteur as changerEtatEnBase, enregistrerCompteur as enregistrerEnBase, listerVersions, supprimerCompteurParId } from "@/lib/donnees/compteurs";
 import { obtenirUtilisateurPourEspace } from "@/lib/donnees/session";
 import { peutGerer } from "@/lib/metier/droits";
 import { TEXTES_COMPTEURS as textes } from "@/lib/textes/compteurs";
@@ -68,6 +68,26 @@ export async function changerEtatCompteur(id: string, estActif: boolean): Promis
     journaliserEchec("du changement d'état", erreur);
     return { message: textes.echec };
   }
+}
+
+/** Supprime un compteur et son historique de versions (après confirmation dans la fenêtre). */
+export async function supprimerCompteur(_etat: EtatFormulaire, formulaire: FormData): Promise<EtatFormulaire> {
+  const auteur = await auteurAutorise();
+  if (!auteur) return { message: textes.droits };
+  const id = identifiant.safeParse(formulaire.get("id"));
+  if (!id.success) return { message: textes.introuvable };
+
+  let libelle: string | null;
+  try {
+    libelle = await supprimerCompteurParId(id.data);
+  } catch (erreur) {
+    journaliserEchec("de la suppression", erreur);
+    return { message: textes.echec };
+  }
+  refresh();
+  if (!libelle) return { message: textes.introuvable };
+  await notifier("compteur", "suppression", libelle, CHEMIN_COMPTEURS);
+  return { succes: { message: textes.supprime, idSelectionne: null } };
 }
 
 /** Historique des versions d'un compteur (fenêtre de modification). */

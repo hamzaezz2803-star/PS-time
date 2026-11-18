@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Gauge } from "lucide-react";
-import { changerEtatCompteur } from "@/app/(connecte)/presence/compteurs/actions";
+import { changerEtatCompteur, supprimerCompteur } from "@/app/(connecte)/presence/compteurs/actions";
 import { GestionListe, type ColonneListe } from "@/components/liste/gestion-liste";
 import { Interrupteur } from "@/components/ui/interrupteur";
 import { Pastille } from "@/components/ui/pastille";
@@ -98,6 +98,7 @@ export function GestionCompteurs({ compteurs }: { compteurs: Compteur[] }) {
         textes={{ ...textes, vide: compteurs.length === 0 ? textes.vide : textes.aucunFiltre, videAction: compteurs.length === 0 ? textes.videAction : "" }}
         icone={Gauge}
         rendreFormulaire={(proprietes) => <FormulaireCompteur {...proprietes} />}
+        actionSupprimer={supprimerCompteur}
       />
     </div>
   );

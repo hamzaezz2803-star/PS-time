@@ -113,3 +113,17 @@ export async function changerEtatCompteur(id: string, estActif: boolean, auteurI
   const [resultat] = await obtenirBase().update(compteurs).set({ estActif, modifiePar: auteurId }).where(eq(compteurs.id, id));
   return resultat.affectedRows > 0;
 }
+
+/**
+ * Supprime un compteur et tout son historique de versions, dans une transaction.
+ * Renvoie son libellé, ou null s'il n'existe plus.
+ */
+export async function supprimerCompteurParId(id: string): Promise<string | null> {
+  return obtenirBase().transaction(async (transaction) => {
+    const [compteur] = await transaction.select({ libelle: compteurs.libelle }).from(compteurs).where(eq(compteurs.id, id)).for("update");
+    if (!compteur) return null;
+    await transaction.delete(compteursVersions).where(eq(compteursVersions.compteurId, id));
+    await transaction.delete(compteurs).where(eq(compteurs.id, id));
+    return compteur.libelle;
+  });
+}

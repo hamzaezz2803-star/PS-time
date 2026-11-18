@@ -642,7 +642,8 @@ const referenceAuteur = (nom: string) => char(nom, { length: 36 }).references(()
 /**
  * Compteurs (retard, heures sup., absences du mois...) : une formule calculée sur les variables
  * d'une journée, d'une semaine ou d'un mois. Les valeurs sont calculées à la demande, jamais
- * stockées. On ne supprime pas un compteur, on le désactive (ses versions restent l'historique).
+ * stockées. Supprimer un compteur supprime aussi ses versions (dans une transaction) ; le
+ * désactiver garde son historique.
  */
 export const compteurs = mysqlTable(
   "compteurs",
