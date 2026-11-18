@@ -4,6 +4,7 @@
  * Couleurs, définies une seule fois ici. Thème par défaut : la marque PS Time (tirée du logo).
  * Le thème choisi par le super administrateur (data-theme sur <html>) remplace les couleurs de
  * marque ; textes, bordures et statuts restent neutres pour garder les contrastes vérifiés.
+ * Thème « personnalisé » : ses couleurs sont posées directement sur <html> par app/layout.tsx.
  */
 :root,
 [data-theme="bleu"] {
@@ -59,6 +60,21 @@
   --couleur-succes: #15803d;
   --couleur-attention: #b45309;
   --couleur-erreur: #b91c1c;
+}
+
+/* Taille du texte (data-taille) : toutes les tailles sont en rem, elles suivent la page entière. */
+html[data-taille="grande"] {
+  font-size: 112.5%;
+}
+html[data-taille="tres_grande"] {
+  font-size: 125%;
+}
+/* Aperçu de la page Apparence : même agrandissement, limité à la carte d'exemple. */
+[data-apercu-taille="grande"] {
+  zoom: 1.125;
+}
+[data-apercu-taille="tres_grande"] {
+  zoom: 1.25;
 }
 
 /* Police choisie (data-police) : les familles sont chargées par next/font dans app/layout.tsx. */

@@ -9,14 +9,14 @@ import { TEXTES_APPARENCE as textes } from "@/lib/textes/apparence";
 import { validerApparence } from "@/lib/validation/apparence";
 import type { EtatFormulaire } from "@/types";
 
-/** Enregistre le thème et la police de l'installation (super administrateur seulement, lu dans la session). */
+/** Enregistre l'apparence de l'installation (super administrateur seulement, lu dans la session). */
 export async function modifierApparence(_etat: EtatFormulaire, formulaire: FormData): Promise<EtatFormulaire> {
   const auteur = await obtenirUtilisateurPourEspace();
   if (!auteur.estSuperAdmin) return { message: textes.droits };
 
   const validation = validerApparence(formulaire);
   if (!validation.ok) return { erreursChamps: validation.erreursChamps };
-  const { theme, police } = validation.donnees;
+  const { theme, police, taille } = validation.donnees;
 
   try {
     await enregistrerApparence(validation.donnees, auteur.id);
@@ -25,8 +25,8 @@ export async function modifierApparence(_etat: EtatFormulaire, formulaire: FormD
     return { message: textes.echec };
   }
   updateTag(ETIQUETTE_APPARENCE);
-  console.info("Apparence modifiée", { par: auteur.identifiant, theme, police });
-  await notifier("apparence", "modification", `${textes.themes[theme].libelle}, ${textes.polices[police].libelle}`, CHEMIN_APPARENCE);
+  console.info("Apparence modifiée", { par: auteur.identifiant, theme, police, taille });
+  await notifier("apparence", "modification", `${textes.themes[theme].libelle}, ${textes.polices[police].libelle}, ${textes.tailles[taille].libelle.toLocaleLowerCase("fr")}`, CHEMIN_APPARENCE);
   refresh();
   return { succes: { message: textes.enregistre, idSelectionne: null } };
 }

@@ -46,10 +46,21 @@ export const PAGES = [...PAGES_PAR_MODULE.personnel, ...PAGES_PAR_MODULE.plannin
 export const CHEMIN_UTILISATEURS = "/administration/utilisateurs";
 export const CHEMIN_APPARENCE = "/administration/apparence";
 /** Apparence de l'application, choisie par le super administrateur (même liste que la base). */
-export const THEMES = ["bleu", "emeraude", "ocean", "ardoise"] as const;
+export const THEMES = ["bleu", "emeraude", "ocean", "ardoise", "personnalise"] as const;
 export const POLICES = ["hanken", "inter", "source_sans", "atkinson"] as const;
+/** Taille de tout le texte de l'application (taille de base de la page). */
+export const TAILLES_TEXTE = ["normale", "grande", "tres_grande"] as const;
 export const THEME_PAR_DEFAUT = "bleu";
 export const POLICE_PAR_DEFAUT = "hanken";
+export const TAILLE_TEXTE_PAR_DEFAUT = "normale";
+/** Couleurs que le thème « Personnalisé » laisse choisir ; les autres nuances en sont déduites. */
+export const COULEURS_PERSONNALISABLES = ["primaire", "marine", "accent", "fond"] as const;
+/** Point de départ du thème personnalisé : les couleurs du thème Bleu PS Time (mêmes valeurs que globals.css). */
+export const COULEURS_PERSONNALISEES_PAR_DEFAUT = { primaire: "#0b4fb3", marine: "#0a2463", accent: "#1aa3e8", fond: "#f6f9fd" } as const;
+/** Texte secondaire des pages (même valeur que globals.css), pour vérifier sa lisibilité sur le fond choisi. */
+export const COULEUR_TEXTE_SECONDAIRE = "#55627c";
+/** Contraste minimal du texte courant (WCAG AA). */
+export const CONTRASTE_MIN_TEXTE = 4.5;
 export const LONGUEUR_MAX_NOM_UTILISATEUR = 100;
 export const LIMITE_UTILISATEURS = 500;
 

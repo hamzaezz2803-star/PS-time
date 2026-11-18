@@ -14,7 +14,7 @@ import {
   uniqueIndex,
   varchar,
 } from "drizzle-orm/mysql-core";
-import { PAGES, POLICES, THEMES } from "../constantes.ts";
+import { COULEURS_PERSONNALISABLES, PAGES, POLICES, TAILLES_TEXTE, THEMES } from "../constantes.ts";
 
 /**
  * Schéma de la base. Toute modification passe par une migration :
@@ -159,7 +159,8 @@ export const autorisationsPages = mysqlTable(
 
 /**
  * Réglages de l'installation (une ligne par réglage), modifiés par le super administrateur :
- * thème de couleurs et police. La base n'accepte que les valeurs connues de l'application.
+ * thème, police, taille du texte et couleurs personnalisées (`#rrggbb`). La base n'accepte
+ * que les valeurs connues de l'application.
  */
 export const parametres = mysqlTable(
   "parametres",
@@ -176,7 +177,7 @@ export const parametres = mysqlTable(
     index("parametres_modifie_par_idx").on(table.modifiePar),
     check(
       "parametres_valeur_valide",
-      sql`(${table.cle} = 'theme' AND ${table.valeur} IN (${listeSql(THEMES)})) OR (${table.cle} = 'police' AND ${table.valeur} IN (${listeSql(POLICES)}))`,
+      sql`(${table.cle} = 'theme' AND ${table.valeur} IN (${listeSql(THEMES)})) OR (${table.cle} = 'police' AND ${table.valeur} IN (${listeSql(POLICES)})) OR (${table.cle} = 'taille_texte' AND ${table.valeur} IN (${listeSql(TAILLES_TEXTE)})) OR (${table.cle} IN (${listeSql(COULEURS_PERSONNALISABLES.map((couleur) => `couleur_${couleur}`))}) AND ${table.valeur} REGEXP '^#[0-9a-f]{6}$')`,
     ),
   ],
 );

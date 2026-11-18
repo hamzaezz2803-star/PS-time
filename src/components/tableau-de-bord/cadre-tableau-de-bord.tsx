@@ -24,7 +24,7 @@ function Marque() {
       <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-surface p-1 shadow-carte ring-1 ring-bordure">
         <Image src="/logo-ps-time.webp" alt={TEXTES_CONNEXION.altLogo} width={1261} height={1247} sizes="28px" className="size-7" />
       </span>
-      <span className="hidden min-w-0 sm:block">
+      <span className="hidden min-w-0 sm:block lg:hidden xl:block">
         <span className="block text-base font-bold leading-tight tracking-tight text-marine">{TEXTES_NAVIGATION.nomApplication}</span>
         <span className="block text-sm leading-tight text-texte-secondaire">{TEXTES_NAVIGATION.sousTitreApplication}</span>
       </span>

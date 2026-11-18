@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
+import type { CSSProperties } from "react";
 import { Atkinson_Hyperlegible_Next, Hanken_Grotesk, Inter, Source_Sans_3 } from "next/font/google";
 import { lireApparence } from "@/lib/donnees/apparence";
+import { variablesCouleurs } from "@/lib/metier/couleurs";
 import "./globals.css";
 
 // Polices au choix du super administrateur (licence OFL), chargées localement par next/font.
@@ -18,10 +20,12 @@ export const metadata: Metadata = {
 };
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {
-  // Thème et police de l'installation, lus par globals.css (data-theme, data-police).
-  const { theme, police } = await lireApparence();
+  // Apparence de l'installation, lue par globals.css (data-theme, data-police, data-taille).
+  // Thème personnalisé : ses couleurs (#rrggbb vérifiées) remplacent celles de globals.css.
+  const { theme, police, taille, couleurs } = await lireApparence();
+  const style = theme === "personnalise" ? (variablesCouleurs(couleurs) as CSSProperties) : undefined;
   return (
-    <html lang="fr" data-theme={theme} data-police={police} className={`${VARIABLES_POLICES} h-full antialiased`}>
+    <html lang="fr" data-theme={theme} data-police={police} data-taille={taille} style={style} className={`${VARIABLES_POLICES} h-full antialiased`}>
       <body className="min-h-full flex flex-col font-sans">{children}</body>
     </html>
   );

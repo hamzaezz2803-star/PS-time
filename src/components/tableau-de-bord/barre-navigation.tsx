@@ -34,7 +34,7 @@ function MenuDeroulant({ menu, chemin }: { menu: MenuNavigation; chemin: string 
         aria-controls={idPanneau}
         className={cn(ENTREE, contientPageActive && ENTREE_ACTIVE, estOuvert && "bg-canevas text-texte")}
       >
-        <Icone className="size-4 shrink-0" aria-hidden="true" />
+        <Icone className="hidden size-4 shrink-0 xl:block" aria-hidden="true" />
         {menu.libelle}
         <ChevronDown
           className={cn("size-4 shrink-0 transition-transform duration-150 motion-reduce:transition-none", estOuvert && "rotate-180")}
@@ -101,7 +101,7 @@ export function BarreNavigation({ droits }: { droits: Droits }) {
             return (
               <li key={menu.libelle}>
                 <Link href={menu.href} aria-current={estActif ? "page" : undefined} className={cn(ENTREE, estActif && ENTREE_ACTIVE)}>
-                  <Icone className="size-4 shrink-0" aria-hidden="true" />
+                  <Icone className="hidden size-4 shrink-0 xl:block" aria-hidden="true" />
                   {menu.libelle}
                 </Link>
               </li>

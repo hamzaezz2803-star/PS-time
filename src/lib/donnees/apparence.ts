@@ -2,7 +2,7 @@ import "server-only";
 
 import { inArray, sql } from "drizzle-orm";
 import { cacheLife, cacheTag } from "next/cache";
-import { APPARENCE_PAR_DEFAUT, apparenceDepuisReglages, type Apparence } from "@/lib/metier/apparence";
+import { APPARENCE_PAR_DEFAUT, apparenceDepuisReglages, reglagesDepuisApparence, type Apparence } from "@/lib/metier/apparence";
 import { obtenirBase } from "./base";
 import { parametres } from "./schema";
 
@@ -10,8 +10,9 @@ import { parametres } from "./schema";
 export const ETIQUETTE_APPARENCE = "apparence";
 
 /**
- * Thème et police de l'installation. Lus sur toutes les pages (mise en page racine) : gardés
- * en cache et relus aussitôt après un changement. Base injoignable : apparence par défaut.
+ * Apparence de l'installation (thème, couleurs, police, taille du texte). Lue sur toutes les
+ * pages (mise en page racine) : gardée en cache et relue aussitôt après un changement.
+ * Base injoignable : apparence par défaut.
  */
 export async function lireApparence(): Promise<Apparence> {
   "use cache";
@@ -21,7 +22,7 @@ export async function lireApparence(): Promise<Apparence> {
     const reglages = await obtenirBase()
       .select({ cle: parametres.cle, valeur: parametres.valeur })
       .from(parametres)
-      .where(inArray(parametres.cle, ["theme", "police"]));
+      .where(inArray(parametres.cle, reglagesDepuisApparence(APPARENCE_PAR_DEFAUT).map((reglage) => reglage.cle)));
     return apparenceDepuisReglages(reglages);
   } catch (erreur) {
     console.error("Échec de la lecture de l'apparence", { type: erreur instanceof Error ? erreur.name : "inconnu" });
@@ -29,10 +30,10 @@ export async function lireApparence(): Promise<Apparence> {
   }
 }
 
-/** Enregistre le thème et la police (création ou mise à jour de chaque réglage) dans une transaction. */
+/** Enregistre toute l'apparence (création ou mise à jour de chaque réglage) dans une transaction. */
 export async function enregistrerApparence(apparence: Apparence, auteurId: string): Promise<void> {
   await obtenirBase().transaction(async (transaction) => {
-    for (const [cle, valeur] of [["theme", apparence.theme], ["police", apparence.police]] as const) {
+    for (const { cle, valeur } of reglagesDepuisApparence(apparence)) {
       await transaction
         .insert(parametres)
         .values({ cle, valeur, modifiePar: auteurId })

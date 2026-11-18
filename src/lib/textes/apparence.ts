@@ -1,7 +1,9 @@
-/** Textes de la page Administration > Thème et police (réservée au super administrateur). */
+/** Textes de la page Administration > Apparence (réservée au super administrateur). */
+const ratioLisible = (ratio: number) => ratio.toLocaleString("fr-FR", { maximumFractionDigits: 1 });
+
 export const TEXTES_APPARENCE = {
-  titrePage: "Thème et police",
-  sousTitre: "Choisissez les couleurs et la police de l'application. Le changement s'applique à tous les comptes.",
+  titrePage: "Apparence",
+  sousTitre: "Choisissez les couleurs, la police et la taille du texte de l'application. Le changement s'applique à tous les comptes.",
   chargement: "Chargement de l'apparence...",
   titreThemes: "Thème de couleurs",
   aideThemes: "Couleurs des boutons, des liens, des titres et des repères de la page active.",
@@ -12,13 +14,35 @@ export const TEXTES_APPARENCE = {
   exempleTitre: "Pointage du jour",
   exempleTexte: "Arrivée 08:00, départ 17:30",
   exempleBouton: "Enregistrer",
+  exempleLien: "Page active",
   exemplePolice: "Aa 08:30",
   themes: {
     bleu: { libelle: "Bleu PS Time", detail: "Les couleurs du logo (par défaut)" },
     emeraude: { libelle: "Émeraude", detail: "Vert profond et reposant" },
     ocean: { libelle: "Océan", detail: "Bleu-vert, sobre et lumineux" },
     ardoise: { libelle: "Ardoise", detail: "Gris anthracite, très neutre" },
+    personnalise: { libelle: "Personnalisé", detail: "Vos propres couleurs, vérifiées pour rester lisibles" },
   },
+  titreCouleurs: "Couleurs personnalisées",
+  aideCouleurs: "Les nuances de survol et les fonds clairs sont calculés à partir de ces couleurs. Chaque couleur est vérifiée : le texte doit rester lisible (contraste d'au moins 4,5:1).",
+  reinitialiserCouleurs: "Repartir des couleurs PS Time",
+  codeCouleur: (couleur: string) => `Code de la ${couleur.toLocaleLowerCase("fr")} (#rrggbb)`,
+  couleurs: {
+    primaire: { libelle: "Couleur principale", detail: "Boutons, liens, page active" },
+    marine: { libelle: "Couleur des titres", detail: "Titres et textes forts" },
+    accent: { libelle: "Couleur d'accent", detail: "Petits repères décoratifs" },
+    fond: { libelle: "Fond des pages", detail: "Derrière les cartes, de préférence très clair" },
+  },
+  lisible: (ratio: number) => `Lisible (${ratioLisible(ratio)}:1)`,
+  decoratif: "Décorative, toujours acceptée",
+  titreTaille: "Taille du texte",
+  aideTaille: "Agrandit tous les textes, les boutons et les espacements de l'application.",
+  tailles: {
+    normale: { libelle: "Normale", detail: "Taille d'origine (par défaut)" },
+    grande: { libelle: "Grande", detail: "Un peu plus grand (112 %)" },
+    tres_grande: { libelle: "Très grande", detail: "Pour une lecture confortable (125 %)" },
+  },
+  exempleTaille: "Aa",
   polices: {
     hanken: { libelle: "Hanken Grotesk", detail: "Police d'origine, moderne (par défaut)" },
     inter: { libelle: "Inter", detail: "Très lisible sur écran" },
@@ -33,5 +57,9 @@ export const TEXTES_APPARENCE = {
   erreurs: {
     theme: "Choisissez un des thèmes proposés.",
     police: "Choisissez une des polices proposées.",
+    taille: "Choisissez une des tailles proposées.",
+    couleur: "Choisissez une couleur valide (format #rrggbb).",
+    contraste: (couleur: "primaire" | "marine" | "accent" | "fond", ratio: number, minimum: number) =>
+      `Pas assez lisible (${ratioLisible(ratio)}:1, il faut au moins ${ratioLisible(minimum)}:1). ${couleur === "fond" ? "Choisissez un fond plus clair." : "Choisissez une couleur plus foncée."}`,
   },
 } as const;

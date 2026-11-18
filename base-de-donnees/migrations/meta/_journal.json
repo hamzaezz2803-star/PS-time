@@ -162,6 +162,13 @@
       "when": 1795008074938,
       "tag": "0022_retirer_autorisations_modules",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "5",
+      "when": 1795009402092,
+      "tag": "0023_apparence_couleurs_taille",
+      "breakpoints": true
     }
   ]
 }

@@ -1,82 +1,47 @@
 "use client";
 
 import { useActionState, useState, type ReactNode } from "react";
-import { Check, LoaderCircle } from "lucide-react";
+import { LoaderCircle } from "lucide-react";
 import { modifierApparence } from "@/app/(connecte)/administration/apparence/actions";
 import { Bouton } from "@/components/ui/bouton";
 import { MessageErreur } from "@/components/ui/message-erreur";
 import { MessageSucces } from "@/components/ui/message-succes";
-import { POLICES, THEMES } from "@/lib/constantes";
-import type { Apparence } from "@/lib/metier/apparence";
+import { COULEURS_PERSONNALISABLES, COULEURS_PERSONNALISEES_PAR_DEFAUT, POLICES, TAILLES_TEXTE, THEMES } from "@/lib/constantes";
+import { cleCouleur, type Apparence } from "@/lib/metier/apparence";
 import { TEXTES_APPARENCE as textes } from "@/lib/textes/apparence";
 import { cn } from "@/lib/utils";
 import type { EtatFormulaire } from "@/types";
+import { ApercuApparence, Nuancier } from "./apercu-apparence";
+import { CarteChoix } from "./carte-choix";
+import { ChoixCouleurs } from "./choix-couleurs";
 
 const ETAT_INITIAL: EtatFormulaire = {};
+/** Taille de l'exemple « Aa » de chaque carte de taille du texte. */
+const TAILLE_EXEMPLE = { normale: "text-2xl", grande: "text-3xl", tres_grande: "text-4xl" } as const;
 
-/** Carte d'un choix (bouton radio caché) : bordure épaisse et coche quand elle est choisie, jamais la couleur seule. */
-function CarteChoix({ nom, valeur, estChoisi, onChoisir, libelle, detail, estActuel, children }: {
-  nom: string;
-  valeur: string;
-  estChoisi: boolean;
-  onChoisir: () => void;
-  libelle: string;
-  detail: string;
-  estActuel: boolean;
-  children: ReactNode;
-}) {
+function Section({ id, titre, aide, erreur, children }: { id: string; titre: string; aide: string; erreur?: string; children: ReactNode }) {
   return (
-    <label
-      className={cn(
-        "flex cursor-pointer flex-col gap-3 rounded-xl border bg-surface p-4 shadow-carte transition-shadow duration-150 hover:shadow-survol has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-primaire",
-        estChoisi ? "border-primaire ring-2 ring-primaire" : "border-bordure",
-      )}
-    >
-      <input type="radio" name={nom} value={valeur} checked={estChoisi} onChange={onChoisir} className="sr-only" />
+    <fieldset className="flex flex-col gap-3" aria-describedby={`aide-${id}`}>
+      <legend className="text-lg font-semibold text-marine">{titre}</legend>
+      <p id={`aide-${id}`} className="-mt-1 text-sm text-texte-secondaire">{aide}</p>
       {children}
-      <span className="flex items-start justify-between gap-2">
-        <span className="flex flex-col">
-          <span className="flex flex-wrap items-center gap-2 text-base font-semibold text-texte">
-            {libelle}
-            {estActuel && <span className="rounded-md bg-canevas px-2 py-0.5 text-sm font-medium text-texte-secondaire">{textes.actuel}</span>}
-          </span>
-          <span className="text-sm text-texte-secondaire">{detail}</span>
-        </span>
-        {estChoisi && (
-          <span className="flex size-6 shrink-0 items-center justify-center rounded-md bg-primaire text-white">
-            <Check className="size-4" aria-hidden="true" />
-          </span>
-        )}
-      </span>
-    </label>
+      <MessageErreur message={erreur} />
+    </fieldset>
   );
 }
 
-/** Aperçu d'une carte de l'application avec le thème et la police choisis (attributs lus par globals.css). */
-function Apercu({ theme, police }: Apparence) {
-  return (
-    <div data-theme={theme} data-police={police} className="flex flex-col gap-3 rounded-xl border border-bordure bg-fond p-5 font-sans">
-      <p className="text-sm font-semibold uppercase tracking-wider text-primaire">{textes.apercu}</p>
-      <div className="flex flex-col gap-3 rounded-lg border border-bordure bg-surface p-4 shadow-carte">
-        <p className="text-lg font-bold text-marine">{textes.exempleTitre}</p>
-        <p className="text-base tabular-nums text-texte-secondaire">{textes.exempleTexte}</p>
-        <span className="inline-flex h-10 w-fit items-center rounded-lg bg-primaire px-4 text-sm font-semibold text-white">{textes.exempleBouton}</span>
-      </div>
-    </div>
-  );
-}
-
-/** Choix du thème de couleurs et de la police de toute l'application, avec aperçu en direct. */
+/** Choix du thème (ou de couleurs libres), de la police et de la taille du texte, avec aperçu en direct. */
 export function FormulaireApparence({ actuelle }: { actuelle: Apparence }) {
   const [etat, action, enCours] = useActionState(modifierApparence, ETAT_INITIAL);
   const [choix, setChoix] = useState<Apparence>(actuelle);
+  const changer = (partiel: Partial<Apparence>) => setChoix((actuel) => ({ ...actuel, ...partiel }));
+  const erreurs = etat.erreursChamps;
+  const estPersonnalise = choix.theme === "personnalise";
 
   return (
     <form action={action} className="grid gap-6 lg:grid-cols-[1fr_20rem]">
       <div className="flex flex-col gap-8">
-        <fieldset className="flex flex-col gap-3" aria-describedby="aide-themes">
-          <legend className="text-lg font-semibold text-marine">{textes.titreThemes}</legend>
-          <p id="aide-themes" className="-mt-1 text-sm text-texte-secondaire">{textes.aideThemes}</p>
+        <Section id="themes" titre={textes.titreThemes} aide={textes.aideThemes} erreur={erreurs?.theme}>
           <div className="grid gap-4 sm:grid-cols-2">
             {THEMES.map((theme) => (
               <CarteChoix
@@ -84,28 +49,31 @@ export function FormulaireApparence({ actuelle }: { actuelle: Apparence }) {
                 nom="theme"
                 valeur={theme}
                 estChoisi={choix.theme === theme}
-                onChoisir={() => setChoix((actuel) => ({ ...actuel, theme }))}
+                onChoisir={() => changer({ theme })}
                 libelle={textes.themes[theme].libelle}
                 detail={textes.themes[theme].detail}
                 estActuel={actuelle.theme === theme}
               >
-                {/* Les nuances viennent des variables du thème : aucune couleur écrite ici. */}
-                <span data-theme={theme} className="flex h-10 overflow-hidden rounded-lg ring-1 ring-bordure" aria-hidden="true">
-                  <span className="flex-[2] bg-marine" />
-                  <span className="flex-[2] bg-primaire" />
-                  <span className="flex-1 bg-accent" />
-                  <span className="flex-[2] bg-ciel" />
-                  <span className="flex-1 bg-fond" />
-                </span>
+                <Nuancier theme={theme} couleurs={choix.couleurs} />
               </CarteChoix>
             ))}
           </div>
-          <MessageErreur message={etat.erreursChamps?.theme} />
-        </fieldset>
+          {estPersonnalise ? (
+            <ChoixCouleurs
+              couleurs={choix.couleurs}
+              erreurs={erreurs}
+              onChange={(couleur, valeur) => changer({ couleurs: { ...choix.couleurs, [couleur]: valeur } })}
+              onReinitialiser={() => changer({ couleurs: { ...COULEURS_PERSONNALISEES_PAR_DEFAUT } })}
+            />
+          ) : (
+            // Les couleurs personnalisées sont gardées telles quelles quand un thème tout prêt est choisi.
+            COULEURS_PERSONNALISABLES.map((couleur) => (
+              <input key={couleur} type="hidden" name={cleCouleur(couleur)} value={choix.couleurs[couleur]} />
+            ))
+          )}
+        </Section>
 
-        <fieldset className="flex flex-col gap-3" aria-describedby="aide-polices">
-          <legend className="text-lg font-semibold text-marine">{textes.titrePolices}</legend>
-          <p id="aide-polices" className="-mt-1 text-sm text-texte-secondaire">{textes.aidePolices}</p>
+        <Section id="polices" titre={textes.titrePolices} aide={textes.aidePolices} erreur={erreurs?.police}>
           <div className="grid gap-4 sm:grid-cols-2">
             {POLICES.map((police) => (
               <CarteChoix
@@ -113,7 +81,7 @@ export function FormulaireApparence({ actuelle }: { actuelle: Apparence }) {
                 nom="police"
                 valeur={police}
                 estChoisi={choix.police === police}
-                onChoisir={() => setChoix((actuel) => ({ ...actuel, police }))}
+                onChoisir={() => changer({ police })}
                 libelle={textes.polices[police].libelle}
                 detail={textes.polices[police].detail}
                 estActuel={actuelle.police === police}
@@ -124,12 +92,32 @@ export function FormulaireApparence({ actuelle }: { actuelle: Apparence }) {
               </CarteChoix>
             ))}
           </div>
-          <MessageErreur message={etat.erreursChamps?.police} />
-        </fieldset>
+        </Section>
+
+        <Section id="tailles" titre={textes.titreTaille} aide={textes.aideTaille} erreur={erreurs?.taille}>
+          <div className="grid gap-4 sm:grid-cols-3">
+            {TAILLES_TEXTE.map((taille) => (
+              <CarteChoix
+                key={taille}
+                nom="taille"
+                valeur={taille}
+                estChoisi={choix.taille === taille}
+                onChoisir={() => changer({ taille })}
+                libelle={textes.tailles[taille].libelle}
+                detail={textes.tailles[taille].detail}
+                estActuel={actuelle.taille === taille}
+              >
+                <span data-police={choix.police} className={cn("font-sans font-semibold leading-none text-marine", TAILLE_EXEMPLE[taille])} aria-hidden="true">
+                  {textes.exempleTaille}
+                </span>
+              </CarteChoix>
+            ))}
+          </div>
+        </Section>
       </div>
 
       <div className="flex flex-col gap-4 lg:sticky lg:top-24 lg:self-start">
-        <Apercu {...choix} />
+        <ApercuApparence {...choix} />
         <div role="alert" aria-live="polite" className="flex flex-col gap-2">
           <MessageErreur message={etat.message} className="rounded-lg border border-erreur/30 bg-erreur/5 p-3" />
           <MessageSucces message={etat.succes?.message} />

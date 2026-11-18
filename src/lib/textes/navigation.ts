@@ -27,7 +27,7 @@ export const TEXTES_NAVIGATION = {
   detailJour: "Détail jour",
   administration: "Administration",
   utilisateurs: "Utilisateurs",
-  apparence: "Thème et police",
+  apparence: "Apparence",
   heureActuelle: "Date et heure actuelles",
   compte: {
     ouvrir: "Ouvrir le menu du compte",
