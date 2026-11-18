@@ -3,6 +3,7 @@ import "server-only";
 import { cache } from "react";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { connection } from "next/server";
 import { CHEMIN_CHANGER_MOT_DE_PASSE, CHEMIN_CONNEXION } from "@/lib/constantes";
 import { modulesAccessibles, pagesAccessibles, type Module, type Page } from "@/lib/metier/droits";
 import { auth } from "./authentification";
@@ -28,6 +29,9 @@ export type UtilisateurConnecte = {
  * À appeler dans un composant placé sous <Suspense> (Cache Components).
  */
 export const obtenirUtilisateurConnecte = cache(async (): Promise<UtilisateurConnecte> => {
+  // Toujours à la requête : Better Auth lit l'heure (new Date()) pour vérifier l'expiration,
+  // ce qui est interdit pendant le prérendu. connection() le place hors du rendu statique.
+  await connection();
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session || !session.user.estActif) redirect(CHEMIN_CONNEXION);
 

@@ -68,15 +68,16 @@ export function GraphiqueColonnes({ id, titre, aide, etiquettes, etiquettesLongu
         </ul>
       )}
 
-      <div className="relative h-52 ps-12" onPointerLeave={() => setActif(null)}>
-        {/* Graduations : traits fins et discrets, valeurs à gauche. */}
+      {/* Marge du haut : la graduation la plus haute, centrée sur son trait, ne touche pas la légende. */}
+      <div className="relative mt-3 h-52 ps-14" onPointerLeave={() => setActif(null)}>
+        {/* Graduations : ligne de hauteur nulle posée sur la valeur, trait et texte centrés dessus. */}
         {ticks.map((tick) => (
-          <div key={tick} className="absolute inset-x-0 flex items-center" style={{ bottom: `${hauteurPourcent(tick, haut)}%` }} aria-hidden="true">
-            <span className="w-11 -translate-y-1/2 pe-2 text-end text-sm tabular-nums text-texte-secondaire">{unite === "heures" ? `${tick / echelle} h` : tick}</span>
+          <div key={tick} className="absolute inset-x-0 flex h-0 items-center" style={{ bottom: `${hauteurPourcent(tick, haut)}%` }} aria-hidden="true">
+            <span className="w-14 shrink-0 whitespace-nowrap pe-2 text-end text-sm tabular-nums text-texte-secondaire">{unite === "heures" ? `${tick / echelle} h` : tick}</span>
             <span className={cn("h-px flex-1", tick === 0 ? "bg-bordure-champ" : "bg-graphe-grille")} />
           </div>
         ))}
-        <div className="absolute inset-y-0 end-0 start-12 flex items-end gap-1">
+        <div className="absolute inset-y-0 end-0 start-14 flex items-end gap-1">
           {etiquettes.map((etiquette, rang) => (
             <div
               key={`${etiquette}-${rang}`}
@@ -109,8 +110,12 @@ export function GraphiqueColonnes({ id, titre, aide, etiquettes, etiquettesLongu
         {actif !== null && (
           <div
             role="presentation"
-            className="pointer-events-none absolute top-0 z-10 min-w-40 -translate-x-1/2 rounded-lg bg-surface px-3 py-2 text-sm shadow-flottant ring-1 ring-bordure"
-            style={{ left: `calc(3rem + (100% - 3rem) * ${(actif + 0.5) / etiquettes.length})` }}
+            className={cn(
+              "pointer-events-none absolute top-0 z-10 min-w-40 rounded-lg bg-surface px-3 py-2 text-sm shadow-flottant ring-1 ring-bordure",
+              // Près d'un bord, l'infobulle se décale vers l'intérieur pour rester dans la carte.
+              (actif + 0.5) / etiquettes.length < 0.25 ? "-translate-x-[15%]" : (actif + 0.5) / etiquettes.length > 0.75 ? "-translate-x-[85%]" : "-translate-x-1/2",
+            )}
+            style={{ left: `calc(3.5rem + (100% - 3.5rem) * ${(actif + 0.5) / etiquettes.length})` }}
           >
             <p className="mb-1 font-medium text-texte-secondaire">{etiquettesLongues[actif]}</p>
             {series.map((serie) => (
@@ -123,7 +128,7 @@ export function GraphiqueColonnes({ id, titre, aide, etiquettes, etiquettesLongu
           </div>
         )}
       </div>
-      <div className="flex gap-1 ps-12 text-sm text-texte-secondaire" aria-hidden="true">
+      <div className="flex gap-1 ps-14 text-sm text-texte-secondaire" aria-hidden="true">
         {etiquettes.map((etiquette, rang) => (
           <span key={`${etiquette}-${rang}`} className="min-w-0 flex-1 truncate text-center">
             {rang % pasEtiquette === 0 || rang === etiquettes.length - 1 ? etiquette : ""}
