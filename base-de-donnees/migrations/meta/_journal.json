@@ -169,6 +169,13 @@
       "when": 1795009402092,
       "tag": "0023_apparence_couleurs_taille",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "5",
+      "when": 1795010180410,
+      "tag": "0024_historique",
+      "breakpoints": true
     }
   ]
 }

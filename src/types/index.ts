@@ -1,4 +1,5 @@
 import type { Page } from "@/lib/metier/droits";
+import type { ActionHistorique, ModuleHistorique, ObjetHistorique } from "@/lib/metier/historique";
 
 /** Résultat explicite d'une opération qui peut échouer. */
 export type Resultat<T> = { ok: true; donnees: T } | { ok: false; erreur: string };
@@ -47,6 +48,20 @@ export type EtatFormulaire<Champ extends string = string> = {
 
 export type EtatFormulaireDepartement = EtatFormulaire<"nom" | "parentId" | "siteId">;
 export type EtatFormulairePoste = EtatFormulaire<"code" | "nom" | "ordre" | "parentId" | "siteId">;
+
+/** Ligne de l'historique (traçabilité) : qui a fait quoi, sur quel élément, dans quel module, et quand. */
+export type EntreeHistorique = {
+  id: string;
+  action: ActionHistorique;
+  objet: ObjetHistorique;
+  module: ModuleHistorique;
+  libelle: string | null;
+  lien: string | null;
+  auteurId: string | null;
+  auteurNom: string;
+  auteurIdentifiant: string | null;
+  creeLe: Date;
+};
 
 /** Notification de la cloche : qui a fait quoi, sur quel élément, et quand. */
 export type Notification = {

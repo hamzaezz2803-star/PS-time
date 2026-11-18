@@ -161,6 +161,17 @@ export const NOTIFICATIONS_AFFICHEES_MAX = 30;
 export const INTERVALLE_NOTIFICATIONS_MS = 30_000;
 export const CONSERVATION_NOTIFICATIONS_JOURS = 90;
 export const LONGUEUR_MAX_LIBELLE_NOTIFICATION = 150;
+/**
+ * Historique (traçabilité) : toutes les actions de tous les comptes, visible par le super
+ * administrateur. Gardé plus longtemps que les notifications ; même liste que la base.
+ */
+export const CHEMIN_HISTORIQUE = "/administration/historique";
+export const ACTIONS_HISTORIQUE = ["creation", "modification", "suppression", "connexion", "deconnexion", "export"] as const;
+export const MODULES_HISTORIQUE = ["personnel", "planning", "presence", "administration"] as const;
+export const CONSERVATION_HISTORIQUE_JOURS = 365;
+export const HISTORIQUE_PAR_PAGE = 50;
+export const HISTORIQUE_JOURS_DEFAUT = 30;
+export const HISTORIQUE_JOURS_MAX = 366;
 export const LONGUEUR_MAX_REMARQUE_POINTAGE = 255;
 /** Un pointage manuel ne peut pas être dans le futur (petite marge pour l'horloge du poste). */
 export const TOLERANCE_POINTAGE_FUTUR_MINUTES = 5;

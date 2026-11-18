@@ -14,7 +14,7 @@ import {
   uniqueIndex,
   varchar,
 } from "drizzle-orm/mysql-core";
-import { COULEURS_PERSONNALISABLES, PAGES, POLICES, TAILLES_TEXTE, THEMES } from "../constantes.ts";
+import { ACTIONS_HISTORIQUE, COULEURS_PERSONNALISABLES, MODULES_HISTORIQUE, PAGES, POLICES, TAILLES_TEXTE, THEMES } from "../constantes.ts";
 
 /**
  * Schéma de la base. Toute modification passe par une migration :
@@ -208,6 +208,36 @@ export const notifications = mysqlTable(
     index("notifications_auteur_idx").on(table.auteurId),
     check("notifications_module_valide", sql`${table.module} IN ('personnel', 'planning', 'presence', 'administration')`),
     check("notifications_action_valide", sql`${table.action} IN ('creation', 'modification', 'suppression')`),
+  ],
+);
+
+/**
+ * Historique des actions (traçabilité), visible par le super administrateur seulement :
+ * créations, modifications, suppressions, connexions, déconnexions et exports, de tous les
+ * comptes. `libelle` : nom affiché, jamais de pièce d'identité, de contact ni de mot de passe.
+ * L'auteur est gardé par son nom et son identifiant si le compte est supprimé ensuite.
+ */
+export const historique = mysqlTable(
+  "historique",
+  {
+    id: identifiantUnique(),
+    action: varchar("action", { length: 20 }).notNull(),
+    objet: varchar("objet", { length: 30 }).notNull(),
+    module: varchar("module", { length: 20 }).notNull(),
+    libelle: varchar("libelle", { length: 150 }),
+    lien: varchar("lien", { length: 200 }),
+    auteurId: char("auteur_id", { length: 36 }).references(() => utilisateurs.id, { onDelete: "set null" }),
+    auteurNom: varchar("auteur_nom", { length: 100 }).notNull(),
+    auteurIdentifiant: varchar("auteur_identifiant", { length: 50 }),
+    creeLe: dateCreation(),
+    modifieLe: dateModification(),
+  },
+  (table) => [
+    index("historique_date_idx").on(table.creeLe),
+    index("historique_auteur_date_idx").on(table.auteurId, table.creeLe),
+    index("historique_module_date_idx").on(table.module, table.creeLe),
+    check("historique_action_valide", sql`${table.action} IN (${listeSql(ACTIONS_HISTORIQUE)})`),
+    check("historique_module_valide", sql`${table.module} IN (${listeSql(MODULES_HISTORIQUE)})`),
   ],
 );
 
