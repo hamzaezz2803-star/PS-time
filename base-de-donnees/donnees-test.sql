@@ -12,6 +12,8 @@ START TRANSACTION;
 -- Compteurs de test et leurs versions (avant les comptes et profils).
 DELETE FROM compteurs_versions WHERE compteur_id LIKE '00000000-0000-4000-8000-%';
 DELETE FROM compteurs WHERE id LIKE '00000000-0000-4000-8000-%';
+-- Événements de test (leurs périodes de prise partent avec eux).
+DELETE FROM evenements WHERE id LIKE '00000000-0000-4000-8000-%';
 -- Règles d'horaire dynamique de test, et celles saisies dans l'application sur un profil de test.
 DELETE FROM regles_horaires WHERE id LIKE '00000000-0000-4000-8000-%' OR profil_id LIKE '00000000-0000-4000-8000-%';
 DELETE FROM affectations WHERE id LIKE '00000000-0000-4000-8000-%';
@@ -243,5 +245,48 @@ INSERT INTO compteurs (id, code, libelle, formule, journalier, hebdomadaire, men
 INSERT INTO compteurs_versions (id, compteur_id, version, formule, journalier, hebdomadaire, mensuel, unite)
 SELECT CONCAT('00000000-0000-4000-8000-0000000017', RIGHT(id, 2)), id, 1, formule, journalier, hebdomadaire, mensuel, unite
 FROM compteurs WHERE id LIKE '00000000-0000-4000-8000-%';
+
+-- 13. Événements : motifs d'absence et de présence courants. Les congés reportés ne pouvaient être
+-- pris que jusqu'au 30 juin (« Fermé aujourd'hui ») ; la récupération est masquée du planning.
+INSERT INTO evenements (id, code, nom, type, est_saisi_en_heures, est_prioritaire_sur_pointages, est_visible_planning, priorite, code_paie) VALUES
+  ('00000000-0000-4000-8000-000000001801', 'CP', 'Congé payé', 'absence', 0, 0, 1, 10, 'CP'),
+  ('00000000-0000-4000-8000-000000001802', 'CPR', 'Congés reportés', 'absence', 0, 0, 1, 10, 'CP-REP'),
+  ('00000000-0000-4000-8000-000000001803', 'MAL', 'Maladie', 'absence', 0, 0, 1, 50, 'MAL'),
+  ('00000000-0000-4000-8000-000000001804', 'AT', 'Accident du travail', 'absence', 0, 0, 1, 60, 'AT'),
+  ('00000000-0000-4000-8000-000000001805', 'MAT', 'Congé de maternité', 'absence', 0, 0, 1, 70, 'MAT'),
+  ('00000000-0000-4000-8000-000000001806', 'PAT', 'Congé de paternité', 'absence', 0, 0, 1, 40, 'PAT'),
+  ('00000000-0000-4000-8000-000000001807', 'CSS', 'Congé sans solde', 'absence', 0, 0, 1, 10, 'CSS'),
+  ('00000000-0000-4000-8000-000000001808', 'ABA', 'Absence autorisée', 'absence', 1, 0, 1, 20, NULL),
+  ('00000000-0000-4000-8000-000000001809', 'FOR', 'Formation', 'presence', 1, 1, 1, 30, 'FOR'),
+  ('00000000-0000-4000-8000-000000001810', 'MIS', 'Mission', 'presence', 0, 1, 1, 30, 'MIS'),
+  ('00000000-0000-4000-8000-000000001811', 'RCP', 'Récupération', 'absence', 1, 0, 0, 15, NULL);
+
+INSERT INTO periodes_evenements (id, evenement_id, date_debut, date_fin) VALUES
+  ('00000000-0000-4000-8000-000000001901', '00000000-0000-4000-8000-000000001802', '2026-01-01', '2026-06-30'),
+  ('00000000-0000-4000-8000-000000001902', '00000000-0000-4000-8000-000000001801', '2026-01-01', '2026-12-31');
+
+-- 14. Pointages saisis à la main (page Pointage manuel), le dernier jour ouvré avant aujourd'hui :
+-- deux employés de bureau (08:30-17:30) : Zineb Alaoui (T013) a oublié son badge (à l'heure) ;
+-- Anas Mansouri (T014) l'a oublié aussi et est arrivé en retard de 15 minutes.
+-- Saisis au nom du premier super administrateur (vide s'il n'existe pas encore).
+INSERT INTO pointages (id, employe_id, horodatage, etat, source, remarque, saisi_par)
+SELECT
+  CONCAT('00000000-0000-4000-8000-0000000400', m.n),
+  m.employe,
+  j.jour + INTERVAL (m.minutes - IF(MONTH(j.jour) BETWEEN 4 AND 10, 60, 0)) MINUTE,
+  m.etat,
+  'manuel',
+  m.remarque,
+  (SELECT id FROM utilisateurs WHERE est_super_admin = 1 ORDER BY cree_le LIMIT 1)
+FROM (
+  SELECT '01' AS n, '00000000-0000-4000-8000-000000000313' AS employe, 510 AS minutes, 'entree' AS etat, 'Oubli de badge' AS remarque
+  UNION ALL SELECT '02', '00000000-0000-4000-8000-000000000313', 1050, 'sortie', 'Oubli de badge'
+  UNION ALL SELECT '03', '00000000-0000-4000-8000-000000000314', 525, 'entree', 'Badge oublié, arrivé en retard'
+  UNION ALL SELECT '04', '00000000-0000-4000-8000-000000000314', 1050, 'sortie', 'Badge oublié'
+) m
+CROSS JOIN (
+  -- Lundi → vendredi précédent, dimanche → vendredi, sinon la veille.
+  SELECT DATE_SUB(UTC_DATE(), INTERVAL CASE DAYOFWEEK(UTC_DATE()) WHEN 2 THEN 3 WHEN 1 THEN 2 ELSE 1 END DAY) AS jour
+) j;
 
 COMMIT;

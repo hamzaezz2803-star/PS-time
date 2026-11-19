@@ -6,6 +6,8 @@ START TRANSACTION;
 -- Compteurs de test et leurs versions (avant les comptes et profils).
 DELETE FROM compteurs_versions WHERE compteur_id LIKE '00000000-0000-4000-8000-%';
 DELETE FROM compteurs WHERE id LIKE '00000000-0000-4000-8000-%';
+-- Événements de test (leurs périodes de prise partent avec eux).
+DELETE FROM evenements WHERE id LIKE '00000000-0000-4000-8000-%';
 -- Règles d'horaire dynamique de test, et celles saisies dans l'application sur un profil de test.
 DELETE FROM regles_horaires WHERE id LIKE '00000000-0000-4000-8000-%' OR profil_id LIKE '00000000-0000-4000-8000-%';
 DELETE FROM affectations WHERE id LIKE '00000000-0000-4000-8000-%';
