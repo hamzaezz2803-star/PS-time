@@ -6,6 +6,7 @@ import { enregistrerProfil } from "@/app/(connecte)/programme/profils-horaires/a
 import type { ProprietesFormulaireListe } from "@/components/liste/gestion-liste";
 import { caseSaisie, useFormulaireListe, valeurSaisie } from "@/components/liste/utiliser-formulaire-liste";
 import { CaseACocher } from "@/components/ui/case-a-cocher";
+import { ChoixCartes, type OptionCarte } from "@/components/ui/choix-cartes";
 import { ChampFormulaire } from "@/components/ui/champ-formulaire";
 import { MessageErreur } from "@/components/ui/message-erreur";
 import { PiedFormulaire } from "@/components/ui/pied-formulaire";
@@ -14,7 +15,6 @@ import { PLAGES_JOURNEE_TYPE, TYPES_PLAGE, type TypePlage } from "@/lib/metier/p
 import { TEXTES_PROFILS } from "@/lib/textes/profils-horaires";
 import { lireTexte } from "@/lib/validation/commun";
 import type { ProfilHoraire } from "@/types";
-import { cn } from "@/lib/utils";
 import { EditeurPlages, versLignes, type LignePlage } from "./editeur-plages";
 
 const { champs, types } = TEXTES_PROFILS;
@@ -31,33 +31,10 @@ function lignesInitiales(saisie: FormData | undefined, profil: ProfilHoraire | u
   return versLignes(profil && profil.plages.length > 0 ? profil.plages : PLAGES_JOURNEE_TYPE);
 }
 
-/** Choix Travail / Repos en deux grandes cartes (zone cliquable confortable). */
-function ChoixType({ valeur, onChanger }: { valeur: "travail" | "repos"; onChanger: (type: "travail" | "repos") => void }) {
-  const options = [
-    { type: "travail" as const, Icone: Briefcase },
-    { type: "repos" as const, Icone: BedDouble },
-  ];
-  return (
-    <fieldset className="flex flex-col gap-2">
-      <legend className="mb-1 text-sm font-medium text-texte">{champs.type}</legend>
-      <div className="grid grid-cols-2 gap-2">
-        {options.map(({ type, Icone }) => (
-          <label
-            key={type}
-            className={cn(
-              "flex min-h-12 cursor-pointer items-center gap-2 rounded-lg border px-3 text-base font-medium transition-colors duration-150 has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-primaire",
-              valeur === type ? "border-primaire bg-ciel text-marine" : "border-bordure-champ bg-surface text-texte hover:bg-fond",
-            )}
-          >
-            <input type="radio" name="type" value={type} checked={valeur === type} onChange={() => onChanger(type)} className="sr-only" />
-            <Icone className="size-5" aria-hidden="true" />
-            {types[type]}
-          </label>
-        ))}
-      </div>
-    </fieldset>
-  );
-}
+const OPTIONS_TYPE: OptionCarte<"travail" | "repos">[] = [
+  { valeur: "travail", libelle: types.travail, Icone: Briefcase },
+  { valeur: "repos", libelle: types.repos, Icone: BedDouble },
+];
 
 /** Création (sans `element`) ou modification d'un profil horaire. */
 export function FormulaireProfil({ element, onTermine, onAnnuler }: ProprietesFormulaireListe<ProfilHoraire>) {
@@ -76,7 +53,7 @@ export function FormulaireProfil({ element, onTermine, onAnnuler }: ProprietesFo
           <ChampFormulaire nom="nom" libelle={champs.nom} defaultValue={valeurSaisie(etat, "nom", element?.nom ?? "")} placeholder={champs.exempleNom} maxLength={LONGUEUR_MAX_NOM_PROGRAMME} autoComplete="off" required erreur={erreurs?.nom} />
         </div>
 
-        <ChoixType valeur={type} onChanger={setType} />
+        <ChoixCartes nom="type" legende={champs.type} options={OPTIONS_TYPE} valeur={type} onChanger={setType} />
         <MessageErreur message={erreurs?.type} />
 
         {type === "travail" ? (
