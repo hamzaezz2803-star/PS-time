@@ -6,7 +6,8 @@ import { ajouterJours, joursEntre } from "@/lib/metier/compteurs/periodes";
 import { horaireDuProfil } from "@/lib/metier/compteurs/variables";
 import { jourEtMinuteLocaux } from "@/lib/metier/dates";
 import { planningDuJour } from "@/lib/metier/planning-jour";
-import type { EmployeStatistiques, Maintenant } from "@/lib/metier/statistiques-presence";
+import type { EmployeStatistiques, EvenementEnJournees, Maintenant } from "@/lib/metier/statistiques-presence";
+import { evenementsEnJourneesDeLaPeriode } from "./absences";
 import { obtenirBase } from "./base";
 import { chargerHoraireDynamique } from "./horaire-dynamique";
 import { chargerPlanning } from "./planning";
@@ -31,7 +32,8 @@ async function pointagesDeLaPeriode(debut: string, fin: string) {
 
 /**
  * Journées de service de toute l'équipe sur les `nombreJours` derniers jours (aujourd'hui compris) :
- * horaire prévu (horaire dynamique, sinon rotation) et pointages. Quatre lectures en tout.
+ * horaire prévu (horaire dynamique, sinon rotation), pointages et événements en journées entières.
+ * Cinq lectures en tout.
  */
 export async function chargerStatistiques(nombreJours: number, maintenantInstant: Date): Promise<DonneesStatistiques> {
   const maintenant = jourEtMinuteLocaux(maintenantInstant, FUSEAU_HORAIRE);
@@ -39,7 +41,7 @@ export async function chargerStatistiques(nombreJours: number, maintenantInstant
   const debut = ajouterJours(maintenant.jour, -(nombreJours - 1));
   const jours = joursEntre(debut, maintenant.jour);
 
-  const [lignesEmployes, locaux] = await Promise.all([
+  const [lignesEmployes, locaux, evenementsPeriode] = await Promise.all([
     obtenirBase()
       .select({
         id: employes.id,
@@ -54,7 +56,12 @@ export async function chargerStatistiques(nombreJours: number, maintenantInstant
       .orderBy(asc(employes.id))
       .limit(STATISTIQUES_EMPLOYES_MAX + 1),
     pointagesDeLaPeriode(debut, maintenant.jour),
+    evenementsEnJourneesDeLaPeriode(debut, maintenant.jour),
   ]);
+  const evenementsParEmploye = new Map<string, EvenementEnJournees[]>();
+  for (const { employeId, debut: du, fin: au, type } of evenementsPeriode) {
+    evenementsParEmploye.set(employeId, [...(evenementsParEmploye.get(employeId) ?? []), { debut: du, fin: au, type }]);
+  }
   const estTronque = lignesEmployes.length > STATISTIQUES_EMPLOYES_MAX;
   const equipe = lignesEmployes.slice(0, STATISTIQUES_EMPLOYES_MAX);
   const [planning, horaireDynamique] = await Promise.all([
@@ -81,6 +88,7 @@ export async function chargerStatistiques(nombreJours: number, maintenantInstant
         departement: employe.departement,
         debutEmploi: employe.dateDebutEmploi ?? employe.dateEmbauche,
         finEmploi: employe.dateFinEmploi,
+        evenements: evenementsParEmploye.get(employe.id) ?? [],
         jours: jours.map((jour) => {
           const prevu = planningDuJour(employe, jour, donnees);
           return {

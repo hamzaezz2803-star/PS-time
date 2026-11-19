@@ -12,6 +12,8 @@ START TRANSACTION;
 -- Compteurs de test et leurs versions (avant les comptes et profils).
 DELETE FROM compteurs_versions WHERE compteur_id LIKE '00000000-0000-4000-8000-%';
 DELETE FROM compteurs WHERE id LIKE '00000000-0000-4000-8000-%';
+-- Absences de test, et celles saisies dans l'application pour un employé ou un événement de test.
+DELETE FROM evenements_employes WHERE id LIKE '00000000-0000-4000-8000-%' OR employe_id LIKE '00000000-0000-4000-8000-%' OR evenement_id LIKE '00000000-0000-4000-8000-%';
 -- Événements de test (leurs périodes de prise partent avec eux).
 DELETE FROM evenements WHERE id LIKE '00000000-0000-4000-8000-%';
 -- Règles d'horaire dynamique de test, et celles saisies dans l'application sur un profil de test.
@@ -288,5 +290,20 @@ CROSS JOIN (
   -- Lundi → vendredi précédent, dimanche → vendredi, sinon la veille.
   SELECT DATE_SUB(UTC_DATE(), INTERVAL CASE DAYOFWEEK(UTC_DATE()) WHEN 2 THEN 3 WHEN 1 THEN 2 ELSE 1 END DAY) AS jour
 ) j;
+
+-- 15. Absences et événements des employés (page Absences et événements), autour de la date du jour :
+-- Hicham Lahlou (T006) en congé payé cette semaine ; Imane Berrada (T007) en maladie depuis 3 jours ;
+-- Rachid El Fassi (T010) en formation aujourd'hui (compté présent) ; Karim Benali (T001) absent
+-- 2 heures pour un rendez-vous dans 2 jours ; Fatima Zahraoui (T015) en congé payé la semaine prochaine.
+INSERT INTO evenements_employes (id, employe_id, evenement_id, date_debut, date_fin, debut_minutes, fin_minutes, remarque, saisi_par)
+SELECT a.id, a.employe, a.evenement, DATE_ADD(UTC_DATE(), INTERVAL a.du DAY), DATE_ADD(UTC_DATE(), INTERVAL a.au DAY), a.de, a.a, a.remarque,
+  (SELECT id FROM utilisateurs WHERE est_super_admin = 1 ORDER BY cree_le LIMIT 1)
+FROM (
+  SELECT '00000000-0000-4000-8000-000000002001' AS id, '00000000-0000-4000-8000-000000000306' AS employe, '00000000-0000-4000-8000-000000001801' AS evenement, -2 AS du, 2 AS au, NULL AS de, NULL AS a, 'Congé validé par le chef d''atelier' AS remarque
+  UNION ALL SELECT '00000000-0000-4000-8000-000000002002', '00000000-0000-4000-8000-000000000307', '00000000-0000-4000-8000-000000001803', -3, 0, NULL, NULL, 'Certificat médical reçu'
+  UNION ALL SELECT '00000000-0000-4000-8000-000000002003', '00000000-0000-4000-8000-000000000310', '00000000-0000-4000-8000-000000001809', 0, 0, NULL, NULL, 'Formation sécurité chariots élévateurs'
+  UNION ALL SELECT '00000000-0000-4000-8000-000000002004', '00000000-0000-4000-8000-000000000301', '00000000-0000-4000-8000-000000001808', 2, 2, 600, 720, 'Rendez-vous administratif'
+  UNION ALL SELECT '00000000-0000-4000-8000-000000002005', '00000000-0000-4000-8000-000000000315', '00000000-0000-4000-8000-000000001801', 5, 9, NULL, NULL, NULL
+) a;
 
 COMMIT;

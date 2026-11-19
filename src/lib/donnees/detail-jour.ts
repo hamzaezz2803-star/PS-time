@@ -7,6 +7,7 @@ import { ajouterJours, periodesDeLaDate, type Periodicite } from "@/lib/metier/c
 import { jourDansFuseau } from "@/lib/metier/dates";
 import { messageErreurFormule } from "@/lib/textes/formules";
 import type { DetailJour, ValeurAffichee } from "@/types";
+import { evenementsDuJour } from "./absences";
 import { obtenirBase } from "./base";
 import { aujourdhuiLocal, chargerJoursService, estJourValide } from "./compteurs-calcul";
 import { listerCompteursActifs } from "./compteurs";
@@ -65,10 +66,11 @@ export async function chargerDetailJour(employeId: string, date: string, nombreJ
   const debutHistorique = ajouterJours(date, -(nombreJours - 1));
   const debut = periodes.reduce((plusTot, periode) => (periode.debut < plusTot ? periode.debut : plusTot), debutHistorique);
   const fin = periodes.reduce((plusTard, periode) => (periode.finCalcul > plusTard ? periode.finCalcul : plusTard), date);
-  const [chargement, compteurs, pointagesJour] = await Promise.all([
+  const [chargement, compteurs, pointagesJour, evenementsJour] = await Promise.all([
     chargerJoursService(employeId, debut, fin),
     listerCompteursActifs(),
     pointagesDuJour(employe, date),
+    evenementsDuJour(employeId, date),
   ]);
   if (!chargement.ok) return { ok: false, erreur: chargement.erreur === "employe" ? "employe" : "date" };
 
@@ -96,6 +98,7 @@ export async function chargerDetailJour(employeId: string, date: string, nombreJ
             }
           : null,
       pointages: pointagesJour,
+      evenements: evenementsJour,
       compteurs,
       valeurs: { JOUR: parPeriodicite("JOUR"), SEMAINE: parPeriodicite("SEMAINE"), MOIS: parPeriodicite("MOIS") },
       periodes: { JOUR: jour, SEMAINE: semaine, MOIS: mois },

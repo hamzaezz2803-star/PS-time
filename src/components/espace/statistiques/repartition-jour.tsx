@@ -1,4 +1,4 @@
-import { CircleCheck, CircleAlert, CircleX, Hourglass, type LucideIcon } from "lucide-react";
+import { CalendarCheck, CircleCheck, CircleAlert, CircleX, Hourglass, type LucideIcon } from "lucide-react";
 import type { BilanJour } from "@/lib/metier/statistiques-presence";
 import { TEXTES_PRESENCE } from "@/lib/textes/presence";
 import { cn } from "@/lib/utils";
@@ -15,6 +15,7 @@ export function RepartitionJour({ bilan }: { bilan: BilanJour }) {
     { cle: "a_l_heure", valeur: bilan.aLHeure, fond: "bg-graphe-a-l-heure", texteDedans: "text-white", Icone: CircleCheck, teinteIcone: "text-succes" },
     { cle: "en_retard", valeur: bilan.enRetard, fond: "bg-graphe-retard", texteDedans: "text-texte", Icone: CircleAlert, teinteIcone: "text-attention" },
     { cle: "absent", valeur: bilan.absents, fond: "bg-graphe-absent", texteDedans: "text-white", Icone: CircleX, teinteIcone: "text-erreur" },
+    { cle: "justifie", valeur: bilan.justifies, fond: "bg-graphe-justifie", texteDedans: "text-white", Icone: CalendarCheck, teinteIcone: "text-primaire" },
     { cle: "attendu", valeur: bilan.attendus, fond: "bg-graphe-attente", texteDedans: "text-texte", Icone: Hourglass, teinteIcone: "text-texte-secondaire" },
   ];
   const total = parts.reduce((somme, part) => somme + part.valeur, 0);

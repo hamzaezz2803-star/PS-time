@@ -68,7 +68,7 @@ export type EntreeHistorique = {
 export type Notification = {
   id: string;
   action: "creation" | "modification" | "suppression";
-  objet: "site" | "departement" | "poste" | "employe" | "profil_horaire" | "rotation" | "groupe" | "affectation" | "regle_horaire" | "horaire_dynamique" | "pointage" | "evenement" | "compteur" | "utilisateur" | "mot_de_passe" | "apparence";
+  objet: "site" | "departement" | "poste" | "employe" | "profil_horaire" | "rotation" | "groupe" | "affectation" | "regle_horaire" | "horaire_dynamique" | "pointage" | "evenement" | "absence" | "compteur" | "utilisateur" | "mot_de_passe" | "apparence";
   libelle: string | null;
   lien: string | null;
   auteurId: string | null;
@@ -329,6 +329,8 @@ export type DetailJour = {
     sortie: number | null;
   } | null;
   pointages: { id: string; horodatage: string; etat: string; source: string; statut: import("@/lib/metier/statut-pointage").StatutPointage }[];
+  /** Absences et événements de l'employé ce jour-là. */
+  evenements: EvenementDuJour[];
   compteurs: Compteur[];
   /** Valeurs par périodicité ; un compteur absent n'a pas cette périodicité. */
   valeurs: Record<"JOUR" | "SEMAINE" | "MOIS", ValeurAffichee[]>;
@@ -367,3 +369,39 @@ export type Evenement = {
   /** Aucune période : l'événement peut être pris toute l'année. */
   periodes: PeriodePrise[];
 };
+
+/** Ligne de la liste « Absences et événements » : un événement attribué à un employé. */
+export type AbsenceListe = {
+  id: string;
+  employeId: string;
+  prenom: string;
+  nom: string;
+  matricule: string;
+  departement: string;
+  photoModifieeLe: Date | null;
+  evenementCode: string;
+  evenementNom: string;
+  evenementType: "absence" | "presence";
+  debut: string;
+  fin: string;
+  /** Vides : journées entières. */
+  debutMinutes: number | null;
+  finMinutes: number | null;
+  remarque: string | null;
+  saisiPar: string | null;
+};
+
+/** Événement d'un employé sur une journée (Détail jour). */
+export type EvenementDuJour = {
+  code: string;
+  nom: string;
+  type: "absence" | "presence";
+  debut: string;
+  fin: string;
+  debutMinutes: number | null;
+  finMinutes: number | null;
+  remarque: string | null;
+};
+
+/** Événement proposé dans la saisie des absences (affiché dans le planning). */
+export type EvenementSaisissable = { id: string; code: string; nom: string; estSaisiEnHeures: boolean };

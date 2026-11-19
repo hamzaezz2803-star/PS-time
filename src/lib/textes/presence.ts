@@ -16,8 +16,14 @@ export const TEXTES_PRESENCE = {
       presentsDetail: (presents: number, echus: number) => `${presents} sur ${echus} attendus`,
       retards: "En retard aujourd'hui",
       retardsDetail: (duree: string) => `${duree} de retard cumulé`,
-      absents: "Absents aujourd'hui",
-      absentsDetail: (attendus: number) => (attendus === 0 ? "Tous les horaires ont commencé" : `${attendus} pas encore arrivé${attendus > 1 ? "s" : ""}`),
+      absents: "Absents non justifiés",
+      absentsDetail: (attendus: number, justifies: number) =>
+        [
+          justifies > 0 ? `${justifies} absence${justifies > 1 ? "s" : ""} justifiée${justifies > 1 ? "s" : ""}` : null,
+          attendus > 0 ? `${attendus} pas encore arrivé${attendus > 1 ? "s" : ""}` : null,
+        ]
+          .filter(Boolean)
+          .join(" · ") || "Tous les horaires ont commencé",
       tauxPeriode: (jours: number) => `Taux de présence, ${jours} jours`,
       tauxPeriodeDetail: (absences: number) => `${absences} absence${absences > 1 ? "s" : ""} sur la période`,
       heuresTravaillees: (jours: number) => `Heures travaillées, ${jours} jours`,
@@ -26,10 +32,10 @@ export const TEXTES_PRESENCE = {
       heuresSupDetail: (retard: string) => `${retard} de retard sur la période`,
       sansDonnee: "Aucun",
     },
-    statuts: { a_l_heure: "À l'heure", en_retard: "En retard", absent: "Absent", attendu: "Pas encore arrivé" },
+    statuts: { a_l_heure: "À l'heure", en_retard: "En retard", absent: "Absent", justifie: "Absence justifiée", attendu: "Pas encore arrivé" },
     graphiques: {
       presenceJours: "Présence par jour",
-      presenceJoursAide: "Employés attendus chaque jour : à l'heure, en retard ou absents.",
+      presenceJoursAide: "Employés attendus chaque jour : à l'heure, en retard, absents ou en absence justifiée (congé, maladie...).",
       repartition: "Répartition aujourd'hui",
       repartitionAide: (prevus: number) => (prevus === 0 ? "Personne n'est attendu aujourd'hui." : `${prevus} employé${prevus > 1 ? "s" : ""} attendu${prevus > 1 ? "s" : ""} aujourd'hui.`),
       heures: "Heures travaillées et prévues",

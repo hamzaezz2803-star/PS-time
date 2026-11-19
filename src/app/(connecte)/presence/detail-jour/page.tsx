@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import { UserRoundSearch } from "lucide-react";
 import { z } from "zod";
 import { BarreSelection } from "@/components/detail-jour/barre-selection";
+import { CarteEvenementsJour } from "@/components/absences/carte-evenements-jour";
 import { CarteHoraire, CartePointages, EnTeteEmploye } from "@/components/detail-jour/cartes-jour";
 import { CompteursJour } from "@/components/detail-jour/compteurs-jour";
 import { HistoriqueCompteurs } from "@/components/detail-jour/historique-compteurs";
@@ -90,6 +91,7 @@ async function Detail({ selection }: { selection: SelectionDetail & { employe: s
   return (
     <>
       <EnTeteEmploye detail={detail} />
+      {detail.evenements.length > 0 && <CarteEvenementsJour evenements={detail.evenements} />}
       <div className="grid gap-6 lg:grid-cols-2">
         <CarteHoraire horaire={detail.horaire} />
         <CartePointages pointages={detail.pointages} />

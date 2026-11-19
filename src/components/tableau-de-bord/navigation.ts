@@ -3,6 +3,7 @@ import {
   Building2,
   CalendarClock,
   CalendarCog,
+  CalendarDays,
   CalendarRange,
   CalendarSearch,
   CalendarX2,
@@ -23,6 +24,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import {
+  CHEMIN_ABSENCES,
   CHEMIN_AFFECTATIONS,
   CHEMIN_APPARENCE,
   CHEMIN_COMPTEURS,
@@ -107,6 +109,7 @@ export const MENUS_NAVIGATION: MenuNavigation[] = [
         liens: [
           { libelle: T.pointagesManuels, icone: ClipboardClock, href: CHEMIN_POINTAGES_MANUELS, page: "pointages_manuels" },
           { libelle: T.evenements, icone: CalendarX2, href: CHEMIN_EVENEMENTS, page: "evenements" },
+          { libelle: T.absences, icone: CalendarDays, href: CHEMIN_ABSENCES, page: "absences" },
         ],
       },
       {

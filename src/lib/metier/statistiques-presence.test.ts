@@ -6,6 +6,7 @@ import {
   bilanDuJour,
   cumulerBilans,
   estEnPoste,
+  evenementDuJour,
   presenceParDepartement,
   statutDuJour,
   tauxPresence,
@@ -105,5 +106,38 @@ describe("arriveesParHeure", () => {
       { heure: 10, arrivees: 1 },
     ]);
     assert.deepEqual(arriveesParHeure([], JOUR), []);
+  });
+});
+
+describe("absences et événements", () => {
+  const conge = [{ debut: "2026-11-16", fin: "2026-11-20", type: "absence" as const }];
+  const formation = [{ debut: JOUR, fin: JOUR, type: "presence" as const }];
+
+  it("trouve l'événement qui couvre le jour", () => {
+    assert.equal(evenementDuJour({ evenements: conge }, JOUR), "absence");
+    assert.equal(evenementDuJour({ evenements: conge }, "2026-11-21"), null);
+    assert.equal(evenementDuJour({}, JOUR), null);
+  });
+
+  it("justifie une absence, compte présent une formation, et laisse les pointages passer avant", () => {
+    assert.equal(statutDuJour(journee([]), MIDI, "absence"), "justifie");
+    assert.equal(statutDuJour(journee([]), MIDI, "presence"), "a_l_heure");
+    assert.equal(statutDuJour(journee([495, 1020]), MIDI, "absence"), "en_retard");
+    assert.equal(statutDuJour(journee([], null), MIDI, "absence"), "sans_horaire");
+    // Connue d'avance : jamais « pas encore arrivé ».
+    assert.equal(statutDuJour(journee([]), { jour: JOUR, minute: 420 }, "absence"), "justifie");
+  });
+
+  it("sort les absences justifiées du taux de présence", () => {
+    const equipe = [
+      { ...employe("a", "Atelier", [journee([480, 1020])]) },
+      { ...employe("b", "Atelier", [journee([])]), evenements: conge },
+      { ...employe("c", "Atelier", [journee([])]), evenements: formation },
+      employe("d", "Atelier", [journee([])]),
+    ];
+    const bilan = bilanDuJour(equipe, JOUR, MIDI);
+    assert.deepEqual({ aLHeure: bilan.aLHeure, absents: bilan.absents, justifies: bilan.justifies }, { aLHeure: 2, absents: 1, justifies: 1 });
+    assert.equal(tauxPresence(bilan), 66.7);
+    assert.deepEqual(presenceParDepartement(equipe, MIDI), [{ departement: "Atelier", prevus: 3, presents: 2, taux: 66.7 }]);
   });
 });

@@ -183,6 +183,13 @@
       "when": 1795087896868,
       "tag": "0025_evenements",
       "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "5",
+      "when": 1795089640287,
+      "tag": "0026_absences_employes",
+      "breakpoints": true
     }
   ]
 }

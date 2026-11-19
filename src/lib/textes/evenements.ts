@@ -73,6 +73,7 @@ export const TEXTES_EVENEMENTS = {
     prioriteInvalide: "Saisissez un nombre entier entre 0 et 255.",
     codePaieInvalide: "20 caractères au plus : lettres, chiffres, « - » ou « _ ».",
     dateInvalide: "Saisissez une date valide.",
+    utilise: "Cet événement est attribué à des employés (Absences et événements). Supprimez d'abord ces saisies, ou masquez-le du planning.",
     periodes: {
       trop: "4 périodes au maximum.",
       ordre: "La date de fin d'une période doit être après sa date de début.",

@@ -15,6 +15,7 @@ const OBJETS: Record<Notification["objet"], { avec: string; sans: string }> = {
   horaire_dynamique: { avec: "les employés en horaire dynamique", sans: "les employés en horaire dynamique" },
   pointage: { avec: "le pointage", sans: "un pointage" },
   evenement: { avec: "l'événement", sans: "un événement" },
+  absence: { avec: "l'absence", sans: "une absence" },
   compteur: { avec: "le compteur", sans: "un compteur" },
   utilisateur: { avec: "le compte", sans: "un compte" },
   mot_de_passe: { avec: "son mot de passe", sans: "son mot de passe" },
@@ -42,6 +43,9 @@ export const TEXTES_NOTIFICATIONS = {
   /** « Salma a créé le site « Usine » » ; pour un pointage, le libellé dit l'état et le nombre. */
   phrase: (notification: Pick<Notification, "action" | "objet" | "libelle">, auteur: string) => {
     if (notification.objet === "mot_de_passe") return `${auteur} a changé son mot de passe`;
+    if (notification.objet === "absence" && notification.action === "creation") {
+      return `${auteur} a saisi des absences${notification.libelle ? ` : ${notification.libelle}` : ""}`;
+    }
     if (notification.objet === "pointage" && notification.action === "creation") {
       return `${auteur} a saisi des pointages${notification.libelle ? ` : ${notification.libelle}` : ""}`;
     }
@@ -51,5 +55,6 @@ export const TEXTES_NOTIFICATIONS = {
       : `${auteur} ${VERBES[notification.action]} ${objet.sans}`;
   },
   /** Libellé d'une saisie de pointages : « Entrée · 3 employés ». */
+  libelleAbsences: (evenement: string, nombre: number) => `${evenement} · ${nombre} employé${nombre > 1 ? "s" : ""}`,
   libellePointages: (etat: string, nombre: number) => `${etat} · ${nombre} employé${nombre > 1 ? "s" : ""}`,
 };

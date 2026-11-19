@@ -813,3 +813,42 @@ export const periodesEvenements = mysqlTable(
     check("periodes_evenements_dates_coherentes", sql`${table.dateFin} >= ${table.dateDebut}`),
   ],
 );
+
+/**
+ * Événements attribués aux employés (congé, maladie, formation...) : journées entières du
+ * `date_debut` au `date_fin`, ou heures (`debut_minutes` à `fin_minutes`, fin exclue) sur un seul
+ * jour. Pas de chevauchement pour un même employé (vérifié dans une transaction qui verrouille
+ * les employés). Un événement utilisé ne peut pas être supprimé (`restrict`).
+ */
+export const evenementsEmployes = mysqlTable(
+  "evenements_employes",
+  {
+    id: identifiantUnique(),
+    employeId: char("employe_id", { length: 36 })
+      .notNull()
+      .references(() => employes.id, { onDelete: "cascade" }),
+    evenementId: char("evenement_id", { length: 36 })
+      .notNull()
+      .references(() => evenements.id, { onDelete: "restrict" }),
+    dateDebut: jour("date_debut").notNull(),
+    dateFin: jour("date_fin").notNull(),
+    // Vides : journées entières.
+    debutMinutes: int("debut_minutes"),
+    finMinutes: int("fin_minutes"),
+    remarque: varchar("remarque", { length: 255 }),
+    saisiPar: referenceAuteur("saisi_par"),
+    creeLe: dateCreation(),
+    modifieLe: dateModification(),
+  },
+  (table) => [
+    index("evenements_employes_employe_idx").on(table.employeId, table.dateDebut),
+    index("evenements_employes_evenement_idx").on(table.evenementId),
+    index("evenements_employes_dates_idx").on(table.dateDebut, table.dateFin),
+    index("evenements_employes_saisi_par_idx").on(table.saisiPar),
+    check("evenements_employes_dates_coherentes", sql`${table.dateFin} >= ${table.dateDebut}`),
+    check(
+      "evenements_employes_heures_valides",
+      sql`(${table.debutMinutes} IS NULL AND ${table.finMinutes} IS NULL) OR (${table.dateDebut} = ${table.dateFin} AND ${table.debutMinutes} >= 0 AND ${table.finMinutes} <= 1440 AND ${table.debutMinutes} < ${table.finMinutes})`,
+    ),
+  ],
+);

@@ -67,6 +67,7 @@
   --couleur-graphe-retard: #d97706;
   --couleur-graphe-absent: #b91c1c;
   --couleur-graphe-attente: #94a3b8;
+  --couleur-graphe-justifie: #2563eb; /* absence justifiée : bleu, distinct du vert, de l'orange et du rouge (5,2:1 avec du blanc) */
   --couleur-graphe-reference: #7f93b3; /* « prévu » : gris voulu, référence discrète (3:1 sur blanc) */
   --couleur-graphe-grille: #eef1f5;
 }
@@ -121,6 +122,7 @@ html[data-taille="tres_grande"] {
   --color-graphe-retard: var(--couleur-graphe-retard);
   --color-graphe-absent: var(--couleur-graphe-absent);
   --color-graphe-attente: var(--couleur-graphe-attente);
+  --color-graphe-justifie: var(--couleur-graphe-justifie);
   --color-graphe-reference: var(--couleur-graphe-reference);
   --color-graphe-grille: var(--couleur-graphe-grille);
 

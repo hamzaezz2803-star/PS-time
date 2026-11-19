@@ -23,6 +23,7 @@ export const TEXTES_NAVIGATION = {
   gestionExceptions: "Gestion des exceptions",
   pointagesManuels: "Pointage manuel",
   evenements: "Événements",
+  absences: "Absences et événements",
   compteurs: "Compteurs",
   gestionCompteurs: "Gestion des compteurs",
   detailJour: "Détail jour",

@@ -5,7 +5,8 @@ import { z } from "zod";
 import { peutAccederPage } from "@/lib/actions/droits";
 import { notifier } from "@/lib/actions/notifier";
 import { CHEMIN_EVENEMENTS } from "@/lib/constantes";
-import { indexEnDoublon } from "@/lib/donnees/erreurs";
+import { evenementEstUtilise } from "@/lib/donnees/absences";
+import { estEncoreReference, indexEnDoublon } from "@/lib/donnees/erreurs";
 import { enregistrerEvenement as enregistrerEnBase, supprimerEvenementParId } from "@/lib/donnees/evenements";
 import { TEXTES_EVENEMENTS as textes } from "@/lib/textes/evenements";
 import { validerEvenement } from "@/lib/validation/evenement";
@@ -46,10 +47,13 @@ export async function supprimerEvenement(_etat: EtatFormulaire, formulaire: Form
 
   const id = identifiant.safeParse(formulaire.get("id"));
   if (!id.success) return { message: textes.introuvable };
+  if (await evenementEstUtilise(id.data)) return { message: textes.erreurs.utilise };
   let nom: string | null;
   try {
     nom = await supprimerEvenementParId(id.data);
   } catch (erreur) {
+    // Attribué entre-temps à un employé (clé « restrict »).
+    if (estEncoreReference(erreur)) return { message: textes.erreurs.utilise };
     journaliserEchec("de la suppression", erreur);
     return { message: textes.echec };
   }

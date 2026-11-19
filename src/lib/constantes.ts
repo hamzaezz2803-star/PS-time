@@ -40,7 +40,7 @@ export const MODULES = ["personnel", "planning", "presence"] as const;
 export const PAGES_PAR_MODULE = {
   personnel: ["sites", "departements", "postes", "personnes"],
   planning: ["profils_horaires", "rotations", "groupes", "affectations", "horaire_dynamique", "rapport_presences"],
-  presence: ["pointages_manuels", "evenements", "compteurs", "detail_jour"],
+  presence: ["pointages_manuels", "evenements", "absences", "compteurs", "detail_jour"],
 } as const;
 export const PAGES = [...PAGES_PAR_MODULE.personnel, ...PAGES_PAR_MODULE.planning, ...PAGES_PAR_MODULE.presence] as const;
 export const CHEMIN_UTILISATEURS = "/administration/utilisateurs";
@@ -166,6 +166,15 @@ export const LONGUEUR_MAX_CODE_PAIE = 20;
 export const PRIORITE_EVENEMENT_MAX = 255;
 export const PERIODES_PRISE_MAX = 4;
 export const LIMITE_EVENEMENTS = 500;
+/**
+ * Absences et événements des employés : un événement attribué à un ou plusieurs employés,
+ * en journées entières (du ... au ...) ou en heures sur un seul jour.
+ */
+export const CHEMIN_ABSENCES = "/exceptions/absences";
+export const ABSENCES_PAR_PAGE = 50;
+/** Une saisie couvre au plus un an (366 jours), bornes comprises. */
+export const DUREE_MAX_ABSENCE_JOURS = 366;
+export const LONGUEUR_MAX_REMARQUE_ABSENCE = 255;
 /** Nombre maximal d'employés pointés en une seule saisie. */
 export const LIMITE_EMPLOYES_POINTAGE = 500;
 /** Cloche de notifications : nombre affiché, actualisation, durée de conservation. */

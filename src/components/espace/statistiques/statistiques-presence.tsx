@@ -63,7 +63,7 @@ export function StatistiquesPresence({ donnees, periode }: { donnees: DonneesSta
       <div className="grid grid-cols-1 gap-3 min-[420px]:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
         <TuileStatistique libelle={t.presents} valeur={pourcent(tauxJour)} detail={t.presentsDetail(aujourdhui.aLHeure + aujourdhui.enRetard, aujourdhui.aLHeure + aujourdhui.enRetard + aujourdhui.absents)} Icone={UserCheck} teinte="bg-succes/10 text-succes" />
         <TuileStatistique libelle={t.retards} valeur={String(aujourdhui.enRetard)} detail={t.retardsDetail(formaterDuree(aujourdhui.minutesRetard))} Icone={CircleAlert} teinte="bg-attention/10 text-attention" />
-        <TuileStatistique libelle={t.absents} valeur={String(aujourdhui.absents)} detail={t.absentsDetail(aujourdhui.attendus)} Icone={UserX} teinte="bg-erreur/10 text-erreur" />
+        <TuileStatistique libelle={t.absents} valeur={String(aujourdhui.absents)} detail={t.absentsDetail(aujourdhui.attendus, aujourdhui.justifies)} Icone={UserX} teinte="bg-erreur/10 text-erreur" />
         <TuileStatistique libelle={t.tauxPeriode(periode)} valeur={pourcent(tauxPeriode)} detail={t.tauxPeriodeDetail(cumul.absents)} Icone={Percent} teinte="bg-ciel text-primaire" />
         <TuileStatistique libelle={t.heuresTravaillees(periode)} valeur={formaterDuree(cumul.minutesTravaillees)} detail={t.heuresTravailleesDetail(formaterDuree(cumul.minutesPrevues))} Icone={Timer} teinte="bg-ciel text-primaire" />
         <TuileStatistique libelle={t.heuresSup(periode)} valeur={formaterDuree(cumul.minutesSupplementaires)} detail={t.heuresSupDetail(formaterDuree(cumul.minutesRetard))} Icone={Clock4} teinte="bg-ciel text-primaire" />
@@ -83,6 +83,7 @@ export function StatistiquesPresence({ donnees, periode }: { donnees: DonneesSta
               { cle: "a_l_heure", nom: textes.statuts.a_l_heure, couleur: "bg-graphe-a-l-heure", valeurs: bilans.map((b) => b.aLHeure) },
               { cle: "en_retard", nom: textes.statuts.en_retard, couleur: "bg-graphe-retard", valeurs: bilans.map((b) => b.enRetard) },
               { cle: "absent", nom: textes.statuts.absent, couleur: "bg-graphe-absent", valeurs: bilans.map((b) => b.absents) },
+              { cle: "justifie", nom: textes.statuts.justifie, couleur: "bg-graphe-justifie", valeurs: bilans.map((b) => b.justifies) },
               { cle: "attendu", nom: textes.statuts.attendu, couleur: "bg-graphe-attente", valeurs: bilans.map((b) => b.attendus) },
             ]}
           />

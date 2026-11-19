@@ -12,6 +12,7 @@ import { evaluerPointages } from "@/lib/donnees/planning";
 import { compterPointagesManuels, listerPointagesManuels } from "@/lib/donnees/pointages";
 import { obtenirUtilisateurPourEspace } from "@/lib/donnees/session";
 import { peutAcceder } from "@/lib/metier/droits";
+import { lirePage } from "@/lib/metier/pagination";
 import { TEXTES_EXCEPTIONS } from "@/lib/textes/exceptions";
 import { lireRecherchePointages } from "@/lib/validation/pointage";
 
@@ -30,12 +31,6 @@ export default function PagePointagesManuels({ searchParams }: { searchParams: P
       </Suspense>
     </div>
   );
-}
-
-/** Numéro de page demandé, ramené entre 1 et le nombre de pages. */
-function lirePage(valeur: string | string[] | undefined, nombrePages: number): number {
-  const page = Number.parseInt(typeof valeur === "string" ? valeur : "1", 10);
-  return Number.isNaN(page) ? 1 : Math.min(Math.max(page, 1), nombrePages);
 }
 
 async function ContenuPointages({ searchParams }: { searchParams: ParametresRecherche }) {

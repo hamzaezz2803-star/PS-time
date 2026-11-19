@@ -1,0 +1,3411 @@
+{
+  "version": "5",
+  "dialect": "mysql",
+  "id": "909c3120-a9d1-446d-9e1d-c0d3f24550dc",
+  "prevId": "cf7b3bb3-7712-4197-bb11-260f8f025bf6",
+  "tables": {
+    "affectations": {
+      "name": "affectations",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(uuid())"
+        },
+        "rotation_id": {
+          "name": "rotation_id",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "groupe_id": {
+          "name": "groupe_id",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "employe_id": {
+          "name": "employe_id",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "date_debut": {
+          "name": "date_debut",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "date_fin": {
+          "name": "date_fin",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "cree_le": {
+          "name": "cree_le",
+          "type": "datetime(3)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP(3)"
+        },
+        "modifie_le": {
+          "name": "modifie_le",
+          "type": "datetime(3)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3)"
+        }
+      },
+      "indexes": {
+        "affectations_rotation_idx": {
+          "name": "affectations_rotation_idx",
+          "columns": [
+            "rotation_id"
+          ],
+          "isUnique": false
+        },
+        "affectations_groupe_idx": {
+          "name": "affectations_groupe_idx",
+          "columns": [
+            "groupe_id",
+            "date_debut"
+          ],
+          "isUnique": false
+        },
+        "affectations_employe_idx": {
+          "name": "affectations_employe_idx",
+          "columns": [
+            "employe_id",
+            "date_debut"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "affectations_rotation_id_rotations_id_fk": {
+          "name": "affectations_rotation_id_rotations_id_fk",
+          "tableFrom": "affectations",
+          "tableTo": "rotations",
+          "columnsFrom": [
+            "rotation_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "affectations_groupe_id_groupes_id_fk": {
+          "name": "affectations_groupe_id_groupes_id_fk",
+          "tableFrom": "affectations",
+          "tableTo": "groupes",
+          "columnsFrom": [
+            "groupe_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "affectations_employe_id_employes_id_fk": {
+          "name": "affectations_employe_id_employes_id_fk",
+          "tableFrom": "affectations",
+          "tableTo": "employes",
+          "columnsFrom": [
+            "employe_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "affectations_id": {
+          "name": "affectations_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraint": {
+        "affectations_une_seule_cible": {
+          "name": "affectations_une_seule_cible",
+          "value": "(`affectations`.`groupe_id` IS NULL) <> (`affectations`.`employe_id` IS NULL)"
+        },
+        "affectations_dates_coherentes": {
+          "name": "affectations_dates_coherentes",
+          "value": "`affectations`.`date_fin` IS NULL OR `affectations`.`date_fin` >= `affectations`.`date_debut`"
+        }
+      }
+    },
+    "autorisations_pages": {
+      "name": "autorisations_pages",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(uuid())"
+        },
+        "utilisateur_id": {
+          "name": "utilisateur_id",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "page": {
+          "name": "page",
+          "type": "varchar(30)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "cree_le": {
+          "name": "cree_le",
+          "type": "datetime(3)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP(3)"
+        },
+        "modifie_le": {
+          "name": "modifie_le",
+          "type": "datetime(3)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3)"
+        }
+      },
+      "indexes": {
+        "autorisations_pages_utilisateur_page_idx": {
+          "name": "autorisations_pages_utilisateur_page_idx",
+          "columns": [
+            "utilisateur_id",
+            "page"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {
+        "autorisations_pages_utilisateur_id_utilisateurs_id_fk": {
+          "name": "autorisations_pages_utilisateur_id_utilisateurs_id_fk",
+          "tableFrom": "autorisations_pages",
+          "tableTo": "utilisateurs",
+          "columnsFrom": [
+            "utilisateur_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "autorisations_pages_id": {
+          "name": "autorisations_pages_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraint": {
+        "autorisations_pages_page_valide": {
+          "name": "autorisations_pages_page_valide",
+          "value": "`autorisations_pages`.`page` IN ('sites', 'departements', 'postes', 'personnes', 'profils_horaires', 'rotations', 'groupes', 'affectations', 'horaire_dynamique', 'rapport_presences', 'pointages_manuels', 'evenements', 'absences', 'compteurs', 'detail_jour')"
+        }
+      }
+    },
+    "comptes": {
+      "name": "comptes",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(uuid())"
+        },
+        "utilisateur_id": {
+          "name": "utilisateur_id",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "fournisseur_id": {
+          "name": "fournisseur_id",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "compte_id": {
+          "name": "compte_id",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "mot_de_passe": {
+          "name": "mot_de_passe",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "jeton_acces": {
+          "name": "jeton_acces",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "jeton_rafraichissement": {
+          "name": "jeton_rafraichissement",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "jeton_identite": {
+          "name": "jeton_identite",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "jeton_acces_expire_le": {
+          "name": "jeton_acces_expire_le",
+          "type": "datetime(3)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "jeton_rafraichissement_expire_le": {
+          "name": "jeton_rafraichissement_expire_le",
+          "type": "datetime(3)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "portee": {
+          "name": "portee",
+          "type": "varchar(500)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "cree_le": {
+          "name": "cree_le",
+          "type": "datetime(3)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP(3)"
+        },
+        "modifie_le": {
+          "name": "modifie_le",
+          "type": "datetime(3)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3)"
+        }
+      },
+      "indexes": {
+        "comptes_fournisseur_compte_idx": {
+          "name": "comptes_fournisseur_compte_idx",
+          "columns": [
+            "fournisseur_id",
+            "compte_id"
+          ],
+          "isUnique": true
+        },
+        "comptes_utilisateur_idx": {
+          "name": "comptes_utilisateur_idx",
+          "columns": [
+            "utilisateur_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "comptes_utilisateur_id_utilisateurs_id_fk": {
+          "name": "comptes_utilisateur_id_utilisateurs_id_fk",
+          "tableFrom": "comptes",
+          "tableTo": "utilisateurs",
+          "columnsFrom": [
+            "utilisateur_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "comptes_id": {
+          "name": "comptes_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraint": {}
+    },
+    "compteurs": {
+      "name": "compteurs",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(uuid())"
+        },
+        "code": {
+          "name": "code",
+          "type": "varchar(30)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "libelle": {
+          "name": "libelle",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "formule": {
+          "name": "formule",
+          "type": "varchar(2000)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "journalier": {
+          "name": "journalier",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
+        },
+        "hebdomadaire": {
+          "name": "hebdomadaire",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
+        },
+        "mensuel": {
+          "name": "mensuel",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
+        },
+        "unite": {
+          "name": "unite",
+          "type": "varchar(12)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "description": {
+          "name": "description",
+          "type": "varchar(500)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "est_actif": {
+          "name": "est_actif",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": true
+        },
+        "version": {
+          "name": "version",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 1
+        },
+        "cree_par": {
+          "name": "cree_par",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "modifie_par": {
+          "name": "modifie_par",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "cree_le": {
+          "name": "cree_le",
+          "type": "datetime(3)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP(3)"
+        },
+        "modifie_le": {
+          "name": "modifie_le",
+          "type": "datetime(3)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3)"
+        }
+      },
+      "indexes": {
+        "compteurs_code_idx": {
+          "name": "compteurs_code_idx",
+          "columns": [
+            "code"
+          ],
+          "isUnique": true
+        },
+        "compteurs_libelle_idx": {
+          "name": "compteurs_libelle_idx",
+          "columns": [
+            "libelle"
+          ],
+          "isUnique": true
+        },
+        "compteurs_cree_par_idx": {
+          "name": "compteurs_cree_par_idx",
+          "columns": [
+            "cree_par"
+          ],
+          "isUnique": false
+        },
+        "compteurs_modifie_par_idx": {
+          "name": "compteurs_modifie_par_idx",
+          "columns": [
+            "modifie_par"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "compteurs_cree_par_utilisateurs_id_fk": {
+          "name": "compteurs_cree_par_utilisateurs_id_fk",
+          "tableFrom": "compteurs",
+          "tableTo": "utilisateurs",
+          "columnsFrom": [
+            "cree_par"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "compteurs_modifie_par_utilisateurs_id_fk": {
+          "name": "compteurs_modifie_par_utilisateurs_id_fk",
+          "tableFrom": "compteurs",
+          "tableTo": "utilisateurs",
+          "columnsFrom": [
+            "modifie_par"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "compteurs_id": {
+          "name": "compteurs_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraint": {
+        "compteurs_code_valide": {
+          "name": "compteurs_code_valide",
+          "value": "`compteurs`.`code` REGEXP '^[A-Z0-9][A-Z0-9_-]{0,29}$'"
+        },
+        "compteurs_libelle_non_vide": {
+          "name": "compteurs_libelle_non_vide",
+          "value": "CHAR_LENGTH(TRIM(`compteurs`.`libelle`)) > 0"
+        },
+        "compteurs_formule_non_vide": {
+          "name": "compteurs_formule_non_vide",
+          "value": "CHAR_LENGTH(TRIM(`compteurs`.`formule`)) > 0"
+        },
+        "compteurs_une_periodicite": {
+          "name": "compteurs_une_periodicite",
+          "value": "`compteurs`.`journalier` OR `compteurs`.`hebdomadaire` OR `compteurs`.`mensuel`"
+        },
+        "compteurs_unite_valide": {
+          "name": "compteurs_unite_valide",
+          "value": "`compteurs`.`unite` IN ('minutes', 'heures', 'jours', 'nombre', 'pourcentage')"
+        },
+        "compteurs_version_positive": {
+          "name": "compteurs_version_positive",
+          "value": "`compteurs`.`version` >= 1"
+        }
+      }
+    },
+    "compteurs_versions": {
+      "name": "compteurs_versions",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(uuid())"
+        },
+        "compteur_id": {
+          "name": "compteur_id",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "version": {
+          "name": "version",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "formule": {
+          "name": "formule",
+          "type": "varchar(2000)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "journalier": {
+          "name": "journalier",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "hebdomadaire": {
+          "name": "hebdomadaire",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "mensuel": {
+          "name": "mensuel",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "unite": {
+          "name": "unite",
+          "type": "varchar(12)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "modifie_par": {
+          "name": "modifie_par",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "cree_le": {
+          "name": "cree_le",
+          "type": "datetime(3)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP(3)"
+        },
+        "modifie_le": {
+          "name": "modifie_le",
+          "type": "datetime(3)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3)"
+        }
+      },
+      "indexes": {
+        "compteurs_versions_compteur_version_idx": {
+          "name": "compteurs_versions_compteur_version_idx",
+          "columns": [
+            "compteur_id",
+            "version"
+          ],
+          "isUnique": true
+        },
+        "compteurs_versions_modifie_par_idx": {
+          "name": "compteurs_versions_modifie_par_idx",
+          "columns": [
+            "modifie_par"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "compteurs_versions_compteur_id_compteurs_id_fk": {
+          "name": "compteurs_versions_compteur_id_compteurs_id_fk",
+          "tableFrom": "compteurs_versions",
+          "tableTo": "compteurs",
+          "columnsFrom": [
+            "compteur_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "compteurs_versions_modifie_par_utilisateurs_id_fk": {
+          "name": "compteurs_versions_modifie_par_utilisateurs_id_fk",
+          "tableFrom": "compteurs_versions",
+          "tableTo": "utilisateurs",
+          "columnsFrom": [
+            "modifie_par"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "compteurs_versions_id": {
+          "name": "compteurs_versions_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraint": {}
+    },
+    "departements": {
+      "name": "departements",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(uuid())"
+        },
+        "nom": {
+          "name": "nom",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "parent_id": {
+          "name": "parent_id",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "site_id": {
+          "name": "site_id",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "cree_le": {
+          "name": "cree_le",
+          "type": "datetime(3)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP(3)"
+        },
+        "modifie_le": {
+          "name": "modifie_le",
+          "type": "datetime(3)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3)"
+        }
+      },
+      "indexes": {
+        "departements_parent_nom_idx": {
+          "name": "departements_parent_nom_idx",
+          "columns": [
+            "parent_id",
+            "nom"
+          ],
+          "isUnique": true
+        },
+        "departements_parent_idx": {
+          "name": "departements_parent_idx",
+          "columns": [
+            "parent_id"
+          ],
+          "isUnique": false
+        },
+        "departements_site_idx": {
+          "name": "departements_site_idx",
+          "columns": [
+            "site_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "departements_parent_id_departements_id_fk": {
+          "name": "departements_parent_id_departements_id_fk",
+          "tableFrom": "departements",
+          "tableTo": "departements",
+          "columnsFrom": [
+            "parent_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "departements_site_id_sites_id_fk": {
+          "name": "departements_site_id_sites_id_fk",
+          "tableFrom": "departements",
+          "tableTo": "sites",
+          "columnsFrom": [
+            "site_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "departements_id": {
+          "name": "departements_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraint": {
+        "departements_nom_non_vide": {
+          "name": "departements_nom_non_vide",
+          "value": "CHAR_LENGTH(TRIM(`departements`.`nom`)) > 0"
+        },
+        "departements_pas_son_propre_parent": {
+          "name": "departements_pas_son_propre_parent",
+          "value": "`departements`.`parent_id` IS NULL OR `departements`.`parent_id` <> `departements`.`id`"
+        }
+      }
+    },
+    "employes": {
+      "name": "employes",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(uuid())"
+        },
+        "matricule": {
+          "name": "matricule",
+          "type": "varchar(30)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "numero_badge": {
+          "name": "numero_badge",
+          "type": "varchar(30)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "prenom": {
+          "name": "prenom",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "nom": {
+          "name": "nom",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "departement_id": {
+          "name": "departement_id",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "poste_id": {
+          "name": "poste_id",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "groupe_id": {
+          "name": "groupe_id",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "site_id": {
+          "name": "site_id",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "telephone": {
+          "name": "telephone",
+          "type": "varchar(16)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "email": {
+          "name": "email",
+          "type": "varchar(254)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "genre": {
+          "name": "genre",
+          "type": "varchar(10)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "type_piece_identite": {
+          "name": "type_piece_identite",
+          "type": "varchar(20)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "numero_piece_identite": {
+          "name": "numero_piece_identite",
+          "type": "varchar(30)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "type_emploi": {
+          "name": "type_emploi",
+          "type": "varchar(20)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "date_embauche": {
+          "name": "date_embauche",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "date_debut_emploi": {
+          "name": "date_debut_emploi",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "date_fin_emploi": {
+          "name": "date_fin_emploi",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "horaire_dynamique": {
+          "name": "horaire_dynamique",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
+        },
+        "cree_le": {
+          "name": "cree_le",
+          "type": "datetime(3)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP(3)"
+        },
+        "modifie_le": {
+          "name": "modifie_le",
+          "type": "datetime(3)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3)"
+        }
+      },
+      "indexes": {
+        "employes_matricule_idx": {
+          "name": "employes_matricule_idx",
+          "columns": [
+            "matricule"
+          ],
+          "isUnique": true
+        },
+        "employes_numero_badge_idx": {
+          "name": "employes_numero_badge_idx",
+          "columns": [
+            "numero_badge"
+          ],
+          "isUnique": true
+        },
+        "employes_piece_identite_idx": {
+          "name": "employes_piece_identite_idx",
+          "columns": [
+            "type_piece_identite",
+            "numero_piece_identite"
+          ],
+          "isUnique": true
+        },
+        "employes_email_idx": {
+          "name": "employes_email_idx",
+          "columns": [
+            "email"
+          ],
+          "isUnique": true
+        },
+        "employes_departement_idx": {
+          "name": "employes_departement_idx",
+          "columns": [
+            "departement_id"
+          ],
+          "isUnique": false
+        },
+        "employes_poste_idx": {
+          "name": "employes_poste_idx",
+          "columns": [
+            "poste_id"
+          ],
+          "isUnique": false
+        },
+        "employes_groupe_idx": {
+          "name": "employes_groupe_idx",
+          "columns": [
+            "groupe_id"
+          ],
+          "isUnique": false
+        },
+        "employes_site_idx": {
+          "name": "employes_site_idx",
+          "columns": [
+            "site_id"
+          ],
+          "isUnique": false
+        },
+        "employes_nom_idx": {
+          "name": "employes_nom_idx",
+          "columns": [
+            "nom",
+            "prenom"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "employes_departement_id_departements_id_fk": {
+          "name": "employes_departement_id_departements_id_fk",
+          "tableFrom": "employes",
+          "tableTo": "departements",
+          "columnsFrom": [
+            "departement_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "employes_poste_id_postes_id_fk": {
+          "name": "employes_poste_id_postes_id_fk",
+          "tableFrom": "employes",
+          "tableTo": "postes",
+          "columnsFrom": [
+            "poste_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "employes_groupe_id_groupes_id_fk": {
+          "name": "employes_groupe_id_groupes_id_fk",
+          "tableFrom": "employes",
+          "tableTo": "groupes",
+          "columnsFrom": [
+            "groupe_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "employes_site_id_sites_id_fk": {
+          "name": "employes_site_id_sites_id_fk",
+          "tableFrom": "employes",
+          "tableTo": "sites",
+          "columnsFrom": [
+            "site_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "employes_id": {
+          "name": "employes_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraint": {
+        "employes_matricule_non_vide": {
+          "name": "employes_matricule_non_vide",
+          "value": "CHAR_LENGTH(TRIM(`employes`.`matricule`)) > 0"
+        },
+        "employes_prenom_non_vide": {
+          "name": "employes_prenom_non_vide",
+          "value": "CHAR_LENGTH(TRIM(`employes`.`prenom`)) > 0"
+        },
+        "employes_nom_non_vide": {
+          "name": "employes_nom_non_vide",
+          "value": "CHAR_LENGTH(TRIM(`employes`.`nom`)) > 0"
+        },
+        "employes_numero_badge_non_vide": {
+          "name": "employes_numero_badge_non_vide",
+          "value": "CHAR_LENGTH(TRIM(`employes`.`numero_badge`)) > 0"
+        },
+        "employes_genre_valide": {
+          "name": "employes_genre_valide",
+          "value": "`employes`.`genre` IS NULL OR `employes`.`genre` IN ('homme', 'femme')"
+        },
+        "employes_type_piece_valide": {
+          "name": "employes_type_piece_valide",
+          "value": "`employes`.`type_piece_identite` IS NULL OR `employes`.`type_piece_identite` IN ('cin', 'passeport', 'carte_sejour')"
+        },
+        "employes_piece_complete": {
+          "name": "employes_piece_complete",
+          "value": "(`employes`.`type_piece_identite` IS NULL) = (`employes`.`numero_piece_identite` IS NULL)"
+        },
+        "employes_email_minuscules": {
+          "name": "employes_email_minuscules",
+          "value": "`employes`.`email` IS NULL OR CAST(`employes`.`email` AS BINARY) = CAST(LOWER(`employes`.`email`) AS BINARY)"
+        },
+        "employes_telephone_e164": {
+          "name": "employes_telephone_e164",
+          "value": "`employes`.`telephone` IS NULL OR `employes`.`telephone` REGEXP '^[+][1-9][0-9]{7,14}$'"
+        },
+        "employes_type_emploi_valide": {
+          "name": "employes_type_emploi_valide",
+          "value": "`employes`.`type_emploi` IS NULL OR `employes`.`type_emploi` IN ('cdi', 'cdd', 'interim', 'stage')"
+        },
+        "employes_dates_emploi_coherentes": {
+          "name": "employes_dates_emploi_coherentes",
+          "value": "`employes`.`date_fin_emploi` IS NULL OR `employes`.`date_embauche` IS NULL OR `employes`.`date_fin_emploi` >= `employes`.`date_embauche`"
+        },
+        "employes_debut_avant_fin": {
+          "name": "employes_debut_avant_fin",
+          "value": "`employes`.`date_fin_emploi` IS NULL OR `employes`.`date_debut_emploi` IS NULL OR `employes`.`date_fin_emploi` >= `employes`.`date_debut_emploi`"
+        }
+      }
+    },
+    "evenements": {
+      "name": "evenements",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(uuid())"
+        },
+        "code": {
+          "name": "code",
+          "type": "varchar(3)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "nom": {
+          "name": "nom",
+          "type": "varchar(60)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "type": {
+          "name": "type",
+          "type": "varchar(10)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "est_saisi_en_heures": {
+          "name": "est_saisi_en_heures",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
+        },
+        "est_prioritaire_sur_pointages": {
+          "name": "est_prioritaire_sur_pointages",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
+        },
+        "est_visible_planning": {
+          "name": "est_visible_planning",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": true
+        },
+        "priorite": {
+          "name": "priorite",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "code_paie": {
+          "name": "code_paie",
+          "type": "varchar(20)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "cree_le": {
+          "name": "cree_le",
+          "type": "datetime(3)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP(3)"
+        },
+        "modifie_le": {
+          "name": "modifie_le",
+          "type": "datetime(3)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3)"
+        }
+      },
+      "indexes": {
+        "evenements_code_idx": {
+          "name": "evenements_code_idx",
+          "columns": [
+            "code"
+          ],
+          "isUnique": true
+        },
+        "evenements_nom_idx": {
+          "name": "evenements_nom_idx",
+          "columns": [
+            "nom"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {
+        "evenements_id": {
+          "name": "evenements_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraint": {
+        "evenements_code_valide": {
+          "name": "evenements_code_valide",
+          "value": "`evenements`.`code` REGEXP '^[A-Z0-9]{1,3}$'"
+        },
+        "evenements_nom_non_vide": {
+          "name": "evenements_nom_non_vide",
+          "value": "CHAR_LENGTH(TRIM(`evenements`.`nom`)) > 0"
+        },
+        "evenements_type_valide": {
+          "name": "evenements_type_valide",
+          "value": "`evenements`.`type` IN ('absence', 'presence')"
+        },
+        "evenements_priorite_bornee": {
+          "name": "evenements_priorite_bornee",
+          "value": "`evenements`.`priorite` BETWEEN 0 AND 255"
+        }
+      }
+    },
+    "evenements_employes": {
+      "name": "evenements_employes",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(uuid())"
+        },
+        "employe_id": {
+          "name": "employe_id",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "evenement_id": {
+          "name": "evenement_id",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "date_debut": {
+          "name": "date_debut",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "date_fin": {
+          "name": "date_fin",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "debut_minutes": {
+          "name": "debut_minutes",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "fin_minutes": {
+          "name": "fin_minutes",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "remarque": {
+          "name": "remarque",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "saisi_par": {
+          "name": "saisi_par",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "cree_le": {
+          "name": "cree_le",
+          "type": "datetime(3)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP(3)"
+        },
+        "modifie_le": {
+          "name": "modifie_le",
+          "type": "datetime(3)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3)"
+        }
+      },
+      "indexes": {
+        "evenements_employes_employe_idx": {
+          "name": "evenements_employes_employe_idx",
+          "columns": [
+            "employe_id",
+            "date_debut"
+          ],
+          "isUnique": false
+        },
+        "evenements_employes_evenement_idx": {
+          "name": "evenements_employes_evenement_idx",
+          "columns": [
+            "evenement_id"
+          ],
+          "isUnique": false
+        },
+        "evenements_employes_dates_idx": {
+          "name": "evenements_employes_dates_idx",
+          "columns": [
+            "date_debut",
+            "date_fin"
+          ],
+          "isUnique": false
+        },
+        "evenements_employes_saisi_par_idx": {
+          "name": "evenements_employes_saisi_par_idx",
+          "columns": [
+            "saisi_par"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "evenements_employes_employe_id_employes_id_fk": {
+          "name": "evenements_employes_employe_id_employes_id_fk",
+          "tableFrom": "evenements_employes",
+          "tableTo": "employes",
+          "columnsFrom": [
+            "employe_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "evenements_employes_evenement_id_evenements_id_fk": {
+          "name": "evenements_employes_evenement_id_evenements_id_fk",
+          "tableFrom": "evenements_employes",
+          "tableTo": "evenements",
+          "columnsFrom": [
+            "evenement_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "evenements_employes_saisi_par_utilisateurs_id_fk": {
+          "name": "evenements_employes_saisi_par_utilisateurs_id_fk",
+          "tableFrom": "evenements_employes",
+          "tableTo": "utilisateurs",
+          "columnsFrom": [
+            "saisi_par"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "evenements_employes_id": {
+          "name": "evenements_employes_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraint": {
+        "evenements_employes_dates_coherentes": {
+          "name": "evenements_employes_dates_coherentes",
+          "value": "`evenements_employes`.`date_fin` >= `evenements_employes`.`date_debut`"
+        },
+        "evenements_employes_heures_valides": {
+          "name": "evenements_employes_heures_valides",
+          "value": "(`evenements_employes`.`debut_minutes` IS NULL AND `evenements_employes`.`fin_minutes` IS NULL) OR (`evenements_employes`.`date_debut` = `evenements_employes`.`date_fin` AND `evenements_employes`.`debut_minutes` >= 0 AND `evenements_employes`.`fin_minutes` <= 1440 AND `evenements_employes`.`debut_minutes` < `evenements_employes`.`fin_minutes`)"
+        }
+      }
+    },
+    "groupes": {
+      "name": "groupes",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(uuid())"
+        },
+        "nom": {
+          "name": "nom",
+          "type": "varchar(60)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "description": {
+          "name": "description",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "cree_le": {
+          "name": "cree_le",
+          "type": "datetime(3)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP(3)"
+        },
+        "modifie_le": {
+          "name": "modifie_le",
+          "type": "datetime(3)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3)"
+        }
+      },
+      "indexes": {
+        "groupes_nom_idx": {
+          "name": "groupes_nom_idx",
+          "columns": [
+            "nom"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {
+        "groupes_id": {
+          "name": "groupes_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraint": {
+        "groupes_nom_non_vide": {
+          "name": "groupes_nom_non_vide",
+          "value": "CHAR_LENGTH(TRIM(`groupes`.`nom`)) > 0"
+        }
+      }
+    },
+    "historique": {
+      "name": "historique",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(uuid())"
+        },
+        "action": {
+          "name": "action",
+          "type": "varchar(20)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "objet": {
+          "name": "objet",
+          "type": "varchar(30)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "module": {
+          "name": "module",
+          "type": "varchar(20)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "libelle": {
+          "name": "libelle",
+          "type": "varchar(150)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "lien": {
+          "name": "lien",
+          "type": "varchar(200)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "auteur_id": {
+          "name": "auteur_id",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "auteur_nom": {
+          "name": "auteur_nom",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "auteur_identifiant": {
+          "name": "auteur_identifiant",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "cree_le": {
+          "name": "cree_le",
+          "type": "datetime(3)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP(3)"
+        },
+        "modifie_le": {
+          "name": "modifie_le",
+          "type": "datetime(3)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3)"
+        }
+      },
+      "indexes": {
+        "historique_date_idx": {
+          "name": "historique_date_idx",
+          "columns": [
+            "cree_le"
+          ],
+          "isUnique": false
+        },
+        "historique_auteur_date_idx": {
+          "name": "historique_auteur_date_idx",
+          "columns": [
+            "auteur_id",
+            "cree_le"
+          ],
+          "isUnique": false
+        },
+        "historique_module_date_idx": {
+          "name": "historique_module_date_idx",
+          "columns": [
+            "module",
+            "cree_le"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "historique_auteur_id_utilisateurs_id_fk": {
+          "name": "historique_auteur_id_utilisateurs_id_fk",
+          "tableFrom": "historique",
+          "tableTo": "utilisateurs",
+          "columnsFrom": [
+            "auteur_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "historique_id": {
+          "name": "historique_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraint": {
+        "historique_action_valide": {
+          "name": "historique_action_valide",
+          "value": "`historique`.`action` IN ('creation', 'modification', 'suppression', 'connexion', 'deconnexion', 'export')"
+        },
+        "historique_module_valide": {
+          "name": "historique_module_valide",
+          "value": "`historique`.`module` IN ('personnel', 'planning', 'presence', 'administration')"
+        }
+      }
+    },
+    "informations_employes": {
+      "name": "informations_employes",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(uuid())"
+        },
+        "employe_id": {
+          "name": "employe_id",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "libelle": {
+          "name": "libelle",
+          "type": "varchar(60)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "valeur": {
+          "name": "valeur",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "cree_le": {
+          "name": "cree_le",
+          "type": "datetime(3)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP(3)"
+        },
+        "modifie_le": {
+          "name": "modifie_le",
+          "type": "datetime(3)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3)"
+        }
+      },
+      "indexes": {
+        "informations_employes_employe_libelle_idx": {
+          "name": "informations_employes_employe_libelle_idx",
+          "columns": [
+            "employe_id",
+            "libelle"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {
+        "informations_employes_employe_id_employes_id_fk": {
+          "name": "informations_employes_employe_id_employes_id_fk",
+          "tableFrom": "informations_employes",
+          "tableTo": "employes",
+          "columnsFrom": [
+            "employe_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "informations_employes_id": {
+          "name": "informations_employes_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraint": {
+        "informations_employes_libelle_non_vide": {
+          "name": "informations_employes_libelle_non_vide",
+          "value": "CHAR_LENGTH(TRIM(`informations_employes`.`libelle`)) > 0"
+        },
+        "informations_employes_valeur_non_vide": {
+          "name": "informations_employes_valeur_non_vide",
+          "value": "CHAR_LENGTH(TRIM(`informations_employes`.`valeur`)) > 0"
+        }
+      }
+    },
+    "jours_rotation": {
+      "name": "jours_rotation",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(uuid())"
+        },
+        "rotation_id": {
+          "name": "rotation_id",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "numero_jour": {
+          "name": "numero_jour",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "profil_id": {
+          "name": "profil_id",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "cree_le": {
+          "name": "cree_le",
+          "type": "datetime(3)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP(3)"
+        },
+        "modifie_le": {
+          "name": "modifie_le",
+          "type": "datetime(3)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3)"
+        }
+      },
+      "indexes": {
+        "jours_rotation_rotation_jour_idx": {
+          "name": "jours_rotation_rotation_jour_idx",
+          "columns": [
+            "rotation_id",
+            "numero_jour"
+          ],
+          "isUnique": true
+        },
+        "jours_rotation_profil_idx": {
+          "name": "jours_rotation_profil_idx",
+          "columns": [
+            "profil_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "jours_rotation_rotation_id_rotations_id_fk": {
+          "name": "jours_rotation_rotation_id_rotations_id_fk",
+          "tableFrom": "jours_rotation",
+          "tableTo": "rotations",
+          "columnsFrom": [
+            "rotation_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "jours_rotation_profil_id_profils_horaires_id_fk": {
+          "name": "jours_rotation_profil_id_profils_horaires_id_fk",
+          "tableFrom": "jours_rotation",
+          "tableTo": "profils_horaires",
+          "columnsFrom": [
+            "profil_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "jours_rotation_id": {
+          "name": "jours_rotation_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraint": {
+        "jours_rotation_numero_borne": {
+          "name": "jours_rotation_numero_borne",
+          "value": "`jours_rotation`.`numero_jour` BETWEEN 0 AND 30"
+        }
+      }
+    },
+    "notifications": {
+      "name": "notifications",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(uuid())"
+        },
+        "module": {
+          "name": "module",
+          "type": "varchar(20)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "action": {
+          "name": "action",
+          "type": "varchar(20)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "objet": {
+          "name": "objet",
+          "type": "varchar(30)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "libelle": {
+          "name": "libelle",
+          "type": "varchar(150)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "lien": {
+          "name": "lien",
+          "type": "varchar(200)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "auteur_id": {
+          "name": "auteur_id",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "auteur_nom": {
+          "name": "auteur_nom",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "cree_le": {
+          "name": "cree_le",
+          "type": "datetime(3)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP(3)"
+        },
+        "modifie_le": {
+          "name": "modifie_le",
+          "type": "datetime(3)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3)"
+        }
+      },
+      "indexes": {
+        "notifications_module_date_idx": {
+          "name": "notifications_module_date_idx",
+          "columns": [
+            "module",
+            "cree_le"
+          ],
+          "isUnique": false
+        },
+        "notifications_date_idx": {
+          "name": "notifications_date_idx",
+          "columns": [
+            "cree_le"
+          ],
+          "isUnique": false
+        },
+        "notifications_auteur_idx": {
+          "name": "notifications_auteur_idx",
+          "columns": [
+            "auteur_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "notifications_auteur_id_utilisateurs_id_fk": {
+          "name": "notifications_auteur_id_utilisateurs_id_fk",
+          "tableFrom": "notifications",
+          "tableTo": "utilisateurs",
+          "columnsFrom": [
+            "auteur_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "notifications_id": {
+          "name": "notifications_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraint": {
+        "notifications_module_valide": {
+          "name": "notifications_module_valide",
+          "value": "`notifications`.`module` IN ('personnel', 'planning', 'presence', 'administration')"
+        },
+        "notifications_action_valide": {
+          "name": "notifications_action_valide",
+          "value": "`notifications`.`action` IN ('creation', 'modification', 'suppression')"
+        }
+      }
+    },
+    "parametres": {
+      "name": "parametres",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(uuid())"
+        },
+        "cle": {
+          "name": "cle",
+          "type": "varchar(30)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "valeur": {
+          "name": "valeur",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "modifie_par": {
+          "name": "modifie_par",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "cree_le": {
+          "name": "cree_le",
+          "type": "datetime(3)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP(3)"
+        },
+        "modifie_le": {
+          "name": "modifie_le",
+          "type": "datetime(3)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3)"
+        }
+      },
+      "indexes": {
+        "parametres_cle_idx": {
+          "name": "parametres_cle_idx",
+          "columns": [
+            "cle"
+          ],
+          "isUnique": true
+        },
+        "parametres_modifie_par_idx": {
+          "name": "parametres_modifie_par_idx",
+          "columns": [
+            "modifie_par"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "parametres_modifie_par_utilisateurs_id_fk": {
+          "name": "parametres_modifie_par_utilisateurs_id_fk",
+          "tableFrom": "parametres",
+          "tableTo": "utilisateurs",
+          "columnsFrom": [
+            "modifie_par"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "parametres_id": {
+          "name": "parametres_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraint": {
+        "parametres_valeur_valide": {
+          "name": "parametres_valeur_valide",
+          "value": "(`parametres`.`cle` = 'theme' AND `parametres`.`valeur` IN ('bleu', 'emeraude', 'ocean', 'ardoise', 'personnalise')) OR (`parametres`.`cle` = 'police' AND `parametres`.`valeur` IN ('hanken', 'inter', 'source_sans', 'atkinson')) OR (`parametres`.`cle` = 'taille_texte' AND `parametres`.`valeur` IN ('normale', 'grande', 'tres_grande')) OR (`parametres`.`cle` IN ('couleur_primaire', 'couleur_marine', 'couleur_accent', 'couleur_fond') AND `parametres`.`valeur` REGEXP '^#[0-9a-f]{6}$')"
+        }
+      }
+    },
+    "periodes_evenements": {
+      "name": "periodes_evenements",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(uuid())"
+        },
+        "evenement_id": {
+          "name": "evenement_id",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "date_debut": {
+          "name": "date_debut",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "date_fin": {
+          "name": "date_fin",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "cree_le": {
+          "name": "cree_le",
+          "type": "datetime(3)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP(3)"
+        },
+        "modifie_le": {
+          "name": "modifie_le",
+          "type": "datetime(3)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3)"
+        }
+      },
+      "indexes": {
+        "periodes_evenements_evenement_idx": {
+          "name": "periodes_evenements_evenement_idx",
+          "columns": [
+            "evenement_id",
+            "date_debut"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "periodes_evenements_evenement_id_evenements_id_fk": {
+          "name": "periodes_evenements_evenement_id_evenements_id_fk",
+          "tableFrom": "periodes_evenements",
+          "tableTo": "evenements",
+          "columnsFrom": [
+            "evenement_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "periodes_evenements_id": {
+          "name": "periodes_evenements_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraint": {
+        "periodes_evenements_dates_coherentes": {
+          "name": "periodes_evenements_dates_coherentes",
+          "value": "`periodes_evenements`.`date_fin` >= `periodes_evenements`.`date_debut`"
+        }
+      }
+    },
+    "photos_employes": {
+      "name": "photos_employes",
+      "columns": {
+        "employe_id": {
+          "name": "employe_id",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "type_mime": {
+          "name": "type_mime",
+          "type": "varchar(20)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "contenu": {
+          "name": "contenu",
+          "type": "mediumblob",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "taille_octets": {
+          "name": "taille_octets",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "cree_le": {
+          "name": "cree_le",
+          "type": "datetime(3)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP(3)"
+        },
+        "modifie_le": {
+          "name": "modifie_le",
+          "type": "datetime(3)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3)"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "photos_employes_employe_id_employes_id_fk": {
+          "name": "photos_employes_employe_id_employes_id_fk",
+          "tableFrom": "photos_employes",
+          "tableTo": "employes",
+          "columnsFrom": [
+            "employe_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "photos_employes_employe_id": {
+          "name": "photos_employes_employe_id",
+          "columns": [
+            "employe_id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraint": {
+        "photos_employes_type_mime": {
+          "name": "photos_employes_type_mime",
+          "value": "`photos_employes`.`type_mime` IN ('image/jpeg', 'image/png', 'image/webp')"
+        },
+        "photos_employes_taille": {
+          "name": "photos_employes_taille",
+          "value": "`photos_employes`.`taille_octets` BETWEEN 1 AND 524288"
+        }
+      }
+    },
+    "plages_profils": {
+      "name": "plages_profils",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(uuid())"
+        },
+        "profil_id": {
+          "name": "profil_id",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "debut_minutes": {
+          "name": "debut_minutes",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "fin_minutes": {
+          "name": "fin_minutes",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "type": {
+          "name": "type",
+          "type": "varchar(15)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "cree_le": {
+          "name": "cree_le",
+          "type": "datetime(3)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP(3)"
+        },
+        "modifie_le": {
+          "name": "modifie_le",
+          "type": "datetime(3)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3)"
+        }
+      },
+      "indexes": {
+        "plages_profils_profil_debut_idx": {
+          "name": "plages_profils_profil_debut_idx",
+          "columns": [
+            "profil_id",
+            "debut_minutes"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {
+        "plages_profils_profil_id_profils_horaires_id_fk": {
+          "name": "plages_profils_profil_id_profils_horaires_id_fk",
+          "tableFrom": "plages_profils",
+          "tableTo": "profils_horaires",
+          "columnsFrom": [
+            "profil_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "plages_profils_id": {
+          "name": "plages_profils_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraint": {
+        "plages_profils_bornes": {
+          "name": "plages_profils_bornes",
+          "value": "`plages_profils`.`debut_minutes` BETWEEN 0 AND 1439 AND `plages_profils`.`fin_minutes` BETWEEN 1 AND 1440 AND `plages_profils`.`fin_minutes` > `plages_profils`.`debut_minutes`"
+        },
+        "plages_profils_type_valide": {
+          "name": "plages_profils_type_valide",
+          "value": "`plages_profils`.`type` IN ('interdite', 'neutralisee', 'variable', 'fixe', 'repas', 'retard_tolere')"
+        }
+      }
+    },
+    "pointages": {
+      "name": "pointages",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(uuid())"
+        },
+        "employe_id": {
+          "name": "employe_id",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "horodatage": {
+          "name": "horodatage",
+          "type": "datetime(3)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "etat": {
+          "name": "etat",
+          "type": "varchar(20)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "source": {
+          "name": "source",
+          "type": "varchar(20)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'manuel'"
+        },
+        "remarque": {
+          "name": "remarque",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "saisi_par": {
+          "name": "saisi_par",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "cree_le": {
+          "name": "cree_le",
+          "type": "datetime(3)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP(3)"
+        },
+        "modifie_le": {
+          "name": "modifie_le",
+          "type": "datetime(3)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3)"
+        }
+      },
+      "indexes": {
+        "pointages_employe_horodatage_etat_idx": {
+          "name": "pointages_employe_horodatage_etat_idx",
+          "columns": [
+            "employe_id",
+            "horodatage",
+            "etat"
+          ],
+          "isUnique": true
+        },
+        "pointages_horodatage_idx": {
+          "name": "pointages_horodatage_idx",
+          "columns": [
+            "horodatage"
+          ],
+          "isUnique": false
+        },
+        "pointages_saisi_par_idx": {
+          "name": "pointages_saisi_par_idx",
+          "columns": [
+            "saisi_par"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "pointages_employe_id_employes_id_fk": {
+          "name": "pointages_employe_id_employes_id_fk",
+          "tableFrom": "pointages",
+          "tableTo": "employes",
+          "columnsFrom": [
+            "employe_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "pointages_saisi_par_utilisateurs_id_fk": {
+          "name": "pointages_saisi_par_utilisateurs_id_fk",
+          "tableFrom": "pointages",
+          "tableTo": "utilisateurs",
+          "columnsFrom": [
+            "saisi_par"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "pointages_id": {
+          "name": "pointages_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraint": {
+        "pointages_etat": {
+          "name": "pointages_etat",
+          "value": "`pointages`.`etat` IN ('entree', 'sortie', 'debut_pause', 'fin_pause', 'debut_heures_sup', 'fin_heures_sup')"
+        },
+        "pointages_source": {
+          "name": "pointages_source",
+          "value": "`pointages`.`source` IN ('manuel', 'badgeuse')"
+        }
+      }
+    },
+    "postes": {
+      "name": "postes",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(uuid())"
+        },
+        "code": {
+          "name": "code",
+          "type": "varchar(30)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "nom": {
+          "name": "nom",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "ordre": {
+          "name": "ordre",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 99999
+        },
+        "parent_id": {
+          "name": "parent_id",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "site_id": {
+          "name": "site_id",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "cree_le": {
+          "name": "cree_le",
+          "type": "datetime(3)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP(3)"
+        },
+        "modifie_le": {
+          "name": "modifie_le",
+          "type": "datetime(3)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3)"
+        }
+      },
+      "indexes": {
+        "postes_code_idx": {
+          "name": "postes_code_idx",
+          "columns": [
+            "code"
+          ],
+          "isUnique": true
+        },
+        "postes_parent_nom_idx": {
+          "name": "postes_parent_nom_idx",
+          "columns": [
+            "parent_id",
+            "nom"
+          ],
+          "isUnique": true
+        },
+        "postes_parent_idx": {
+          "name": "postes_parent_idx",
+          "columns": [
+            "parent_id"
+          ],
+          "isUnique": false
+        },
+        "postes_site_idx": {
+          "name": "postes_site_idx",
+          "columns": [
+            "site_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "postes_parent_id_postes_id_fk": {
+          "name": "postes_parent_id_postes_id_fk",
+          "tableFrom": "postes",
+          "tableTo": "postes",
+          "columnsFrom": [
+            "parent_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "postes_site_id_sites_id_fk": {
+          "name": "postes_site_id_sites_id_fk",
+          "tableFrom": "postes",
+          "tableTo": "sites",
+          "columnsFrom": [
+            "site_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "postes_id": {
+          "name": "postes_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraint": {
+        "postes_code_non_vide": {
+          "name": "postes_code_non_vide",
+          "value": "CHAR_LENGTH(TRIM(`postes`.`code`)) > 0"
+        },
+        "postes_nom_non_vide": {
+          "name": "postes_nom_non_vide",
+          "value": "CHAR_LENGTH(TRIM(`postes`.`nom`)) > 0"
+        },
+        "postes_ordre_borne": {
+          "name": "postes_ordre_borne",
+          "value": "`postes`.`ordre` BETWEEN 0 AND 99999"
+        },
+        "postes_pas_son_propre_parent": {
+          "name": "postes_pas_son_propre_parent",
+          "value": "`postes`.`parent_id` IS NULL OR `postes`.`parent_id` <> `postes`.`id`"
+        }
+      }
+    },
+    "profils_horaires": {
+      "name": "profils_horaires",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(uuid())"
+        },
+        "code": {
+          "name": "code",
+          "type": "varchar(3)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "nom": {
+          "name": "nom",
+          "type": "varchar(60)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "type": {
+          "name": "type",
+          "type": "varchar(10)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'travail'"
+        },
+        "est_badge": {
+          "name": "est_badge",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": true
+        },
+        "repas_minimum_minutes": {
+          "name": "repas_minimum_minutes",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "repas_maximum_minutes": {
+          "name": "repas_maximum_minutes",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "cree_le": {
+          "name": "cree_le",
+          "type": "datetime(3)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP(3)"
+        },
+        "modifie_le": {
+          "name": "modifie_le",
+          "type": "datetime(3)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3)"
+        }
+      },
+      "indexes": {
+        "profils_horaires_code_idx": {
+          "name": "profils_horaires_code_idx",
+          "columns": [
+            "code"
+          ],
+          "isUnique": true
+        },
+        "profils_horaires_nom_idx": {
+          "name": "profils_horaires_nom_idx",
+          "columns": [
+            "nom"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {
+        "profils_horaires_id": {
+          "name": "profils_horaires_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraint": {
+        "profils_horaires_code_valide": {
+          "name": "profils_horaires_code_valide",
+          "value": "`profils_horaires`.`code` REGEXP '^[A-Z0-9]{1,3}$'"
+        },
+        "profils_horaires_nom_non_vide": {
+          "name": "profils_horaires_nom_non_vide",
+          "value": "CHAR_LENGTH(TRIM(`profils_horaires`.`nom`)) > 0"
+        },
+        "profils_horaires_type_valide": {
+          "name": "profils_horaires_type_valide",
+          "value": "`profils_horaires`.`type` IN ('travail', 'repos')"
+        },
+        "profils_horaires_repas_borne": {
+          "name": "profils_horaires_repas_borne",
+          "value": "(`profils_horaires`.`repas_minimum_minutes` IS NULL OR `profils_horaires`.`repas_minimum_minutes` BETWEEN 0 AND 720) AND (`profils_horaires`.`repas_maximum_minutes` IS NULL OR `profils_horaires`.`repas_maximum_minutes` BETWEEN 0 AND 720)"
+        }
+      }
+    },
+    "regles_horaires": {
+      "name": "regles_horaires",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(uuid())"
+        },
+        "debut_minutes": {
+          "name": "debut_minutes",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "fin_minutes": {
+          "name": "fin_minutes",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "jours_semaine": {
+          "name": "jours_semaine",
+          "type": "varchar(7)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'1234567'"
+        },
+        "profil_id": {
+          "name": "profil_id",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "est_actif": {
+          "name": "est_actif",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": true
+        },
+        "cree_le": {
+          "name": "cree_le",
+          "type": "datetime(3)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP(3)"
+        },
+        "modifie_le": {
+          "name": "modifie_le",
+          "type": "datetime(3)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3)"
+        }
+      },
+      "indexes": {
+        "regles_horaires_profil_idx": {
+          "name": "regles_horaires_profil_idx",
+          "columns": [
+            "profil_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "regles_horaires_profil_id_profils_horaires_id_fk": {
+          "name": "regles_horaires_profil_id_profils_horaires_id_fk",
+          "tableFrom": "regles_horaires",
+          "tableTo": "profils_horaires",
+          "columnsFrom": [
+            "profil_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "regles_horaires_id": {
+          "name": "regles_horaires_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraint": {
+        "regles_horaires_bornes": {
+          "name": "regles_horaires_bornes",
+          "value": "`regles_horaires`.`debut_minutes` BETWEEN 0 AND 1439 AND `regles_horaires`.`fin_minutes` BETWEEN 1 AND 1440 AND `regles_horaires`.`fin_minutes` > `regles_horaires`.`debut_minutes`"
+        },
+        "regles_horaires_jours_valides": {
+          "name": "regles_horaires_jours_valides",
+          "value": "`regles_horaires`.`jours_semaine` REGEXP '^[1-7]{1,7}$'"
+        }
+      }
+    },
+    "rotations": {
+      "name": "rotations",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(uuid())"
+        },
+        "nom": {
+          "name": "nom",
+          "type": "varchar(60)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "type": {
+          "name": "type",
+          "type": "varchar(12)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "nombre_jours": {
+          "name": "nombre_jours",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "cree_le": {
+          "name": "cree_le",
+          "type": "datetime(3)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP(3)"
+        },
+        "modifie_le": {
+          "name": "modifie_le",
+          "type": "datetime(3)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3)"
+        }
+      },
+      "indexes": {
+        "rotations_nom_idx": {
+          "name": "rotations_nom_idx",
+          "columns": [
+            "nom"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {
+        "rotations_id": {
+          "name": "rotations_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraint": {
+        "rotations_nom_non_vide": {
+          "name": "rotations_nom_non_vide",
+          "value": "CHAR_LENGTH(TRIM(`rotations`.`nom`)) > 0"
+        },
+        "rotations_type_et_duree": {
+          "name": "rotations_type_et_duree",
+          "value": "(`rotations`.`type` = 'hebdomadaire' AND `rotations`.`nombre_jours` = 7) OR (`rotations`.`type` = 'cycle' AND `rotations`.`nombre_jours` BETWEEN 1 AND 31)"
+        }
+      }
+    },
+    "sessions": {
+      "name": "sessions",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(uuid())"
+        },
+        "utilisateur_id": {
+          "name": "utilisateur_id",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "jeton": {
+          "name": "jeton",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "expire_le": {
+          "name": "expire_le",
+          "type": "datetime(3)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "adresse_ip": {
+          "name": "adresse_ip",
+          "type": "varchar(45)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "agent_utilisateur": {
+          "name": "agent_utilisateur",
+          "type": "varchar(500)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "cree_le": {
+          "name": "cree_le",
+          "type": "datetime(3)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP(3)"
+        },
+        "modifie_le": {
+          "name": "modifie_le",
+          "type": "datetime(3)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3)"
+        }
+      },
+      "indexes": {
+        "sessions_jeton_idx": {
+          "name": "sessions_jeton_idx",
+          "columns": [
+            "jeton"
+          ],
+          "isUnique": true
+        },
+        "sessions_utilisateur_idx": {
+          "name": "sessions_utilisateur_idx",
+          "columns": [
+            "utilisateur_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "sessions_utilisateur_id_utilisateurs_id_fk": {
+          "name": "sessions_utilisateur_id_utilisateurs_id_fk",
+          "tableFrom": "sessions",
+          "tableTo": "utilisateurs",
+          "columnsFrom": [
+            "utilisateur_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "sessions_id": {
+          "name": "sessions_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraint": {}
+    },
+    "sites": {
+      "name": "sites",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(uuid())"
+        },
+        "nom": {
+          "name": "nom",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "adresse": {
+          "name": "adresse",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "cree_le": {
+          "name": "cree_le",
+          "type": "datetime(3)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP(3)"
+        },
+        "modifie_le": {
+          "name": "modifie_le",
+          "type": "datetime(3)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3)"
+        }
+      },
+      "indexes": {
+        "sites_nom_idx": {
+          "name": "sites_nom_idx",
+          "columns": [
+            "nom"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {
+        "sites_id": {
+          "name": "sites_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraint": {
+        "sites_nom_non_vide": {
+          "name": "sites_nom_non_vide",
+          "value": "CHAR_LENGTH(TRIM(`sites`.`nom`)) > 0"
+        }
+      }
+    },
+    "utilisateurs": {
+      "name": "utilisateurs",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(uuid())"
+        },
+        "identifiant": {
+          "name": "identifiant",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "email": {
+          "name": "email",
+          "type": "varchar(254)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "email_verifie": {
+          "name": "email_verifie",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
+        },
+        "nom": {
+          "name": "nom",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "image": {
+          "name": "image",
+          "type": "varchar(500)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "doit_changer_mot_de_passe": {
+          "name": "doit_changer_mot_de_passe",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": true
+        },
+        "est_actif": {
+          "name": "est_actif",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": true
+        },
+        "est_super_admin": {
+          "name": "est_super_admin",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
+        },
+        "notifications_lues_le": {
+          "name": "notifications_lues_le",
+          "type": "datetime(3)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "cree_le": {
+          "name": "cree_le",
+          "type": "datetime(3)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP(3)"
+        },
+        "modifie_le": {
+          "name": "modifie_le",
+          "type": "datetime(3)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3)"
+        }
+      },
+      "indexes": {
+        "utilisateurs_identifiant_idx": {
+          "name": "utilisateurs_identifiant_idx",
+          "columns": [
+            "identifiant"
+          ],
+          "isUnique": true
+        },
+        "utilisateurs_email_idx": {
+          "name": "utilisateurs_email_idx",
+          "columns": [
+            "email"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {
+        "utilisateurs_id": {
+          "name": "utilisateurs_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraint": {
+        "utilisateurs_email_minuscules": {
+          "name": "utilisateurs_email_minuscules",
+          "value": "CAST(`utilisateurs`.`email` AS BINARY) = CAST(LOWER(`utilisateurs`.`email`) AS BINARY)"
+        },
+        "utilisateurs_identifiant_minuscules": {
+          "name": "utilisateurs_identifiant_minuscules",
+          "value": "CAST(`utilisateurs`.`identifiant` AS BINARY) = CAST(LOWER(`utilisateurs`.`identifiant`) AS BINARY)"
+        },
+        "utilisateurs_nom_non_vide": {
+          "name": "utilisateurs_nom_non_vide",
+          "value": "CHAR_LENGTH(TRIM(`utilisateurs`.`nom`)) > 0"
+        }
+      }
+    },
+    "verifications": {
+      "name": "verifications",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(uuid())"
+        },
+        "identifiant": {
+          "name": "identifiant",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "valeur": {
+          "name": "valeur",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "expire_le": {
+          "name": "expire_le",
+          "type": "datetime(3)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "cree_le": {
+          "name": "cree_le",
+          "type": "datetime(3)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP(3)"
+        },
+        "modifie_le": {
+          "name": "modifie_le",
+          "type": "datetime(3)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3)"
+        }
+      },
+      "indexes": {
+        "verifications_identifiant_idx": {
+          "name": "verifications_identifiant_idx",
+          "columns": [
+            "identifiant"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {
+        "verifications_id": {
+          "name": "verifications_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraint": {}
+    }
+  },
+  "views": {},
+  "_meta": {
+    "schemas": {},
+    "tables": {},
+    "columns": {}
+  },
+  "internal": {
+    "tables": {},
+    "indexes": {}
+  }
+}
