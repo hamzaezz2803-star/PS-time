@@ -14,6 +14,7 @@ export function MessageErreur({ id, message, className }: MessageErreurProps) {
   return (
     <p
       id={id}
+      data-erreur
       className={cn("flex items-start gap-2 text-sm text-erreur", className)}
     >
       <CircleAlert className="mt-0.5 size-4 shrink-0" aria-hidden="true" />

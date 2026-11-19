@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { CalendarX2, Plane } from "lucide-react";
 import { enregistrerEvenement } from "@/app/(connecte)/exceptions/evenements/actions";
 import type { ProprietesFormulaireListe } from "@/components/liste/gestion-liste";
@@ -50,13 +50,19 @@ export function FormulaireEvenement({ element, onTermine, onAnnuler }: Propriete
   const [type, setType] = useState<TypeEvenement>(typeInitial);
   const coche = (nom: "estSaisiEnHeures" | "estPrioritaireSurPointages" | "estVisiblePlanning", parDefaut: boolean) =>
     caseSaisie(etat, nom, element?.[nom] ?? parDefaut);
+  const zoneDefilement = useRef<HTMLDivElement>(null);
+
+  // Après un refus, montre la première erreur : elle peut être en bas de la fenêtre (périodes, paie).
+  useEffect(() => {
+    if (etat.erreursChamps) zoneDefilement.current?.querySelector("[data-erreur]")?.scrollIntoView({ block: "center" });
+  }, [etat]);
 
   return (
     <form action={action} noValidate className="flex min-h-0 flex-1 flex-col">
       {element && <input type="hidden" name="id" value={element.id} />}
-      <div key={etat.numeroReponse} className="flex flex-1 flex-col gap-6 overflow-y-auto px-5 py-5 sm:px-6">
+      <div key={etat.numeroReponse} ref={zoneDefilement} className="flex flex-1 flex-col gap-6 overflow-y-auto px-5 py-5 sm:px-6">
         <div className="flex flex-col gap-4">
-          <div className="grid gap-4 sm:grid-cols-[8rem_1fr]">
+          <div className="grid gap-4 sm:grid-cols-[10rem_1fr]">
             <ChampFormulaire nom="code" libelle={champs.code} defaultValue={valeurSaisie(etat, "code", element?.code ?? "")} maxLength={LONGUEUR_MAX_CODE_EVENEMENT} autoComplete="off" autoCapitalize="characters" spellCheck={false} required className="uppercase" aide={champs.aideCode} erreur={erreurs?.code} data-focus-initial />
             <ChampFormulaire nom="nom" libelle={champs.nom} defaultValue={valeurSaisie(etat, "nom", element?.nom ?? "")} placeholder={champs.exempleNom} maxLength={LONGUEUR_MAX_NOM_EVENEMENT} autoComplete="off" required erreur={erreurs?.nom} />
           </div>
