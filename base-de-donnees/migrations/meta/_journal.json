@@ -176,6 +176,13 @@
       "when": 1795010180410,
       "tag": "0024_historique",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "5",
+      "when": 1795087896868,
+      "tag": "0025_evenements",
+      "breakpoints": true
     }
   ]
 }

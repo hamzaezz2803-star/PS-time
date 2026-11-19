@@ -40,7 +40,7 @@ export const MODULES = ["personnel", "planning", "presence"] as const;
 export const PAGES_PAR_MODULE = {
   personnel: ["sites", "departements", "postes", "personnes"],
   planning: ["profils_horaires", "rotations", "groupes", "affectations", "horaire_dynamique", "rapport_presences"],
-  presence: ["pointages_manuels", "compteurs", "detail_jour"],
+  presence: ["pointages_manuels", "evenements", "compteurs", "detail_jour"],
 } as const;
 export const PAGES = [...PAGES_PAR_MODULE.personnel, ...PAGES_PAR_MODULE.planning, ...PAGES_PAR_MODULE.presence] as const;
 export const CHEMIN_UTILISATEURS = "/administration/utilisateurs";
@@ -154,6 +154,18 @@ export const CHEMIN_POINTAGES_MANUELS = "/exceptions/pointages-manuels";
 export const ETATS_POINTAGE = ["entree", "sortie", "debut_pause", "fin_pause", "debut_heures_sup", "fin_heures_sup"] as const;
 export const SOURCES_POINTAGE = ["manuel", "badgeuse"] as const;
 export const POINTAGES_PAR_PAGE = 50;
+/**
+ * Événements : motifs d'absence ou de présence (congé, maladie, formation, mission...).
+ * Code de 3 caractères au plus, priorité de 0 à 255, 4 périodes de prise au plus.
+ */
+export const CHEMIN_EVENEMENTS = "/exceptions/evenements";
+export const TYPES_EVENEMENT = ["absence", "presence"] as const;
+export const LONGUEUR_MAX_CODE_EVENEMENT = 3;
+export const LONGUEUR_MAX_NOM_EVENEMENT = 60;
+export const LONGUEUR_MAX_CODE_PAIE = 20;
+export const PRIORITE_EVENEMENT_MAX = 255;
+export const PERIODES_PRISE_MAX = 4;
+export const LIMITE_EVENEMENTS = 500;
 /** Nombre maximal d'employés pointés en une seule saisie. */
 export const LIMITE_EMPLOYES_POINTAGE = 500;
 /** Cloche de notifications : nombre affiché, actualisation, durée de conservation. */

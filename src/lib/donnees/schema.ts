@@ -14,7 +14,7 @@ import {
   uniqueIndex,
   varchar,
 } from "drizzle-orm/mysql-core";
-import { ACTIONS_HISTORIQUE, COULEURS_PERSONNALISABLES, MODULES_HISTORIQUE, PAGES, POLICES, TAILLES_TEXTE, THEMES } from "../constantes.ts";
+import { ACTIONS_HISTORIQUE, COULEURS_PERSONNALISABLES, MODULES_HISTORIQUE, PAGES, POLICES, TAILLES_TEXTE, THEMES, TYPES_EVENEMENT } from "../constantes.ts";
 
 /**
  * Schéma de la base. Toute modification passe par une migration :
@@ -761,5 +761,55 @@ export const compteursVersions = mysqlTable(
   (table) => [
     uniqueIndex("compteurs_versions_compteur_version_idx").on(table.compteurId, table.version),
     index("compteurs_versions_modifie_par_idx").on(table.modifiePar),
+  ],
+);
+
+/**
+ * Événements : motifs d'absence ou de présence (congé, maladie, formation, mission...).
+ * `est_prioritaire_sur_pointages` : l'événement reste retenu même si l'employé a pointé
+ * (ex. formation non badgée). `priorite` départage deux événements (le plus grand l'emporte).
+ * `code_paie` vide : l'événement n'est pas transmis à la paie.
+ */
+export const evenements = mysqlTable(
+  "evenements",
+  {
+    id: identifiantUnique(),
+    code: varchar("code", { length: 3 }).notNull(),
+    nom: varchar("nom", { length: 60 }).notNull(),
+    type: varchar("type", { length: 10 }).notNull(),
+    estSaisiEnHeures: boolean("est_saisi_en_heures").notNull().default(false),
+    estPrioritaireSurPointages: boolean("est_prioritaire_sur_pointages").notNull().default(false),
+    estVisiblePlanning: boolean("est_visible_planning").notNull().default(true),
+    priorite: int("priorite").notNull().default(0),
+    codePaie: varchar("code_paie", { length: 20 }),
+    creeLe: dateCreation(),
+    modifieLe: dateModification(),
+  },
+  (table) => [
+    uniqueIndex("evenements_code_idx").on(table.code),
+    uniqueIndex("evenements_nom_idx").on(table.nom),
+    check("evenements_code_valide", sql`${table.code} REGEXP '^[A-Z0-9]{1,3}$'`),
+    check("evenements_nom_non_vide", sql`CHAR_LENGTH(TRIM(${table.nom})) > 0`),
+    check("evenements_type_valide", sql`${table.type} IN (${listeSql(TYPES_EVENEMENT)})`),
+    check("evenements_priorite_bornee", sql`${table.priorite} BETWEEN 0 AND 255`),
+  ],
+);
+
+/** Périodes pendant lesquelles un événement peut être pris (4 au plus, vérifié par l'application). Aucune : toute l'année. */
+export const periodesEvenements = mysqlTable(
+  "periodes_evenements",
+  {
+    id: identifiantUnique(),
+    evenementId: char("evenement_id", { length: 36 })
+      .notNull()
+      .references(() => evenements.id, { onDelete: "cascade" }),
+    dateDebut: jour("date_debut").notNull(),
+    dateFin: jour("date_fin").notNull(),
+    creeLe: dateCreation(),
+    modifieLe: dateModification(),
+  },
+  (table) => [
+    index("periodes_evenements_evenement_idx").on(table.evenementId, table.dateDebut),
+    check("periodes_evenements_dates_coherentes", sql`${table.dateFin} >= ${table.dateDebut}`),
   ],
 );

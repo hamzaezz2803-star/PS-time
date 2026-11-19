@@ -5,6 +5,7 @@ import {
   CalendarCog,
   CalendarRange,
   CalendarSearch,
+  CalendarX2,
   ClipboardClock,
   ClockAlert,
   ClockArrowUp,
@@ -28,6 +29,7 @@ import {
   CHEMIN_DEPARTEMENTS,
   CHEMIN_DETAIL_JOUR,
   CHEMIN_ESPACE,
+  CHEMIN_EVENEMENTS,
   CHEMIN_GROUPES,
   CHEMIN_HISTORIQUE,
   CHEMIN_HORAIRE_DYNAMIQUE,
@@ -102,7 +104,10 @@ export const MENUS_NAVIGATION: MenuNavigation[] = [
     sections: [
       {
         titre: T.gestionExceptions,
-        liens: [{ libelle: T.pointagesManuels, icone: ClipboardClock, href: CHEMIN_POINTAGES_MANUELS, page: "pointages_manuels" }],
+        liens: [
+          { libelle: T.pointagesManuels, icone: ClipboardClock, href: CHEMIN_POINTAGES_MANUELS, page: "pointages_manuels" },
+          { libelle: T.evenements, icone: CalendarX2, href: CHEMIN_EVENEMENTS, page: "evenements" },
+        ],
       },
       {
         titre: T.compteurs,

@@ -1,4 +1,5 @@
 import type { Page } from "@/lib/metier/droits";
+import type { PeriodePrise } from "@/lib/metier/evenements";
 import type { ActionHistorique, ModuleHistorique, ObjetHistorique } from "@/lib/metier/historique";
 
 /** Résultat explicite d'une opération qui peut échouer. */
@@ -67,7 +68,7 @@ export type EntreeHistorique = {
 export type Notification = {
   id: string;
   action: "creation" | "modification" | "suppression";
-  objet: "site" | "departement" | "poste" | "employe" | "profil_horaire" | "rotation" | "groupe" | "affectation" | "regle_horaire" | "horaire_dynamique" | "pointage" | "compteur" | "utilisateur" | "mot_de_passe" | "apparence";
+  objet: "site" | "departement" | "poste" | "employe" | "profil_horaire" | "rotation" | "groupe" | "affectation" | "regle_horaire" | "horaire_dynamique" | "pointage" | "evenement" | "compteur" | "utilisateur" | "mot_de_passe" | "apparence";
   libelle: string | null;
   lien: string | null;
   auteurId: string | null;
@@ -346,4 +347,23 @@ export type LigneRapportPresence = {
   /** Premier pointage, en minutes depuis minuit (heure de Casablanca). */
   minutes: number;
   profil: { code: string; nom: string } | null;
+};
+
+/** Événement : motif d'absence ou de présence (congé, maladie, formation, mission...). */
+export type Evenement = {
+  id: string;
+  code: string;
+  nom: string;
+  type: "absence" | "presence";
+  /** Vrai : l'événement peut être saisi en heures ; faux : à la journée seulement. */
+  estSaisiEnHeures: boolean;
+  /** Vrai : l'événement reste retenu même si l'employé a pointé (ex. formation non badgée). */
+  estPrioritaireSurPointages: boolean;
+  estVisiblePlanning: boolean;
+  /** De 0 à 255 : entre deux événements le même jour, le plus grand l'emporte. */
+  priorite: number;
+  /** Vide : non transmis à la paie. */
+  codePaie: string | null;
+  /** Aucune période : l'événement peut être pris toute l'année. */
+  periodes: PeriodePrise[];
 };
