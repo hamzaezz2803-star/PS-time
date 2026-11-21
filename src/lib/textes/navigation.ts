@@ -32,6 +32,7 @@ export const TEXTES_NAVIGATION = {
   utilisateurs: "Utilisateurs",
   historique: "Historique",
   apparence: "Apparence",
+  sauvegarde: "Sauvegarde",
   heureActuelle: "Date et heure actuelles",
   compte: {
     ouvrir: "Ouvrir le menu du compte",
