@@ -180,7 +180,7 @@ export const LONGUEUR_MAX_REMARQUE_ABSENCE = 255;
  * un événement et une période, des jours acquis ; les absences saisies les consomment.
  */
 export const CHEMIN_DROITS_CONGES = "/presence/droits-conges";
-export const DROITS_CONGES_PAR_PAGE = 24;
+export const DROITS_CONGES_PAR_PAGE = 50;
 /** Jours acquis ou reliquat : de 0 à 366, par demi-journée (même borne que la base). */
 export const JOURS_DROIT_MAX = 366;
 export const LONGUEUR_MAX_REMARQUE_DROIT = 255;

@@ -6,9 +6,9 @@ import { chaineRecherche } from "@/lib/metier/recherche";
 import { TEXTES_DROITS_CONGES as textes } from "@/lib/textes/droits-conges";
 import type { RechercheAbsences } from "@/lib/validation/absence";
 import type { DroitCongeListe } from "@/types";
-import { CarteDroit } from "./carte-droit";
+import { LigneDroit } from "./ligne-droit";
 
-/** Liste paginée des droits aux congés, en cartes (deux colonnes sur grand écran). */
+/** Liste paginée et compacte des droits aux congés : une ligne par droit, titres de colonnes sur grand écran. */
 export function ListeDroits({
   droits,
   total,
@@ -42,11 +42,19 @@ export function ListeDroits({
           {!estFiltree && <p className="max-w-md text-sm text-texte-secondaire">{textes.videAction}</p>}
         </div>
       ) : (
-        <div className="grid gap-4 bg-fond/60 p-4 sm:p-5 xl:grid-cols-2">
-          {droits.map((droit) => (
-            <CarteDroit key={droit.id} droit={droit} />
-          ))}
-        </div>
+        <>
+          <div className="hidden gap-x-4 border-b border-bordure bg-fond/70 px-5 py-2.5 text-sm font-semibold text-texte-secondaire lg:grid lg:[grid-template-columns:minmax(0,1.1fr)_minmax(0,1fr)_minmax(0,1.5fr)_7.5rem_5.5rem]" aria-hidden="true">
+            <span>{textes.colonnes.employe}</span>
+            <span>{textes.colonnes.evenement}</span>
+            <span>{textes.colonnes.consommation}</span>
+            <span>{textes.colonnes.reste}</span>
+          </div>
+          <ul className="divide-y divide-bordure">
+            {droits.map((droit) => (
+              <LigneDroit key={droit.id} droit={droit} />
+            ))}
+          </ul>
+        </>
       )}
       <PaginationListe page={page} nombrePages={nombrePages} lienPage={lienPage} textes={textes} />
     </section>
