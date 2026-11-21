@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { bilanDroit, estNombreDeJoursValide, etatSolde, joursDecomptes, pourcentageConsomme } from "./droits-conges.ts";
+import { anneeCivile, bilanDroit, estNombreDeJoursValide, etatSolde, joursDecomptes, pourcentageConsomme } from "./droits-conges.ts";
 
 const ANNEE_2026 = { debut: "2026-01-01", fin: "2026-12-31", joursAcquis: 18, joursReliquat: 3 };
 const journees = (debut: string, fin: string) => ({ debut, fin, debutMinutes: null, finMinutes: null });
@@ -69,5 +69,13 @@ describe("affichage du solde", () => {
     assert.equal(estNombreDeJoursValide(2.25, 366), false);
     assert.equal(estNombreDeJoursValide(-1, 366), false);
     assert.equal(estNombreDeJoursValide(400, 366), false);
+  });
+});
+
+describe("période d'un droit", () => {
+  it("reconnaît une année civile entière", () => {
+    assert.equal(anneeCivile("2026-01-01", "2026-12-31"), 2026);
+    assert.equal(anneeCivile("2026-01-01", "2026-06-30"), null);
+    assert.equal(anneeCivile("2026-06-01", "2027-05-31"), null);
   });
 });

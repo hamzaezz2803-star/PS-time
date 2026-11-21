@@ -83,3 +83,9 @@ export function pourcentageConsomme(bilan: Pick<BilanDroit, "acquis" | "pris" | 
 export function estNombreDeJoursValide(jours: number, maximum: number): boolean {
   return Number.isFinite(jours) && jours >= 0 && jours <= maximum && Number.isInteger(jours * 2);
 }
+
+/** Année si la période couvre exactement une année civile (1er janvier au 31 décembre), sinon null. */
+export function anneeCivile(debut: string, fin: string): number | null {
+  const annee = debut.slice(0, 4);
+  return debut === `${annee}-01-01` && fin === `${annee}-12-31` ? Number(annee) : null;
+}
