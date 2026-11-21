@@ -29,7 +29,7 @@ type DescriptionTable = { nom: string; colonnes: string[]; cle: string[] };
 const estDans = (liste: readonly string[], nom: string) => liste.includes(nom);
 
 /** Tables du schéma Drizzle (une nouvelle table est sauvegardée sans rien changer ici), sauf sessions et jetons. */
-const TABLES: DescriptionTable[] = Object.values(schema)
+const TABLES: DescriptionTable[] = (Object.values(schema) as unknown[])
   .filter((valeur): valeur is MySqlTable => is(valeur, MySqlTable))
   .map((table) => {
     const config = getTableConfig(table);

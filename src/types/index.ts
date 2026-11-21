@@ -434,3 +434,6 @@ export type DroitCongeListe = {
 
 /** Événement proposé pour un droit aux congés (événements de type absence). */
 export type EvenementDroit = { id: string; code: string; nom: string };
+
+/** Réponse de la route d'import d'une sauvegarde (Administration > Sauvegarde). */
+export type ReponseImportSauvegarde = { ok: true; message: string; reconnexion: boolean } | { ok: false; message: string };

@@ -11,7 +11,9 @@
     "db:migrer": "drizzle-kit migrate",
     "admin:creer": "node scripts/creer-administrateur.mts",
     "test": "node --test --disable-warning=MODULE_TYPELESS_PACKAGE_JSON \"src/**/*.test.ts\"",
-    "sql:utilisateur": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/generer-sql-utilisateur.mts"
+    "sql:utilisateur": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/generer-sql-utilisateur.mts",
+    "sauvegarde:exporter": "node --conditions=react-server --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/sauvegarde.mts exporter",
+    "sauvegarde:importer": "node --conditions=react-server --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/sauvegarde.mts importer"
   },
   "dependencies": {
     "better-auth": "^1.7.23",
