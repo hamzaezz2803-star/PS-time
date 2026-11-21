@@ -234,3 +234,17 @@ export const CHEMIN_IMPRESSION_RAPPORT_PRESENCES = "/impression/rapport-presence
 export const RAPPORT_JOURS_DEFAUT = 30;
 export const RAPPORT_JOURS_MAX = 93;
 export const RAPPORT_LIGNES_MAX = 5000;
+/** Sauvegarde (Administration > Sauvegarde) : fichier SQL signé, produit et relu par l'application. */
+export const CHEMIN_SAUVEGARDE = "/administration/sauvegarde";
+export const CHEMIN_EXPORT_SAUVEGARDE = "/administration/sauvegarde/export";
+export const CHEMIN_IMPORT_SAUVEGARDE = "/administration/sauvegarde/import";
+export const FORMAT_SAUVEGARDE = 1;
+/** Jamais sauvegardées : sessions ouvertes et jetons temporaires (on pourrait s'en servir pour se connecter). */
+export const TABLES_JAMAIS_SAUVEGARDEES = ["sessions", "verifications"] as const;
+/** Comptes de connexion : sauvegardés seulement si la case « comptes » est cochée. */
+export const TABLES_COMPTES = ["utilisateurs", "comptes", "autorisations_pages"] as const;
+export const TAILLE_MAX_IMPORT_OCTETS = 100 * 1024 * 1024;
+export const MOT_CONFIRMATION_IMPORT = "IMPORTER";
+export const LIGNES_PAR_LECTURE_SAUVEGARDE = 500;
+/** Taille d'une instruction INSERT du fichier (reste sous max_allowed_packet, 16 Mo par défaut). */
+export const TAILLE_MAX_INSTRUCTION_SAUVEGARDE = 1_000_000;
