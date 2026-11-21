@@ -68,7 +68,7 @@ export type EntreeHistorique = {
 export type Notification = {
   id: string;
   action: "creation" | "modification" | "suppression";
-  objet: "site" | "departement" | "poste" | "employe" | "profil_horaire" | "rotation" | "groupe" | "affectation" | "regle_horaire" | "horaire_dynamique" | "pointage" | "evenement" | "absence" | "compteur" | "utilisateur" | "mot_de_passe" | "apparence";
+  objet: "site" | "departement" | "poste" | "employe" | "profil_horaire" | "rotation" | "groupe" | "affectation" | "regle_horaire" | "horaire_dynamique" | "pointage" | "evenement" | "absence" | "droit_conge" | "compteur" | "utilisateur" | "mot_de_passe" | "apparence";
   libelle: string | null;
   lien: string | null;
   auteurId: string | null;
@@ -405,3 +405,32 @@ export type EvenementDuJour = {
 
 /** Événement proposé dans la saisie des absences (affiché dans le planning). */
 export type EvenementSaisissable = { id: string; code: string; nom: string; estSaisiEnHeures: boolean };
+
+/** Absence qui consomme un droit aux congés : jours pris (passés) et prévus (à venir). */
+export type AbsenceDuDroit = { id: string; debut: string; fin: string; pris: number; prevus: number; remarque: string | null };
+
+/** Carte de la page « Droits aux congés » : un droit d'un employé, son bilan calculé et ses absences. */
+export type DroitCongeListe = {
+  id: string;
+  employeId: string;
+  prenom: string;
+  nom: string;
+  matricule: string;
+  departement: string;
+  photoModifieeLe: Date | null;
+  evenementId: string;
+  evenementCode: string;
+  evenementNom: string;
+  debut: string;
+  fin: string;
+  joursAcquis: number;
+  joursReliquat: number;
+  estBloquant: boolean;
+  remarque: string | null;
+  saisiPar: string | null;
+  bilan: { acquis: number; pris: number; prevus: number; soldeAujourdhui: number; soldePrevisionnel: number };
+  absences: AbsenceDuDroit[];
+};
+
+/** Événement proposé pour un droit aux congés (événements de type absence). */
+export type EvenementDroit = { id: string; code: string; nom: string };

@@ -40,7 +40,7 @@ export const MODULES = ["personnel", "planning", "presence"] as const;
 export const PAGES_PAR_MODULE = {
   personnel: ["sites", "departements", "postes", "personnes"],
   planning: ["profils_horaires", "rotations", "groupes", "affectations", "horaire_dynamique", "rapport_presences"],
-  presence: ["pointages_manuels", "evenements", "absences", "compteurs", "detail_jour"],
+  presence: ["pointages_manuels", "evenements", "absences", "droits_conges", "compteurs", "detail_jour"],
 } as const;
 export const PAGES = [...PAGES_PAR_MODULE.personnel, ...PAGES_PAR_MODULE.planning, ...PAGES_PAR_MODULE.presence] as const;
 export const CHEMIN_UTILISATEURS = "/administration/utilisateurs";
@@ -175,6 +175,15 @@ export const ABSENCES_PAR_PAGE = 50;
 /** Une saisie couvre au plus un an (366 jours), bornes comprises. */
 export const DUREE_MAX_ABSENCE_JOURS = 366;
 export const LONGUEUR_MAX_REMARQUE_ABSENCE = 255;
+/**
+ * Droits aux congés (d'après la « Gestion des droits » de Gestor, simplifiée) : pour un employé,
+ * un événement et une période, des jours acquis ; les absences saisies les consomment.
+ */
+export const CHEMIN_DROITS_CONGES = "/presence/droits-conges";
+export const DROITS_CONGES_PAR_PAGE = 24;
+/** Jours acquis ou reliquat : de 0 à 366, par demi-journée (même borne que la base). */
+export const JOURS_DROIT_MAX = 366;
+export const LONGUEUR_MAX_REMARQUE_DROIT = 255;
 /** Nombre maximal d'employés pointés en une seule saisie. */
 export const LIMITE_EMPLOYES_POINTAGE = 500;
 /** Cloche de notifications : nombre affiché, actualisation, durée de conservation. */

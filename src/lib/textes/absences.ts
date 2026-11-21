@@ -99,6 +99,7 @@ export const TEXTES_ABSENCES = {
     pasEnHeures: "Cet événement se saisit à la journée entière seulement.",
     horsPeriodePrise: "Cet événement ne peut pas être pris à ces dates (voir sa période de prise).",
     chevauchement: (noms: string) => `Une absence existe déjà sur cette période pour : ${noms}.`,
+    soldeInsuffisant: (noms: string) => `Solde de congés insuffisant pour : ${noms}. Voir Présence > Droits aux congés.`,
     remarqueTropLongue: pointages.erreurs.remarqueTropLongue,
     introuvable: "Cette absence n'existe plus. Rechargez la page.",
     echec: "L'absence n'a pas pu être enregistrée. Réessayez dans un instant.",

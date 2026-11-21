@@ -8,6 +8,8 @@ DELETE FROM compteurs_versions WHERE compteur_id LIKE '00000000-0000-4000-8000-%
 DELETE FROM compteurs WHERE id LIKE '00000000-0000-4000-8000-%';
 -- Absences de test, et celles saisies dans l'application pour un employé ou un événement de test.
 DELETE FROM evenements_employes WHERE id LIKE '00000000-0000-4000-8000-%' OR employe_id LIKE '00000000-0000-4000-8000-%' OR evenement_id LIKE '00000000-0000-4000-8000-%';
+-- Droits aux congés de test, et ceux saisis dans l'application pour un employé ou un événement de test.
+DELETE FROM droits_conges WHERE id LIKE '00000000-0000-4000-8000-%' OR employe_id LIKE '00000000-0000-4000-8000-%' OR evenement_id LIKE '00000000-0000-4000-8000-%';
 -- Événements de test (leurs périodes de prise partent avec eux).
 DELETE FROM evenements WHERE id LIKE '00000000-0000-4000-8000-%';
 -- Règles d'horaire dynamique de test, et celles saisies dans l'application sur un profil de test.

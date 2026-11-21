@@ -1,6 +1,7 @@
 import {
   Briefcase,
   Building2,
+  CalendarCheck,
   CalendarClock,
   CalendarCog,
   CalendarDays,
@@ -30,6 +31,7 @@ import {
   CHEMIN_COMPTEURS,
   CHEMIN_DEPARTEMENTS,
   CHEMIN_DETAIL_JOUR,
+  CHEMIN_DROITS_CONGES,
   CHEMIN_ESPACE,
   CHEMIN_EVENEMENTS,
   CHEMIN_GROUPES,
@@ -110,6 +112,7 @@ export const MENUS_NAVIGATION: MenuNavigation[] = [
           { libelle: T.pointagesManuels, icone: ClipboardClock, href: CHEMIN_POINTAGES_MANUELS, page: "pointages_manuels" },
           { libelle: T.evenements, icone: CalendarX2, href: CHEMIN_EVENEMENTS, page: "evenements" },
           { libelle: T.absences, icone: CalendarDays, href: CHEMIN_ABSENCES, page: "absences" },
+          { libelle: T.droitsConges, icone: CalendarCheck, href: CHEMIN_DROITS_CONGES, page: "droits_conges" },
         ],
       },
       {

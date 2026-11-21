@@ -7,6 +7,7 @@ const TONS = {
   neutre: "bg-fond text-texte ring-bordure",
   succes: "bg-succes/5 text-succes ring-succes/25",
   attention: "bg-attention/5 text-attention ring-attention/25",
+  erreur: "bg-erreur/5 text-erreur ring-erreur/25",
 } as const;
 
 /** Petite étiquette de statut ou de type : texte toujours présent (jamais la couleur seule). */

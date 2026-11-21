@@ -33,6 +33,7 @@ export async function creerAbsences(_etat: EtatFormulaire, formulaire: FormData)
     const resultat = await enregistrerAbsences(donnees, utilisateur.id);
     if (!resultat.ok) {
       if (resultat.erreur === "chevauchement") return { erreursChamps: { employeIds: textes.erreurs.chevauchement(resultat.noms.join(", ")) } };
+      if (resultat.erreur === "solde_insuffisant") return { erreursChamps: { employeIds: textes.erreurs.soldeInsuffisant(resultat.noms.join(", ")) } };
       if (resultat.erreur === "employe") return { erreursChamps: { employeIds: textes.erreurs.employeIntrouvable } };
       if (resultat.erreur === "pas_en_heures") return { erreursChamps: { de: textes.erreurs.pasEnHeures } };
       if (resultat.erreur === "hors_periode") return { erreursChamps: { evenementId: textes.erreurs.horsPeriodePrise } };

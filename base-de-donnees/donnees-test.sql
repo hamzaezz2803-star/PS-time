@@ -14,6 +14,8 @@ DELETE FROM compteurs_versions WHERE compteur_id LIKE '00000000-0000-4000-8000-%
 DELETE FROM compteurs WHERE id LIKE '00000000-0000-4000-8000-%';
 -- Absences de test, et celles saisies dans l'application pour un employé ou un événement de test.
 DELETE FROM evenements_employes WHERE id LIKE '00000000-0000-4000-8000-%' OR employe_id LIKE '00000000-0000-4000-8000-%' OR evenement_id LIKE '00000000-0000-4000-8000-%';
+-- Droits aux congés de test, et ceux saisis dans l'application pour un employé ou un événement de test.
+DELETE FROM droits_conges WHERE id LIKE '00000000-0000-4000-8000-%' OR employe_id LIKE '00000000-0000-4000-8000-%' OR evenement_id LIKE '00000000-0000-4000-8000-%';
 -- Événements de test (leurs périodes de prise partent avec eux).
 DELETE FROM evenements WHERE id LIKE '00000000-0000-4000-8000-%';
 -- Règles d'horaire dynamique de test, et celles saisies dans l'application sur un profil de test.
@@ -305,5 +307,20 @@ FROM (
   UNION ALL SELECT '00000000-0000-4000-8000-000000002004', '00000000-0000-4000-8000-000000000301', '00000000-0000-4000-8000-000000001808', 2, 2, 600, 720, 'Rendez-vous administratif'
   UNION ALL SELECT '00000000-0000-4000-8000-000000002005', '00000000-0000-4000-8000-000000000315', '00000000-0000-4000-8000-000000001801', 5, 9, NULL, NULL, NULL
 ) a;
+
+
+-- 16. Droits aux congés (page Droits aux congés), pour l'année en cours : 18 jours de congé payé
+-- pour Karim Benali (T001), Hicham Lahlou (T006, avec 2 jours de reliquat et un solde bloquant)
+-- et Imane Berrada (T007) ; seulement 3 jours pour Fatima Zahraoui (T015), dont le congé de la
+-- semaine prochaine dépasse le solde (carte « Dépassé »).
+INSERT INTO droits_conges (id, employe_id, evenement_id, date_debut, date_fin, jours_acquis, jours_reliquat, est_bloquant, remarque, saisi_par)
+SELECT d.id, d.employe, '00000000-0000-4000-8000-000000001801', MAKEDATE(YEAR(UTC_DATE()), 1), DATE(CONCAT(YEAR(UTC_DATE()), '-12-31')), d.acquis, d.reliquat, d.bloquant, d.remarque,
+  (SELECT id FROM utilisateurs WHERE est_super_admin = 1 ORDER BY cree_le LIMIT 1)
+FROM (
+  SELECT '00000000-0000-4000-8000-000000002101' AS id, '00000000-0000-4000-8000-000000000301' AS employe, 18 AS acquis, 0 AS reliquat, 0 AS bloquant, '1,5 jour par mois travaillé' AS remarque
+  UNION ALL SELECT '00000000-0000-4000-8000-000000002102', '00000000-0000-4000-8000-000000000306', 18, 2, 1, NULL
+  UNION ALL SELECT '00000000-0000-4000-8000-000000002103', '00000000-0000-4000-8000-000000000307', 18, 0, 0, NULL
+  UNION ALL SELECT '00000000-0000-4000-8000-000000002104', '00000000-0000-4000-8000-000000000315', 3, 0, 0, 'Embauchée en cours d''année'
+) d;
 
 COMMIT;

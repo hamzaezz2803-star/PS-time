@@ -67,6 +67,7 @@ export const TEXTES_UTILISATEURS = {
     pointages_manuels: { libelle: "Pointage manuel", detail: "Saisie et suppression de pointages" },
     evenements: { libelle: "Événements", detail: "Motifs d'absence et de présence" },
     absences: { libelle: "Absences et événements", detail: "Congés, maladies, formations des employés" },
+    droits_conges: { libelle: "Droits aux congés", detail: "Jours acquis, pris et soldes" },
     compteurs: { libelle: "Gestion des compteurs", detail: "Formules et versions" },
     detail_jour: { libelle: "Détail jour", detail: "Pointages et compteurs d'un employé" },
   },

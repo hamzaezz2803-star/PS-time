@@ -16,6 +16,7 @@ const OBJETS: Record<Notification["objet"], { avec: string; sans: string }> = {
   pointage: { avec: "le pointage", sans: "un pointage" },
   evenement: { avec: "l'événement", sans: "un événement" },
   absence: { avec: "l'absence", sans: "une absence" },
+  droit_conge: { avec: "le droit aux congés de", sans: "un droit aux congés" },
   compteur: { avec: "le compteur", sans: "un compteur" },
   utilisateur: { avec: "le compte", sans: "un compte" },
   mot_de_passe: { avec: "son mot de passe", sans: "son mot de passe" },
@@ -45,6 +46,9 @@ export const TEXTES_NOTIFICATIONS = {
     if (notification.objet === "mot_de_passe") return `${auteur} a changé son mot de passe`;
     if (notification.objet === "absence" && notification.action === "creation") {
       return `${auteur} a saisi des absences${notification.libelle ? ` : ${notification.libelle}` : ""}`;
+    }
+    if (notification.objet === "droit_conge" && notification.action === "creation") {
+      return `${auteur} a attribué des droits aux congés${notification.libelle ? ` : ${notification.libelle}` : ""}`;
     }
     if (notification.objet === "pointage" && notification.action === "creation") {
       return `${auteur} a saisi des pointages${notification.libelle ? ` : ${notification.libelle}` : ""}`;

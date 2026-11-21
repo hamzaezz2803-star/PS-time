@@ -24,6 +24,7 @@ export const TEXTES_NAVIGATION = {
   pointagesManuels: "Pointage manuel",
   evenements: "Événements",
   absences: "Absences et événements",
+  droitsConges: "Droits aux congés",
   compteurs: "Compteurs",
   gestionCompteurs: "Gestion des compteurs",
   detailJour: "Détail jour",

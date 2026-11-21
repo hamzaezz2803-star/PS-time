@@ -1,0 +1,99 @@
+"use client";
+
+import { useState } from "react";
+import { CalendarCheck, Users } from "lucide-react";
+import { creerDroits, modifierDroit } from "@/app/(connecte)/presence/droits-conges/actions";
+import { ChoixEmployes, type EmployeChoisissable } from "@/components/employes/choix-employes";
+import { useFormulaireListe, valeurSaisie } from "@/components/liste/utiliser-formulaire-liste";
+import { SectionFormulaire } from "@/components/programme/section-formulaire";
+import { ChampSelection } from "@/components/ui/champ-selection";
+import { MessageErreur } from "@/components/ui/message-erreur";
+import { PiedFormulaire } from "@/components/ui/pied-formulaire";
+import { FUSEAU_HORAIRE } from "@/lib/constantes";
+import type { ElementArbre } from "@/lib/metier/arbre";
+import { jourDansFuseau } from "@/lib/metier/dates";
+import { TEXTES_DROITS_CONGES as textes } from "@/lib/textes/droits-conges";
+import { lireTexte } from "@/lib/validation/commun";
+import type { DroitCongeListe, EtatFormulaire, EvenementDroit } from "@/types";
+import { ChampsDroit, type ValeursDroit } from "./champs-droit";
+
+type Succes = NonNullable<EtatFormulaire["succes"]>;
+type ProprietesFenetre = { onTermine: (succes: Succes) => void; onAnnuler: () => void };
+
+const anneeLocale = () => Number(jourDansFuseau(new Date(), FUSEAU_HORAIRE).slice(0, 4));
+const enTexte = (jours: number) => String(jours).replace(".", ",");
+
+function Pied({ message, enCours, onAnnuler }: { message?: string; enCours: boolean; onAnnuler: () => void }) {
+  return <PiedFormulaire message={message} enCours={enCours} libelle={textes.enregistrer} libelleEnCours={textes.enregistrementEnCours} libelleAnnuler={textes.annuler} onAnnuler={onAnnuler} />;
+}
+
+/** Attribution d'un même droit (événement, période, jours) à un ou plusieurs employés. */
+export function FormulaireCreationDroits({
+  employes,
+  departements,
+  evenements,
+  onTermine,
+  onAnnuler,
+}: ProprietesFenetre & { employes: EmployeChoisissable[]; departements: ElementArbre[]; evenements: EvenementDroit[] }) {
+  const [etat, action, enCours] = useFormulaireListe(creerDroits, onTermine);
+  const [annee] = useState(anneeLocale);
+  const employesCoches = etat.saisie ? etat.saisie.getAll("employes").map(lireTexte) : [];
+  const initiales: ValeursDroit = { du: `${annee}-01-01`, au: `${annee}-12-31`, joursAcquis: "", joursReliquat: "0", estBloquant: false, remarque: "" };
+
+  if (evenements.length === 0) {
+    return <p className="m-5 rounded-lg border border-bordure bg-fond p-4 text-base text-texte-secondaire">{textes.aucunEvenement}</p>;
+  }
+
+  return (
+    <form action={action} noValidate className="flex min-h-0 flex-1 flex-col">
+      <div key={etat.numeroReponse} className="flex flex-1 flex-col gap-7 overflow-y-auto px-5 py-5 sm:px-6">
+        <SectionFormulaire titre={textes.sectionEmployes} icone={Users}>
+          <ChoixEmployes employes={employes} departements={departements} nomChamp="employes" selectionInitiale={employesCoches} textes={textes} />
+          <MessageErreur message={etat.erreursChamps?.employeIds} />
+        </SectionFormulaire>
+        <SectionFormulaire titre={textes.evenement} icone={CalendarCheck}>
+          <ChampSelection
+            nom="evenementId"
+            libelle={textes.evenement}
+            options={evenements.map((evenement) => ({ valeur: evenement.id, libelle: `${evenement.code} · ${evenement.nom}` }))}
+            optionVide={textes.choisirEvenement}
+            defaultValue={valeurSaisie(etat, "evenementId", "")}
+            aide={textes.aideEvenement}
+            erreur={etat.erreursChamps?.evenementId}
+            required
+          />
+        </SectionFormulaire>
+        <ChampsDroit etat={etat} initiales={initiales} anneeCourante={annee} />
+      </div>
+      <Pied message={etat.message} enCours={enCours} onAnnuler={onAnnuler} />
+    </form>
+  );
+}
+
+/** Modification d'un droit : l'employé et l'événement restent ceux d'origine. */
+export function FormulaireModificationDroit({ droit, onTermine, onAnnuler }: ProprietesFenetre & { droit: DroitCongeListe }) {
+  const [etat, action, enCours] = useFormulaireListe(modifierDroit, onTermine);
+  const [annee] = useState(anneeLocale);
+  const initiales: ValeursDroit = {
+    du: droit.debut,
+    au: droit.fin,
+    joursAcquis: enTexte(droit.joursAcquis),
+    joursReliquat: enTexte(droit.joursReliquat),
+    estBloquant: droit.estBloquant,
+    remarque: droit.remarque ?? "",
+  };
+
+  return (
+    <form action={action} noValidate className="flex min-h-0 flex-1 flex-col">
+      <input type="hidden" name="id" value={droit.id} />
+      <div key={etat.numeroReponse} className="flex flex-1 flex-col gap-7 overflow-y-auto px-5 py-5 sm:px-6">
+        <p className="flex items-center gap-3 rounded-lg bg-ciel px-4 py-3 text-base font-semibold text-marine">
+          <CalendarCheck className="size-5 shrink-0" aria-hidden="true" />
+          {textes.employeFixe(`${droit.prenom} ${droit.nom}`, `${droit.evenementCode} · ${droit.evenementNom}`)}
+        </p>
+        <ChampsDroit etat={etat} initiales={initiales} anneeCourante={annee} />
+      </div>
+      <Pied message={etat.message} enCours={enCours} onAnnuler={onAnnuler} />
+    </form>
+  );
+}

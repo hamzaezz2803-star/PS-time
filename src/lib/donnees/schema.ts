@@ -7,6 +7,7 @@ import {
   customType,
   date as dateCalendrier,
   datetime,
+  decimal,
   index,
   int,
   mysqlTable,
@@ -850,5 +851,46 @@ export const evenementsEmployes = mysqlTable(
       "evenements_employes_heures_valides",
       sql`(${table.debutMinutes} IS NULL AND ${table.finMinutes} IS NULL) OR (${table.dateDebut} = ${table.dateFin} AND ${table.debutMinutes} >= 0 AND ${table.finMinutes} <= 1440 AND ${table.debutMinutes} < ${table.finMinutes})`,
     ),
+  ],
+);
+
+const joursDroit = (nom: string) => decimal(nom, { precision: 4, scale: 1, mode: "number" });
+
+/**
+ * Droits aux congés : jours acquis par un employé pour un événement (congé payé, récupération...)
+ * sur une période. Les absences en journées entières de cet événement les consomment ; les soldes
+ * sont calculés à l'affichage, jamais stockés. Pas de chevauchement de périodes pour un même
+ * employé et un même événement (vérifié par l'application, dans une transaction).
+ * `est_bloquant` : une absence qui rendrait le solde négatif est refusée.
+ */
+export const droitsConges = mysqlTable(
+  "droits_conges",
+  {
+    id: identifiantUnique(),
+    employeId: char("employe_id", { length: 36 })
+      .notNull()
+      .references(() => employes.id, { onDelete: "cascade" }),
+    evenementId: char("evenement_id", { length: 36 })
+      .notNull()
+      .references(() => evenements.id, { onDelete: "restrict" }),
+    dateDebut: jour("date_debut").notNull(),
+    dateFin: jour("date_fin").notNull(),
+    joursAcquis: joursDroit("jours_acquis").notNull(),
+    joursReliquat: joursDroit("jours_reliquat").notNull().default(0),
+    estBloquant: boolean("est_bloquant").notNull().default(false),
+    remarque: varchar("remarque", { length: 255 }),
+    saisiPar: referenceAuteur("saisi_par"),
+    creeLe: dateCreation(),
+    modifieLe: dateModification(),
+  },
+  (table) => [
+    index("droits_conges_employe_idx").on(table.employeId, table.evenementId, table.dateDebut),
+    index("droits_conges_evenement_idx").on(table.evenementId),
+    index("droits_conges_dates_idx").on(table.dateDebut, table.dateFin),
+    index("droits_conges_saisi_par_idx").on(table.saisiPar),
+    check("droits_conges_dates_coherentes", sql`${table.dateFin} >= ${table.dateDebut}`),
+    // De 0 à 366 jours, par demi-journée.
+    check("droits_conges_acquis_valide", sql`${table.joursAcquis} BETWEEN 0 AND 366 AND ${table.joursAcquis} * 2 = FLOOR(${table.joursAcquis} * 2)`),
+    check("droits_conges_reliquat_valide", sql`${table.joursReliquat} BETWEEN 0 AND 366 AND ${table.joursReliquat} * 2 = FLOOR(${table.joursReliquat} * 2)`),
   ],
 );

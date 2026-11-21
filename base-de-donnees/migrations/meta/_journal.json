@@ -190,6 +190,13 @@
       "when": 1795089640287,
       "tag": "0026_absences_employes",
       "breakpoints": true
+    },
+    {
+      "idx": 27,
+      "version": "5",
+      "when": 1795267094926,
+      "tag": "0027_droits_conges",
+      "breakpoints": true
     }
   ]
 }

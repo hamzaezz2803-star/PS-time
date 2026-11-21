@@ -1,11 +1,14 @@
 import "server-only";
 
 import { and, asc, count, desc, eq, gte, inArray, isNull, like, lte, or, type SQL } from "drizzle-orm";
+import { FUSEAU_HORAIRE } from "@/lib/constantes";
+import { jourDansFuseau } from "@/lib/metier/dates";
 import { estDansUnePeriodePrise, saisiesSeChevauchent, type SaisieEvenement } from "@/lib/metier/evenements";
 import { motifContient } from "@/lib/metier/recherche";
 import type { DonneesAbsences, RechercheAbsences } from "@/lib/validation/absence";
 import type { AbsenceListe, EvenementDuJour, EvenementSaisissable } from "@/types";
 import { obtenirBase } from "./base";
+import { employesAuSoldeInsuffisant } from "./droits-conges-soldes";
 import { departements, employes, evenements, evenementsEmployes, periodesEvenements, photosEmployes, utilisateurs } from "./schema";
 
 const typeEvenement = (type: string): "absence" | "presence" => (type === "presence" ? "presence" : "absence");
@@ -76,7 +79,7 @@ export async function listerEvenementsSaisissables(): Promise<EvenementSaisissab
 export type ResultatEnregistrement =
   | { ok: true; nombre: number; evenementNom: string }
   | { ok: false; erreur: "evenement" | "pas_en_heures" | "hors_periode" | "employe" }
-  | { ok: false; erreur: "chevauchement"; noms: string[] };
+  | { ok: false; erreur: "chevauchement" | "solde_insuffisant"; noms: string[] };
 
 /**
  * Attribue l'événement à chaque employé, dans une transaction qui verrouille les employés :
@@ -118,6 +121,11 @@ export async function enregistrerAbsences(donnees: DonneesAbsences, saisiPar: st
     const enConflit = new Set(existantes.filter((existante) => saisiesSeChevauchent(existante, saisie)).map((existante) => existante.employeId));
     if (enConflit.size > 0) {
       return { ok: false, erreur: "chevauchement", noms: concernes.filter((employe) => enConflit.has(employe.id)).map((employe) => `${employe.prenom} ${employe.nom}`) };
+    }
+    // Droit aux congés « bloquant » : l'absence ne doit pas rendre le solde négatif.
+    const soldeInsuffisant = new Set(await employesAuSoldeInsuffisant(donnees.employeIds, donnees.evenementId, saisie, jourDansFuseau(new Date(), FUSEAU_HORAIRE)));
+    if (soldeInsuffisant.size > 0) {
+      return { ok: false, erreur: "solde_insuffisant", noms: concernes.filter((employe) => soldeInsuffisant.has(employe.id)).map((employe) => `${employe.prenom} ${employe.nom}`) };
     }
 
     await transaction.insert(evenementsEmployes).values(
