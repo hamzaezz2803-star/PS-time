@@ -133,6 +133,7 @@ export const MENUS_NAVIGATION: MenuNavigation[] = [
           { libelle: T.utilisateurs, icone: ShieldCheck, href: CHEMIN_UTILISATEURS, reserveSuperAdmin: true },
           { libelle: T.historique, icone: History, href: CHEMIN_HISTORIQUE, reserveSuperAdmin: true },
           { libelle: T.apparence, icone: Palette, href: CHEMIN_APPARENCE, reserveSuperAdmin: true },
+          { libelle: T.sauvegarde, icone: DatabaseBackup, href: CHEMIN_SAUVEGARDE, reserveSuperAdmin: true },
         ],
       },
     ],

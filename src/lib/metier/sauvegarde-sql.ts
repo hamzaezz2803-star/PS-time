@@ -38,7 +38,10 @@ export function instructionInsert(table: string, colonnes: readonly string[], li
 /** Lecteur pas à pas d'une ligne ; chaque méthode renvoie null si le texte attendu n'est pas là. */
 class Lecteur {
   position = 0;
-  constructor(private readonly texte: string) {}
+  private readonly texte: string;
+  constructor(texte: string) {
+    this.texte = texte;
+  }
 
   fini = () => this.position >= this.texte.length;
 
