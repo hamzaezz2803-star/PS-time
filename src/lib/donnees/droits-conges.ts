@@ -1,13 +1,16 @@
 import "server-only";
 
 import { and, asc, count, desc, eq, gte, inArray, like, lte, ne, or, type SQL } from "drizzle-orm";
+import { PIECES_JOINTES_PAR_DROIT_MAX } from "@/lib/constantes";
 import { periodesSeChevauchent } from "@/lib/metier/programme";
 import { motifContient } from "@/lib/metier/recherche";
 import type { DonneesCreationDroits, DonneesDroit } from "@/lib/validation/droit-conge";
+import type { PieceJointeRecue } from "@/lib/validation/piece-jointe";
 import type { RechercheAbsences } from "@/lib/validation/absence";
 import type { DroitCongeListe, EvenementDroit } from "@/types";
 import { obtenirBase } from "./base";
 import { calculerSoldes } from "./droits-conges-soldes";
+import { compterPiecesDuDroit, listerPiecesDesDroits, relierPiecesAuxDroits, supprimerPiecesOrphelines } from "./pieces-jointes";
 import { departements, droitsConges, employes, evenements, photosEmployes, utilisateurs } from "./schema";
 
 /** Condition SQL des filtres (paramétrée) : employé par nom ou matricule, droit valable ce jour-là. */
@@ -54,12 +57,13 @@ export async function listerDroits(page: number, parPage: number, recherche: Rec
     .limit(parPage)
     .offset((page - 1) * parPage);
 
-  const soldes = await calculerSoldes(lignes, aujourdhui);
+  const [soldes, pieces] = await Promise.all([calculerSoldes(lignes, aujourdhui), listerPiecesDesDroits(lignes.map((ligne) => ligne.id))]);
   return lignes.map((ligne, rang) => {
     const { absences, ...bilan } = soldes[rang];
     return {
       ...ligne,
       bilan,
+      piecesJointes: pieces.get(ligne.id) ?? [],
       absences: absences.map(({ saisie, pris, prevus }) => ({ id: saisie.id, debut: saisie.debut, fin: saisie.fin, remarque: saisie.remarque, pris, prevus })),
     };
   });
@@ -97,7 +101,7 @@ export type ResultatCreation =
  * Attribue le même droit à chaque employé, dans une transaction qui verrouille les employés :
  * deux saisies simultanées ne peuvent pas créer deux droits qui se chevauchent.
  */
-export async function creerDroits(donnees: DonneesCreationDroits, saisiPar: string): Promise<ResultatCreation> {
+export async function creerDroits(donnees: DonneesCreationDroits, pieces: PieceJointeRecue[], saisiPar: string): Promise<ResultatCreation> {
   return obtenirBase().transaction(async (transaction) => {
     const [evenement] = await transaction.select({ nom: evenements.nom, estSoumisDroits: evenements.estSoumisDroits }).from(evenements).where(eq(evenements.id, donnees.evenementId));
     if (!evenement || !evenement.estSoumisDroits) return { ok: false, erreur: "evenement" };
@@ -118,17 +122,17 @@ export async function creerDroits(donnees: DonneesCreationDroits, saisiPar: stri
       return { ok: false, erreur: "chevauchement", noms: concernes.filter((employe) => enConflit.has(employe.id)).map((employe) => `${employe.prenom} ${employe.nom}`) };
     }
 
-    await transaction.insert(droitsConges).values(
-      donnees.employeIds.map((employeId) => ({ id: crypto.randomUUID(), employeId, evenementId: donnees.evenementId, saisiPar, ...valeursDroit(donnees) })),
-    );
+    const nouveaux = donnees.employeIds.map((employeId) => ({ id: crypto.randomUUID(), employeId, evenementId: donnees.evenementId, saisiPar, ...valeursDroit(donnees) }));
+    await transaction.insert(droitsConges).values(nouveaux);
+    await relierPiecesAuxDroits(transaction, nouveaux.map((droit) => droit.id), pieces, saisiPar);
     return { ok: true, nombre: donnees.employeIds.length, evenementNom: evenement.nom };
   });
 }
 
-export type ResultatModification = { ok: true; nom: string } | { ok: false; erreur: "introuvable" | "chevauchement" };
+export type ResultatModification = { ok: true; nom: string } | { ok: false; erreur: "introuvable" | "chevauchement" | "trop_de_pieces" };
 
 /** Modifie un droit ; refuse une nouvelle période qui chevaucherait un autre droit du même employé et événement. */
-export async function modifierDroit(id: string, donnees: DonneesDroit): Promise<ResultatModification> {
+export async function modifierDroit(id: string, donnees: DonneesDroit, pieces: PieceJointeRecue[], auteur: string): Promise<ResultatModification> {
   return obtenirBase().transaction(async (transaction) => {
     const [droit] = await transaction
       .select({ employeId: droitsConges.employeId, evenementId: droitsConges.evenementId, prenom: employes.prenom, nom: employes.nom })
@@ -144,13 +148,19 @@ export async function modifierDroit(id: string, donnees: DonneesDroit): Promise<
       .where(and(eq(droitsConges.employeId, droit.employeId), eq(droitsConges.evenementId, droit.evenementId), ne(droitsConges.id, id)));
     if (autres.some((autre) => periodesSeChevauchent(autre, { debut: donnees.du, fin: donnees.au }))) return { ok: false, erreur: "chevauchement" };
 
+    if ((await compterPiecesDuDroit(transaction, id)) + pieces.length > PIECES_JOINTES_PAR_DROIT_MAX) return { ok: false, erreur: "trop_de_pieces" };
     await transaction.update(droitsConges).set(valeursDroit(donnees)).where(eq(droitsConges.id, id));
+    await relierPiecesAuxDroits(transaction, [id], pieces, auteur);
     return { ok: true, nom: `${droit.prenom} ${droit.nom}` };
   });
 }
 
-/** Supprime un droit (les absences restent). Renvoie false s'il n'existe plus. */
+/** Supprime un droit (les absences restent) et ses pièces devenues inutiles. Renvoie false s'il n'existe plus. */
 export async function supprimerDroit(id: string): Promise<boolean> {
-  const [resultat] = await obtenirBase().delete(droitsConges).where(eq(droitsConges.id, id));
-  return resultat.affectedRows > 0;
+  return obtenirBase().transaction(async (transaction) => {
+    const [resultat] = await transaction.delete(droitsConges).where(eq(droitsConges.id, id));
+    if (resultat.affectedRows === 0) return false;
+    await supprimerPiecesOrphelines(transaction);
+    return true;
+  });
 }
