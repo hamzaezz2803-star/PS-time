@@ -440,10 +440,19 @@ export type DroitCongeListe = {
   fin: string;
   joursAcquis: number;
   joursReliquat: number;
+  supplement1: number;
+  supplement2: number;
+  supplement3: number;
+  uniteSaisie: UniteSaisieEvenement;
+  /** Faux : droit provisoire (« À confirmer »). */
+  estConfirme: boolean;
+  /** Vrai : le solde restant passe sur la période suivante. */
+  estReporte: boolean;
+  /** Vrai : « Solde : positif » (une absence qui le rendrait négatif est refusée). */
   estBloquant: boolean;
   remarque: string | null;
   saisiPar: string | null;
-  bilan: { acquis: number; pris: number; prevus: number; soldeAujourdhui: number; soldePrevisionnel: number };
+  bilan: { total: number; acquis: number; report: number; pris: number; prevus: number; soldeAujourdhui: number; soldePrevisionnel: number };
   absences: AbsenceDuDroit[];
   piecesJointes: PieceJointeDroit[];
 };

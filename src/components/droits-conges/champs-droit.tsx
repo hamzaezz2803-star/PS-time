@@ -1,22 +1,46 @@
 "use client";
 
 import { useState } from "react";
-import { CalendarRange, Calculator } from "lucide-react";
-import { valeurSaisie, caseSaisie, type EtatFormulaireListe } from "@/components/liste/utiliser-formulaire-liste";
+import { CalendarRange, Calculator, Check, CircleCheck, CircleMinus, CirclePlus, Forward, X } from "lucide-react";
+import { caseSaisie, valeurSaisie, type EtatFormulaireListe } from "@/components/liste/utiliser-formulaire-liste";
 import { SectionFormulaire } from "@/components/programme/section-formulaire";
-import { CaseACocher } from "@/components/ui/case-a-cocher";
 import { ChampFormulaire } from "@/components/ui/champ-formulaire";
-import { JOURS_DROIT_MAX, LONGUEUR_MAX_REMARQUE_DROIT } from "@/lib/constantes";
-import { estNombreDeJoursValide } from "@/lib/metier/droits-conges";
-import { formaterJours, TEXTES_DROITS_CONGES as textes } from "@/lib/textes/droits-conges";
+import { ChoixCartes, type OptionCarte } from "@/components/ui/choix-cartes";
+import { LONGUEUR_MAX_REMARQUE_DROIT } from "@/lib/constantes";
+import type { UniteDroit } from "@/lib/metier/droits-conges";
+import { formaterValeurDroit, TEXTES_DROITS_CONGES as textes } from "@/lib/textes/droits-conges";
 import { cn } from "@/lib/utils";
 import type { DroitCongeListe } from "@/types";
 import { ChampPiecesJointes } from "./champ-pieces-jointes";
+import { ValeursChiffrees } from "./valeurs-droit";
 
 /** Valeurs de départ d'un droit (création : année en cours ; modification : le droit existant). */
-export type ValeursDroit = { du: string; au: string; joursAcquis: string; joursReliquat: string; estBloquant: boolean; remarque: string };
+export type ValeursDroit = {
+  du: string;
+  au: string;
+  uniteSaisie: UniteDroit;
+  joursAcquis: string;
+  joursReliquat: string;
+  supplement1: string;
+  supplement2: string;
+  supplement3: string;
+  estConfirme: boolean;
+  estBloquant: boolean;
+  estReporte: boolean;
+  remarque: string;
+};
 
-const lireJours = (texte: string) => (texte.trim() === "" ? 0 : Number(texte.replace(",", ".")));
+type OuiNon = "oui" | "non";
+type Solde = "positif" | "negatif";
+const OPTIONS_OUI_NON: OptionCarte<OuiNon>[] = [
+  { valeur: "oui", libelle: textes.oui, Icone: Check },
+  { valeur: "non", libelle: textes.non, Icone: X },
+];
+const OPTIONS_SOLDE: OptionCarte<Solde>[] = [
+  { valeur: "negatif", libelle: textes.soldes.negatif, Icone: CircleMinus },
+  { valeur: "positif", libelle: textes.soldes.positif, Icone: CirclePlus },
+];
+const enOuiNon = (vrai: boolean): OuiNon => (vrai ? "oui" : "non");
 
 /** Raccourci de période : toute une année civile. */
 function BoutonAnnee({ annee, onChoisir }: { annee: number; onChoisir: (du: string, au: string) => void }) {
@@ -31,14 +55,10 @@ function BoutonAnnee({ annee, onChoisir }: { annee: number; onChoisir: (du: stri
   );
 }
 
-/**
- * Période, jours acquis, reliquat, blocage et remarque : communs à la création et à la
- * modification. Recréés à chaque réponse du serveur (clé du formulaire) avec la dernière saisie.
- */
 /** Jours acquis, prévus, consommés et solde du droit existant (fenêtre de modification). */
-function BilanDroit({ bilan }: { bilan: DroitCongeListe["bilan"] }) {
+function BilanDroit({ bilan, unite }: { bilan: DroitCongeListe["bilan"]; unite: UniteDroit }) {
   const cases = [
-    { libelle: textes.acquis, valeur: bilan.acquis },
+    { libelle: textes.acquis, valeur: bilan.total },
     { libelle: textes.prevus, valeur: bilan.prevus },
     { libelle: textes.pris, valeur: bilan.pris },
     { libelle: textes.reste, valeur: bilan.soldePrevisionnel },
@@ -48,21 +68,48 @@ function BilanDroit({ bilan }: { bilan: DroitCongeListe["bilan"] }) {
       {cases.map(({ libelle, valeur }, rang) => (
         <div key={libelle} className={cn("flex flex-col gap-0.5 rounded-lg border px-3 py-2", rang === 3 ? "border-primaire/30 bg-ciel" : "border-bordure bg-fond")}>
           <dt className="text-sm text-texte-secondaire">{libelle}</dt>
-          <dd className={cn("text-lg font-bold tabular-nums", rang === 3 && valeur < 0 ? "text-erreur" : "text-marine")}>{formaterJours(valeur)}</dd>
+          <dd className={cn("text-lg font-bold tabular-nums", rang === 3 && valeur < 0 ? "text-erreur" : "text-marine")}>{formaterValeurDroit(valeur, unite)}</dd>
         </div>
       ))}
     </dl>
   );
 }
 
+/** Un choix de la fiche (deux cartes) avec son explication. */
+function Choix<V extends string>({ nom, legende, aide, options, initiale }: { nom: string; legende: string; aide: string; options: OptionCarte<V>[]; initiale: V }) {
+  const [valeur, setValeur] = useState<V>(initiale);
+  return (
+    <div className="flex flex-col gap-1">
+      <ChoixCartes nom={nom} legende={legende} options={options} valeur={valeur} onChanger={setValeur} />
+      <p className="text-sm text-texte-secondaire">{aide}</p>
+    </div>
+  );
+}
+
+/** Confirmation, solde et report : les choix Oui / Non de la fiche. */
+function Reglages({ etat, initiales }: { etat: EtatFormulaireListe; initiales: ValeursDroit }) {
+  const lire = <V extends string>(nom: string, parDefaut: V, valeurs: readonly V[]): V => {
+    const saisie = valeurSaisie(etat, nom, parDefaut);
+    return (valeurs as readonly string[]).includes(saisie) ? (saisie as V) : parDefaut;
+  };
+  return (
+    <>
+      <Choix nom="estConfirme" legende={textes.confirmation} aide={textes.aideConfirmation} options={OPTIONS_OUI_NON} initiale={lire("estConfirme", enOuiNon(initiales.estConfirme), ["oui", "non"])} />
+      <Choix nom="solde" legende={textes.solde} aide={textes.aideSolde} options={OPTIONS_SOLDE} initiale={lire<Solde>("solde", initiales.estBloquant ? "positif" : "negatif", ["positif", "negatif"])} />
+      <Choix nom="estReporte" legende={textes.reportSurPeriode} aide={textes.aideReport} options={OPTIONS_OUI_NON} initiale={lire("estReporte", enOuiNon(initiales.estReporte), ["oui", "non"])} />
+    </>
+  );
+}
+
+/**
+ * Corps de la fiche d'un droit, commun à la création et à la modification : période, droit et
+ * son unité, confirmation, solde, report, reliquat et suppléments avec le total, pièces jointes et
+ * remarque. Recréé à chaque réponse du serveur (clé du formulaire) avec la dernière saisie.
+ */
 export function ChampsDroit({ etat, initiales, anneeCourante, bilan }: { etat: EtatFormulaireListe; initiales: ValeursDroit; anneeCourante: number; bilan?: DroitCongeListe["bilan"] }) {
   const erreurs = etat.erreursChamps;
   const [du, setDu] = useState(() => valeurSaisie(etat, "du", initiales.du));
   const [au, setAu] = useState(() => valeurSaisie(etat, "au", initiales.au));
-  const [acquis, setAcquis] = useState(() => valeurSaisie(etat, "joursAcquis", initiales.joursAcquis));
-  const [reliquat, setReliquat] = useState(() => valeurSaisie(etat, "joursReliquat", initiales.joursReliquat));
-  const total = lireJours(acquis) + lireJours(reliquat);
-  const totalValide = estNombreDeJoursValide(lireJours(acquis), JOURS_DROIT_MAX) && estNombreDeJoursValide(lireJours(reliquat), JOURS_DROIT_MAX);
   const choisirAnnee = (debut: string, fin: string) => {
     setDu(debut);
     setAu(fin);
@@ -83,17 +130,17 @@ export function ChampsDroit({ etat, initiales, anneeCourante, bilan }: { etat: E
       </SectionFormulaire>
 
       <SectionFormulaire titre={textes.sectionJours} icone={Calculator}>
-        {bilan && <BilanDroit bilan={bilan} />}
-        <div className="grid gap-4 sm:grid-cols-2">
-          <ChampFormulaire nom="joursAcquis" libelle={textes.joursAcquis} inputMode="decimal" required value={acquis} onChange={(evenement) => setAcquis(evenement.target.value)} aide={textes.aideJoursAcquis} erreur={erreurs?.joursAcquis} autoComplete="off" className="tabular-nums" />
-          <ChampFormulaire nom="joursReliquat" libelle={textes.joursReliquat} inputMode="decimal" value={reliquat} onChange={(evenement) => setReliquat(evenement.target.value)} aide={textes.aideReliquat} erreur={erreurs?.joursReliquat} autoComplete="off" className="tabular-nums" />
-        </div>
-        {totalValide && (
-          <p className="rounded-lg bg-ciel px-4 py-3 text-base font-semibold text-marine tabular-nums" aria-live="polite">
-            {textes.totalDisponible(formaterJours(total))}
+        {bilan && <BilanDroit bilan={bilan} unite={initiales.uniteSaisie} />}
+        <ValeursChiffrees etat={etat} initiales={initiales} reglages={<Reglages etat={etat} initiales={initiales} />} />
+        {(erreurs?.estConfirme || erreurs?.solde || erreurs?.estReporte || erreurs?.uniteSaisie) && (
+          <p className="flex items-center gap-1.5 text-sm text-erreur" data-erreur>
+            <CircleCheck className="size-4" aria-hidden="true" />
+            {erreurs.uniteSaisie ?? erreurs.estConfirme ?? erreurs.solde ?? erreurs.estReporte}
           </p>
         )}
-        <CaseACocher nom="estBloquant" libelle={textes.estBloquant} aide={textes.aideBloquant} defaultChecked={caseSaisie(etat, "estBloquant", initiales.estBloquant)} />
+      </SectionFormulaire>
+
+      <SectionFormulaire titre={textes.remarque} icone={Forward}>
         <ChampPiecesJointes cocheeInitialement={caseSaisie(etat, "aPieceJointe", false)} erreur={erreurs?.fichiers} />
         <ChampFormulaire nom="remarque" libelle={textes.remarque} defaultValue={valeurSaisie(etat, "remarque", initiales.remarque)} placeholder={textes.exempleRemarque} maxLength={LONGUEUR_MAX_REMARQUE_DROIT} autoComplete="off" erreur={erreurs?.remarque} />
       </SectionFormulaire>

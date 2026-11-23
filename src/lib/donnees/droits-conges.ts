@@ -9,7 +9,7 @@ import type { PieceJointeRecue } from "@/lib/validation/piece-jointe";
 import type { RechercheAbsences } from "@/lib/validation/absence";
 import type { DroitCongeListe, EvenementDroit } from "@/types";
 import { obtenirBase } from "./base";
-import { calculerSoldes } from "./droits-conges-soldes";
+import { calculerSoldes, lireUniteDroit } from "./droits-conges-soldes";
 import { compterPiecesDuDroit, listerPiecesDesDroits, relierPiecesAuxDroits, supprimerPiecesOrphelines } from "./pieces-jointes";
 import { departements, droitsConges, employes, evenements, photosEmployes, utilisateurs } from "./schema";
 
@@ -42,6 +42,12 @@ export async function listerDroits(page: number, parPage: number, recherche: Rec
       fin: droitsConges.dateFin,
       joursAcquis: droitsConges.joursAcquis,
       joursReliquat: droitsConges.joursReliquat,
+      supplement1: droitsConges.supplement1,
+      supplement2: droitsConges.supplement2,
+      supplement3: droitsConges.supplement3,
+      uniteSaisie: droitsConges.uniteSaisie,
+      estConfirme: droitsConges.estConfirme,
+      estReporte: droitsConges.estReporte,
       estBloquant: droitsConges.estBloquant,
       remarque: droitsConges.remarque,
       saisiPar: utilisateurs.nom,
@@ -62,6 +68,7 @@ export async function listerDroits(page: number, parPage: number, recherche: Rec
     const { absences, ...bilan } = soldes[rang];
     return {
       ...ligne,
+      uniteSaisie: lireUniteDroit(ligne.uniteSaisie),
       bilan,
       piecesJointes: pieces.get(ligne.id) ?? [],
       absences: absences.map(({ saisie, pris, prevus }) => ({ id: saisie.id, debut: saisie.debut, fin: saisie.fin, remarque: saisie.remarque, pris, prevus })),
@@ -88,6 +95,12 @@ const valeursDroit = (donnees: DonneesDroit) => ({
   dateFin: donnees.au,
   joursAcquis: donnees.joursAcquis,
   joursReliquat: donnees.joursReliquat,
+  supplement1: donnees.supplement1,
+  supplement2: donnees.supplement2,
+  supplement3: donnees.supplement3,
+  uniteSaisie: donnees.uniteSaisie,
+  estConfirme: donnees.estConfirme,
+  estReporte: donnees.estReporte,
   estBloquant: donnees.estBloquant,
   remarque: donnees.remarque,
 });
@@ -162,5 +175,20 @@ export async function supprimerDroit(id: string): Promise<boolean> {
     if (resultat.affectedRows === 0) return false;
     await supprimerPiecesOrphelines(transaction);
     return true;
+  });
+}
+
+/** Confirme un droit provisoire. Renvoie le nom de l'employé, ou null si le droit n'existe plus. */
+export async function confirmerDroit(id: string): Promise<string | null> {
+  return obtenirBase().transaction(async (transaction) => {
+    const [droit] = await transaction
+      .select({ prenom: employes.prenom, nom: employes.nom })
+      .from(droitsConges)
+      .innerJoin(employes, eq(employes.id, droitsConges.employeId))
+      .where(eq(droitsConges.id, id))
+      .for("update");
+    if (!droit) return null;
+    await transaction.update(droitsConges).set({ estConfirme: true }).where(eq(droitsConges.id, id));
+    return `${droit.prenom} ${droit.nom}`;
   });
 }

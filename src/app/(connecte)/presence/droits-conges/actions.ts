@@ -5,7 +5,7 @@ import { z } from "zod";
 import { peutAccederPage } from "@/lib/actions/droits";
 import { notifier } from "@/lib/actions/notifier";
 import { CHEMIN_DROITS_CONGES, PIECES_JOINTES_PAR_DROIT_MAX } from "@/lib/constantes";
-import { creerDroits as creerEnBase, modifierDroit as modifierEnBase, supprimerDroit as supprimerEnBase } from "@/lib/donnees/droits-conges";
+import { confirmerDroit as confirmerEnBase, creerDroits as creerEnBase, modifierDroit as modifierEnBase, supprimerDroit as supprimerEnBase } from "@/lib/donnees/droits-conges";
 import { ajouterPiecesAuDroit, retirerPieceDuDroit } from "@/lib/donnees/pieces-jointes";
 import { obtenirUtilisateurPourEspace } from "@/lib/donnees/session";
 import { peutAcceder } from "@/lib/metier/droits";
@@ -142,5 +142,23 @@ export async function retirerPieceJointe(_etat: EtatFormulaire, formulaire: Form
   } catch (erreur) {
     journaliserEchec("du retrait d'une pièce jointe", erreur);
     return { message: textes.erreurs.echecPieces };
+  }
+}
+
+/** Confirme un droit provisoire : ses jours deviennent utilisables. */
+export async function confirmerDroit(_etat: EtatFormulaire, formulaire: FormData): Promise<EtatFormulaire> {
+  if (!(await peutAccederPage("droits_conges"))) return { message: textes.droits };
+
+  const id = identifiant.safeParse(formulaire.get("id"));
+  if (!id.success) return { message: textes.erreurs.introuvable };
+  try {
+    const nom = await confirmerEnBase(id.data);
+    refresh();
+    if (nom === null) return { message: textes.erreurs.introuvable };
+    await notifier("droit_conge", "modification", nom, CHEMIN_DROITS_CONGES);
+    return { succes: { message: textes.confirme, idSelectionne: id.data } };
+  } catch (erreur) {
+    journaliserEchec("de la confirmation", erreur);
+    return { message: textes.erreurs.echecConfirmation };
   }
 }

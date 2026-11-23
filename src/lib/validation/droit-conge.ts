@@ -1,9 +1,9 @@
 import { z } from "zod";
-import { JOURS_DROIT_MAX, LIMITE_EMPLOYES_POINTAGE, LONGUEUR_MAX_REMARQUE_DROIT } from "@/lib/constantes";
-import { estNombreDeJoursValide } from "@/lib/metier/droits-conges";
+import { JOURS_DROIT_MAX, LIMITE_EMPLOYES_POINTAGE, LONGUEUR_MAX_REMARQUE_DROIT, UNITES_SAISIE_EVENEMENT } from "@/lib/constantes";
+import { estNombreDeJoursValide, estValeurValidePourUnite } from "@/lib/metier/droits-conges";
 import { nombreDeJours } from "@/lib/metier/evenements";
 import { TEXTES_DROITS_CONGES } from "@/lib/textes/droits-conges";
-import { caseCochee, lireTexte, premieresErreurs, texteFacultatif } from "./commun";
+import { lireTexte, premieresErreurs, texteFacultatif } from "./commun";
 
 const { erreurs } = TEXTES_DROITS_CONGES;
 const FORMAT_JOUR = /^\d{4}-\d{2}-\d{2}$/;
@@ -22,16 +22,37 @@ const nombreDeJoursSaisi = z
   .transform((valeur) => (valeur === "" ? 0 : Number(valeur.replace(",", "."))))
   .refine((jours) => estNombreDeJoursValide(jours, JOURS_DROIT_MAX), { error: erreurs.joursInvalides(JOURS_DROIT_MAX) });
 
+/** Choix « Oui / Non » de la fiche (boutons radio « oui » ou « non »). */
+const ouiNon = (erreur: string) => z.enum(["oui", "non"], { error: erreur }).transform((valeur) => valeur === "oui");
+
+/** Champs chiffrés du droit, contrôlés selon l'unité choisie. */
+const CHAMPS_CHIFFRES = ["joursAcquis", "joursReliquat", "supplement1", "supplement2", "supplement3"] as const;
+
 const schemaDroit = z
   .object({
     du: jourValide,
     au: jourValide,
+    uniteSaisie: z.enum(UNITES_SAISIE_EVENEMENT, { error: erreurs.uniteInvalide }),
     joursAcquis: nombreDeJoursSaisi,
     joursReliquat: nombreDeJoursSaisi,
-    estBloquant: caseCochee,
+    supplement1: nombreDeJoursSaisi,
+    supplement2: nombreDeJoursSaisi,
+    supplement3: nombreDeJoursSaisi,
+    estConfirme: ouiNon(erreurs.choixOuiNon),
+    // « Solde : positif » = le solde ne peut pas devenir négatif (absence refusée).
+    estBloquant: z.enum(["positif", "negatif"], { error: erreurs.choixSolde }).transform((valeur) => valeur === "positif"),
+    estReporte: ouiNon(erreurs.choixOuiNon),
     remarque: texteFacultatif.pipe(z.string().max(LONGUEUR_MAX_REMARQUE_DROIT, { error: erreurs.remarqueTropLongue(LONGUEUR_MAX_REMARQUE_DROIT) }).nullable()),
   })
   .refine((droit) => droit.au >= droit.du, { path: ["au"], error: erreurs.datesIncoherentes })
+  .superRefine((droit, contexte) => {
+    // En jours entiers, pas de demi-journée.
+    for (const champ of CHAMPS_CHIFFRES) {
+      if (!estValeurValidePourUnite(droit[champ], droit.uniteSaisie, JOURS_DROIT_MAX)) {
+        contexte.addIssue({ code: "custom", path: [champ], message: erreurs.valeurPourUnite(droit.uniteSaisie, JOURS_DROIT_MAX) });
+      }
+    }
+  })
   .refine((droit) => nombreDeJours({ debut: droit.du, fin: droit.au }) <= DUREE_MAX_PERIODE_JOURS, { path: ["au"], error: erreurs.tropLong(DUREE_MAX_PERIODE_JOURS) });
 
 const schemaCreation = z.object({
@@ -52,9 +73,15 @@ const lireDroit = (formulaire: FormData) =>
   schemaDroit.safeParse({
     du: lireTexte(formulaire.get("du")),
     au: lireTexte(formulaire.get("au")),
+    uniteSaisie: lireTexte(formulaire.get("uniteSaisie")),
     joursAcquis: lireTexte(formulaire.get("joursAcquis")),
     joursReliquat: lireTexte(formulaire.get("joursReliquat")),
-    estBloquant: lireTexte(formulaire.get("estBloquant")),
+    supplement1: lireTexte(formulaire.get("supplement1")),
+    supplement2: lireTexte(formulaire.get("supplement2")),
+    supplement3: lireTexte(formulaire.get("supplement3")),
+    estConfirme: lireTexte(formulaire.get("estConfirme")),
+    estBloquant: lireTexte(formulaire.get("solde")),
+    estReporte: lireTexte(formulaire.get("estReporte")),
     remarque: lireTexte(formulaire.get("remarque")),
   });
 
