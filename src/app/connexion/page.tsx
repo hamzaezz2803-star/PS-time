@@ -20,8 +20,8 @@ export default function PageConnexion() {
           <Image
             src="/logo-ps-time.webp"
             alt={TEXTES_CONNEXION.altLogo}
-            width={1261}
-            height={1247}
+            width={1155}
+            height={1163}
             priority
             sizes="96px"
             className="mx-auto mb-6 size-24 lg:hidden"

@@ -237,6 +237,8 @@ export const CHEMIN_IMPRESSION_RAPPORT_PRESENCES = "/impression/rapport-presence
 export const RAPPORT_JOURS_DEFAUT = 30;
 export const RAPPORT_JOURS_MAX = 93;
 export const RAPPORT_LIGNES_MAX = 5000;
+/** Appareils (badgeuses) : page d'attente, la gestion des badgeuses viendra ensuite. */
+export const CHEMIN_APPAREILS = "/appareils";
 /** Sauvegarde (Administration > Sauvegarde) : fichier SQL signé, produit et relu par l'application. */
 export const CHEMIN_SAUVEGARDE = "/administration/sauvegarde";
 export const CHEMIN_EXPORT_SAUVEGARDE = "/administration/sauvegarde/export";

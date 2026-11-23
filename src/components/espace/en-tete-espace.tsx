@@ -14,8 +14,8 @@ export function EnTeteEspace() {
           <Image
             src="/logo-ps-time.webp"
             alt={TEXTES_CONNEXION.altLogo}
-            width={1261}
-            height={1247}
+            width={1155}
+            height={1163}
             sizes="44px"
             className="size-11"
           />

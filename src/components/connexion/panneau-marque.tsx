@@ -15,8 +15,8 @@ export function PanneauMarque() {
         <Image
           src="/logo-ps-time.webp"
           alt={TEXTES_CONNEXION.altLogo}
-          width={1261}
-          height={1247}
+          width={1155}
+          height={1163}
           priority
           sizes="176px"
           className="relative z-10 size-36 xl:size-44"

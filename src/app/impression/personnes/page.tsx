@@ -62,7 +62,7 @@ async function DocumentEmployes({ searchParams }: { searchParams: ParametresRech
       <article className="rounded-xl bg-surface p-8 shadow-carte ring-1 ring-bordure print:rounded-none print:p-0 print:shadow-none print:ring-0">
         <header className="flex items-start justify-between gap-6 border-b-2 border-primaire pb-5">
           <div className="flex items-center gap-3">
-            <Image src="/logo-ps-time.webp" alt={TEXTES_CONNEXION.altLogo} width={1261} height={1247} sizes="48px" className="size-12" priority />
+            <Image src="/logo-ps-time.webp" alt={TEXTES_CONNEXION.altLogo} width={1155} height={1163} sizes="48px" className="size-12" priority />
             <div>
               <p className="text-lg font-bold leading-tight text-marine">{TEXTES_NAVIGATION.nomApplication}</p>
               <p className="text-sm text-texte-secondaire">{TEXTES_NAVIGATION.sousTitreApplication}</p>

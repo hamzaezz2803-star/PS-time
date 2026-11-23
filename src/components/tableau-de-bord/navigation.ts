@@ -14,11 +14,13 @@ import {
   DatabaseBackup,
   Factory,
   FileClock,
+  Fingerprint,
   History,
   LayoutDashboard,
   ListChecks,
   Palette,
   Repeat,
+  ScanLine,
   ShieldCheck,
   UserRound,
   Users,
@@ -28,6 +30,7 @@ import {
 import {
   CHEMIN_ABSENCES,
   CHEMIN_AFFECTATIONS,
+  CHEMIN_APPAREILS,
   CHEMIN_APPARENCE,
   CHEMIN_SAUVEGARDE,
   CHEMIN_COMPTEURS,
@@ -113,24 +116,34 @@ export const MENUS_NAVIGATION: MenuNavigation[] = [
         liens: [
           { libelle: T.pointagesManuels, icone: ClipboardClock, href: CHEMIN_POINTAGES_MANUELS, page: "pointages_manuels" },
           { libelle: T.evenements, icone: CalendarX2, href: CHEMIN_EVENEMENTS, page: "evenements" },
-          { libelle: T.absences, icone: CalendarDays, href: CHEMIN_ABSENCES, page: "absences" },
-          { libelle: T.droitsConges, icone: CalendarCheck, href: CHEMIN_DROITS_CONGES, page: "droits_conges" },
         ],
       },
       {
         titre: T.compteurs,
-        liens: [
-          { libelle: T.gestionCompteurs, icone: ListChecks, href: CHEMIN_COMPTEURS, page: "compteurs" },
-          { libelle: T.detailJour, icone: CalendarSearch, href: CHEMIN_DETAIL_JOUR, page: "detail_jour" },
-        ],
+        liens: [{ libelle: T.detailJour, icone: CalendarSearch, href: CHEMIN_DETAIL_JOUR, page: "detail_jour" }],
       },
     ],
+  },
+  {
+    libelle: T.appareils,
+    icone: Fingerprint,
+    sections: [{ liens: [{ libelle: T.badgeuses, icone: ScanLine, href: CHEMIN_APPAREILS, reserveSuperAdmin: true }] }],
   },
   {
     libelle: T.administration,
     icone: ShieldCheck,
     sections: [
       {
+        // Chaque page garde son propre droit : un administrateur ne voit que celles qui lui sont accordées.
+        titre: T.congesEtCompteurs,
+        liens: [
+          { libelle: T.absences, icone: CalendarDays, href: CHEMIN_ABSENCES, page: "absences" },
+          { libelle: T.droitsConges, icone: CalendarCheck, href: CHEMIN_DROITS_CONGES, page: "droits_conges" },
+          { libelle: T.gestionCompteurs, icone: ListChecks, href: CHEMIN_COMPTEURS, page: "compteurs" },
+        ],
+      },
+      {
+        titre: T.systeme,
         liens: [
           { libelle: T.utilisateurs, icone: ShieldCheck, href: CHEMIN_UTILISATEURS, reserveSuperAdmin: true },
           { libelle: T.historique, icone: History, href: CHEMIN_HISTORIQUE, reserveSuperAdmin: true },
