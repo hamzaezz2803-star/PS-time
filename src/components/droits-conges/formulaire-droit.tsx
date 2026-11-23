@@ -3,7 +3,9 @@
 import { useState } from "react";
 import { CalendarCheck, Users } from "lucide-react";
 import { creerDroits, modifierDroit } from "@/app/(connecte)/presence/droits-conges/actions";
-import { ChoixEmployes, type EmployeChoisissable } from "@/components/employes/choix-employes";
+import { ChoixCibleEmployes, type GroupeChoisissable } from "@/components/employes/choix-cible-employes";
+import type { EmployeChoisissable } from "@/components/employes/choix-employes";
+import { LienSupprimerSaisie } from "@/components/liste/gestion-saisie";
 import { useFormulaireListe, valeurSaisie } from "@/components/liste/utiliser-formulaire-liste";
 import { SectionFormulaire } from "@/components/programme/section-formulaire";
 import { ChampSelection } from "@/components/ui/champ-selection";
@@ -30,11 +32,12 @@ function Pied({ message, enCours, onAnnuler }: { message?: string; enCours: bool
 /** Attribution d'un même droit (événement, période, jours) à un ou plusieurs employés. */
 export function FormulaireCreationDroits({
   employes,
+  groupes,
   departements,
   evenements,
   onTermine,
   onAnnuler,
-}: ProprietesFenetre & { employes: EmployeChoisissable[]; departements: ElementArbre[]; evenements: EvenementDroit[] }) {
+}: ProprietesFenetre & { employes: EmployeChoisissable[]; groupes: GroupeChoisissable[]; departements: ElementArbre[]; evenements: EvenementDroit[] }) {
   const [etat, action, enCours] = useFormulaireListe(creerDroits, onTermine);
   const [annee] = useState(anneeLocale);
   const employesCoches = etat.saisie ? etat.saisie.getAll("employes").map(lireTexte) : [];
@@ -48,7 +51,7 @@ export function FormulaireCreationDroits({
     <form action={action} noValidate className="flex min-h-0 flex-1 flex-col">
       <div key={etat.numeroReponse} className="flex flex-1 flex-col gap-7 overflow-y-auto px-5 py-5 sm:px-6">
         <SectionFormulaire titre={textes.sectionEmployes} icone={Users}>
-          <ChoixEmployes employes={employes} departements={departements} nomChamp="employes" selectionInitiale={employesCoches} textes={textes} />
+          <ChoixCibleEmployes employes={employes} groupes={groupes} departements={departements} nomChamp="employes" selectionInitiale={employesCoches} textes={textes} />
           <MessageErreur message={etat.erreursChamps?.employeIds} />
         </SectionFormulaire>
         <SectionFormulaire titre={textes.evenement} icone={CalendarCheck}>
@@ -70,7 +73,7 @@ export function FormulaireCreationDroits({
   );
 }
 
-/** Modification d'un droit : l'employé et l'événement restent ceux d'origine. */
+/** Modification d'un droit : l'employé et l'événement restent ceux d'origine ; la suppression se fait d'ici. */
 export function FormulaireModificationDroit({ droit, onTermine, onAnnuler }: ProprietesFenetre & { droit: DroitCongeListe }) {
   const [etat, action, enCours] = useFormulaireListe(modifierDroit, onTermine);
   const [annee] = useState(anneeLocale);
@@ -91,7 +94,8 @@ export function FormulaireModificationDroit({ droit, onTermine, onAnnuler }: Pro
           <CalendarCheck className="size-5 shrink-0" aria-hidden="true" />
           {textes.employeFixe(`${droit.prenom} ${droit.nom}`, `${droit.evenementCode} · ${droit.evenementNom}`)}
         </p>
-        <ChampsDroit etat={etat} initiales={initiales} anneeCourante={annee} />
+        <ChampsDroit etat={etat} initiales={initiales} anneeCourante={annee} bilan={droit.bilan} />
+        <LienSupprimerSaisie id={droit.id} nom={`${droit.prenom} ${droit.nom}`} libelle={textes.supprimerCeDroit} />
       </div>
       <Pied message={etat.message} enCours={enCours} onAnnuler={onAnnuler} />
     </form>

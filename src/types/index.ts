@@ -327,7 +327,18 @@ export type DetailJour = {
     entree: number | null;
     sortie: number | null;
   } | null;
-  pointages: { id: string; horodatage: string; etat: string; source: string; statut: import("@/lib/metier/statut-pointage").StatutPointage }[];
+  pointages: {
+    id: string;
+    horodatage: string;
+    etat: string;
+    /** « badgeuse » ou « manuel ». */
+    source: string;
+    remarque: string | null;
+    /** Compte qui a saisi un pointage manuel (vide pour la badgeuse ou un compte supprimé). */
+    saisiParNom: string | null;
+    saisiParIdentifiant: string | null;
+    statut: import("@/lib/metier/statut-pointage").StatutPointage;
+  }[];
   /** Absences et événements de l'employé ce jour-là. */
   evenements: EvenementDuJour[];
   compteurs: Compteur[];

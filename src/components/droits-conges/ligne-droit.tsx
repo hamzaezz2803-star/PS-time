@@ -1,11 +1,12 @@
 import { CircleAlert, CircleCheck, CircleMinus, Lock } from "lucide-react";
-import { BoutonModifierSaisie, BoutonSupprimerSaisie } from "@/components/liste/gestion-saisie";
+import { BoutonModifierSaisie } from "@/components/liste/gestion-saisie";
 import { AvatarEmploye } from "@/components/personnes/avatar-employe";
 import { formaterJour } from "@/lib/formats";
 import { anneeCivile, etatSolde, pourcentageConsomme, type EtatSolde } from "@/lib/metier/droits-conges";
 import { formaterJours, TEXTES_DROITS_CONGES as textes } from "@/lib/textes/droits-conges";
 import { cn } from "@/lib/utils";
 import type { DroitCongeListe } from "@/types";
+import { PiecesJointesDroit } from "./pieces-jointes-droit";
 
 const ETATS: Record<EtatSolde, { couleur: string; Icone: typeof CircleCheck }> = {
   disponible: { couleur: "text-succes", Icone: CircleCheck },
@@ -65,7 +66,8 @@ function Consommation({ droit }: { droit: DroitCongeListe }) {
 }
 
 /**
- * Un droit sur une ligne : employé, événement et période, consommation, reste, actions.
+ * Un droit sur une ligne : employé, événement et période, consommation, solde, puis modifier
+ * (la suppression est dans la fenêtre de modification) et pièces jointes.
  * Sur mobile, les mêmes blocs se rangent sur trois lignes (zones de grille).
  */
 export function LigneDroit({ droit }: { droit: DroitCongeListe }) {
@@ -75,7 +77,7 @@ export function LigneDroit({ droit }: { droit: DroitCongeListe }) {
   const { couleur, Icone } = ETATS[etat];
 
   return (
-    <li className="grid items-center gap-x-4 gap-y-3 px-4 py-3 transition-colors duration-150 [grid-template-areas:'emp_act'_'evt_reste'_'conso_conso'] [grid-template-columns:minmax(0,1fr)_auto] hover:bg-fond sm:px-5 lg:[grid-template-areas:'emp_evt_conso_reste_act'] lg:[grid-template-columns:minmax(0,1.1fr)_minmax(0,1fr)_minmax(0,1.5fr)_7.5rem_5.5rem]">
+    <li className="grid items-center gap-x-4 gap-y-3 px-4 py-3 transition-colors duration-150 [grid-template-areas:'emp_act'_'evt_reste'_'conso_conso'] [grid-template-columns:minmax(0,1fr)_auto] hover:bg-fond sm:px-5 lg:[grid-template-areas:'emp_evt_conso_reste_act'] lg:[grid-template-columns:minmax(0,1.1fr)_minmax(0,1fr)_minmax(0,1.5fr)_7.5rem_6.5rem]">
       <div className="flex min-w-0 items-center gap-3 [grid-area:emp]">
         <AvatarEmploye id={droit.employeId} nomComplet={nomComplet} photoModifieeLe={droit.photoModifieeLe} />
         <div className="min-w-0">
@@ -110,7 +112,7 @@ export function LigneDroit({ droit }: { droit: DroitCongeListe }) {
 
       <div className="-me-2 flex self-start justify-self-end [grid-area:act] lg:self-center">
         <BoutonModifierSaisie id={droit.id} libelle={textes.modifier(nomComplet)} />
-        <BoutonSupprimerSaisie id={droit.id} nom={nomComplet} libelle={textes.supprimer(nomComplet)} />
+        <PiecesJointesDroit droitId={droit.id} nomEmploye={nomComplet} pieces={droit.piecesJointes} />
       </div>
     </li>
   );

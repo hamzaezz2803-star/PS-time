@@ -43,7 +43,7 @@ export function ListeDroits({
         </div>
       ) : (
         <>
-          <div className="hidden gap-x-4 border-b border-bordure bg-fond/70 px-5 py-2.5 text-sm font-semibold text-texte-secondaire lg:grid lg:[grid-template-columns:minmax(0,1.1fr)_minmax(0,1fr)_minmax(0,1.5fr)_7.5rem_5.5rem]" aria-hidden="true">
+          <div className="hidden gap-x-4 border-b border-bordure bg-fond/70 px-5 py-2.5 text-sm font-semibold text-texte-secondaire lg:grid lg:[grid-template-columns:minmax(0,1.1fr)_minmax(0,1fr)_minmax(0,1.5fr)_7.5rem_6.5rem]" aria-hidden="true">
             <span>{textes.colonnes.employe}</span>
             <span>{textes.colonnes.evenement}</span>
             <span>{textes.colonnes.consommation}</span>

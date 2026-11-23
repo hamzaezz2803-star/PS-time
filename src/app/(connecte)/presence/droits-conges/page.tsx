@@ -6,7 +6,7 @@ import { DROITS_CONGES_PAR_PAGE } from "@/lib/constantes";
 import { aujourdhuiLocal } from "@/lib/donnees/compteurs-calcul";
 import { listerDepartements } from "@/lib/donnees/departements";
 import { compterDroits, listerDroits, listerEvenementsDroits } from "@/lib/donnees/droits-conges";
-import { listerEmployesSelection } from "@/lib/donnees/groupes";
+import { listerEmployesSelection, listerGroupes } from "@/lib/donnees/groupes";
 import { lirePage } from "@/lib/metier/pagination";
 import { TEXTES_DROITS_CONGES as textes } from "@/lib/textes/droits-conges";
 import { lireRechercheAbsences } from "@/lib/validation/absence";
@@ -31,9 +31,10 @@ async function ContenuDroits({ searchParams }: { searchParams: ParametresRecherc
   const parametres = await searchParams;
   // Mêmes filtres que les absences : employé, et « valable le » (jour compris dans la période).
   const recherche = lireRechercheAbsences(parametres);
-  const [total, employes, departements, evenements] = await Promise.all([
+  const [total, employes, groupes, departements, evenements] = await Promise.all([
     compterDroits(recherche),
     listerEmployesSelection(),
+    listerGroupes(),
     listerDepartements(),
     listerEvenementsDroits(),
   ]);
@@ -42,7 +43,7 @@ async function ContenuDroits({ searchParams }: { searchParams: ParametresRecherc
   const droits = await listerDroits(page, DROITS_CONGES_PAR_PAGE, recherche, aujourdhuiLocal());
 
   return (
-    <GestionDroits droits={droits} employes={employes} departements={departements} evenements={evenements}>
+    <GestionDroits droits={droits} employes={employes} groupes={groupes.map(({ id, nom }) => ({ id, nom }))} departements={departements} evenements={evenements}>
       <ListeDroits droits={droits} total={total} page={page} nombrePages={nombrePages} recherche={recherche} />
     </GestionDroits>
   );

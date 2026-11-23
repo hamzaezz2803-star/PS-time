@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { CalendarClock, ClipboardList, Hand, Sparkles } from "lucide-react";
+import { CalendarClock, ClipboardList, Hand, ScanLine, Sparkles } from "lucide-react";
 import { PastilleEtat } from "@/components/exceptions/pastille-etat";
 import { ResultatPointage } from "@/components/exceptions/resultat-pointage";
 import { Pastille } from "@/components/ui/pastille";
@@ -8,6 +8,7 @@ import { formaterMinutes } from "@/lib/metier/compteurs/format";
 import { minutesVersHeure } from "@/lib/metier/programme";
 import { TEXTES_DETAIL_JOUR } from "@/lib/textes/detail-jour";
 import type { DetailJour } from "@/types";
+import { AjoutPointageJour, SuppressionPointageJour } from "./correction-pointages";
 
 const textes = TEXTES_DETAIL_JOUR;
 
@@ -84,32 +85,75 @@ export function CarteHoraire({ horaire }: { horaire: DetailJour["horaire"] }) {
   );
 }
 
-/** Pointages du jour : heure, état, source et résultat d'après le planning. */
-export function CartePointages({ pointages }: { pointages: DetailJour["pointages"] }) {
+type PointageJour = DetailJour["pointages"][number];
+
+/** D'où vient le pointage : la badgeuse, ou une saisie manuelle avec le nom et l'identifiant de son auteur. */
+function OriginePointage({ pointage }: { pointage: PointageJour }) {
   const t = textes.pointages;
+  if (pointage.source !== "manuel") {
+    return (
+      <span className="inline-flex items-center gap-1 text-sm text-texte-secondaire">
+        <ScanLine className="size-3.5" aria-hidden="true" />
+        {t.badgeuse}
+      </span>
+    );
+  }
+  const auteur = pointage.saisiParNom && pointage.saisiParIdentifiant ? t.saisiPar(pointage.saisiParNom, pointage.saisiParIdentifiant) : t.compteSupprime;
   return (
-    <Carte titre={t.titre} Icone={ClipboardList} action={<span className="rounded-md bg-fond px-2 py-0.5 text-sm tabular-nums text-texte-secondaire ring-1 ring-inset ring-bordure">{t.total(pointages.length)}</span>}>
+    <span className="inline-flex flex-wrap items-center gap-1 text-sm text-texte-secondaire">
+      <Hand className="size-3.5" aria-hidden="true" />
+      <span className="font-medium text-texte">{t.manuel}</span>
+      <span>{auteur}</span>
+    </span>
+  );
+}
+
+/**
+ * Pointages du jour : heure, état, origine (badgeuse ou saisie manuelle et son auteur) et résultat
+ * d'après le planning. Avec la page Pointage manuel : ajout d'un pointage manquant et suppression
+ * d'une saisie manuelle, sans quitter le détail.
+ */
+export function CartePointages({
+  pointages,
+  correction,
+}: {
+  pointages: DetailJour["pointages"];
+  /** Présent seulement si le compte peut saisir des pointages manuels. */
+  correction?: { employeId: string; date: string; libelleJour: string };
+}) {
+  const t = textes.pointages;
+  const action = (
+    <span className="flex items-center gap-2">
+      {correction && <AjoutPointageJour {...correction} />}
+      <span className="rounded-md bg-fond px-2 py-0.5 text-sm tabular-nums text-texte-secondaire ring-1 ring-inset ring-bordure">{t.total(pointages.length)}</span>
+    </span>
+  );
+  return (
+    <Carte titre={t.titre} Icone={ClipboardList} action={action}>
       {pointages.length === 0 ? (
-        <p className="text-base text-texte-secondaire">{t.aucun}</p>
+        <div className="flex flex-col gap-1">
+          <p className="text-base text-texte-secondaire">{t.aucun}</p>
+          {correction && <p className="text-sm text-texte-secondaire">{t.aideCorrection}</p>}
+        </div>
       ) : (
         <ol className="flex flex-col">
-          {pointages.map((pointage) => (
-            <li key={pointage.id} className="flex flex-wrap items-start gap-x-3 gap-y-1.5 border-s-2 border-primaire/30 py-2 ps-3">
-              <span className="w-14 text-base font-semibold text-texte tabular-nums">{formaterHeure(new Date(pointage.horodatage))}</span>
-              <span className="flex flex-col items-start gap-1">
-                <PastilleEtat etat={pointage.etat} />
-                {pointage.source === "manuel" && (
-                  <span className="inline-flex items-center gap-1 text-sm text-texte-secondaire">
-                    <Hand className="size-3.5" aria-hidden="true" />
-                    {t.manuel}
-                  </span>
-                )}
-              </span>
-              <span className="ms-auto">
-                <ResultatPointage statut={pointage.statut} />
-              </span>
-            </li>
-          ))}
+          {pointages.map((pointage) => {
+            const heure = formaterHeure(new Date(pointage.horodatage));
+            return (
+              <li key={pointage.id} className="flex flex-wrap items-start gap-x-3 gap-y-1.5 border-s-2 border-primaire/30 py-2 ps-3">
+                <span className="w-14 text-base font-semibold text-texte tabular-nums">{heure}</span>
+                <span className="flex min-w-0 flex-col items-start gap-1">
+                  <PastilleEtat etat={pointage.etat} />
+                  <OriginePointage pointage={pointage} />
+                  {pointage.remarque && <span className="text-sm text-texte-secondaire">{pointage.remarque}</span>}
+                </span>
+                <span className="ms-auto flex items-start gap-1">
+                  <ResultatPointage statut={pointage.statut} />
+                  {correction && pointage.source === "manuel" && <SuppressionPointageJour id={pointage.id} heure={heure} />}
+                </span>
+              </li>
+            );
+          })}
         </ol>
       )}
     </Carte>

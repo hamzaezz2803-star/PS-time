@@ -31,7 +31,6 @@ export function verifierPieceJointe(octets: Uint8Array): VerificationPieceJointe
  */
 export function nettoyerNomFichier(nom: string): string {
   const sansChemin = nom.split(/[/\\]/).pop() ?? "";
-  // eslint-disable-next-line no-control-regex -- on retire justement les caractères de contrôle
   const propre = sansChemin.replace(/[\u0000-\u001f\u007f"<>|*?:]/g, "").replace(/\s+/g, " ").trim();
   if (propre === "" || /^\.+$/.test(propre)) return "piece-jointe";
   if (propre.length <= LONGUEUR_MAX_NOM_PIECE_JOINTE) return propre;

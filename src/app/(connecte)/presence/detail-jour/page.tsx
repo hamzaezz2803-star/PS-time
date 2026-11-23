@@ -12,6 +12,7 @@ import { Chargement } from "@/components/ui/chargement";
 import { EnTetePage } from "@/components/ui/en-tete-page";
 import { MessageErreur } from "@/components/ui/message-erreur";
 import { DUREES_HISTORIQUE } from "@/lib/constantes";
+import { formaterJour } from "@/lib/formats";
 import { aujourdhuiLocal } from "@/lib/donnees/compteurs-calcul";
 import { listerDepartements } from "@/lib/donnees/departements";
 import { chargerDetailJour } from "@/lib/donnees/detail-jour";
@@ -59,7 +60,11 @@ async function ContenuDetailJour({ searchParams }: { searchParams: ParametresRec
     <NavigationDetail selection={selection}>
       <BarreSelection employes={employes} departements={departements} aujourdhui={aujourdhui} />
       <ZoneDetail>
-        {selection.employe ? <Detail selection={{ ...selection, employe: selection.employe }} /> : <AucunEmploye />}
+        {selection.employe ? (
+          <Detail selection={{ ...selection, employe: selection.employe }} peutCorriger={peutAcceder(utilisateur, "pointages_manuels")} />
+        ) : (
+          <AucunEmploye />
+        )}
       </ZoneDetail>
     </NavigationDetail>
   );
@@ -77,7 +82,8 @@ function AucunEmploye() {
   );
 }
 
-async function Detail({ selection }: { selection: SelectionDetail & { employe: string } }) {
+/** `peutCorriger` : le compte a la page Pointage manuel (revérifiée par chaque action). */
+async function Detail({ selection, peutCorriger }: { selection: SelectionDetail & { employe: string }; peutCorriger: boolean }) {
   let resultat;
   try {
     resultat = await chargerDetailJour(selection.employe, selection.date, selection.jours);
@@ -94,7 +100,10 @@ async function Detail({ selection }: { selection: SelectionDetail & { employe: s
       {detail.evenements.length > 0 && <CarteEvenementsJour evenements={detail.evenements} />}
       <div className="grid gap-6 lg:grid-cols-2">
         <CarteHoraire horaire={detail.horaire} />
-        <CartePointages pointages={detail.pointages} />
+        <CartePointages
+          pointages={detail.pointages}
+          correction={peutCorriger ? { employeId: detail.employe.id, date: detail.date, libelleJour: textes.pointages.pourLe(detail.employe.nomComplet, formaterJour(detail.date)) } : undefined}
+        />
       </div>
       <CompteursJour detail={detail} />
       <HistoriqueCompteurs detail={detail} />

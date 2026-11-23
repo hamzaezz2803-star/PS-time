@@ -25,6 +25,18 @@ export function BoutonSupprimerSaisie({ id, nom, libelle }: { id: string; nom: s
   return <BoutonIcone libelle={libelle} Icone={Trash2} onClick={() => ouvrir({ type: "suppression", id, nom })} estDanger />;
 }
 
+/** Bouton « supprimer » avec son texte, par exemple au bas d'une fenêtre de modification. */
+export function LienSupprimerSaisie({ id, nom, libelle }: { id: string; nom: string; libelle: string }) {
+  const ouvrir = use(ContexteSaisie);
+  if (!ouvrir) return null;
+  return (
+    <Bouton variante="fantome" onClick={() => ouvrir({ type: "suppression", id, nom })} className="w-fit text-erreur hover:bg-erreur/5">
+      <Trash2 className="size-4" aria-hidden="true" />
+      {libelle}
+    </Bouton>
+  );
+}
+
 /** Bouton « modifier » d'une ligne (seulement si la gestion sait afficher une modification). */
 export function BoutonModifierSaisie({ id, libelle }: { id: string; libelle: string }) {
   const ouvrir = use(ContexteSaisie);

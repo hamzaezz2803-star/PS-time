@@ -251,19 +251,19 @@ SELECT CONCAT('00000000-0000-4000-8000-0000000017', RIGHT(id, 2)), id, 1, formul
 FROM compteurs WHERE id LIKE '00000000-0000-4000-8000-%';
 
 -- 13. Événements : motifs d'absence et de présence courants, à la journée, à la demi-journée ou en heures.
--- La récupération est masquée du planning.
-INSERT INTO evenements (id, code, nom, type, unite_saisie, duree_minutes, est_prioritaire_sur_pointages, est_visible_planning, priorite, code_paie) VALUES
-  ('00000000-0000-4000-8000-000000001801', 'CP', 'Congé payé', 'absence', 'journee', NULL, 0, 1, 10, 'CP'),
-  ('00000000-0000-4000-8000-000000001802', 'CPR', 'Congés reportés', 'absence', 'journee', NULL, 0, 1, 10, 'CP-REP'),
-  ('00000000-0000-4000-8000-000000001803', 'MAL', 'Maladie', 'absence', 'journee', NULL, 0, 1, 50, 'MAL'),
-  ('00000000-0000-4000-8000-000000001804', 'AT', 'Accident du travail', 'absence', 'journee', NULL, 0, 1, 60, 'AT'),
-  ('00000000-0000-4000-8000-000000001805', 'MAT', 'Congé de maternité', 'absence', 'journee', NULL, 0, 1, 70, 'MAT'),
-  ('00000000-0000-4000-8000-000000001806', 'PAT', 'Congé de paternité', 'absence', 'journee', NULL, 0, 1, 40, 'PAT'),
-  ('00000000-0000-4000-8000-000000001807', 'CSS', 'Congé sans solde', 'absence', 'demi_journee', NULL, 0, 1, 10, 'CSS'),
-  ('00000000-0000-4000-8000-000000001808', 'ABA', 'Absence autorisée', 'absence', 'heures', 120, 0, 1, 20, NULL),
-  ('00000000-0000-4000-8000-000000001809', 'FOR', 'Formation', 'presence', 'heures', 120, 1, 1, 30, 'FOR'),
-  ('00000000-0000-4000-8000-000000001810', 'MIS', 'Mission', 'presence', 'journee', NULL, 1, 1, 30, 'MIS'),
-  ('00000000-0000-4000-8000-000000001811', 'RCP', 'Récupération', 'absence', 'heures', 120, 0, 0, 15, NULL);
+-- La récupération est non active. Congés payés, reportés et récupération sont soumis à la gestion des droits.
+INSERT INTO evenements (id, code, nom, type, unite_saisie, duree_minutes, est_prioritaire_sur_pointages, est_visible_planning, priorite, code_paie, est_soumis_droits) VALUES
+  ('00000000-0000-4000-8000-000000001801', 'CP', 'Congé payé', 'absence', 'journee', NULL, 0, 1, 10, 'CP', 1),
+  ('00000000-0000-4000-8000-000000001802', 'CPR', 'Congés reportés', 'absence', 'journee', NULL, 0, 1, 10, 'CP-REP', 1),
+  ('00000000-0000-4000-8000-000000001803', 'MAL', 'Maladie', 'absence', 'journee', NULL, 0, 1, 50, 'MAL', 0),
+  ('00000000-0000-4000-8000-000000001804', 'AT', 'Accident du travail', 'absence', 'journee', NULL, 0, 1, 60, 'AT', 0),
+  ('00000000-0000-4000-8000-000000001805', 'MAT', 'Congé de maternité', 'absence', 'journee', NULL, 0, 1, 70, 'MAT', 0),
+  ('00000000-0000-4000-8000-000000001806', 'PAT', 'Congé de paternité', 'absence', 'journee', NULL, 0, 1, 40, 'PAT', 0),
+  ('00000000-0000-4000-8000-000000001807', 'CSS', 'Congé sans solde', 'absence', 'demi_journee', NULL, 0, 1, 10, 'CSS', 0),
+  ('00000000-0000-4000-8000-000000001808', 'ABA', 'Absence autorisée', 'absence', 'heures', 120, 0, 1, 20, NULL, 0),
+  ('00000000-0000-4000-8000-000000001809', 'FOR', 'Formation', 'presence', 'heures', 120, 1, 1, 30, 'FOR', 0),
+  ('00000000-0000-4000-8000-000000001810', 'MIS', 'Mission', 'presence', 'journee', NULL, 1, 1, 30, 'MIS', 0),
+  ('00000000-0000-4000-8000-000000001811', 'RCP', 'Récupération', 'absence', 'heures', 120, 0, 0, 15, NULL, 1);
 
 -- 14. Pointages saisis à la main (page Pointage manuel), le dernier jour ouvré avant aujourd'hui :
 -- deux employés de bureau (08:30-17:30) : Zineb Alaoui (T013) a oublié son badge (à l'heure) ;

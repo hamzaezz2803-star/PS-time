@@ -12,7 +12,7 @@ import { obtenirBase } from "./base";
 import { aujourdhuiLocal, chargerJoursService, estJourValide } from "./compteurs-calcul";
 import { listerCompteursActifs } from "./compteurs";
 import { evaluerPointages } from "./planning";
-import { departements, employes, pointages } from "./schema";
+import { departements, employes, pointages, utilisateurs } from "./schema";
 
 // Formules compilées gardées d'une demande à l'autre (la clé contient la version : jamais périmées).
 const cache: CacheFormules = new Map();
@@ -38,8 +38,18 @@ async function pointagesDuJour(employe: { id: string; groupeId: string | null },
   const depuis = new Date(Date.parse(`${date}T00:00:00Z`) - UN_JOUR_MILLISECONDES);
   const jusqua = new Date(Date.parse(`${date}T00:00:00Z`) + 2 * UN_JOUR_MILLISECONDES);
   const lignes = await obtenirBase()
-    .select({ id: pointages.id, horodatage: pointages.horodatage, etat: pointages.etat, source: pointages.source })
+    .select({
+      id: pointages.id,
+      horodatage: pointages.horodatage,
+      etat: pointages.etat,
+      source: pointages.source,
+      remarque: pointages.remarque,
+      // Auteur d’une saisie manuelle : nom et identifiant de connexion (jamais de donnée sensible).
+      saisiParNom: utilisateurs.nom,
+      saisiParIdentifiant: utilisateurs.identifiant,
+    })
     .from(pointages)
+    .leftJoin(utilisateurs, eq(utilisateurs.id, pointages.saisiPar))
     .where(and(eq(pointages.employeId, employe.id), gte(pointages.horodatage, depuis), lt(pointages.horodatage, jusqua)))
     .orderBy(asc(pointages.horodatage))
     .limit(DETAIL_POINTAGES_MAX * 3);
