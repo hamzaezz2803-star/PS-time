@@ -1,58 +1,38 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { couvreLaJournee, estDansUnePeriodePrise, estPrisAutoriseLe, nombreDeJours, saisiesSeChevauchent, trierPeriodes, verifierPeriodesPrise } from "./evenements.ts";
+import { couvreLaJournee, heuresEnMinutes, minutesEnHeures, niveauPriorite, nombreDeJours, saisiesSeChevauchent } from "./evenements.ts";
 
-describe("périodes de prise d'un événement", () => {
-  it("accepte aucune période (toute l'année) ou des périodes distinctes", () => {
-    assert.equal(verifierPeriodesPrise([]), null);
-    assert.equal(
-      verifierPeriodesPrise([
-        { debut: "2026-01-01", fin: "2026-06-30" },
-        { debut: "2026-09-01", fin: "2026-09-01" },
-      ]),
-      null,
-    );
+describe("durée d'un événement en heures", () => {
+  it("lit un nombre d'heures entier ou décimal (virgule ou point)", () => {
+    assert.equal(heuresEnMinutes("2"), 120);
+    assert.equal(heuresEnMinutes("1,5"), 90);
+    assert.equal(heuresEnMinutes(" 0.5 "), 30);
+    assert.equal(heuresEnMinutes("24"), 1440);
   });
 
-  it("refuse une fin avant le début", () => {
-    assert.equal(verifierPeriodesPrise([{ debut: "2026-07-01", fin: "2026-06-30" }]), "ordre");
+  it("refuse zéro, plus de 24 h, un pas autre que la demi-heure et le texte", () => {
+    assert.equal(heuresEnMinutes("0"), null);
+    assert.equal(heuresEnMinutes("24,5"), null);
+    assert.equal(heuresEnMinutes("1,25"), null);
+    assert.equal(heuresEnMinutes("deux"), null);
+    assert.equal(heuresEnMinutes(""), null);
+    assert.equal(heuresEnMinutes("-1"), null);
   });
 
-  it("refuse deux périodes qui ont un jour en commun", () => {
-    assert.equal(
-      verifierPeriodesPrise([
-        { debut: "2026-01-01", fin: "2026-03-31" },
-        { debut: "2026-03-31", fin: "2026-05-31" },
-      ]),
-      "chevauchement",
-    );
-  });
-
-  it("refuse plus de 4 périodes", () => {
-    const periodes = ["01", "02", "03", "04", "05"].map((mois) => ({ debut: `2026-${mois}-01`, fin: `2026-${mois}-10` }));
-    assert.equal(verifierPeriodesPrise(periodes), "trop");
+  it("affiche les minutes en heures avec une virgule", () => {
+    assert.equal(minutesEnHeures(90), "1,5");
+    assert.equal(minutesEnHeures(120), "2");
   });
 });
 
-describe("prise autorisée un jour donné", () => {
-  const congesReportes = [{ debut: "2026-01-01", fin: "2026-07-01" }];
-
-  it("autorise tous les jours sans période", () => {
-    assert.equal(estPrisAutoriseLe([], "2026-11-19"), true);
-  });
-
-  it("autorise les bornes et refuse le lendemain de la fin", () => {
-    assert.equal(estPrisAutoriseLe(congesReportes, "2026-01-01"), true);
-    assert.equal(estPrisAutoriseLe(congesReportes, "2026-07-01"), true);
-    assert.equal(estPrisAutoriseLe(congesReportes, "2026-07-02"), false);
-  });
-
-  it("range les périodes dans l'ordre du calendrier", () => {
-    const triees = trierPeriodes([
-      { debut: "2026-09-01", fin: "2026-09-30" },
-      { debut: "2026-02-01", fin: "2026-02-28" },
-    ]);
-    assert.deepEqual(triees.map((periode) => periode.debut), ["2026-02-01", "2026-09-01"]);
+describe("niveau de priorité", () => {
+  it("découpe 0 à 255 en trois tiers", () => {
+    assert.equal(niveauPriorite(0), "basse");
+    assert.equal(niveauPriorite(84), "basse");
+    assert.equal(niveauPriorite(85), "moyenne");
+    assert.equal(niveauPriorite(169), "moyenne");
+    assert.equal(niveauPriorite(171), "haute");
+    assert.equal(niveauPriorite(255), "haute");
   });
 });
 
@@ -69,13 +49,6 @@ describe("saisies d'événements d'un employé", () => {
   it("accepte deux saisies en heures le même jour si les heures ne se croisent pas (fin exclue)", () => {
     assert.equal(saisiesSeChevauchent(rendezVous(600, 720), rendezVous(720, 780)), false);
     assert.equal(saisiesSeChevauchent(rendezVous(600, 720), rendezVous(700, 780)), true);
-  });
-
-  it("exige que toute la saisie tienne dans une période de prise", () => {
-    const periodes = [{ debut: "2026-01-01", fin: "2026-06-30" }];
-    assert.equal(estDansUnePeriodePrise([], "2026-12-01", "2026-12-05"), true);
-    assert.equal(estDansUnePeriodePrise(periodes, "2026-06-25", "2026-06-30"), true);
-    assert.equal(estDansUnePeriodePrise(periodes, "2026-06-25", "2026-07-02"), false);
   });
 
   it("dit si un jour est couvert en entier et compte les jours", () => {

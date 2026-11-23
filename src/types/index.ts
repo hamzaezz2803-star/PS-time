@@ -1,5 +1,4 @@
 import type { Page } from "@/lib/metier/droits";
-import type { PeriodePrise } from "@/lib/metier/evenements";
 import type { ActionHistorique, ModuleHistorique, ObjetHistorique } from "@/lib/metier/historique";
 
 /** Résultat explicite d'une opération qui peut échouer. */
@@ -357,8 +356,10 @@ export type Evenement = {
   code: string;
   nom: string;
   type: "absence" | "presence";
-  /** Vrai : l'événement peut être saisi en heures ; faux : à la journée seulement. */
-  estSaisiEnHeures: boolean;
+  /** Journée, demi-journée ou heures (seule une saisie en heures accepte des heures dans les absences). */
+  uniteSaisie: UniteSaisieEvenement;
+  /** Durée prévue d'un événement en heures, en minutes ; vide pour une journée ou une demi-journée. */
+  dureeMinutes: number | null;
   /** Vrai : l'événement reste retenu même si l'employé a pointé (ex. formation non badgée). */
   estPrioritaireSurPointages: boolean;
   estVisiblePlanning: boolean;
@@ -366,9 +367,9 @@ export type Evenement = {
   priorite: number;
   /** Vide : non transmis à la paie. */
   codePaie: string | null;
-  /** Aucune période : l'événement peut être pris toute l'année. */
-  periodes: PeriodePrise[];
 };
+
+export type UniteSaisieEvenement = "journee" | "demi_journee" | "heures";
 
 /** Ligne de la liste « Absences et événements » : un événement attribué à un employé. */
 export type AbsenceListe = {

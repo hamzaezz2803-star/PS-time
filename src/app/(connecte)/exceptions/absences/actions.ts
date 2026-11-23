@@ -36,7 +36,6 @@ export async function creerAbsences(_etat: EtatFormulaire, formulaire: FormData)
       if (resultat.erreur === "solde_insuffisant") return { erreursChamps: { employeIds: textes.erreurs.soldeInsuffisant(resultat.noms.join(", ")) } };
       if (resultat.erreur === "employe") return { erreursChamps: { employeIds: textes.erreurs.employeIntrouvable } };
       if (resultat.erreur === "pas_en_heures") return { erreursChamps: { de: textes.erreurs.pasEnHeures } };
-      if (resultat.erreur === "hors_periode") return { erreursChamps: { evenementId: textes.erreurs.horsPeriodePrise } };
       return { erreursChamps: { evenementId: textes.erreurs.evenementIntrouvable } };
     }
     // Journal d'audit : qui, combien, quelle période. Aucune donnée d'employé.

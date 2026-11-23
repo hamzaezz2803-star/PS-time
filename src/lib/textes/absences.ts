@@ -97,7 +97,6 @@ export const TEXTES_ABSENCES = {
     heureInvalide: "Saisissez une heure valide (HH:MM).",
     heuresIncoherentes: "L'heure de fin doit être après l'heure de début.",
     pasEnHeures: "Cet événement se saisit à la journée entière seulement.",
-    horsPeriodePrise: "Cet événement ne peut pas être pris à ces dates (voir sa période de prise).",
     chevauchement: (noms: string) => `Une absence existe déjà sur cette période pour : ${noms}.`,
     soldeInsuffisant: (noms: string) => `Solde de congés insuffisant pour : ${noms}. Voir Présence > Droits aux congés.`,
     remarqueTropLongue: pointages.erreurs.remarqueTropLongue,

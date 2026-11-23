@@ -3,13 +3,13 @@ import "server-only";
 import { and, asc, count, desc, eq, gte, inArray, isNull, like, lte, or, type SQL } from "drizzle-orm";
 import { FUSEAU_HORAIRE } from "@/lib/constantes";
 import { jourDansFuseau } from "@/lib/metier/dates";
-import { estDansUnePeriodePrise, saisiesSeChevauchent, type SaisieEvenement } from "@/lib/metier/evenements";
+import { saisiesSeChevauchent, type SaisieEvenement } from "@/lib/metier/evenements";
 import { motifContient } from "@/lib/metier/recherche";
 import type { DonneesAbsences, RechercheAbsences } from "@/lib/validation/absence";
 import type { AbsenceListe, EvenementDuJour, EvenementSaisissable } from "@/types";
 import { obtenirBase } from "./base";
 import { employesAuSoldeInsuffisant } from "./droits-conges-soldes";
-import { departements, employes, evenements, evenementsEmployes, periodesEvenements, photosEmployes, utilisateurs } from "./schema";
+import { departements, employes, evenements, evenementsEmployes, photosEmployes, utilisateurs } from "./schema";
 
 const typeEvenement = (type: string): "absence" | "presence" => (type === "presence" ? "presence" : "absence");
 
@@ -69,37 +69,33 @@ export async function compterAbsences(recherche: RechercheAbsences): Promise<num
 
 /** Événements proposés dans la saisie : ceux affichés dans le planning seulement. */
 export async function listerEvenementsSaisissables(): Promise<EvenementSaisissable[]> {
-  return obtenirBase()
-    .select({ id: evenements.id, code: evenements.code, nom: evenements.nom, estSaisiEnHeures: evenements.estSaisiEnHeures })
+  const lignes = await obtenirBase()
+    .select({ id: evenements.id, code: evenements.code, nom: evenements.nom, uniteSaisie: evenements.uniteSaisie })
     .from(evenements)
     .where(eq(evenements.estVisiblePlanning, true))
     .orderBy(asc(evenements.code));
+  return lignes.map(({ uniteSaisie, ...evenement }) => ({ ...evenement, estSaisiEnHeures: uniteSaisie === "heures" }));
 }
 
 export type ResultatEnregistrement =
   | { ok: true; nombre: number; evenementNom: string }
-  | { ok: false; erreur: "evenement" | "pas_en_heures" | "hors_periode" | "employe" }
+  | { ok: false; erreur: "evenement" | "pas_en_heures" | "employe" }
   | { ok: false; erreur: "chevauchement" | "solde_insuffisant"; noms: string[] };
 
 /**
  * Attribue l'événement à chaque employé, dans une transaction qui verrouille les employés :
  * deux saisies simultanées ne peuvent pas créer de chevauchement. Les règles de l'événement
- * (affiché dans le planning, saisie en heures, période de prise) sont revérifiées ici.
+ * (affiché dans le planning, saisie en heures) sont revérifiées ici.
  */
 export async function enregistrerAbsences(donnees: DonneesAbsences, saisiPar: string): Promise<ResultatEnregistrement> {
   const { saisie } = donnees;
   return obtenirBase().transaction(async (transaction) => {
     const [evenement] = await transaction
-      .select({ nom: evenements.nom, estSaisiEnHeures: evenements.estSaisiEnHeures, estVisiblePlanning: evenements.estVisiblePlanning })
+      .select({ nom: evenements.nom, uniteSaisie: evenements.uniteSaisie, estVisiblePlanning: evenements.estVisiblePlanning })
       .from(evenements)
       .where(eq(evenements.id, donnees.evenementId));
     if (!evenement || !evenement.estVisiblePlanning) return { ok: false, erreur: "evenement" };
-    if (saisie.debutMinutes !== null && !evenement.estSaisiEnHeures) return { ok: false, erreur: "pas_en_heures" };
-    const periodes = await transaction
-      .select({ debut: periodesEvenements.dateDebut, fin: periodesEvenements.dateFin })
-      .from(periodesEvenements)
-      .where(eq(periodesEvenements.evenementId, donnees.evenementId));
-    if (!estDansUnePeriodePrise(periodes, saisie.debut, saisie.fin)) return { ok: false, erreur: "hors_periode" };
+    if (saisie.debutMinutes !== null && evenement.uniteSaisie !== "heures") return { ok: false, erreur: "pas_en_heures" };
 
     const concernes = await transaction
       .select({ id: employes.id, prenom: employes.prenom, nom: employes.nom })

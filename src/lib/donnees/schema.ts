@@ -15,7 +15,7 @@ import {
   uniqueIndex,
   varchar,
 } from "drizzle-orm/mysql-core";
-import { ACTIONS_HISTORIQUE, COULEURS_PERSONNALISABLES, MODULES_HISTORIQUE, PAGES, POLICES, TAILLES_TEXTE, THEMES, TYPES_EVENEMENT } from "../constantes.ts";
+import { ACTIONS_HISTORIQUE, COULEURS_PERSONNALISABLES, MODULES_HISTORIQUE, PAGES, POLICES, TAILLES_TEXTE, THEMES, TYPES_EVENEMENT, UNITES_SAISIE_EVENEMENT, DUREE_EVENEMENT_MAX_MINUTES } from "../constantes.ts";
 
 /**
  * Schéma de la base. Toute modification passe par une migration :
@@ -769,6 +769,7 @@ export const compteursVersions = mysqlTable(
  * Événements : motifs d'absence ou de présence (congé, maladie, formation, mission...).
  * `est_prioritaire_sur_pointages` : l'événement reste retenu même si l'employé a pointé
  * (ex. formation non badgée). `priorite` départage deux événements (le plus grand l'emporte).
+ * `unite_saisie` : journée, demi-journée ou heures ; `duree_minutes` : durée d'un événement en heures.
  * `code_paie` vide : l'événement n'est pas transmis à la paie.
  */
 export const evenements = mysqlTable(
@@ -778,7 +779,8 @@ export const evenements = mysqlTable(
     code: varchar("code", { length: 3 }).notNull(),
     nom: varchar("nom", { length: 60 }).notNull(),
     type: varchar("type", { length: 10 }).notNull(),
-    estSaisiEnHeures: boolean("est_saisi_en_heures").notNull().default(false),
+    uniteSaisie: varchar("unite_saisie", { length: 15 }).notNull().default("journee"),
+    dureeMinutes: int("duree_minutes"),
     estPrioritaireSurPointages: boolean("est_prioritaire_sur_pointages").notNull().default(false),
     estVisiblePlanning: boolean("est_visible_planning").notNull().default(true),
     priorite: int("priorite").notNull().default(0),
@@ -793,25 +795,12 @@ export const evenements = mysqlTable(
     check("evenements_nom_non_vide", sql`CHAR_LENGTH(TRIM(${table.nom})) > 0`),
     check("evenements_type_valide", sql`${table.type} IN (${listeSql(TYPES_EVENEMENT)})`),
     check("evenements_priorite_bornee", sql`${table.priorite} BETWEEN 0 AND 255`),
-  ],
-);
-
-/** Périodes pendant lesquelles un événement peut être pris (4 au plus, vérifié par l'application). Aucune : toute l'année. */
-export const periodesEvenements = mysqlTable(
-  "periodes_evenements",
-  {
-    id: identifiantUnique(),
-    evenementId: char("evenement_id", { length: 36 })
-      .notNull()
-      .references(() => evenements.id, { onDelete: "cascade" }),
-    dateDebut: jour("date_debut").notNull(),
-    dateFin: jour("date_fin").notNull(),
-    creeLe: dateCreation(),
-    modifieLe: dateModification(),
-  },
-  (table) => [
-    index("periodes_evenements_evenement_idx").on(table.evenementId, table.dateDebut),
-    check("periodes_evenements_dates_coherentes", sql`${table.dateFin} >= ${table.dateDebut}`),
+    check("evenements_unite_valide", sql`${table.uniteSaisie} IN (${listeSql(UNITES_SAISIE_EVENEMENT)})`),
+    // Une durée seulement pour un événement en heures, et toujours dans ce cas.
+    check(
+      "evenements_duree_coherente",
+      sql`(${table.uniteSaisie} = 'heures' AND ${table.dureeMinutes} BETWEEN 1 AND ${sql.raw(String(DUREE_EVENEMENT_MAX_MINUTES))}) OR (${table.uniteSaisie} <> 'heures' AND ${table.dureeMinutes} IS NULL)`,
+    ),
   ],
 );
 

@@ -156,7 +156,8 @@ export const SOURCES_POINTAGE = ["manuel", "badgeuse"] as const;
 export const POINTAGES_PAR_PAGE = 50;
 /**
  * Événements : motifs d'absence ou de présence (congé, maladie, formation, mission...).
- * Code de 3 caractères au plus, priorité de 0 à 255, 4 périodes de prise au plus.
+ * Code de 3 caractères au plus, priorité de 0 à 255. Saisie à la journée, à la demi-journée
+ * ou en heures (durée de 30 min à 24 h, par demi-heure).
  */
 export const CHEMIN_EVENEMENTS = "/exceptions/evenements";
 export const TYPES_EVENEMENT = ["absence", "presence"] as const;
@@ -164,7 +165,9 @@ export const LONGUEUR_MAX_CODE_EVENEMENT = 3;
 export const LONGUEUR_MAX_NOM_EVENEMENT = 60;
 export const LONGUEUR_MAX_CODE_PAIE = 20;
 export const PRIORITE_EVENEMENT_MAX = 255;
-export const PERIODES_PRISE_MAX = 4;
+export const UNITES_SAISIE_EVENEMENT = ["journee", "demi_journee", "heures"] as const;
+export const DUREE_EVENEMENT_MAX_MINUTES = 1440;
+export const PAS_DUREE_EVENEMENT_MINUTES = 30;
 export const LIMITE_EVENEMENTS = 500;
 /**
  * Absences et événements des employés : un événement attribué à un ou plusieurs employés,

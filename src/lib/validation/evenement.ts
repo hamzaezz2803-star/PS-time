@@ -1,21 +1,17 @@
 import { z } from "zod";
-import { LONGUEUR_MAX_NOM_EVENEMENT, PERIODES_PRISE_MAX, PRIORITE_EVENEMENT_MAX, TYPES_EVENEMENT } from "@/lib/constantes";
-import { trierPeriodes, verifierPeriodesPrise, type PeriodePrise } from "@/lib/metier/evenements";
+import { LONGUEUR_MAX_NOM_EVENEMENT, PRIORITE_EVENEMENT_MAX, TYPES_EVENEMENT, UNITES_SAISIE_EVENEMENT } from "@/lib/constantes";
+import { heuresEnMinutes } from "@/lib/metier/evenements";
 import { TEXTES_EVENEMENTS } from "@/lib/textes/evenements";
 import type { Evenement, Resultat } from "@/types";
 import { entierBorne, lireTexte, nomObligatoire, premieresErreurs } from "./commun";
 
 const { erreurs } = TEXTES_EVENEMENTS;
-const FORMAT_JOUR = /^\d{4}-\d{2}-\d{2}$/;
-
-/** Jour du calendrier AAAA-MM-JJ réellement existant (refuse le 31 février). */
-const estJourValide = (jour: string) => FORMAT_JOUR.test(jour) && new Date(`${jour}T00:00:00Z`).toISOString().startsWith(jour);
 
 const schemaEvenement = z.object({
   code: z.string().trim().toUpperCase().regex(/^[A-Z0-9]{1,3}$/, { error: erreurs.codeInvalide }),
   nom: nomObligatoire(LONGUEUR_MAX_NOM_EVENEMENT, erreurs.nomVide, TEXTES_EVENEMENTS.nomTropLong),
   type: z.enum(TYPES_EVENEMENT, { error: erreurs.typeInvalide }),
-  estSaisiEnHeures: z.boolean(),
+  uniteSaisie: z.enum(UNITES_SAISIE_EVENEMENT, { error: erreurs.uniteInvalide }),
   estPrioritaireSurPointages: z.boolean(),
   estVisiblePlanning: z.boolean(),
   priorite: entierBorne(0, PRIORITE_EVENEMENT_MAX, erreurs.prioriteInvalide),
@@ -29,42 +25,24 @@ const schemaEvenement = z.object({
 export type DonneesEvenement = Omit<Evenement, "id">;
 type ResultatValidation = Resultat<DonneesEvenement> & { erreursChamps?: Record<string, string> };
 
-/**
- * Périodes envoyées par le formulaire : une date de début et une date de fin par ligne
- * (« periodeDebut », « periodeFin »). Une ligne entièrement vide est ignorée.
- */
-function lirePeriodes(formulaire: FormData): { ok: true; periodes: PeriodePrise[] } | { ok: false; erreur: string } {
-  const debuts = formulaire.getAll("periodeDebut").map(lireTexte);
-  const fins = formulaire.getAll("periodeFin").map(lireTexte);
-  if (debuts.length > PERIODES_PRISE_MAX || fins.length > PERIODES_PRISE_MAX) return { ok: false, erreur: erreurs.periodes.trop };
-  const periodes: PeriodePrise[] = [];
-  for (const [rang, debut] of debuts.entries()) {
-    const fin = fins[rang] ?? "";
-    if (debut === "" && fin === "") continue;
-    if (debut === "" || fin === "") return { ok: false, erreur: erreurs.periodes.incomplete };
-    if (!estJourValide(debut) || !estJourValide(fin)) return { ok: false, erreur: erreurs.dateInvalide };
-    periodes.push({ debut, fin });
-  }
-  const probleme = verifierPeriodesPrise(periodes);
-  return probleme ? { ok: false, erreur: erreurs.periodes[probleme] } : { ok: true, periodes: trierPeriodes(periodes) };
-}
-
-/** Valide le formulaire d'un événement, périodes de prise comprises. */
+/** Valide le formulaire d'un événement ; le nombre d'heures n'est lu que pour un événement en heures. */
 export function validerEvenement(formulaire: FormData): ResultatValidation {
   const analyse = schemaEvenement.safeParse({
     code: lireTexte(formulaire.get("code")),
     nom: lireTexte(formulaire.get("nom")),
     type: lireTexte(formulaire.get("type")),
-    estSaisiEnHeures: formulaire.get("estSaisiEnHeures") === "oui",
+    uniteSaisie: lireTexte(formulaire.get("uniteSaisie")),
     estPrioritaireSurPointages: formulaire.get("estPrioritaireSurPointages") === "oui",
     estVisiblePlanning: formulaire.get("estVisiblePlanning") === "oui",
     priorite: lireTexte(formulaire.get("priorite")),
     codePaie: lireTexte(formulaire.get("codePaie")),
   });
-  const periodes = lirePeriodes(formulaire);
-  if (!analyse.success || !periodes.ok) {
+  const enHeures = analyse.success && analyse.data.uniteSaisie === "heures";
+  const dureeMinutes = enHeures ? heuresEnMinutes(lireTexte(formulaire.get("dureeHeures"))) : null;
+  const dureeManquante = enHeures && dureeMinutes === null;
+  if (!analyse.success || dureeManquante) {
     const erreursChamps = analyse.success ? {} : premieresErreurs(analyse.error);
-    return { ok: false, erreur: "validation", erreursChamps: periodes.ok ? erreursChamps : { ...erreursChamps, periodes: periodes.erreur } };
+    return { ok: false, erreur: "validation", erreursChamps: dureeManquante ? { ...erreursChamps, dureeHeures: erreurs.dureeInvalide } : erreursChamps };
   }
-  return { ok: true, donnees: { ...analyse.data, periodes: periodes.periodes } };
+  return { ok: true, donnees: { ...analyse.data, dureeMinutes } };
 }
