@@ -1089,8 +1089,8 @@
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "droits_conges_pieces_jointes_piece_jointe_id_pieces_jointes_id_fk": {
-          "name": "droits_conges_pieces_jointes_piece_jointe_id_pieces_jointes_id_fk",
+        "droits_conges_pj_piece_fk": {
+          "name": "droits_conges_pj_piece_fk",
           "tableFrom": "droits_conges_pieces_jointes",
           "tableTo": "pieces_jointes",
           "columnsFrom": [

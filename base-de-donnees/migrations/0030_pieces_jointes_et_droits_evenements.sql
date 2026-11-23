@@ -24,7 +24,7 @@ ALTER TABLE `evenements` ADD `est_soumis_droits` boolean DEFAULT false NOT NULL;
 -- Reprise : jusqu'ici, tout événement d'absence pouvait recevoir des droits aux congés.
 UPDATE `evenements` SET `est_soumis_droits` = 1 WHERE `type` = 'absence' OR `id` IN (SELECT `evenement_id` FROM `droits_conges`);--> statement-breakpoint
 ALTER TABLE `droits_conges_pieces_jointes` ADD CONSTRAINT `droits_conges_pieces_jointes_droit_id_droits_conges_id_fk` FOREIGN KEY (`droit_id`) REFERENCES `droits_conges`(`id`) ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE `droits_conges_pieces_jointes` ADD CONSTRAINT `droits_conges_pieces_jointes_piece_jointe_id_pieces_jointes_id_fk` FOREIGN KEY (`piece_jointe_id`) REFERENCES `pieces_jointes`(`id`) ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE `droits_conges_pieces_jointes` ADD CONSTRAINT `droits_conges_pj_piece_fk` FOREIGN KEY (`piece_jointe_id`) REFERENCES `pieces_jointes`(`id`) ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE `pieces_jointes` ADD CONSTRAINT `pieces_jointes_ajoute_par_utilisateurs_id_fk` FOREIGN KEY (`ajoute_par`) REFERENCES `utilisateurs`(`id`) ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 CREATE INDEX `droits_conges_pieces_jointes_piece_idx` ON `droits_conges_pieces_jointes` (`piece_jointe_id`);--> statement-breakpoint
 CREATE INDEX `pieces_jointes_ajoute_par_idx` ON `pieces_jointes` (`ajoute_par`);

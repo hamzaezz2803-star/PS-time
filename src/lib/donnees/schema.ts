@@ -8,6 +8,7 @@ import {
   date as dateCalendrier,
   datetime,
   decimal,
+  foreignKey,
   index,
   int,
   mysqlTable,
@@ -933,13 +934,13 @@ export const droitsCongesPiecesJointes = mysqlTable(
     droitId: char("droit_id", { length: 36 })
       .notNull()
       .references(() => droitsConges.id, { onDelete: "cascade" }),
-    pieceJointeId: char("piece_jointe_id", { length: 36 })
-      .notNull()
-      .references(() => piecesJointes.id, { onDelete: "cascade" }),
+    pieceJointeId: char("piece_jointe_id", { length: 36 }).notNull(),
     creeLe: dateCreation(),
   },
   (table) => [
     primaryKey({ columns: [table.droitId, table.pieceJointeId] }),
+    // Nom court : le nom automatique dépasse les 64 caractères permis par MySQL et MariaDB.
+    foreignKey({ name: "droits_conges_pj_piece_fk", columns: [table.pieceJointeId], foreignColumns: [piecesJointes.id] }).onDelete("cascade"),
     index("droits_conges_pieces_jointes_piece_idx").on(table.pieceJointeId),
   ],
 );
