@@ -853,7 +853,11 @@ const joursDroit = (nom: string) => decimal(nom, { precision: 4, scale: 1, mode:
  * sur une période. Les absences en journées entières de cet événement les consomment ; les soldes
  * sont calculés à l'affichage, jamais stockés. Pas de chevauchement de périodes pour un même
  * employé et un même événement (vérifié par l'application, dans une transaction).
- * `est_bloquant` : une absence qui rendrait le solde négatif est refusée.
+ * `est_bloquant` : une absence qui rendrait le solde négatif est refusée (« Solde : positif »).
+ * `unite_saisie` : valeurs en jours entiers, en demi-journées ou en heures (même colonnes).
+ * `supplement_1` à `_3` : jours (ou heures) ajoutés au droit ; total = reliquat + droit + suppléments.
+ * `est_confirme` : faux = droit provisoire, ses jours ne sont pas encore utilisables.
+ * `est_reporte` : le solde restant en fin de période s'ajoute au droit suivant (calculé à l'affichage).
  */
 export const droitsConges = mysqlTable(
   "droits_conges",
@@ -869,6 +873,12 @@ export const droitsConges = mysqlTable(
     dateFin: jour("date_fin").notNull(),
     joursAcquis: joursDroit("jours_acquis").notNull(),
     joursReliquat: joursDroit("jours_reliquat").notNull().default(0),
+    supplement1: joursDroit("supplement_1").notNull().default(0),
+    supplement2: joursDroit("supplement_2").notNull().default(0),
+    supplement3: joursDroit("supplement_3").notNull().default(0),
+    uniteSaisie: varchar("unite_saisie", { length: 15 }).notNull().default("journee"),
+    estConfirme: boolean("est_confirme").notNull().default(true),
+    estReporte: boolean("est_reporte").notNull().default(false),
     estBloquant: boolean("est_bloquant").notNull().default(false),
     remarque: varchar("remarque", { length: 255 }),
     saisiPar: referenceAuteur("saisi_par"),
@@ -884,6 +894,10 @@ export const droitsConges = mysqlTable(
     // De 0 à 366 jours, par demi-journée.
     check("droits_conges_acquis_valide", sql`${table.joursAcquis} BETWEEN 0 AND 366 AND ${table.joursAcquis} * 2 = FLOOR(${table.joursAcquis} * 2)`),
     check("droits_conges_reliquat_valide", sql`${table.joursReliquat} BETWEEN 0 AND 366 AND ${table.joursReliquat} * 2 = FLOOR(${table.joursReliquat} * 2)`),
+    check("droits_conges_supplement_1_valide", sql`${table.supplement1} BETWEEN 0 AND 366 AND ${table.supplement1} * 2 = FLOOR(${table.supplement1} * 2)`),
+    check("droits_conges_supplement_2_valide", sql`${table.supplement2} BETWEEN 0 AND 366 AND ${table.supplement2} * 2 = FLOOR(${table.supplement2} * 2)`),
+    check("droits_conges_supplement_3_valide", sql`${table.supplement3} BETWEEN 0 AND 366 AND ${table.supplement3} * 2 = FLOOR(${table.supplement3} * 2)`),
+    check("droits_conges_unite_valide", sql`${table.uniteSaisie} IN (${listeSql(UNITES_SAISIE_EVENEMENT)})`),
   ],
 );
 
