@@ -4,7 +4,8 @@ import { CircleCheck, CircleSlash, KeyRound, ShieldCheck, UserCog } from "lucide
 import { supprimerCompte } from "@/app/(connecte)/administration/utilisateurs/actions";
 import { GestionListe, type ColonneListe } from "@/components/liste/gestion-liste";
 import { Pastille } from "@/components/ui/pastille";
-import { MODULES, PAGES_PAR_MODULE } from "@/lib/constantes";
+import { MODULES } from "@/lib/constantes";
+import { pagesProposees } from "@/lib/metier/droits";
 import { formaterDate } from "@/lib/formats";
 import { TEXTES_UTILISATEURS as textes } from "@/lib/textes/utilisateurs";
 import type { UtilisateurListe } from "@/types";
@@ -34,7 +35,7 @@ function Role({ utilisateur }: { utilisateur: UtilisateurListe }) {
 function Autorisations({ utilisateur }: { utilisateur: UtilisateurListe }) {
   if (utilisateur.estSuperAdmin) return <Pastille ton="neutre">{textes.toutesLesPages}</Pastille>;
   const resumes = MODULES.flatMap((module) => {
-    const pages = PAGES_PAR_MODULE[module];
+    const pages = pagesProposees(module);
     const accordees = pages.filter((page) => utilisateur.pages.includes(page)).length;
     return accordees > 0 ? [{ module, texte: textes.resumeModule(textes.modules[module], accordees, pages.length) }] : [];
   });

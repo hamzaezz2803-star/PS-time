@@ -4,7 +4,6 @@ import {
   CalendarCheck,
   CalendarClock,
   CalendarCog,
-  CalendarDays,
   CalendarRange,
   CalendarSearch,
   CalendarX2,
@@ -28,7 +27,6 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import {
-  CHEMIN_ABSENCES,
   CHEMIN_AFFECTATIONS,
   CHEMIN_APPAREILS,
   CHEMIN_APPARENCE,
@@ -137,7 +135,6 @@ export const MENUS_NAVIGATION: MenuNavigation[] = [
         // Chaque page garde son propre droit : un administrateur ne voit que celles qui lui sont accordées.
         titre: T.congesEtCompteurs,
         liens: [
-          { libelle: T.absences, icone: CalendarDays, href: CHEMIN_ABSENCES, page: "absences" },
           { libelle: T.droitsConges, icone: CalendarCheck, href: CHEMIN_DROITS_CONGES, page: "droits_conges" },
           { libelle: T.gestionCompteurs, icone: ListChecks, href: CHEMIN_COMPTEURS, page: "compteurs" },
         ],

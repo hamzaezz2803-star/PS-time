@@ -43,6 +43,12 @@ export const PAGES_PAR_MODULE = {
   presence: ["pointages_manuels", "evenements", "absences", "droits_conges", "compteurs", "detail_jour"],
 } as const;
 export const PAGES = [...PAGES_PAR_MODULE.personnel, ...PAGES_PAR_MODULE.planning, ...PAGES_PAR_MODULE.presence] as const;
+/**
+ * Pages retirées du menu et des droits proposés aux administrateurs (23/11/2026 : Absences et
+ * événements). La page, ses données et leurs effets (soldes, détail jour) restent : réactivable
+ * en la retirant d'ici et en remettant son lien dans le menu.
+ */
+export const PAGES_MASQUEES: readonly string[] = ["absences"];
 export const CHEMIN_UTILISATEURS = "/administration/utilisateurs";
 export const CHEMIN_APPARENCE = "/administration/apparence";
 /** Apparence de l'application, choisie par le super administrateur (même liste que la base). */

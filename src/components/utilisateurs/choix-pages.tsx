@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { MessageErreur } from "@/components/ui/message-erreur";
-import { MODULES, PAGES, PAGES_PAR_MODULE } from "@/lib/constantes";
-import type { Module, Page } from "@/lib/metier/droits";
+import { MODULES } from "@/lib/constantes";
+import { PAGES_PROPOSEES, pagesProposees, type Module, type Page } from "@/lib/metier/droits";
 import { TEXTES_UTILISATEURS } from "@/lib/textes/utilisateurs";
 
 const { champs, modules: libellesModules, pages: libellesPages } = TEXTES_UTILISATEURS;
@@ -31,7 +31,7 @@ function BlocModule({ module, coches, basculer, fixer }: {
   basculer: (page: Page) => void;
   fixer: (pages: readonly Page[], estCoche: boolean) => void;
 }) {
-  const pages = PAGES_PAR_MODULE[module];
+  const pages = pagesProposees(module);
   const nombre = pages.filter((page) => coches.includes(page)).length;
   return (
     <div className="border-t border-bordure first:border-t-0">
@@ -65,6 +65,7 @@ function BlocModule({ module, coches, basculer, fixer }: {
 /** Autorisations détaillées : une case par page, regroupées par module, avec « Tout » et « Tout le module ». */
 export function ChoixPages({ initiales, erreur }: { initiales: Page[]; erreur?: string }) {
   const [coches, setCoches] = useState<Page[]>(initiales);
+  const nombreCoches = PAGES_PROPOSEES.filter((page) => coches.includes(page)).length;
 
   const basculer = (page: Page) =>
     setCoches((actuelles) => (actuelles.includes(page) ? actuelles.filter((p) => p !== page) : [...actuelles, page]));
@@ -77,7 +78,7 @@ export function ChoixPages({ initiales, erreur }: { initiales: Page[]; erreur?: 
       <p id="aide-pages" className="text-sm text-texte-secondaire">{champs.aidePages}</p>
       <div className="mt-1 overflow-hidden rounded-lg border border-bordure">
         <label className="flex min-h-12 cursor-pointer items-center gap-3 border-b-2 border-bordure px-4 text-base font-semibold text-texte">
-          <CaseEnsemble coches={coches.length} total={PAGES.length} onChange={() => fixer(PAGES, coches.length < PAGES.length)} />
+          <CaseEnsemble coches={nombreCoches} total={PAGES_PROPOSEES.length} onChange={() => fixer(PAGES_PROPOSEES, nombreCoches < PAGES_PROPOSEES.length)} />
           {champs.tout}
         </label>
         {MODULES.map((module) => (

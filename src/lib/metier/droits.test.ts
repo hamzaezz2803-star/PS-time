@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { aAccesAuModule, modulesAccessibles, nettoyerPages, pagesAccessibles, peutAcceder } from "./droits.ts";
+import { aAccesAuModule, modulesAccessibles, nettoyerPages, PAGES_PROPOSEES, pagesAccessibles, pagesProposees, peutAcceder } from "./droits.ts";
 
 describe("peutAcceder", () => {
   it("donne tout au super administrateur, même sans page accordée", () => {
@@ -34,5 +34,13 @@ describe("aAccesAuModule", () => {
 describe("nettoyerPages", () => {
   it("retire les pages inconnues et les doublons, dans l'ordre du menu", () => {
     assert.deepEqual(nettoyerPages(["detail_jour", "admin", "sites", "detail_jour", "personnel"]), ["sites", "detail_jour"]);
+  });
+});
+
+describe("pages proposées dans le choix des droits", () => {
+  it("ne propose plus Absences et événements (page masquée), mais garde les autres", () => {
+    assert.equal(PAGES_PROPOSEES.includes("absences"), false);
+    assert.deepEqual(pagesProposees("presence"), ["pointages_manuels", "evenements", "droits_conges", "compteurs", "detail_jour"]);
+    assert.equal(PAGES_PROPOSEES.length, 15);
   });
 });

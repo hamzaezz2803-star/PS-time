@@ -1,7 +1,13 @@
-import { MODULES, PAGES, PAGES_PAR_MODULE } from "../constantes.ts";
+import { MODULES, PAGES, PAGES_MASQUEES, PAGES_PAR_MODULE } from "../constantes.ts";
 
 export type Module = (typeof MODULES)[number];
 export type Page = (typeof PAGES)[number];
+
+/** Pages d'un module proposées dans le choix des droits (sans les pages masquées). */
+export const pagesProposees = (module: Module): Page[] => PAGES_PAR_MODULE[module].filter((page) => !PAGES_MASQUEES.includes(page));
+
+/** Toutes les pages proposées, dans l'ordre du menu. */
+export const PAGES_PROPOSEES: Page[] = MODULES.flatMap(pagesProposees);
 
 /** Ce qu'il faut savoir d'un compte pour décider de ses droits. */
 export type Droits = { estSuperAdmin: boolean; pages: readonly string[] };
