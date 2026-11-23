@@ -21,7 +21,7 @@ export type NiveauPriorite = "basse" | "moyenne" | "haute";
 
 /** Niveau lisible d'une priorité de 0 à `maximum`, par tiers : 0 à 84 basse, 85 à 169 moyenne, 170 et plus haute. */
 export function niveauPriorite(valeur: number, maximum = PRIORITE_EVENEMENT_MAX): NiveauPriorite {
-  const tiers = (maximum + 1) / 3;
+  const tiers = Math.round((maximum + 1) / 3);
   if (valeur < tiers) return "basse";
   return valeur < 2 * tiers ? "moyenne" : "haute";
 }

@@ -12,17 +12,20 @@ export function ChoixCartes<V extends string>({
   options,
   valeur,
   onChanger,
+  classeGrille = "grid-cols-2",
 }: {
   nom: string;
   legende: string;
   options: OptionCarte<V>[];
   valeur: V;
   onChanger: (valeur: V) => void;
+  /** Colonnes de la grille des cartes (deux par défaut). */
+  classeGrille?: string;
 }) {
   return (
     <fieldset className="flex flex-col gap-2">
       <legend className="mb-1 text-sm font-medium text-texte">{legende}</legend>
-      <div className="grid grid-cols-2 gap-2">
+      <div className={cn("grid gap-2", classeGrille)}>
         {options.map(({ valeur: option, libelle, Icone, aide }) => (
           <label
             key={option}

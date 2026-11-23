@@ -1,0 +1,1 @@
+ALTER TABLE `evenements` DROP COLUMN `est_saisi_en_heures`;
