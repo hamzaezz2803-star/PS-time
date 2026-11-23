@@ -187,6 +187,16 @@ export const DROITS_CONGES_PAR_PAGE = 50;
 /** Jours acquis ou reliquat : de 0 à 366, par demi-journée (même borne que la base). */
 export const JOURS_DROIT_MAX = 366;
 export const LONGUEUR_MAX_REMARQUE_DROIT = 255;
+/**
+ * Pièces justificatives d'un droit aux congés : PDF, PNG, JPEG ou WebP (vérifiés par leur
+ * signature), 2 Mo chacune, 5 par envoi et 10 par droit au plus. Jamais publiques.
+ */
+export const CHEMIN_PIECES_JOINTES_DROITS = "/presence/droits-conges/piece-jointe";
+export const TYPES_PIECE_JOINTE = ["application/pdf", "image/png", "image/jpeg", "image/webp"] as const;
+export const PIECE_JOINTE_TAILLE_MAX_OCTETS = 2_097_152;
+export const PIECES_JOINTES_PAR_ENVOI_MAX = 5;
+export const PIECES_JOINTES_PAR_DROIT_MAX = 10;
+export const LONGUEUR_MAX_NOM_PIECE_JOINTE = 150;
 /** Nombre maximal d'employés pointés en une seule saisie. */
 export const LIMITE_EMPLOYES_POINTAGE = 500;
 /** Cloche de notifications : nombre affiché, actualisation, durée de conservation. */

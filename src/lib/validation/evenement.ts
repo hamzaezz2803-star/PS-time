@@ -13,6 +13,7 @@ const schemaEvenement = z.object({
   type: z.enum(TYPES_EVENEMENT, { error: erreurs.typeInvalide }),
   uniteSaisie: z.enum(UNITES_SAISIE_EVENEMENT, { error: erreurs.uniteInvalide }),
   estPrioritaireSurPointages: z.boolean(),
+  estSoumisDroits: z.boolean(),
   estVisiblePlanning: z.boolean(),
   priorite: entierBorne(0, PRIORITE_EVENEMENT_MAX, erreurs.prioriteInvalide),
   codePaie: z
@@ -33,6 +34,7 @@ export function validerEvenement(formulaire: FormData): ResultatValidation {
     type: lireTexte(formulaire.get("type")),
     uniteSaisie: lireTexte(formulaire.get("uniteSaisie")),
     estPrioritaireSurPointages: formulaire.get("estPrioritaireSurPointages") === "oui",
+    estSoumisDroits: formulaire.get("estSoumisDroits") === "oui",
     estVisiblePlanning: formulaire.get("estVisiblePlanning") === "oui",
     priorite: lireTexte(formulaire.get("priorite")),
     codePaie: lireTexte(formulaire.get("codePaie")),

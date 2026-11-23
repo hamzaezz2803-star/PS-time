@@ -211,6 +211,13 @@
       "when": 1795450890835,
       "tag": "0029_evenements_sans_saisi_en_heures",
       "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "5",
+      "when": 1795451797832,
+      "tag": "0030_pieces_jointes_et_droits_evenements",
+      "breakpoints": true
     }
   ]
 }

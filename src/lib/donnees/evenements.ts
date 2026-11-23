@@ -21,6 +21,7 @@ export async function listerEvenements(): Promise<Evenement[]> {
       uniteSaisie: evenements.uniteSaisie,
       dureeMinutes: evenements.dureeMinutes,
       estPrioritaireSurPointages: evenements.estPrioritaireSurPointages,
+      estSoumisDroits: evenements.estSoumisDroits,
       estVisiblePlanning: evenements.estVisiblePlanning,
       priorite: evenements.priorite,
       codePaie: evenements.codePaie,

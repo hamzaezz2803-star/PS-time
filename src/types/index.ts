@@ -362,6 +362,9 @@ export type Evenement = {
   dureeMinutes: number | null;
   /** Vrai : l'événement reste retenu même si l'employé a pointé (ex. formation non badgée). */
   estPrioritaireSurPointages: boolean;
+  /** Vrai : l'événement peut recevoir des droits aux congés. */
+  estSoumisDroits: boolean;
+  /** « Actif » : proposé dans les saisies (Absences et événements) ; « Non actif » sinon. */
   estVisiblePlanning: boolean;
   /** De 0 à 255 : entre deux événements le même jour, le plus grand l'emporte. */
   priorite: number;

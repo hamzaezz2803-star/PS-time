@@ -49,7 +49,7 @@ export function FormulaireEvenement({ element, onTermine, onAnnuler }: Propriete
   const [type, setType] = useState<TypeEvenement>(valeurSaisie(etat, "type", element?.type ?? "absence") === "presence" ? "presence" : "absence");
   const [unite, setUnite] = useState<UniteSaisieEvenement>(lireUnite(valeurSaisie(etat, "uniteSaisie", element?.uniteSaisie ?? "journee")));
   const dureeInitiale = element?.dureeMinutes ? minutesEnHeures(element.dureeMinutes) : "";
-  const coche = (nom: "estPrioritaireSurPointages" | "estVisiblePlanning", parDefaut: boolean) => caseSaisie(etat, nom, element?.[nom] ?? parDefaut);
+  const coche = (nom: "estPrioritaireSurPointages" | "estSoumisDroits" | "estVisiblePlanning", parDefaut: boolean) => caseSaisie(etat, nom, element?.[nom] ?? parDefaut);
   const zoneDefilement = useRef<HTMLDivElement>(null);
 
   // Après un refus, montre la première erreur : elle peut être en bas de la fenêtre (priorité, paie).
@@ -79,6 +79,7 @@ export function FormulaireEvenement({ element, onTermine, onAnnuler }: Propriete
             </div>
           )}
           <CaseACocher nom="estPrioritaireSurPointages" libelle={champs.estPrioritaireSurPointages} defaultChecked={coche("estPrioritaireSurPointages", false)} />
+          <CaseACocher nom="estSoumisDroits" libelle={champs.estSoumisDroits} aide={champs.aideSoumisDroits} defaultChecked={coche("estSoumisDroits", false)} />
           <CaseACocher nom="estVisiblePlanning" libelle={champs.estVisiblePlanning} aide={champs.aideVisible} defaultChecked={coche("estVisiblePlanning", true)} />
           <JaugePriorite valeurInitiale={Number(valeurSaisie(etat, "priorite", String(element?.priorite ?? 0)))} erreur={erreurs?.priorite} />
         </Section>

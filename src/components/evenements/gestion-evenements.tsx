@@ -1,6 +1,6 @@
 "use client";
 
-import { CalendarX2, EyeOff, Plane, ShieldCheck, Tags } from "lucide-react";
+import { CalendarCheck, CalendarX2, CircleCheck, CircleOff, Plane, ShieldCheck, Tags } from "lucide-react";
 import { supprimerEvenement } from "@/app/(connecte)/exceptions/evenements/actions";
 import { GestionListe, type ColonneListe } from "@/components/liste/gestion-liste";
 import { Pastille } from "@/components/ui/pastille";
@@ -22,8 +22,13 @@ function Identite({ evenement }: { evenement: Evenement }) {
           <Pastille ton={estAbsence ? "attention" : "info"} Icone={estAbsence ? CalendarX2 : Plane}>
             {textes.types[evenement.type]}
           </Pastille>
+          {evenement.estVisiblePlanning ? (
+            <Pastille ton="succes" Icone={CircleCheck}>{textes.actif}</Pastille>
+          ) : (
+            <Pastille ton="neutre" Icone={CircleOff}>{textes.nonActif}</Pastille>
+          )}
           {evenement.estPrioritaireSurPointages && <Pastille ton="neutre" Icone={ShieldCheck}>{textes.prioritaire}</Pastille>}
-          {!evenement.estVisiblePlanning && <Pastille ton="neutre" Icone={EyeOff}>{textes.masque}</Pastille>}
+          {evenement.estSoumisDroits && <Pastille ton="neutre" Icone={CalendarCheck}>{textes.soumisDroits}</Pastille>}
         </span>
       </span>
     </span>

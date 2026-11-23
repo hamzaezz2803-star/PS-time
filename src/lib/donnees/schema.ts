@@ -11,11 +11,12 @@ import {
   index,
   int,
   mysqlTable,
+  primaryKey,
   text,
   uniqueIndex,
   varchar,
 } from "drizzle-orm/mysql-core";
-import { ACTIONS_HISTORIQUE, COULEURS_PERSONNALISABLES, MODULES_HISTORIQUE, PAGES, POLICES, TAILLES_TEXTE, THEMES, TYPES_EVENEMENT, UNITES_SAISIE_EVENEMENT, DUREE_EVENEMENT_MAX_MINUTES } from "../constantes.ts";
+import { ACTIONS_HISTORIQUE, COULEURS_PERSONNALISABLES, MODULES_HISTORIQUE, PAGES, POLICES, TAILLES_TEXTE, THEMES, TYPES_EVENEMENT, TYPES_PIECE_JOINTE, UNITES_SAISIE_EVENEMENT, DUREE_EVENEMENT_MAX_MINUTES, PIECE_JOINTE_TAILLE_MAX_OCTETS } from "../constantes.ts";
 
 /**
  * Schéma de la base. Toute modification passe par une migration :
@@ -782,6 +783,8 @@ export const evenements = mysqlTable(
     uniteSaisie: varchar("unite_saisie", { length: 15 }).notNull().default("journee"),
     dureeMinutes: int("duree_minutes"),
     estPrioritaireSurPointages: boolean("est_prioritaire_sur_pointages").notNull().default(false),
+    // Vrai : l'événement peut recevoir des droits aux congés (jours acquis, solde).
+    estSoumisDroits: boolean("est_soumis_droits").notNull().default(false),
     estVisiblePlanning: boolean("est_visible_planning").notNull().default(true),
     priorite: int("priorite").notNull().default(0),
     codePaie: varchar("code_paie", { length: 20 }),
@@ -881,5 +884,48 @@ export const droitsConges = mysqlTable(
     // De 0 à 366 jours, par demi-journée.
     check("droits_conges_acquis_valide", sql`${table.joursAcquis} BETWEEN 0 AND 366 AND ${table.joursAcquis} * 2 = FLOOR(${table.joursAcquis} * 2)`),
     check("droits_conges_reliquat_valide", sql`${table.joursReliquat} BETWEEN 0 AND 366 AND ${table.joursReliquat} * 2 = FLOOR(${table.joursReliquat} * 2)`),
+  ],
+);
+
+/**
+ * Pièces justificatives (PDF ou image), en base comme les photos : jamais publiques, servies
+ * seulement aux comptes qui ont la page Droits aux congés. Une même pièce peut justifier les
+ * droits de plusieurs employés (attribution groupée) : liens dans `droits_conges_pieces_jointes`.
+ */
+export const piecesJointes = mysqlTable(
+  "pieces_jointes",
+  {
+    id: identifiantUnique(),
+    nomFichier: varchar("nom_fichier", { length: 150 }).notNull(),
+    typeMime: varchar("type_mime", { length: 30 }).notNull(),
+    tailleOctets: int("taille_octets").notNull(),
+    contenu: mediumBlob("contenu").notNull(),
+    ajoutePar: referenceAuteur("ajoute_par"),
+    creeLe: dateCreation(),
+    modifieLe: dateModification(),
+  },
+  (table) => [
+    index("pieces_jointes_ajoute_par_idx").on(table.ajoutePar),
+    check("pieces_jointes_type_mime", sql`${table.typeMime} IN (${listeSql(TYPES_PIECE_JOINTE)})`),
+    check("pieces_jointes_taille", sql`${table.tailleOctets} BETWEEN 1 AND ${sql.raw(String(PIECE_JOINTE_TAILLE_MAX_OCTETS))}`),
+    check("pieces_jointes_nom_non_vide", sql`CHAR_LENGTH(TRIM(${table.nomFichier})) > 0`),
+  ],
+);
+
+/** Pièces jointes d'un droit aux congés ; une pièce sans aucun lien est supprimée par l'application. */
+export const droitsCongesPiecesJointes = mysqlTable(
+  "droits_conges_pieces_jointes",
+  {
+    droitId: char("droit_id", { length: 36 })
+      .notNull()
+      .references(() => droitsConges.id, { onDelete: "cascade" }),
+    pieceJointeId: char("piece_jointe_id", { length: 36 })
+      .notNull()
+      .references(() => piecesJointes.id, { onDelete: "cascade" }),
+    creeLe: dateCreation(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.droitId, table.pieceJointeId] }),
+    index("droits_conges_pieces_jointes_piece_idx").on(table.pieceJointeId),
   ],
 );

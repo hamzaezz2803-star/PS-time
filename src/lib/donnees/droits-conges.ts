@@ -74,9 +74,9 @@ export async function compterDroits(recherche: RechercheAbsences): Promise<numbe
   return resultat?.total ?? 0;
 }
 
-/** Événements proposés : ceux de type absence (congé payé, récupération...). */
+/** Événements proposés : ceux soumis à la gestion des droits (congé payé, récupération...). */
 export async function listerEvenementsDroits(): Promise<EvenementDroit[]> {
-  return obtenirBase().select({ id: evenements.id, code: evenements.code, nom: evenements.nom }).from(evenements).where(eq(evenements.type, "absence")).orderBy(asc(evenements.code));
+  return obtenirBase().select({ id: evenements.id, code: evenements.code, nom: evenements.nom }).from(evenements).where(eq(evenements.estSoumisDroits, true)).orderBy(asc(evenements.code));
 }
 
 const valeursDroit = (donnees: DonneesDroit) => ({
@@ -99,8 +99,8 @@ export type ResultatCreation =
  */
 export async function creerDroits(donnees: DonneesCreationDroits, saisiPar: string): Promise<ResultatCreation> {
   return obtenirBase().transaction(async (transaction) => {
-    const [evenement] = await transaction.select({ nom: evenements.nom, type: evenements.type }).from(evenements).where(eq(evenements.id, donnees.evenementId));
-    if (!evenement || evenement.type !== "absence") return { ok: false, erreur: "evenement" };
+    const [evenement] = await transaction.select({ nom: evenements.nom, estSoumisDroits: evenements.estSoumisDroits }).from(evenements).where(eq(evenements.id, donnees.evenementId));
+    if (!evenement || !evenement.estSoumisDroits) return { ok: false, erreur: "evenement" };
 
     const concernes = await transaction
       .select({ id: employes.id, prenom: employes.prenom, nom: employes.nom })
