@@ -1,11 +1,12 @@
-import { CircleAlert, CircleCheck, CircleMinus, Lock } from "lucide-react";
+import { CircleAlert, CircleCheck, CircleDashed, CircleMinus, Forward, Lock } from "lucide-react";
 import { BoutonModifierSaisie } from "@/components/liste/gestion-saisie";
 import { AvatarEmploye } from "@/components/personnes/avatar-employe";
 import { formaterJour } from "@/lib/formats";
 import { anneeCivile, etatSolde, pourcentageConsomme, type EtatSolde } from "@/lib/metier/droits-conges";
-import { formaterJours, TEXTES_DROITS_CONGES as textes } from "@/lib/textes/droits-conges";
+import { formaterValeurDroit, TEXTES_DROITS_CONGES as textes } from "@/lib/textes/droits-conges";
 import { cn } from "@/lib/utils";
 import type { DroitCongeListe } from "@/types";
+import { BoutonConfirmerDroit } from "./confirmer-droit";
 import { PiecesJointesDroit } from "./pieces-jointes-droit";
 
 const ETATS: Record<EtatSolde, { couleur: string; Icone: typeof CircleCheck }> = {
@@ -14,8 +15,9 @@ const ETATS: Record<EtatSolde, { couleur: string; Icone: typeof CircleCheck }> =
   depasse: { couleur: "text-erreur", Icone: CircleAlert },
 };
 
-/** Nombre sans unité, virgule décimale : « 2,5 ». */
-const nombre = (jours: number) => jours.toLocaleString("fr-FR", { maximumFractionDigits: 1 });
+/** Nombre court, virgule décimale : « 2,5 » en jours, « 7,5 h » en heures. */
+const valeurCourte = (valeur: number, unite: DroitCongeListe["uniteSaisie"]) =>
+  `${valeur.toLocaleString("fr-FR", { maximumFractionDigits: 2 })}${unite === "heures" ? " h" : ""}`;
 
 function periodeLisible(debut: string, fin: string): string {
   const annee = anneeCivile(debut, fin);
@@ -24,7 +26,7 @@ function periodeLisible(debut: string, fin: string): string {
 
 /** Barre fine : jours pris (plein) puis prévus (clair) sur l'acquis. */
 function Barre({ bilan }: { bilan: DroitCongeListe["bilan"] }) {
-  const base = Math.max(bilan.acquis, bilan.pris + bilan.prevus, 1);
+  const base = Math.max(bilan.total, bilan.pris + bilan.prevus, 1);
   const largeur = (jours: number) => `${(jours / base) * 100}%`;
   return (
     <div className="flex h-1.5 w-full gap-0.5 overflow-hidden rounded-full bg-fond ring-1 ring-inset ring-bordure" role="img" aria-label={textes.barre(pourcentageConsomme(bilan))}>
@@ -37,14 +39,27 @@ function Barre({ bilan }: { bilan: DroitCongeListe["bilan"] }) {
 /** Pris, prévus et acquis sur une ligne, puis absences décomptées et remarque (repliées). */
 function Consommation({ droit }: { droit: DroitCongeListe }) {
   const { bilan } = droit;
+  const nombre = (valeur: number) => valeurCourte(valeur, droit.uniteSaisie);
+  const supplements = droit.supplement1 + droit.supplement2 + droit.supplement3;
+  const details = [
+    droit.joursReliquat > 0 ? textes.dontReliquat(nombre(droit.joursReliquat)) : null,
+    supplements > 0 ? textes.dontSupplements(nombre(supplements)) : null,
+    bilan.report > 0 ? textes.dontReport(nombre(bilan.report)) : null,
+  ].filter(Boolean);
   return (
     <div className="flex min-w-0 flex-col gap-1.5 [grid-area:conso]">
       <Barre bilan={bilan} />
       <p className="flex flex-wrap gap-x-3 gap-y-0.5 text-sm tabular-nums text-texte-secondaire">
         <span className="flex items-center gap-1"><span className="size-2 rounded-full bg-primaire" aria-hidden="true" />{textes.pris} <strong className="font-semibold text-texte">{nombre(bilan.pris)}</strong></span>
         <span className="flex items-center gap-1"><span className="size-2 rounded-full bg-accent" aria-hidden="true" />{textes.prevus} <strong className="font-semibold text-texte">{nombre(bilan.prevus)}</strong></span>
-        <span>{textes.acquis} <strong className="font-semibold text-texte">{nombre(bilan.acquis)}</strong>{droit.joursReliquat > 0 && ` (${textes.dontReliquat(nombre(droit.joursReliquat))})`}</span>
+        <span>{textes.acquis} <strong className="font-semibold text-texte">{nombre(bilan.total)}</strong>{details.length > 0 && ` (${details.join(", ")})`}</span>
       </p>
+      {droit.estReporte && (
+        <p className="flex items-center gap-1 text-sm text-texte-secondaire">
+          <Forward className="size-3.5" aria-hidden="true" />
+          {textes.reporteSurSuivant}
+        </p>
+      )}
       {(droit.absences.length > 0 || droit.remarque) && (
         <details className="group text-sm">
           <summary className="w-fit cursor-pointer list-none rounded font-medium text-primaire hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primaire">
@@ -97,7 +112,17 @@ export function LigneDroit({ droit }: { droit: DroitCongeListe }) {
       <Consommation droit={droit} />
 
       <div className="flex flex-col items-end gap-0.5 [grid-area:reste] lg:items-start">
-        <p className={cn("text-xl font-bold tabular-nums", etat === "depasse" ? "text-erreur" : "text-marine")}>{formaterJours(bilan.soldePrevisionnel)}</p>
+        {!droit.estConfirme ? (
+          <>
+            <p className="flex items-center gap-1 text-sm font-semibold text-attention" title={textes.aideAConfirmer}>
+              <CircleDashed className="size-4 shrink-0" aria-hidden="true" />
+              {textes.aConfirmer}
+            </p>
+            <BoutonConfirmerDroit id={droit.id} nomEmploye={nomComplet} />
+          </>
+        ) : (
+          <>
+        <p className={cn("text-xl font-bold tabular-nums", etat === "depasse" ? "text-erreur" : "text-marine")}>{formaterValeurDroit(bilan.soldePrevisionnel, droit.uniteSaisie)}</p>
         <p className={cn("flex items-center gap-1 text-sm font-medium", couleur)}>
           <Icone className="size-4 shrink-0" aria-hidden="true" />
           {textes.etats[etat]}
@@ -108,6 +133,8 @@ export function LigneDroit({ droit }: { droit: DroitCongeListe }) {
             </span>
           )}
         </p>
+          </>
+        )}
       </div>
 
       <div className="-me-2 flex self-start justify-self-end [grid-area:act] lg:self-center">
