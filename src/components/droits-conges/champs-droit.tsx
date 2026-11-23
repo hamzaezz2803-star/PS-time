@@ -34,8 +34,8 @@ export type ValeursDroit = {
 type OuiNon = "oui" | "non";
 type Solde = "positif" | "negatif";
 const OPTIONS_OUI_NON: OptionCarte<OuiNon>[] = [
-  { valeur: "oui", libelle: textes.oui, Icone: Check },
-  { valeur: "non", libelle: textes.non, Icone: X },
+  { valeur: "oui", libelle: textes.ouiChoix, Icone: Check },
+  { valeur: "non", libelle: textes.nonChoix, Icone: X },
 ];
 const OPTIONS_SOLDE: OptionCarte<Solde>[] = [
   { valeur: "negatif", libelle: textes.soldes.negatif, Icone: CircleMinus },

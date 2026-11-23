@@ -69,7 +69,7 @@ export function ValeursChiffrees({ etat, initiales, reglages }: { etat: EtatForm
           />
         ))}
         <div className="mt-1 rounded-lg border-t-2 border-marine bg-ciel px-4 py-3" aria-live="polite">
-          <p className="text-base font-bold text-marine tabular-nums">{totalValide ? textes.totalDisponible(formaterValeurDroit(total, unite)) : `${textes.total} : -`}</p>
+          <p className="text-base font-bold text-marine tabular-nums">{totalValide ? textes.totalDisponible(formaterValeurDroit(total, unite)) : `${textes.libelleTotal} : -`}</p>
           <p className="text-sm text-texte-secondaire">{textes.formuleTotal}</p>
         </div>
       </div>
