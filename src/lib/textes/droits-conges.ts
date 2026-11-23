@@ -69,11 +69,12 @@ export const TEXTES_DROITS_CONGES = {
   // Fenêtres de saisie
   titreCreation: "Consulter les droits aux congés",
   titreModification: "Modifier le droit",
-  sectionEmployes: "Employés concernés",
+  sectionEmployes: "Employé / groupe",
   sectionDroit: "Code droit et période",
   sectionJours: "Droit",
   sectionReglages: "Règles du droit",
   sectionComplements: "Reliquat et suppléments",
+  sectionJustificatif: "Justificatif et remarque",
   rechercher: absences.rechercher,
   exempleRecherche: absences.exempleRecherche,
   filtreDepartement: absences.filtreDepartement,

@@ -25,6 +25,31 @@ type ProprietesFenetre = { onTermine: (succes: Succes) => void; onAnnuler: () =>
 const anneeLocale = () => Number(jourDansFuseau(new Date(), FUSEAU_HORAIRE).slice(0, 4));
 const enTexte = (jours: number) => String(jours).replace(".", ",");
 
+/** Code droit (liste des codes) et son libellé, côte à côte comme sur la fiche. */
+function CodeDroit({ evenements, initial, erreur }: { evenements: EvenementDroit[]; initial: string; erreur?: string }) {
+  const [id, setId] = useState(initial);
+  const choisi = evenements.find((evenement) => evenement.id === id);
+  return (
+    <div className="grid gap-4 sm:grid-cols-2">
+      <ChampSelection
+        nom="evenementId"
+        libelle={textes.evenement}
+        options={evenements.map((evenement) => ({ valeur: evenement.id, libelle: `${evenement.code} · ${evenement.nom}` }))}
+        optionVide={textes.choisirEvenement}
+        value={id}
+        onChange={(evenement) => setId(evenement.target.value)}
+        aide={textes.aideEvenement}
+        erreur={erreur}
+        required
+      />
+      <div className="flex flex-col gap-2">
+        <span className="text-sm font-medium text-texte">{textes.libelleDroit}</span>
+        <p className="flex h-11 items-center rounded-lg border border-bordure bg-fond px-3.5 text-base text-texte lg:h-10" aria-live="polite">{choisi?.nom ?? "-"}</p>
+      </div>
+    </div>
+  );
+}
+
 function Pied({ message, enCours, onAnnuler }: { message?: string; enCours: boolean; onAnnuler: () => void }) {
   return <PiedFormulaire message={message} enCours={enCours} libelle={textes.enregistrer} libelleEnCours={textes.enregistrementEnCours} libelleAnnuler={textes.annuler} onAnnuler={onAnnuler} />;
 }
@@ -41,7 +66,20 @@ export function FormulaireCreationDroits({
   const [etat, action, enCours] = useFormulaireListe(creerDroits, onTermine);
   const [annee] = useState(anneeLocale);
   const employesCoches = etat.saisie ? etat.saisie.getAll("employes").map(lireTexte) : [];
-  const initiales: ValeursDroit = { du: `${annee}-01-01`, au: `${annee}-12-31`, joursAcquis: "", joursReliquat: "0", estBloquant: false, remarque: "" };
+  const initiales: ValeursDroit = {
+    du: `${annee}-01-01`,
+    au: `${annee}-12-31`,
+    uniteSaisie: "journee",
+    joursAcquis: "",
+    joursReliquat: "0",
+    supplement1: "0",
+    supplement2: "0",
+    supplement3: "0",
+    estConfirme: true,
+    estBloquant: true,
+    estReporte: false,
+    remarque: "",
+  };
 
   if (evenements.length === 0) {
     return <p className="m-5 rounded-lg border border-bordure bg-fond p-4 text-base text-texte-secondaire">{textes.aucunEvenement}</p>;
@@ -55,16 +93,7 @@ export function FormulaireCreationDroits({
           <MessageErreur message={etat.erreursChamps?.employeIds} />
         </SectionFormulaire>
         <SectionFormulaire titre={textes.evenement} icone={CalendarCheck}>
-          <ChampSelection
-            nom="evenementId"
-            libelle={textes.evenement}
-            options={evenements.map((evenement) => ({ valeur: evenement.id, libelle: `${evenement.code} · ${evenement.nom}` }))}
-            optionVide={textes.choisirEvenement}
-            defaultValue={valeurSaisie(etat, "evenementId", "")}
-            aide={textes.aideEvenement}
-            erreur={etat.erreursChamps?.evenementId}
-            required
-          />
+          <CodeDroit evenements={evenements} initial={valeurSaisie(etat, "evenementId", "")} erreur={etat.erreursChamps?.evenementId} />
         </SectionFormulaire>
         <ChampsDroit etat={etat} initiales={initiales} anneeCourante={annee} />
       </div>
@@ -82,7 +111,13 @@ export function FormulaireModificationDroit({ droit, onTermine, onAnnuler }: Pro
     au: droit.fin,
     joursAcquis: enTexte(droit.joursAcquis),
     joursReliquat: enTexte(droit.joursReliquat),
+    uniteSaisie: droit.uniteSaisie,
+    supplement1: enTexte(droit.supplement1),
+    supplement2: enTexte(droit.supplement2),
+    supplement3: enTexte(droit.supplement3),
+    estConfirme: droit.estConfirme,
     estBloquant: droit.estBloquant,
+    estReporte: droit.estReporte,
     remarque: droit.remarque ?? "",
   };
 

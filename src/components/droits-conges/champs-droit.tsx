@@ -1,11 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { CalendarRange, Calculator, Check, CircleCheck, CircleMinus, CirclePlus, Forward, X } from "lucide-react";
+import { CalendarRange, Calculator, Check, CircleMinus, CirclePlus, Paperclip, X } from "lucide-react";
 import { caseSaisie, valeurSaisie, type EtatFormulaireListe } from "@/components/liste/utiliser-formulaire-liste";
 import { SectionFormulaire } from "@/components/programme/section-formulaire";
 import { ChampFormulaire } from "@/components/ui/champ-formulaire";
 import { ChoixCartes, type OptionCarte } from "@/components/ui/choix-cartes";
+import { MessageErreur } from "@/components/ui/message-erreur";
 import { LONGUEUR_MAX_REMARQUE_DROIT } from "@/lib/constantes";
 import type { UniteDroit } from "@/lib/metier/droits-conges";
 import { formaterValeurDroit, TEXTES_DROITS_CONGES as textes } from "@/lib/textes/droits-conges";
@@ -132,15 +133,10 @@ export function ChampsDroit({ etat, initiales, anneeCourante, bilan }: { etat: E
       <SectionFormulaire titre={textes.sectionJours} icone={Calculator}>
         {bilan && <BilanDroit bilan={bilan} unite={initiales.uniteSaisie} />}
         <ValeursChiffrees etat={etat} initiales={initiales} reglages={<Reglages etat={etat} initiales={initiales} />} />
-        {(erreurs?.estConfirme || erreurs?.solde || erreurs?.estReporte || erreurs?.uniteSaisie) && (
-          <p className="flex items-center gap-1.5 text-sm text-erreur" data-erreur>
-            <CircleCheck className="size-4" aria-hidden="true" />
-            {erreurs.uniteSaisie ?? erreurs.estConfirme ?? erreurs.solde ?? erreurs.estReporte}
-          </p>
-        )}
+        <MessageErreur message={erreurs?.uniteSaisie ?? erreurs?.estConfirme ?? erreurs?.estBloquant ?? erreurs?.estReporte} />
       </SectionFormulaire>
 
-      <SectionFormulaire titre={textes.remarque} icone={Forward}>
+      <SectionFormulaire titre={textes.sectionJustificatif} icone={Paperclip}>
         <ChampPiecesJointes cocheeInitialement={caseSaisie(etat, "aPieceJointe", false)} erreur={erreurs?.fichiers} />
         <ChampFormulaire nom="remarque" libelle={textes.remarque} defaultValue={valeurSaisie(etat, "remarque", initiales.remarque)} placeholder={textes.exempleRemarque} maxLength={LONGUEUR_MAX_REMARQUE_DROIT} autoComplete="off" erreur={erreurs?.remarque} />
       </SectionFormulaire>
