@@ -9,7 +9,7 @@ import { aplatirArbre, construireArbre, idsDescendants, type ElementArbre } from
 import { correspondARecherche } from "@/lib/metier/recherche";
 import { cn } from "@/lib/utils";
 
-export type EmployeChoisissable = { id: string; nomComplet: string; matricule: string; departementId: string };
+export type EmployeChoisissable = { id: string; nomComplet: string; matricule: string; departementId: string; groupeId?: string | null };
 
 export type TextesChoixEmployes = {
   rechercher: string;

@@ -10,6 +10,10 @@ const nextConfig: NextConfig = {
     { source: "/", destination: "/connexion", permanent: false },
   ],
   partialPrefetching: true,
+  experimental: {
+    // Pièces justificatives des droits aux congés : 5 fichiers de 2 Mo au plus par envoi (vérifié par l'action).
+    serverActions: { bodySizeLimit: "12mb" },
+  },
   turbopack: {
     rules: {
       "*.css": {
