@@ -68,7 +68,7 @@ function Consommation({ droit }: { droit: DroitCongeListe }) {
           <ul className="mt-1.5 flex flex-col gap-1 border-s-2 border-bordure ps-3">
             {droit.absences.map((absence) => (
               <li key={absence.id} className="tabular-nums text-texte">
-                {textes.absencePeriode(formaterJour(absence.debut), formaterJour(absence.fin))} · <span className="font-medium text-marine">{textes.absenceJours(absence.pris, absence.prevus)}</span>
+                {textes.absencePeriode(formaterJour(absence.debut), formaterJour(absence.fin))} · <span className="font-medium text-marine">{textes.absenceJours(absence.pris, absence.prevus, droit.uniteSaisie)}</span>
               </li>
             ))}
             {droit.remarque && <li className="text-texte-secondaire">{droit.remarque}</li>}
@@ -122,17 +122,17 @@ export function LigneDroit({ droit }: { droit: DroitCongeListe }) {
           </>
         ) : (
           <>
-        <p className={cn("text-xl font-bold tabular-nums", etat === "depasse" ? "text-erreur" : "text-marine")}>{formaterValeurDroit(bilan.soldePrevisionnel, droit.uniteSaisie)}</p>
-        <p className={cn("flex items-center gap-1 text-sm font-medium", couleur)}>
-          <Icone className="size-4 shrink-0" aria-hidden="true" />
-          {textes.etats[etat]}
-          {droit.estBloquant && (
-            <span className="ms-1 text-texte-secondaire" title={textes.aideBloquantCarte}>
-              <Lock className="size-3.5" aria-hidden="true" />
-              <span className="sr-only">{textes.bloquant}</span>
-            </span>
-          )}
-        </p>
+            <p className={cn("text-xl font-bold tabular-nums", etat === "depasse" ? "text-erreur" : "text-marine")}>{formaterValeurDroit(bilan.soldePrevisionnel, droit.uniteSaisie)}</p>
+            <p className={cn("flex items-center gap-1 text-sm font-medium", couleur)}>
+              <Icone className="size-4 shrink-0" aria-hidden="true" />
+              {textes.etats[etat]}
+              {droit.estBloquant && (
+                <span className="ms-1 text-texte-secondaire" title={textes.aideBloquantCarte}>
+                  <Lock className="size-3.5" aria-hidden="true" />
+                  <span className="sr-only">{textes.bloquant}</span>
+                </span>
+              )}
+            </p>
           </>
         )}
       </div>

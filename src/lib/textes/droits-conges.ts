@@ -48,8 +48,8 @@ export const TEXTES_DROITS_CONGES = {
   unites: { journee: "Jour", demi_journee: "½ journée", heures: "Heures" },
   aideBloquantCarte: "Une absence qui dépasse le solde est refusée.",
   voirAbsences: (n: number) => (n === 0 ? "Aucune absence décomptée" : n === 1 ? "Voir l'absence décomptée" : `Voir les ${n} absences décomptées`),
-  absenceJours: (pris: number, prevus: number) =>
-    [pris > 0 ? `${formaterJours(pris)} consommé${pris > 1 ? "s" : ""}` : null, prevus > 0 ? `${formaterJours(prevus)} prévu${prevus > 1 ? "s" : ""}` : null].filter(Boolean).join(", "),
+  absenceJours: (pris: number, prevus: number, unite: "journee" | "demi_journee" | "heures") =>
+    [pris > 0 ? `${formaterValeurDroit(pris, unite)} consommé${pris > 1 ? "s" : ""}` : null, prevus > 0 ? `${formaterValeurDroit(prevus, unite)} prévu${prevus > 1 ? "s" : ""}` : null].filter(Boolean).join(", "),
   absencePeriode: (debut: string, fin: string) => (debut === fin ? debut : `du ${debut} au ${fin}`),
   saisiPar: (nom: string) => `Saisi par ${nom}`,
   modifier: (nom: string) => `Modifier le droit de ${nom}`,
