@@ -9,6 +9,9 @@ import { ChampFormulaire } from "@/components/ui/champ-formulaire";
 import { JOURS_DROIT_MAX, LONGUEUR_MAX_REMARQUE_DROIT } from "@/lib/constantes";
 import { estNombreDeJoursValide } from "@/lib/metier/droits-conges";
 import { formaterJours, TEXTES_DROITS_CONGES as textes } from "@/lib/textes/droits-conges";
+import { cn } from "@/lib/utils";
+import type { DroitCongeListe } from "@/types";
+import { ChampPiecesJointes } from "./champ-pieces-jointes";
 
 /** Valeurs de départ d'un droit (création : année en cours ; modification : le droit existant). */
 export type ValeursDroit = { du: string; au: string; joursAcquis: string; joursReliquat: string; estBloquant: boolean; remarque: string };
@@ -32,7 +35,27 @@ function BoutonAnnee({ annee, onChoisir }: { annee: number; onChoisir: (du: stri
  * Période, jours acquis, reliquat, blocage et remarque : communs à la création et à la
  * modification. Recréés à chaque réponse du serveur (clé du formulaire) avec la dernière saisie.
  */
-export function ChampsDroit({ etat, initiales, anneeCourante }: { etat: EtatFormulaireListe; initiales: ValeursDroit; anneeCourante: number }) {
+/** Jours acquis, prévus, consommés et solde du droit existant (fenêtre de modification). */
+function BilanDroit({ bilan }: { bilan: DroitCongeListe["bilan"] }) {
+  const cases = [
+    { libelle: textes.acquis, valeur: bilan.acquis },
+    { libelle: textes.prevus, valeur: bilan.prevus },
+    { libelle: textes.pris, valeur: bilan.pris },
+    { libelle: textes.reste, valeur: bilan.soldePrevisionnel },
+  ];
+  return (
+    <dl className="grid grid-cols-2 gap-2 sm:grid-cols-4" aria-label={textes.bilan}>
+      {cases.map(({ libelle, valeur }, rang) => (
+        <div key={libelle} className={cn("flex flex-col gap-0.5 rounded-lg border px-3 py-2", rang === 3 ? "border-primaire/30 bg-ciel" : "border-bordure bg-fond")}>
+          <dt className="text-sm text-texte-secondaire">{libelle}</dt>
+          <dd className={cn("text-lg font-bold tabular-nums", rang === 3 && valeur < 0 ? "text-erreur" : "text-marine")}>{formaterJours(valeur)}</dd>
+        </div>
+      ))}
+    </dl>
+  );
+}
+
+export function ChampsDroit({ etat, initiales, anneeCourante, bilan }: { etat: EtatFormulaireListe; initiales: ValeursDroit; anneeCourante: number; bilan?: DroitCongeListe["bilan"] }) {
   const erreurs = etat.erreursChamps;
   const [du, setDu] = useState(() => valeurSaisie(etat, "du", initiales.du));
   const [au, setAu] = useState(() => valeurSaisie(etat, "au", initiales.au));
@@ -60,6 +83,7 @@ export function ChampsDroit({ etat, initiales, anneeCourante }: { etat: EtatForm
       </SectionFormulaire>
 
       <SectionFormulaire titre={textes.sectionJours} icone={Calculator}>
+        {bilan && <BilanDroit bilan={bilan} />}
         <div className="grid gap-4 sm:grid-cols-2">
           <ChampFormulaire nom="joursAcquis" libelle={textes.joursAcquis} inputMode="decimal" required value={acquis} onChange={(evenement) => setAcquis(evenement.target.value)} aide={textes.aideJoursAcquis} erreur={erreurs?.joursAcquis} autoComplete="off" className="tabular-nums" />
           <ChampFormulaire nom="joursReliquat" libelle={textes.joursReliquat} inputMode="decimal" value={reliquat} onChange={(evenement) => setReliquat(evenement.target.value)} aide={textes.aideReliquat} erreur={erreurs?.joursReliquat} autoComplete="off" className="tabular-nums" />
@@ -70,6 +94,7 @@ export function ChampsDroit({ etat, initiales, anneeCourante }: { etat: EtatForm
           </p>
         )}
         <CaseACocher nom="estBloquant" libelle={textes.estBloquant} aide={textes.aideBloquant} defaultChecked={caseSaisie(etat, "estBloquant", initiales.estBloquant)} />
+        <ChampPiecesJointes cocheeInitialement={caseSaisie(etat, "aPieceJointe", false)} erreur={erreurs?.fichiers} />
         <ChampFormulaire nom="remarque" libelle={textes.remarque} defaultValue={valeurSaisie(etat, "remarque", initiales.remarque)} placeholder={textes.exempleRemarque} maxLength={LONGUEUR_MAX_REMARQUE_DROIT} autoComplete="off" erreur={erreurs?.remarque} />
       </SectionFormulaire>
     </>
