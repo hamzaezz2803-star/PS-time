@@ -434,7 +434,11 @@ export type DroitCongeListe = {
   saisiPar: string | null;
   bilan: { acquis: number; pris: number; prevus: number; soldeAujourdhui: number; soldePrevisionnel: number };
   absences: AbsenceDuDroit[];
+  piecesJointes: PieceJointeDroit[];
 };
+
+/** Pièce justificative d'un droit (sans son contenu, servi par sa propre route). */
+export type PieceJointeDroit = { id: string; nomFichier: string; typeMime: string; tailleOctets: number };
 
 /** Événement proposé pour un droit aux congés (événements de type absence). */
 export type EvenementDroit = { id: string; code: string; nom: string };
