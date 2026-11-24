@@ -8,6 +8,8 @@ import {
   CalendarSearch,
   CalendarX2,
   ClipboardClock,
+  ClipboardList,
+  FileBarChart,
   ClockAlert,
   ClockArrowUp,
   DatabaseBackup,
@@ -36,6 +38,7 @@ import {
   CHEMIN_DETAIL_JOUR,
   CHEMIN_DROITS_CONGES,
   CHEMIN_ESPACE,
+  CHEMIN_ETAT,
   CHEMIN_EVENEMENTS,
   CHEMIN_GROUPES,
   CHEMIN_HISTORIQUE,
@@ -119,6 +122,20 @@ export const MENUS_NAVIGATION: MenuNavigation[] = [
       {
         titre: T.compteurs,
         liens: [{ libelle: T.detailJour, icone: CalendarSearch, href: CHEMIN_DETAIL_JOUR, page: "detail_jour" }],
+      },
+    ],
+  },
+  {
+    libelle: T.etats,
+    icone: FileBarChart,
+    sections: [
+      {
+        liens: [
+          { libelle: T.etatPresences, icone: ClockAlert, href: CHEMIN_ETAT("presences"), page: "etat_presences" },
+          { libelle: T.etatEvenements, icone: CalendarX2, href: CHEMIN_ETAT("evenements"), page: "etat_evenements" },
+          { libelle: T.etatConges, icone: CalendarCheck, href: CHEMIN_ETAT("conges"), page: "etat_conges" },
+          { libelle: T.etatPointages, icone: ClipboardList, href: CHEMIN_ETAT("pointages-manuels"), page: "etat_pointages" },
+        ],
       },
     ],
   },

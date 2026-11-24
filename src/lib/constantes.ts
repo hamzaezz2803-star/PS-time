@@ -32,7 +32,7 @@ export const TENTATIVES_INSTALLATION_MAX_PAR_JOUR = 30;
 export const UN_JOUR_MILLISECONDES = 24 * 60 * 60 * 1000;
 
 /** Grandes parties de l'application (menu, tableau de bord, notifications). */
-export const MODULES = ["personnel", "planning", "presence"] as const;
+export const MODULES = ["personnel", "planning", "presence", "etats"] as const;
 /**
  * Pages qu'un super administrateur peut accorder une par une à un administrateur, rangées
  * par module dans l'ordre du menu. Même liste que la contrainte de la base (`autorisations_pages`).
@@ -41,8 +41,9 @@ export const PAGES_PAR_MODULE = {
   personnel: ["sites", "departements", "postes", "personnes"],
   planning: ["profils_horaires", "rotations", "groupes", "affectations", "horaire_dynamique", "rapport_presences"],
   presence: ["pointages_manuels", "evenements", "absences", "droits_conges", "compteurs", "detail_jour"],
+  etats: ["etat_presences", "etat_evenements", "etat_conges", "etat_pointages"],
 } as const;
-export const PAGES = [...PAGES_PAR_MODULE.personnel, ...PAGES_PAR_MODULE.planning, ...PAGES_PAR_MODULE.presence] as const;
+export const PAGES = [...PAGES_PAR_MODULE.personnel, ...PAGES_PAR_MODULE.planning, ...PAGES_PAR_MODULE.presence, ...PAGES_PAR_MODULE.etats] as const;
 /**
  * Pages retirées du menu et des droits proposés aux administrateurs (23/11/2026 : Absences et
  * événements). La page, ses données et leurs effets (soldes, détail jour) restent : réactivable
@@ -253,6 +254,14 @@ export const CHEMIN_IMPRESSION_RAPPORT_PRESENCES = "/impression/rapport-presence
 export const RAPPORT_JOURS_DEFAUT = 30;
 export const RAPPORT_JOURS_MAX = 93;
 export const RAPPORT_LIGNES_MAX = 5000;
+/** Menu État : une page par rapport (/etats/presences...), son export Excel et sa version imprimable. */
+export const CHEMIN_ETATS = "/etats";
+export const CHEMIN_IMPRESSION_ETATS = "/impression/etats";
+export const CHEMIN_ETAT = (etat: string) => `${CHEMIN_ETATS}/${etat}`;
+export const CHEMIN_EXPORT_ETAT = (etat: string) => `${CHEMIN_ETATS}/${etat}/export-excel`;
+export const CHEMIN_IMPRESSION_ETAT = (etat: string) => `${CHEMIN_IMPRESSION_ETATS}/${etat}`;
+/** Lignes affichées à l'écran (l'export Excel ou PDF en contient jusqu'à RAPPORT_LIGNES_MAX). */
+export const ETAT_LIGNES_ECRAN_MAX = 500;
 /** Appareils (badgeuses) : page d'attente, la gestion des badgeuses viendra ensuite. */
 export const CHEMIN_APPAREILS = "/appareils";
 /** Sauvegarde (Administration > Sauvegarde) : fichier SQL signé, produit et relu par l'application. */

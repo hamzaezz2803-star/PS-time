@@ -7,6 +7,7 @@ import { TEXTES_NOTIFICATIONS } from "./notifications";
 const EXPORTS: Partial<Record<EntreeHistorique["objet"], string>> = {
   employe: "la liste des personnes",
   rapport_presences: "le rapport des présences",
+  etat: "un état",
   sauvegarde: "une sauvegarde des données",
 };
 
@@ -90,7 +91,7 @@ export const TEXTES_HISTORIQUE = {
     if (entree.action === "deconnexion") return `Déconnexion de ${auteur}`;
     if (entree.action === "export") return `${auteur} a exporté ${EXPORTS[entree.objet] ?? "des données"}${precision}`;
     if (entree.objet === "sauvegarde") return `${auteur} a importé une sauvegarde des données${precision}`;
-    if (entree.objet === "rapport_presences" || entree.objet === "session") return `${auteur} : ${entree.libelle ?? ""}`;
+    if (entree.objet === "rapport_presences" || entree.objet === "etat" || entree.objet === "session") return `${auteur} : ${entree.libelle ?? ""}`;
     return TEXTES_NOTIFICATIONS.phrase({ action: entree.action, objet: entree.objet, libelle: entree.libelle }, auteur);
   },
 } as const;
