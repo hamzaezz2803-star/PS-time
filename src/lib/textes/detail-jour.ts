@@ -114,7 +114,7 @@ export const TEXTES_DETAIL_JOUR = {
     titre: "Historique journalier",
     duree: "Durée affichée",
     jours: (n: number) => `${n} jours`,
-    aucun: "Aucun compteur journalier actif : rien à afficher jour par jour.",
+    aucun: "Aucun compteur journalier actif : seuls l’horaire, les pointages et les événements sont montrés.",
     colonneJour: "Jour",
     legende: "Une ligne par jour, le plus récent en haut. Cliquez un jour pour l'afficher ; les jours de repos sont grisés.",
     total: "Total (moyenne pour les %)",
