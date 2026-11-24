@@ -194,6 +194,14 @@ UPDATE employes e JOIN departements d ON d.id = e.departement_id
   SET e.site_id = d.site_id
   WHERE e.id LIKE '00000000-0000-4000-8000-%';
 
+-- 9 bis. Pointage à distance et doigts à enrôler (jamais d'empreinte) : Hamid Bouzid (T011), souvent en
+-- mission, peut pointer depuis son téléphone ou une tablette, position et photo exigées ; Karim Benali
+-- (T001) depuis son PC. Doigts prévus : index droit et index gauche pour T001, pouces pour T011.
+UPDATE employes SET pointage_distance = 1, appareils_distance = 'tablette,telephone', distance_exige_position = 1, distance_exige_photo = 1, doigts_a_enroler = '45'
+  WHERE id = '00000000-0000-4000-8000-000000000311';
+UPDATE employes SET pointage_distance = 1, appareils_distance = 'pc', doigts_a_enroler = '36'
+  WHERE id = '00000000-0000-4000-8000-000000000301';
+
 -- 10. Horaire dynamique : premier pointage du matin → Matin, de l'après-midi → Après-midi (lundi à vendredi).
 -- Une couleur par règle : Matin en orange, Après-midi en bleu (pastilles du rapport des présences).
 INSERT INTO regles_horaires (id, debut_minutes, fin_minutes, jours_semaine, profil_id, est_actif, couleur) VALUES
