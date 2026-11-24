@@ -1,12 +1,38 @@
-import { ArrowRight, CalendarX2, Moon, Plane, TriangleAlert } from "lucide-react";
+import { ArrowRight, Briefcase, CalendarCheck, CalendarX2, CircleCheck, CircleX, Clock, Moon, Plane, TriangleAlert, type LucideIcon } from "lucide-react";
 import { formaterMinutes } from "@/lib/metier/compteurs/format";
 import { minutesVersHeure } from "@/lib/metier/programme";
+import { statutJourDetail, type StatutJourDetail } from "@/lib/metier/statut-jour-detail";
+import { cn } from "@/lib/utils";
 import { TEXTES_DETAIL_JOUR } from "@/lib/textes/detail-jour";
 import type { JourDetail } from "@/types";
 
 const textes = TEXTES_DETAIL_JOUR.jour;
 
-const HEURE = "rounded-md bg-surface px-1.5 py-0.5 font-medium text-texte tabular-nums ring-1 ring-bordure";
+const STATUTS: Record<StatutJourDetail, { Icone: LucideIcon; teinte: string }> = {
+  a_l_heure: { Icone: CircleCheck, teinte: "bg-succes/10 text-succes" },
+  retard: { Icone: Clock, teinte: "bg-attention/10 text-attention" },
+  incomplet: { Icone: TriangleAlert, teinte: "bg-attention/10 text-attention" },
+  sans_pointage: { Icone: CircleX, teinte: "bg-erreur/10 text-erreur" },
+  absence_justifiee: { Icone: CalendarCheck, teinte: "bg-graphe-justifie/10 text-graphe-justifie" },
+  evenement_presence: { Icone: Plane, teinte: "bg-ciel text-primaire" },
+  repos: { Icone: Moon, teinte: "bg-canevas text-texte-secondaire" },
+  repos_travaille: { Icone: Briefcase, teinte: "bg-ciel text-primaire" },
+};
+
+/** Statut de la journée en une étiquette (icône + mot, jamais la couleur seule), avec le retard en minutes. */
+export function StatutJour({ jour }: { jour: JourDetail }) {
+  const statut = statutJourDetail(jour);
+  const { Icone, teinte } = STATUTS[statut];
+  return (
+    <span className={cn("inline-flex items-center gap-1.5 whitespace-nowrap rounded-md px-2 py-1 text-sm font-medium", teinte)}>
+      <Icone className="size-4 shrink-0" aria-hidden="true" />
+      {textes.statuts[statut]}
+      {statut === "retard" && jour.retardMinutes !== null && <span className="font-normal tabular-nums">{textes.retardDe(formaterMinutes(jour.retardMinutes))}</span>}
+    </span>
+  );
+}
+
+const HEURE ="rounded-md bg-surface px-1.5 py-0.5 font-medium text-texte tabular-nums ring-1 ring-bordure";
 
 /** Profil du jour (code), ou « Repos » avec une icône. */
 export function HoraireJour({ jour }: { jour: JourDetail }) {
