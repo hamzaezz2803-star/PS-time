@@ -78,7 +78,7 @@ export function FormulaireEvenement({ element, onTermine, onAnnuler }: Propriete
               <ChampFormulaire nom="dureeHeures" libelle={champs.dureeHeures} defaultValue={valeurSaisie(etat, "dureeHeures", dureeInitiale)} inputMode="decimal" maxLength={5} autoComplete="off" required aide={champs.aideDureeHeures} erreur={erreurs?.dureeHeures} className="tabular-nums" />
             </div>
           )}
-          <CaseACocher nom="estPrioritaireSurPointages" libelle={champs.estPrioritaireSurPointages} defaultChecked={coche("estPrioritaireSurPointages", false)} />
+          <CaseACocher nom="estPrioritaireSurPointages" libelle={champs.estPrioritaireSurPointages} aide={champs.aideNeutraliser} defaultChecked={coche("estPrioritaireSurPointages", false)} />
           <CaseACocher nom="estSoumisDroits" libelle={champs.estSoumisDroits} aide={champs.aideSoumisDroits} defaultChecked={coche("estSoumisDroits", false)} />
           <CaseACocher nom="estVisiblePlanning" libelle={champs.estVisiblePlanning} aide={champs.aideVisible} defaultChecked={coche("estVisiblePlanning", true)} />
           <JaugePriorite valeurInitiale={Number(valeurSaisie(etat, "priorite", String(element?.priorite ?? 0)))} erreur={erreurs?.priorite} />
