@@ -107,6 +107,7 @@ export const TEXTES_DETAIL_JOUR = {
     nonValide: "non validé",
     nonValides: (codes: string) => `Non validé : ${codes}`,
     entreeSortie: (entree: string, sortie: string) => `${entree} à ${sortie}`,
+    jusqua: "à",
     sortieManquante: "sortie manquante",
   },
 

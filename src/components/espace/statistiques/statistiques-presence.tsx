@@ -1,17 +1,15 @@
 import Link from "next/link";
-import { CircleAlert, Clock4, Percent, Timer, UserCheck, UserX } from "lucide-react";
 import { CHEMIN_ESPACE, STATISTIQUES_EMPLOYES_MAX, STATISTIQUES_PERIODES } from "@/lib/constantes";
 import type { DonneesStatistiques } from "@/lib/donnees/statistiques-presence";
 import { formaterJour, formaterJourCourt } from "@/lib/formats";
-import { formaterDuree } from "@/lib/metier/programme";
-import { arriveesParHeure, bilanDuJour, cumulerBilans, joursParEvenement, parJourDeSemaine, presenceParDepartement, tauxPresence } from "@/lib/metier/statistiques-presence";
+import { arriveesParHeure, bilanDuJour, cumulerBilans, joursParEvenement, parJourDeSemaine, presenceParDepartement } from "@/lib/metier/statistiques-presence";
 import { TEXTES_PRESENCE } from "@/lib/textes/presence";
 import { cn } from "@/lib/utils";
 import { BarresDepartements } from "./barres-departements";
 import { BarresEvenements } from "./barres-evenements";
+import { ChiffresCles } from "./chiffres-cles";
 import { GraphiqueColonnes } from "./graphique-colonnes";
 import { RepartitionJour } from "./repartition-jour";
-import { TuileStatistique } from "./tuile-statistique";
 
 const textes = TEXTES_PRESENCE.statistiques;
 const CARTE = "rounded-xl border border-bordure bg-surface p-4 shadow-carte sm:p-5";
@@ -44,13 +42,9 @@ export function StatistiquesPresence({ donnees, periode }: { donnees: DonneesSta
   const bilans = jours.map((jour) => bilanDuJour(employes, jour, maintenant));
   const aujourdhui = bilans[bilans.length - 1] ?? bilanDuJour(employes, maintenant.jour, maintenant);
   const cumul = cumulerBilans(bilans);
-  const tauxJour = tauxPresence(aujourdhui);
-  const tauxPeriode = tauxPresence(cumul);
   const arrivees = arriveesParHeure(employes, maintenant.jour);
   const semaine = parJourDeSemaine(bilans);
   const g = textes.graphiques;
-  const pourcent = (taux: number | null) => (taux === null ? textes.tuiles.sansDonnee : textes.pourcentage(taux));
-  const t = textes.tuiles;
 
   return (
     <section aria-labelledby="titre-statistiques" className="flex flex-col gap-5">
@@ -63,14 +57,7 @@ export function StatistiquesPresence({ donnees, periode }: { donnees: DonneesSta
         <ChoixPeriode periode={periode} />
       </div>
 
-      <div className="grid grid-cols-1 gap-3 min-[420px]:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-        <TuileStatistique libelle={t.presents} valeur={pourcent(tauxJour)} detail={t.presentsDetail(aujourdhui.aLHeure + aujourdhui.enRetard, aujourdhui.aLHeure + aujourdhui.enRetard + aujourdhui.absents)} Icone={UserCheck} teinte="bg-succes/10 text-succes" />
-        <TuileStatistique libelle={t.retards} valeur={String(aujourdhui.enRetard)} detail={t.retardsDetail(formaterDuree(aujourdhui.minutesRetard))} Icone={CircleAlert} teinte="bg-attention/10 text-attention" />
-        <TuileStatistique libelle={t.absents} valeur={String(aujourdhui.absents)} detail={t.absentsDetail(aujourdhui.attendus, aujourdhui.justifies)} Icone={UserX} teinte="bg-erreur/10 text-erreur" />
-        <TuileStatistique libelle={t.tauxPeriode(periode)} valeur={pourcent(tauxPeriode)} detail={t.tauxPeriodeDetail(cumul.absents)} Icone={Percent} teinte="bg-ciel text-primaire" />
-        <TuileStatistique libelle={t.heuresTravaillees(periode)} valeur={formaterDuree(cumul.minutesTravaillees)} detail={t.heuresTravailleesDetail(formaterDuree(cumul.minutesPrevues))} Icone={Timer} teinte="bg-ciel text-primaire" />
-        <TuileStatistique libelle={t.heuresSup(periode)} valeur={formaterDuree(cumul.minutesSupplementaires)} detail={t.heuresSupDetail(formaterDuree(cumul.minutesRetard))} Icone={Clock4} teinte="bg-ciel text-primaire" />
-      </div>
+      <ChiffresCles aujourdhui={aujourdhui} cumul={cumul} periode={periode} />
 
       <div className="grid gap-5 lg:grid-cols-3">
         <div className={cn(CARTE, "lg:col-span-2")}>
