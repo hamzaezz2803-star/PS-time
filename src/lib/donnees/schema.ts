@@ -17,7 +17,7 @@ import {
   uniqueIndex,
   varchar,
 } from "drizzle-orm/mysql-core";
-import { ACTIONS_HISTORIQUE, COULEURS_PERSONNALISABLES, MODULES_HISTORIQUE, PAGES, POLICES, TAILLES_TEXTE, THEMES, TYPES_EVENEMENT, TYPES_PIECE_JOINTE, UNITES_SAISIE_EVENEMENT, DUREE_EVENEMENT_MAX_MINUTES, PIECE_JOINTE_TAILLE_MAX_OCTETS } from "../constantes.ts";
+import { ACTIONS_HISTORIQUE, COULEUR_REGLE_DEFAUT, COULEURS_REGLE, COULEURS_PERSONNALISABLES,MODULES_HISTORIQUE, PAGES, POLICES, TAILLES_TEXTE, THEMES, TYPES_EVENEMENT, TYPES_PIECE_JOINTE, UNITES_SAISIE_EVENEMENT, DUREE_EVENEMENT_MAX_MINUTES, PIECE_JOINTE_TAILLE_MAX_OCTETS } from "../constantes.ts";
 
 /**
  * Schéma de la base. Toute modification passe par une migration :
@@ -688,11 +688,14 @@ export const reglesHoraires = mysqlTable(
       .notNull()
       .references(() => profilsHoraires.id, { onDelete: "restrict" }),
     estActif: boolean("est_actif").notNull().default(true),
+    // Couleur de la pastille dans le rapport des présences (palette fixe).
+    couleur: varchar("couleur", { length: 15 }).notNull().default(COULEUR_REGLE_DEFAUT),
     creeLe: dateCreation(),
     modifieLe: dateModification(),
   },
   (table) => [
     index("regles_horaires_profil_idx").on(table.profilId),
+    check("regles_horaires_couleur_valide", sql`${table.couleur} IN (${listeSql(COULEURS_REGLE)})`),
     check("regles_horaires_bornes", sql`${table.debutMinutes} BETWEEN 0 AND 1439 AND ${table.finMinutes} BETWEEN 1 AND 1440 AND ${table.finMinutes} > ${table.debutMinutes}`),
     check("regles_horaires_jours_valides", sql`${table.joursSemaine} REGEXP '^[1-7]{1,7}$'`),
   ],

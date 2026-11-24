@@ -70,6 +70,25 @@
   --couleur-graphe-justifie: #2563eb; /* absence justifiée : bleu, distinct du vert, de l'orange et du rouge (5,2:1 avec du blanc) */
   --couleur-graphe-reference: #7f93b3; /* « prévu » : gris voulu, référence discrète (3:1 sur blanc) */
   --couleur-graphe-grille: #eef1f5;
+
+  /* Couleurs des règles d'horaire dynamique (pastilles du rapport des présences) : texte foncé
+     sur fond clair de la même teinte, 4,5:1 minimum. Toujours avec le code et le nom du profil. */
+  --couleur-regle-bleu: #1d4ed8;
+  --couleur-regle-bleu-fond: #dbeafe;
+  --couleur-regle-vert: #166534;
+  --couleur-regle-vert-fond: #dcfce7;
+  --couleur-regle-orange: #9a3412;
+  --couleur-regle-orange-fond: #ffedd5;
+  --couleur-regle-rouge: #b91c1c;
+  --couleur-regle-rouge-fond: #fee2e2;
+  --couleur-regle-turquoise: #115e59;
+  --couleur-regle-turquoise-fond: #ccfbf1;
+  --couleur-regle-rose: #be185d;
+  --couleur-regle-rose-fond: #fce7f3;
+  --couleur-regle-jaune: #854d0e;
+  --couleur-regle-jaune-fond: #fef9c3;
+  --couleur-regle-ardoise: #334155;
+  --couleur-regle-ardoise-fond: #e2e8f0;
 }
 
 /* Taille du texte (data-taille) : toutes les tailles sont en rem, elles suivent la page entière. */
@@ -125,6 +144,22 @@ html[data-taille="tres_grande"] {
   --color-graphe-justifie: var(--couleur-graphe-justifie);
   --color-graphe-reference: var(--couleur-graphe-reference);
   --color-graphe-grille: var(--couleur-graphe-grille);
+  --color-regle-bleu: var(--couleur-regle-bleu);
+  --color-regle-bleu-fond: var(--couleur-regle-bleu-fond);
+  --color-regle-vert: var(--couleur-regle-vert);
+  --color-regle-vert-fond: var(--couleur-regle-vert-fond);
+  --color-regle-orange: var(--couleur-regle-orange);
+  --color-regle-orange-fond: var(--couleur-regle-orange-fond);
+  --color-regle-rouge: var(--couleur-regle-rouge);
+  --color-regle-rouge-fond: var(--couleur-regle-rouge-fond);
+  --color-regle-turquoise: var(--couleur-regle-turquoise);
+  --color-regle-turquoise-fond: var(--couleur-regle-turquoise-fond);
+  --color-regle-rose: var(--couleur-regle-rose);
+  --color-regle-rose-fond: var(--couleur-regle-rose-fond);
+  --color-regle-jaune: var(--couleur-regle-jaune);
+  --color-regle-jaune-fond: var(--couleur-regle-jaune-fond);
+  --color-regle-ardoise: var(--couleur-regle-ardoise);
+  --color-regle-ardoise-fond: var(--couleur-regle-ardoise-fond);
 
   --font-sans: var(--font-texte), ui-sans-serif, system-ui, sans-serif;
 

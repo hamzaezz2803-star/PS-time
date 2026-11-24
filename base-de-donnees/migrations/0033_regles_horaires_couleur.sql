@@ -1,0 +1,2 @@
+ALTER TABLE `regles_horaires` ADD `couleur` varchar(15) DEFAULT 'bleu' NOT NULL;--> statement-breakpoint
+ALTER TABLE `regles_horaires` ADD CONSTRAINT `regles_horaires_couleur_valide` CHECK (`regles_horaires`.`couleur` IN ('bleu', 'vert', 'orange', 'rouge', 'turquoise', 'rose', 'jaune', 'ardoise'));

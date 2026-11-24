@@ -232,6 +232,13 @@
       "when": 1795537041805,
       "tag": "0032_etats_pages",
       "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "5",
+      "when": 1795539469208,
+      "tag": "0033_regles_horaires_couleur",
+      "breakpoints": true
     }
   ]
 }

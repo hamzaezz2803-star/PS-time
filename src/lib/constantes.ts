@@ -173,6 +173,11 @@ export const LONGUEUR_MAX_NOM_EVENEMENT = 60;
 export const LONGUEUR_MAX_CODE_PAIE = 20;
 export const PRIORITE_EVENEMENT_MAX = 255;
 export const UNITES_SAISIE_EVENEMENT = ["journee", "demi_journee", "heures"] as const;
+
+/** Couleurs proposées pour une règle d'horaire dynamique (palette fixe, contrastes vérifiés dans globals.css). */
+export const COULEURS_REGLE = ["bleu", "vert", "orange", "rouge", "turquoise", "rose", "jaune", "ardoise"] as const;
+export type CouleurRegle = (typeof COULEURS_REGLE)[number];
+export const COULEUR_REGLE_DEFAUT: CouleurRegle = "bleu";
 export const DUREE_EVENEMENT_MAX_MINUTES = 1440;
 export const PAS_DUREE_EVENEMENT_MINUTES = 30;
 export const LIMITE_EVENEMENTS = 500;
