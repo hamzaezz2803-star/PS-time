@@ -84,9 +84,7 @@ export function TableauRapport({ lignes, estTronque }: { lignes: LigneRapportPre
                   <td className="px-5 py-3 font-mono text-base tabular-nums">{minutesVersHeure(ligne.minutes)}</td>
                   <td className="px-5 py-3">
                     {ligne.profil ? (
-                      <Pastille Icone={CalendarClock}>
-                        <span className="font-mono">{ligne.profil.code}</span> {ligne.profil.nom}
-                      </Pastille>
+                      <PastilleRegle couleur={ligne.profil.couleur} code={ligne.profil.code} nom={ligne.profil.nom} />
                     ) : (
                       <Pastille Icone={CircleHelp} ton="neutre">{textes.aucunHoraire}</Pastille>
                     )}

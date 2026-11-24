@@ -284,6 +284,7 @@ export type RegleHoraireListe = {
   profilNom: string;
   profilCode: string;
   estActif: boolean;
+  couleur: import("@/lib/constantes").CouleurRegle;
 };
 
 /** Compteur tel qu'affiché dans la liste et le formulaire. */
@@ -364,7 +365,8 @@ export type LigneRapportPresence = {
   jour: string;
   /** Premier pointage, en minutes depuis minuit (heure de Casablanca). */
   minutes: number;
-  profil: { code: string; nom: string } | null;
+  /** Profil reconnu et couleur de la règle qui l'a reconnu, ou null. */
+  profil: { code: string; nom: string; couleur: import("@/lib/constantes").CouleurRegle } | null;
 };
 
 /** Événement : motif d'absence ou de présence (congé, maladie, formation, mission...). */

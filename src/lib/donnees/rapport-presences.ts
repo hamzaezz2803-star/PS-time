@@ -1,7 +1,7 @@
 import "server-only";
 
 import { and, eq, gte, inArray, lt } from "drizzle-orm";
-import { FUSEAU_HORAIRE, RAPPORT_LIGNES_MAX, UN_JOUR_MILLISECONDES } from "@/lib/constantes";
+import { COULEUR_REGLE_DEFAUT, FUSEAU_HORAIRE, RAPPORT_LIGNES_MAX, UN_JOUR_MILLISECONDES } from "@/lib/constantes";
 import { idsDescendants } from "@/lib/metier/arbre";
 import { jourEtMinuteLocaux } from "@/lib/metier/dates";
 import { lignesRapport } from "@/lib/metier/rapport-presences";
@@ -9,7 +9,7 @@ import type { RechercheRapport } from "@/lib/validation/rapport-presences";
 import type { LigneRapportPresence } from "@/types";
 import { obtenirBase } from "./base";
 import { listerDepartements } from "./departements";
-import { listerReglesActives } from "./horaire-dynamique";
+import { couleursDesRegles, listerReglesActives } from "./horaire-dynamique";
 import { listerProfils } from "./profils-horaires";
 import { departements, employes, pointages } from "./schema";
 
@@ -36,13 +36,14 @@ export async function chargerRapport(recherche: RechercheRapport): Promise<Rappo
   // Un jour de marge de chaque côté : le jour local peut différer du jour UTC.
   const depuis = new Date(Date.parse(`${recherche.du}T00:00:00Z`) - UN_JOUR_MILLISECONDES);
   const jusqua = new Date(Date.parse(`${recherche.au}T00:00:00Z`) + 2 * UN_JOUR_MILLISECONDES);
-  const [lignesPointages, regles, profils] = await Promise.all([
+  const [lignesPointages, regles, profils, couleurs] = await Promise.all([
     obtenirBase()
       .select({ employeId: pointages.employeId, horodatage: pointages.horodatage })
       .from(pointages)
       .where(and(inArray(pointages.employeId, concernes.map((employe) => employe.id)), gte(pointages.horodatage, depuis), lt(pointages.horodatage, jusqua))),
     listerReglesActives(),
     listerProfils(),
+    couleursDesRegles(),
   ]);
 
   const locaux = lignesPointages
@@ -54,6 +55,7 @@ export async function chargerRapport(recherche: RechercheRapport): Promise<Rappo
   const toutes = lignesRapport(locaux, regles).flatMap((ligne): LigneRapportPresence[] => {
     const employe = parEmploye.get(ligne.employeId);
     if (!employe) return [];
+    const profil = ligne.profilId ? parProfil.get(ligne.profilId) : undefined;
     return [{
       employeId: employe.id,
       matricule: employe.matricule,
@@ -61,7 +63,7 @@ export async function chargerRapport(recherche: RechercheRapport): Promise<Rappo
       departement: employe.departement,
       jour: ligne.jour,
       minutes: ligne.minutes,
-      profil: ligne.profilId ? (parProfil.get(ligne.profilId) ?? null) : null,
+      profil: profil ? { ...profil, couleur: (ligne.regleId && couleurs.get(ligne.regleId)) || COULEUR_REGLE_DEFAUT } : null,
     }];
   });
   return { lignes: toutes.slice(0, RAPPORT_LIGNES_MAX), estTronque: toutes.length > RAPPORT_LIGNES_MAX };

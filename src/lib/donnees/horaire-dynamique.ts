@@ -1,7 +1,7 @@
 import "server-only";
 
 import { and, asc, eq, gte, inArray, lt, notInArray } from "drizzle-orm";
-import { FUSEAU_HORAIRE, LIMITE_LISTE_PROGRAMME, UN_JOUR_MILLISECONDES } from "@/lib/constantes";
+import { COULEUR_REGLE_DEFAUT, COULEURS_REGLE, FUSEAU_HORAIRE, LIMITE_LISTE_PROGRAMME, UN_JOUR_MILLISECONDES, type CouleurRegle } from "@/lib/constantes";
 import { jourEtMinuteLocaux } from "@/lib/metier/dates";
 import { joursVersTexte, premiersPointages, regleEnConflit, texteVersJours, type RegleHoraire } from "@/lib/metier/horaire-dynamique";
 import type { DonneesHoraireDynamique } from "@/lib/metier/planning-jour";
@@ -31,16 +31,25 @@ const versRegle = ({ joursSemaine, ...regle }: { joursSemaine: string } & Omit<R
 /** Règles triées par heure de début, avec le nom du profil appliqué. */
 export async function listerRegles(): Promise<RegleHoraireListe[]> {
   const lignes = await obtenirBase()
-    .select({ ...colonnesRegle, profilNom: profilsHoraires.nom, profilCode: profilsHoraires.code })
+    .select({ ...colonnesRegle, profilNom: profilsHoraires.nom, profilCode: profilsHoraires.code, couleur: reglesHoraires.couleur })
     .from(reglesHoraires)
     .innerJoin(profilsHoraires, eq(profilsHoraires.id, reglesHoraires.profilId))
     .orderBy(asc(reglesHoraires.debutMinutes), asc(reglesHoraires.finMinutes))
     .limit(LIMITE_LISTE_PROGRAMME);
-  return lignes.map(({ profilNom, profilCode, ...ligne }) => {
+  return lignes.map(({ profilNom, profilCode, couleur, ...ligne }) => {
     const regle = versRegle(ligne);
     const nom = TEXTES_HORAIRE_DYNAMIQUE.nomRegle(minutesVersHeure(regle.debut), minutesVersHeure(regle.fin), profilNom);
-    return { ...regle, nom, profilNom, profilCode };
+    return { ...regle, nom, profilNom, profilCode, couleur: lireCouleurRegle(couleur) };
   });
+}
+
+/** Couleur lue en base, ramenée à la palette (la contrainte `check` la garantit déjà). */
+const lireCouleurRegle = (valeur: string): CouleurRegle => COULEURS_REGLE.find((couleur) => couleur === valeur) ?? COULEUR_REGLE_DEFAUT;
+
+/** Couleur de chaque règle, par identifiant (pastilles du rapport des présences). */
+export async function couleursDesRegles(): Promise<Map<string, CouleurRegle>> {
+  const lignes = await obtenirBase().select({ id: reglesHoraires.id, couleur: reglesHoraires.couleur }).from(reglesHoraires);
+  return new Map(lignes.map((ligne) => [ligne.id, lireCouleurRegle(ligne.couleur)]));
 }
 
 /**
@@ -76,6 +85,7 @@ export async function enregistrerRegle(id: string | null, donnees: DonneesRegleH
       joursSemaine: joursVersTexte(donnees.jours),
       profilId: donnees.profilId,
       estActif: donnees.estActif,
+      couleur: donnees.couleur,
     };
     if (id) await transaction.update(reglesHoraires).set(valeurs).where(eq(reglesHoraires.id, id));
     else await transaction.insert(reglesHoraires).values({ id: idRegle, ...valeurs });

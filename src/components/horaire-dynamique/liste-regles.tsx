@@ -1,13 +1,13 @@
 "use client";
 
-import { CalendarClock, ClockArrowUp, TriangleAlert } from "lucide-react";
+import { ClockArrowUp, TriangleAlert } from "lucide-react";
 import { supprimerRegle } from "@/app/(connecte)/programme/horaire-dynamique/actions";
 import { GestionListe, type ColonneListe } from "@/components/liste/gestion-liste";
 import type { OptionSelection } from "@/components/ui/champ-selection";
-import { Pastille } from "@/components/ui/pastille";
 import { minutesVersHeure } from "@/lib/metier/programme";
 import { TEXTES_HORAIRE_DYNAMIQUE as textes } from "@/lib/textes/horaire-dynamique";
 import type { RegleHoraireListe } from "@/types";
+import { PastilleRegle } from "./couleur-regle";
 import { FormulaireRegle } from "./formulaire-regle";
 import { InterrupteurRegle } from "./interrupteur-regle";
 import { JoursSemaine } from "./jours-semaine";
@@ -19,11 +19,7 @@ const COLONNES: ColonneListe<RegleHoraireListe>[] = [
   },
   {
     titre: textes.colonnes.profil,
-    rendu: (regle) => (
-      <Pastille Icone={CalendarClock}>
-        <span className="font-mono">{regle.profilCode}</span> {regle.profilNom}
-      </Pastille>
-    ),
+    rendu: (regle) => <PastilleRegle couleur={regle.couleur} code={regle.profilCode} nom={regle.profilNom} />,
   },
   { titre: textes.colonnes.jours, estSecondaire: true, rendu: (regle) => <JoursSemaine jours={regle.jours} /> },
   { titre: textes.colonnes.etat, rendu: (regle) => <InterrupteurRegle id={regle.id} estActif={regle.estActif} /> },
