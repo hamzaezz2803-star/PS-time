@@ -2,104 +2,103 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useState, type PointerEvent } from "react";
 import { ChevronDown } from "lucide-react";
 import { useMenuDeroulant } from "@/components/ui/utiliser-menu-deroulant";
 import type { Droits } from "@/lib/metier/droits";
 import { TEXTES_NAVIGATION } from "@/lib/textes/navigation";
 import { cn } from "@/lib/utils";
 import { estLienActif, menusVisibles, type MenuNavigation } from "./navigation";
+import { PanneauMenu } from "./panneau-menu";
 import { TiroirNavigation } from "./tiroir-navigation";
 
 // Entrée active : texte en gras et trait sous l'entrée (jamais la couleur seule).
+// Le fond de survol est un repère unique qui glisse d'une entrée à l'autre (voir BarreNavigation).
 const ENTREE =
-  "relative flex h-10 items-center gap-2 rounded-lg px-3 text-sm font-medium text-texte-secondaire transition-colors duration-150 hover:bg-canevas hover:text-texte focus-visible:outline-2 focus-visible:outline-primaire";
+  "relative flex h-10 items-center gap-2 whitespace-nowrap rounded-lg px-3 text-sm font-medium text-texte-secondaire transition-colors duration-150 hover:text-texte focus-visible:outline-2 focus-visible:outline-primaire";
 const ENTREE_ACTIVE =
   "font-semibold text-marine after:absolute after:inset-x-3 after:-bottom-[13px] after:h-0.5 after:rounded-full after:bg-primaire";
-const LIEN_SOUS_MENU =
-  "flex min-h-10 items-center gap-3 rounded-md px-3 text-sm text-texte transition-colors duration-150 hover:bg-canevas focus-visible:outline-2 focus-visible:outline-primaire";
 
-function MenuDeroulant({ menu, chemin }: { menu: MenuNavigation; chemin: string }) {
-  const { estOuvert, basculer, fermer, conteneur } = useMenuDeroulant();
+/** Vrai pour une souris : au doigt, le menu s'ouvre seulement au toucher (sinon il s'ouvrirait puis se refermerait). */
+const estSouris = (evenement: PointerEvent) => evenement.pointerType === "mouse";
+
+function MenuDeroulant({ menu, chemin, alignerAFin }: { menu: MenuNavigation; chemin: string; alignerAFin: boolean }) {
+  const { estOuvert, ouvrir, basculer, fermer, conteneur } = useMenuDeroulant();
   const sections = menu.sections ?? [];
   const contientPageActive = sections.some((section) => section.liens.some((lien) => estLienActif(lien.href, chemin)));
   const idPanneau = `menu-${menu.libelle}`;
   const Icone = menu.icone;
 
   return (
-    <div ref={conteneur} className="relative">
+    <div
+      ref={conteneur}
+      className="relative"
+      onPointerEnter={(evenement) => estSouris(evenement) && ouvrir()}
+      onPointerLeave={(evenement) => estSouris(evenement) && fermer()}
+    >
       <button
         type="button"
         onClick={basculer}
         aria-expanded={estOuvert}
         aria-controls={idPanneau}
-        className={cn(ENTREE, contientPageActive && ENTREE_ACTIVE, estOuvert && "bg-canevas text-texte")}
+        className={cn(ENTREE, contientPageActive && ENTREE_ACTIVE, estOuvert && "text-texte")}
       >
         <Icone className="hidden size-4 shrink-0 xl:block" aria-hidden="true" />
         {menu.libelle}
         <ChevronDown
-          className={cn("size-4 shrink-0 transition-transform duration-150 motion-reduce:transition-none", estOuvert && "rotate-180")}
+          className={cn("size-4 shrink-0 transition-transform duration-200 motion-reduce:transition-none", estOuvert && "rotate-180")}
           aria-hidden="true"
         />
       </button>
-      {estOuvert && (
-        <div
-          id={idPanneau}
-          className="absolute start-0 top-full z-40 mt-2 flex w-72 animate-apparition flex-col gap-1 rounded-xl bg-surface p-2 shadow-flottant ring-1 ring-bordure motion-reduce:animate-none"
-        >
-          {sections.map((section, rang) => (
-            <div key={section.titre ?? rang} className={cn("flex flex-col gap-0.5", rang > 0 && "border-t border-bordure pt-1")}>
-              {section.titre && (
-                <p className="px-3 pb-1 pt-2 text-sm font-semibold uppercase tracking-wider text-texte-secondaire">{section.titre}</p>
-              )}
-              <ul className="flex flex-col gap-0.5">
-                {section.liens.map((lien) => {
-                  const estActif = estLienActif(lien.href, chemin);
-                  const IconeLien = lien.icone;
-                  return (
-                    <li key={lien.href}>
-                      <Link
-                        href={lien.href}
-                        onClick={fermer}
-                        aria-current={estActif ? "page" : undefined}
-                        className={cn(LIEN_SOUS_MENU, estActif && "bg-ciel font-semibold text-marine")}
-                      >
-                        <IconeLien className={cn("size-4 shrink-0", estActif ? "text-primaire" : "text-texte-secondaire")} aria-hidden="true" />
-                        <span className="flex-1">{lien.libelle}</span>
-                        {estActif && <span className="size-1.5 rounded-full bg-primaire" aria-hidden="true" />}
-                      </Link>
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
-          ))}
-        </div>
-      )}
+      {estOuvert && <PanneauMenu id={idPanneau} sections={sections} chemin={chemin} alignerAFin={alignerAFin} onChoisir={fermer} />}
     </div>
   );
 }
+
+type Repere = { gauche: number; largeur: number };
 
 /** Barre de navigation (ordinateur) et tiroir (mobile), limités aux pages accordées au compte. */
 export function BarreNavigation({ droits }: { droits: Droits }) {
   const chemin = usePathname();
   const menus = menusVisibles(droits);
+  const [repere, setRepere] = useState<Repere | null>(null);
+  const [estRepereVisible, setEstRepereVisible] = useState(false);
+
+  const survoler = (evenement: PointerEvent<HTMLLIElement>) => {
+    if (!estSouris(evenement)) return;
+    const entree = evenement.currentTarget;
+    setRepere({ gauche: entree.offsetLeft, largeur: entree.offsetWidth });
+    setEstRepereVisible(true);
+  };
 
   return (
     <>
       <nav aria-label={TEXTES_NAVIGATION.menuPrincipal} className="hidden lg:block">
-        <ul className="flex items-center gap-1">
-          {menus.map((menu) => {
+        <ul className="relative flex items-center gap-1" onPointerLeave={() => setEstRepereVisible(false)}>
+          {repere && (
+            <span
+              aria-hidden="true"
+              className={cn(
+                "pointer-events-none absolute start-0 top-1/2 h-10 rounded-lg bg-primaire/10 transition-[transform,width,opacity] duration-200 ease-out motion-reduce:transition-none",
+                estRepereVisible ? "opacity-100" : "opacity-0",
+              )}
+              style={{ width: repere.largeur, transform: `translate(${repere.gauche}px, -50%)` }}
+            />
+          )}
+          {menus.map((menu, rang) => {
+            // Les derniers menus s'ouvrent vers la gauche pour ne pas sortir de l'écran.
+            const alignerAFin = rang >= menus.length - 2;
             if (!menu.href) {
               return (
-                <li key={menu.libelle}>
-                  <MenuDeroulant menu={menu} chemin={chemin} />
+                <li key={menu.libelle} onPointerEnter={survoler}>
+                  <MenuDeroulant menu={menu} chemin={chemin} alignerAFin={alignerAFin} />
                 </li>
               );
             }
             const estActif = chemin === menu.href;
             const Icone = menu.icone;
             return (
-              <li key={menu.libelle}>
+              <li key={menu.libelle} onPointerEnter={survoler}>
                 <Link href={menu.href} aria-current={estActif ? "page" : undefined} className={cn(ENTREE, estActif && ENTREE_ACTIVE)}>
                   <Icone className="hidden size-4 shrink-0 xl:block" aria-hidden="true" />
                   {menu.libelle}
