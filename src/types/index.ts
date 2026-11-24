@@ -313,6 +313,9 @@ export type VersionCompteur = {
 /** Valeur d'un compteur prête à afficher : un nombre, ou le message expliquant pourquoi il n'y en a pas. */
 export type ValeurAffichee = { idCompteur: string; valeur: number | null; message: string | null };
 
+/** Un jour du Détail jour : résumé (horaire, entrée, sortie, événement retenu) et compteurs journaliers. */
+export type JourDetail = import("@/lib/metier/resume-jour").ResumeJour & { valeurs: ValeurAffichee[] };
+
 /** Tout ce que montre l'écran Détail jour pour un employé et une date. */
 export type DetailJour = {
   date: string;
@@ -346,7 +349,10 @@ export type DetailJour = {
   valeurs: Record<"JOUR" | "SEMAINE" | "MOIS", ValeurAffichee[]>;
   periodes: Record<"JOUR" | "SEMAINE" | "MOIS", { debut: string; fin: string; finCalcul: string }>;
   /** Valeurs journalières des jours précédents (le plus ancien d'abord), date comprise. */
-  historique: { jour: string; valeurs: ValeurAffichee[] }[];
+  /** Chaque jour chargé (historique, semaine et mois de la date), du plus ancien au plus récent. */
+  jours: JourDetail[];
+  /** Premier jour de l'historique journalier (les jours avant servent à la semaine et au mois). */
+  debutHistorique: string;
 };
 
 /** Ligne du Rapport des présences : premier pointage d'un employé un jour donné, et horaire reconnu. */

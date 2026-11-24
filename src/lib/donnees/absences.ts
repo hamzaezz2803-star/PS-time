@@ -5,6 +5,7 @@ import { FUSEAU_HORAIRE } from "@/lib/constantes";
 import { jourDansFuseau } from "@/lib/metier/dates";
 import { saisiesSeChevauchent, type EvenementCandidat, type SaisieEvenement } from "@/lib/metier/evenements";
 import { motifContient } from "@/lib/metier/recherche";
+import type { EvenementPeriode } from "@/lib/metier/resume-jour";
 import type { DonneesAbsences, RechercheAbsences } from "@/lib/validation/absence";
 import type { AbsenceListe, EvenementDuJour, EvenementSaisissable } from "@/types";
 import { obtenirBase } from "./base";
@@ -194,6 +195,25 @@ export async function evenementsEnJourneesDeLaPeriode(debut: string, fin: string
     .from(evenementsEmployes)
     .innerJoin(evenements, eq(evenements.id, evenementsEmployes.evenementId))
     .where(and(isNull(evenementsEmployes.debutMinutes), lte(evenementsEmployes.dateDebut, fin), gte(evenementsEmployes.dateFin, debut)))
+    .orderBy(asc(evenements.code));
+  return lignes.map((ligne) => ({ ...ligne, type: typeEvenement(ligne.type) }));
+}
+
+/** Événements en journées entières d'un employé qui touchent la période (Détail jour), par code. */
+export async function evenementsEnJourneesDeLEmploye(employeId: string, debut: string, fin: string): Promise<EvenementPeriode[]> {
+  const lignes = await obtenirBase()
+    .select({
+      code: evenements.code,
+      nom: evenements.nom,
+      type: evenements.type,
+      priorite: evenements.priorite,
+      neutralisePointage: evenements.estPrioritaireSurPointages,
+      debut: evenementsEmployes.dateDebut,
+      fin: evenementsEmployes.dateFin,
+    })
+    .from(evenementsEmployes)
+    .innerJoin(evenements, eq(evenements.id, evenementsEmployes.evenementId))
+    .where(and(eq(evenementsEmployes.employeId, employeId), isNull(evenementsEmployes.debutMinutes), lte(evenementsEmployes.dateDebut, fin), gte(evenementsEmployes.dateFin, debut)))
     .orderBy(asc(evenements.code));
   return lignes.map((ligne) => ({ ...ligne, type: typeEvenement(ligne.type) }));
 }

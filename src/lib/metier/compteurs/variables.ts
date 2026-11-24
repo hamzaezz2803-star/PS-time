@@ -67,7 +67,7 @@ export function horaireDuProfil(profil: ProfilHoraire): HorairePrevu | null {
 const partiePositive = (valeur: number) => Math.max(0, valeur);
 
 /** Entrée et sortie retenues ; un profil non badgé est considéré présent aux heures prévues. */
-function entreeSortie({ horaire, pointages }: JourService): { entree: number | null; sortie: number | null } {
+export function entreeSortie({ horaire, pointages }: JourService): { entree: number | null; sortie: number | null } {
   if (horaire && !horaire.estBadge) return { entree: horaire.debutPrevu, sortie: horaire.finPrevue };
   const tries = [...pointages].sort((a, b) => a - b);
   const entree = tries[0] ?? null;
