@@ -30,7 +30,9 @@ export function ChoixCartes<V extends string>({
           <label
             key={option}
             className={cn(
-              "flex min-h-12 cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 text-base font-medium transition-colors duration-150 has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-primaire",
+              // `relative` : le bouton radio masqué (position absolue) reste dans sa carte ; sinon le
+              // navigateur fait défiler la fenêtre modale (overflow-hidden) pour l'atteindre et la vide.
+              "relative flex min-h-12 cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 text-base font-medium transition-colors duration-150 has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-primaire",
               valeur === option ? "border-primaire bg-ciel text-marine" : "border-bordure-champ bg-surface text-texte hover:bg-fond",
             )}
           >
