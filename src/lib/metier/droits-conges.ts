@@ -9,6 +9,8 @@
  *   en jours, chaque jour d'absence en journée entière vaut 1 (0 un jour de repos du planning) ;
  *   en heures, il vaut la durée prévue par le planning, et une absence saisie en heures compte ses heures ;
  * - « pris » (consommé) : jours passés, aujourd'hui compris ; « prévus » : jours à venir déjà saisis ;
+ * - un jour où l'événement n'est pas retenu (maladie plus prioritaire, pointage : voir
+ *   evenementRetenu) vaut 0 : le congé reste « non validé » ce jour-là ;
  * - droit provisoire (non confirmé) : rien n'est encore utilisable (disponible = 0) ;
  * - report : le solde prévisionnel positif d'un droit avec « Report » s'ajoute au droit suivant du
  *   même employé et du même événement, s'il est dans la même unité.

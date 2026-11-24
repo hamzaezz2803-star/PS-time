@@ -3,8 +3,9 @@ import "server-only";
 import { and, asc, count, desc, eq, gte, inArray, isNull, like, lte, or, type SQL } from "drizzle-orm";
 import { FUSEAU_HORAIRE } from "@/lib/constantes";
 import { jourDansFuseau } from "@/lib/metier/dates";
-import { saisiesSeChevauchent, type SaisieEvenement } from "@/lib/metier/evenements";
+import { saisiesSeChevauchent, type EvenementCandidat, type SaisieEvenement } from "@/lib/metier/evenements";
 import { motifContient } from "@/lib/metier/recherche";
+import type { EvenementPeriode } from "@/lib/metier/resume-jour";
 import type { DonneesAbsences, RechercheAbsences } from "@/lib/validation/absence";
 import type { AbsenceListe, EvenementDuJour, EvenementSaisissable } from "@/types";
 import { obtenirBase } from "./base";
@@ -84,7 +85,8 @@ export type ResultatEnregistrement =
 
 /**
  * Attribue l'événement à chaque employé, dans une transaction qui verrouille les employés :
- * deux saisies simultanées ne peuvent pas créer de chevauchement. Les règles de l'événement
+ * deux saisies simultanées ne peuvent pas créer de chevauchement du même événement (deux
+ * événements différents le même jour sont permis : la priorité les départage). Les règles de l'événement
  * (affiché dans le planning, saisie en heures) sont revérifiées ici.
  */
 export async function enregistrerAbsences(donnees: DonneesAbsences, saisiPar: string): Promise<ResultatEnregistrement> {
@@ -113,7 +115,7 @@ export async function enregistrerAbsences(donnees: DonneesAbsences, saisiPar: st
         finMinutes: evenementsEmployes.finMinutes,
       })
       .from(evenementsEmployes)
-      .where(and(inArray(evenementsEmployes.employeId, donnees.employeIds), lte(evenementsEmployes.dateDebut, saisie.fin), gte(evenementsEmployes.dateFin, saisie.debut)));
+      .where(and(inArray(evenementsEmployes.employeId, donnees.employeIds), eq(evenementsEmployes.evenementId, donnees.evenementId), lte(evenementsEmployes.dateDebut, saisie.fin), gte(evenementsEmployes.dateFin, saisie.debut)));
     const enConflit = new Set(existantes.filter((existante) => saisiesSeChevauchent(existante, saisie)).map((existante) => existante.employeId));
     if (enConflit.size > 0) {
       return { ok: false, erreur: "chevauchement", noms: concernes.filter((employe) => enConflit.has(employe.id)).map((employe) => `${employe.prenom} ${employe.nom}`) };
@@ -154,12 +156,14 @@ export async function evenementEstUtilise(evenementId: string): Promise<boolean>
 }
 
 /** Événements d'un employé qui touchent ce jour (journées entières ou heures), dans l'ordre de la journée. */
-export async function evenementsDuJour(employeId: string, jour: string): Promise<EvenementDuJour[]> {
+export async function evenementsDuJour(employeId: string, jour: string): Promise<Omit<EvenementDuJour, "estValide">[]> {
   const lignes = await obtenirBase()
     .select({
       code: evenements.code,
       nom: evenements.nom,
       type: evenements.type,
+      priorite: evenements.priorite,
+      neutralisePointage: evenements.estPrioritaireSurPointages,
       debut: evenementsEmployes.dateDebut,
       fin: evenementsEmployes.dateFin,
       debutMinutes: evenementsEmployes.debutMinutes,
@@ -169,18 +173,22 @@ export async function evenementsDuJour(employeId: string, jour: string): Promise
     .from(evenementsEmployes)
     .innerJoin(evenements, eq(evenements.id, evenementsEmployes.evenementId))
     .where(and(eq(evenementsEmployes.employeId, employeId), lte(evenementsEmployes.dateDebut, jour), gte(evenementsEmployes.dateFin, jour)))
-    .orderBy(asc(evenementsEmployes.debutMinutes));
+    .orderBy(asc(evenementsEmployes.debutMinutes), asc(evenements.code));
   return lignes.map((ligne) => ({ ...ligne, type: typeEvenement(ligne.type) }));
 }
 
-export type JourneesEvenement = SaisieEvenement & { employeId: string; type: "absence" | "presence" };
+export type JourneesEvenement = SaisieEvenement & EvenementCandidat & { employeId: string; code: string; nom: string; type: "absence" | "presence" };
 
 /** Événements en journées entières qui touchent la période, pour tous les employés (statistiques). */
 export async function evenementsEnJourneesDeLaPeriode(debut: string, fin: string): Promise<JourneesEvenement[]> {
   const lignes = await obtenirBase()
     .select({
       employeId: evenementsEmployes.employeId,
+      code: evenements.code,
+      nom: evenements.nom,
       type: evenements.type,
+      priorite: evenements.priorite,
+      neutralisePointage: evenements.estPrioritaireSurPointages,
       debut: evenementsEmployes.dateDebut,
       fin: evenementsEmployes.dateFin,
       debutMinutes: evenementsEmployes.debutMinutes,
@@ -188,6 +196,26 @@ export async function evenementsEnJourneesDeLaPeriode(debut: string, fin: string
     })
     .from(evenementsEmployes)
     .innerJoin(evenements, eq(evenements.id, evenementsEmployes.evenementId))
-    .where(and(isNull(evenementsEmployes.debutMinutes), lte(evenementsEmployes.dateDebut, fin), gte(evenementsEmployes.dateFin, debut)));
+    .where(and(isNull(evenementsEmployes.debutMinutes), lte(evenementsEmployes.dateDebut, fin), gte(evenementsEmployes.dateFin, debut)))
+    .orderBy(asc(evenements.code));
+  return lignes.map((ligne) => ({ ...ligne, type: typeEvenement(ligne.type) }));
+}
+
+/** Événements en journées entières d'un employé qui touchent la période (Détail jour), par code. */
+export async function evenementsEnJourneesDeLEmploye(employeId: string, debut: string, fin: string): Promise<EvenementPeriode[]> {
+  const lignes = await obtenirBase()
+    .select({
+      code: evenements.code,
+      nom: evenements.nom,
+      type: evenements.type,
+      priorite: evenements.priorite,
+      neutralisePointage: evenements.estPrioritaireSurPointages,
+      debut: evenementsEmployes.dateDebut,
+      fin: evenementsEmployes.dateFin,
+    })
+    .from(evenementsEmployes)
+    .innerJoin(evenements, eq(evenements.id, evenementsEmployes.evenementId))
+    .where(and(eq(evenementsEmployes.employeId, employeId), isNull(evenementsEmployes.debutMinutes), lte(evenementsEmployes.dateDebut, fin), gte(evenementsEmployes.dateFin, debut)))
+    .orderBy(asc(evenements.code));
   return lignes.map((ligne) => ({ ...ligne, type: typeEvenement(ligne.type) }));
 }

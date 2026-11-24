@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import Link from "next/link";
 import { CircleAlert, Gauge, TrendingDown, TrendingUp, Equal } from "lucide-react";
 import { CHEMIN_COMPTEURS } from "@/lib/constantes";
@@ -7,6 +8,7 @@ import { PERIODICITES, type Periodicite } from "@/lib/metier/compteurs/periodes"
 import { TEXTES_DETAIL_JOUR } from "@/lib/textes/detail-jour";
 import type { Compteur, DetailJour, ValeurAffichee } from "@/types";
 import { Carte } from "./cartes-jour";
+import { DetailPeriode } from "./detail-periode";
 
 const textes = TEXTES_DETAIL_JOUR.compteurs;
 const JOURS_TENDANCE = 7;
@@ -46,10 +48,10 @@ function EcartVeille({ compteur, valeur, veille }: { compteur: Compteur; valeur:
   );
 }
 
-function CarteValeur({ compteur, valeur, points }: { compteur: Compteur; valeur: ValeurAffichee; points?: { jour: string; valeur: number | null }[] }) {
+function CarteValeur({ compteur, valeur, points, detail }: { compteur: Compteur; valeur: ValeurAffichee; points?: { jour: string; valeur: number | null }[]; detail?: ReactNode }) {
   const veille = points && points.length >= 2 ? points[points.length - 2].valeur : null;
   return (
-    <article className="flex w-60 shrink-0 snap-start flex-col gap-2 rounded-lg border border-bordure bg-surface p-4">
+    <article className={`relative flex w-60 shrink-0 snap-start flex-col gap-2 rounded-lg border border-bordure bg-surface p-4${detail ? " transition-colors duration-150 hover:border-primaire hover:bg-ciel/40" : ""}`}>
       <h4 className="text-sm font-medium text-texte-secondaire">{compteur.nom}</h4>
       {valeur.valeur !== null ? (
         <p className="text-2xl font-semibold text-marine tabular-nums">{formaterValeur(valeur.valeur, compteur.unite)}</p>
@@ -64,6 +66,7 @@ function CarteValeur({ compteur, valeur, points }: { compteur: Compteur; valeur:
       )}
       {valeur.valeur !== null && <EcartVeille compteur={compteur} valeur={valeur.valeur} veille={veille} />}
       {points && <Tendance compteur={compteur} points={points} />}
+      {detail}
       <p className="mt-auto truncate border-t border-bordure pt-2 font-mono text-sm text-texte-secondaire" title={compteur.formule}>
         <span className="sr-only">{textes.formule} : </span>
         {compteur.formule}
@@ -72,9 +75,9 @@ function CarteValeur({ compteur, valeur, points }: { compteur: Compteur; valeur:
   );
 }
 
-/** Points de tendance d'un compteur journalier : les 7 derniers jours de l'historique. */
+/** Points de tendance d'un compteur journalier : les 7 derniers jours jusqu'à la date affichée. */
 function pointsTendance(detail: DetailJour, idCompteur: string) {
-  return detail.historique.slice(-JOURS_TENDANCE).map((jour) => ({
+  return detail.jours.filter((jour) => jour.jour <= detail.date).slice(-JOURS_TENDANCE).map((jour) => ({
     jour: jour.jour,
     valeur: jour.valeurs.find((valeur) => valeur.idCompteur === idCompteur)?.valeur ?? null,
   }));
@@ -99,9 +102,17 @@ function GroupePeriode({ detail, periodicite }: { detail: DetailJour; periodicit
         <div className="relative -mx-1 flex snap-x gap-3 overflow-x-auto px-1 pb-2" tabIndex={0} role="group" aria-label={textes.periodes[periodicite]}>
           {valeurs.map((valeur) => {
             const compteur = detail.compteurs.find((element) => element.id === valeur.idCompteur);
-            return compteur ? (
-              <CarteValeur key={valeur.idCompteur} compteur={compteur} valeur={valeur} points={periodicite === "JOUR" ? pointsTendance(detail, compteur.id) : undefined} />
-            ) : null;
+            if (!compteur) return null;
+            if (periodicite === "JOUR") return <CarteValeur key={valeur.idCompteur} compteur={compteur} valeur={valeur} points={pointsTendance(detail, compteur.id)} />;
+            const jours = detail.jours.filter((jour) => jour.jour >= periode.debut && jour.jour <= periode.finCalcul);
+            return (
+              <CarteValeur
+                key={valeur.idCompteur}
+                compteur={compteur}
+                valeur={valeur}
+                detail={<DetailPeriode compteur={compteur} valeur={valeur} periode={sousTitre} jours={jours} finCalcul={periode.finCalcul} />}
+              />
+            );
           })}
         </div>
       )}

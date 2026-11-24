@@ -6,6 +6,7 @@ import type { SaisieEvenement } from "@/lib/metier/evenements";
 import { planningDuJour } from "@/lib/metier/planning-jour";
 import { theoriqueMinutes } from "@/lib/metier/profil-horaire";
 import { obtenirBase } from "./base";
+import { chargerConcurrence } from "./droits-conges-concurrence";
 import { chargerPlanning, groupesDesEmployes } from "./planning";
 import { droitsConges, evenementsEmployes } from "./schema";
 
@@ -133,7 +134,14 @@ export type BilanCalcule = BilanDroit & { absences: { saisie: AbsenceSaisie; pri
 export async function calculerSoldes(droits: readonly DroitACalculer[], aujourdhui: string, ajout?: Ajout): Promise<BilanCalcule[]> {
   if (droits.length === 0) return [];
   const suites = await chargerSuites(droits);
-  const [absences, valeurJour] = await Promise.all([chargerAbsences(suites), chargerValeursJour(suites.map((droit) => droit.employeId))]);
+  const employeIds = [...new Set(suites.map((droit) => droit.employeId))];
+  const debut = suites.reduce((min, droit) => (droit.debut < min ? droit.debut : min), suites[0].debut);
+  const fin = suites.reduce((max, droit) => (droit.fin > max ? droit.fin : max), suites[0].fin);
+  const [absences, valeurJour, estRetenu] = await Promise.all([
+    chargerAbsences(suites),
+    chargerValeursJour(employeIds),
+    chargerConcurrence(employeIds, debut, fin, aujourdhui, ajout),
+  ]);
 
   const bilan = (droit: DroitACalculer, report: number): BilanCalcule => {
     const siennes = absences.filter((absence) => absence.employeId === droit.employeId && absence.evenementId === droit.evenementId);
@@ -141,7 +149,9 @@ export async function calculerSoldes(droits: readonly DroitACalculer[], aujourdh
       siennes.push({ ...ajout.saisie, id: "", employeId: droit.employeId, evenementId: droit.evenementId, remarque: null });
     }
     const periode = periodeDe(droit, report);
-    return bilanDroit(periode, siennes, aujourdhui, valeurJour(droit.employeId, periode.unite));
+    const valeur = valeurJour(droit.employeId, periode.unite);
+    // Un jour où l'événement n'est pas retenu (maladie plus prioritaire, pointage) ne consomme rien.
+    return bilanDroit(periode, siennes, aujourdhui, (jour) => (estRetenu(droit.employeId, droit.evenementId, jour) ? valeur(jour) : 0));
   };
 
   const reports = calculerReports(

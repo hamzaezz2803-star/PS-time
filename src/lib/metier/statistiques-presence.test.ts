@@ -7,6 +7,9 @@ import {
   cumulerBilans,
   estEnPoste,
   evenementDuJour,
+  joursParEvenement,
+  parJourDeSemaine,
+  rangJourSemaine,
   presenceParDepartement,
   statutDuJour,
   tauxPresence,
@@ -110,8 +113,9 @@ describe("arriveesParHeure", () => {
 });
 
 describe("absences et événements", () => {
-  const conge = [{ debut: "2026-11-16", fin: "2026-11-20", type: "absence" as const }];
-  const formation = [{ debut: JOUR, fin: JOUR, type: "presence" as const }];
+  const regles = { priorite: 10, neutralisePointage: false };
+  const conge = [{ ...regles, debut: "2026-11-16", fin: "2026-11-20", type: "absence" as const }];
+  const formation = [{ ...regles, debut: JOUR, fin: JOUR, type: "presence" as const }];
 
   it("trouve l'événement qui couvre le jour", () => {
     assert.equal(evenementDuJour({ evenements: conge }, JOUR), "absence");
@@ -119,10 +123,18 @@ describe("absences et événements", () => {
     assert.equal(evenementDuJour({}, JOUR), null);
   });
 
-  it("justifie une absence, compte présent une formation, et laisse les pointages passer avant", () => {
+  it("laisse le pointage l'emporter, sauf sur un événement qui neutralise le pointage", () => {
+    assert.equal(evenementDuJour({ evenements: conge }, JOUR, true), null);
+    assert.equal(evenementDuJour({ evenements: [{ ...conge[0], neutralisePointage: true }] }, JOUR, true), "absence");
+    // Formation (priorité 10) et maladie (priorité 50) le même jour : la maladie l'emporte.
+    const maladie = { ...regles, priorite: 50, debut: JOUR, fin: JOUR, type: "absence" as const };
+    assert.equal(evenementDuJour({ evenements: [...formation, maladie] }, JOUR), "absence");
+  });
+
+  it("justifie une absence retenue et compte présent une formation", () => {
     assert.equal(statutDuJour(journee([]), MIDI, "absence"), "justifie");
     assert.equal(statutDuJour(journee([]), MIDI, "presence"), "a_l_heure");
-    assert.equal(statutDuJour(journee([495, 1020]), MIDI, "absence"), "en_retard");
+    assert.equal(statutDuJour(journee([495, 1020]), MIDI, null), "en_retard");
     assert.equal(statutDuJour(journee([], null), MIDI, "absence"), "sans_horaire");
     // Connue d'avance : jamais « pas encore arrivé ».
     assert.equal(statutDuJour(journee([]), { jour: JOUR, minute: 420 }, "absence"), "justifie");
@@ -139,5 +151,28 @@ describe("absences et événements", () => {
     assert.deepEqual({ aLHeure: bilan.aLHeure, absents: bilan.absents, justifies: bilan.justifies }, { aLHeure: 2, absents: 1, justifies: 1 });
     assert.equal(tauxPresence(bilan), 66.7);
     assert.deepEqual(presenceParDepartement(equipe, MIDI), [{ departement: "Atelier", prevus: 3, presents: 2, taux: 66.7 }]);
+  });
+});
+
+describe("graphiques supplémentaires", () => {
+  it("cumule retards et absences par jour de la semaine", () => {
+    const bilan = (jour: string, enRetard: number, absents: number) => ({ ...bilanDuJour([], jour, MIDI), enRetard, absents, minutesRetard: enRetard * 10 });
+    // 2026-11-16 et 2026-11-23 sont des lundis, 2026-11-18 un mercredi.
+    const semaine = parJourDeSemaine([bilan("2026-11-16", 1, 0), bilan("2026-11-23", 2, 1), bilan("2026-11-18", 0, 3)]);
+    assert.deepEqual(semaine[0], { retards: 3, absents: 1, minutesRetard: 30 });
+    assert.deepEqual(semaine[2], { retards: 0, absents: 3, minutesRetard: 0 });
+    assert.equal(rangJourSemaine("2026-11-22"), 6);
+  });
+
+  it("compte les jours retenus par événement, hors repos et pointages qui l'emportent", () => {
+    const regles = { priorite: 10, neutralisePointage: false };
+    const conge = { ...regles, code: "CP", nom: "Congé payé", type: "absence" as const, debut: "2026-11-16", fin: "2026-11-20" };
+    const maladie = { ...regles, priorite: 50, code: "MAL", nom: "Maladie", type: "absence" as const, debut: JOUR, fin: JOUR };
+    const jours = [journee([], HORAIRE, "2026-11-17"), journee([]), journee([480], HORAIRE, "2026-11-19"), journee([], null, "2026-11-20")];
+    const equipe = [{ ...employe("a", "A", jours), evenements: [conge, maladie] }];
+    assert.deepEqual(joursParEvenement(equipe), [
+      { code: "CP", nom: "Congé payé", type: "absence", jours: 1 },
+      { code: "MAL", nom: "Maladie", type: "absence", jours: 1 },
+    ]);
   });
 });

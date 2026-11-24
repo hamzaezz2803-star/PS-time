@@ -47,3 +47,22 @@ export const couvreLaJournee = (saisie: SaisieEvenement, jour: string) => saisie
 
 /** Nombre de jours d'une saisie, bornes comprises (1 pour une saisie en heures). */
 export const nombreDeJours = (saisie: Pick<SaisieEvenement, "debut" | "fin">) => joursEntre(saisie.debut, saisie.fin) + 1;
+
+/** Ce qui départage les événements qui tombent le même jour. */
+export type EvenementCandidat = { priorite: number; neutralisePointage: boolean };
+
+/**
+ * Événement retenu (« validé ») un jour donné parmi ceux qui couvrent la journée entière : un
+ * pointage l'emporte sur tout événement qui ne neutralise pas le pointage ; entre événements, la
+ * plus grande priorité l'emporte (à égalité, le premier de la liste). Les autres restent « non
+ * validés » : ils ne changent pas le statut du jour et ne consomment pas de droit aux congés.
+ * Null si aucun n'est retenu.
+ */
+export function evenementRetenu<T extends EvenementCandidat>(candidats: readonly T[], aPointe: boolean): T | null {
+  let retenu: T | null = null;
+  for (const candidat of candidats) {
+    if (aPointe && !candidat.neutralisePointage) continue;
+    if (retenu === null || candidat.priorite > retenu.priorite) retenu = candidat;
+  }
+  return retenu;
+}

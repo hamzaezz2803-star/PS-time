@@ -4,12 +4,13 @@
  * Fonctions pures, testées dans statistiques-presence.test.ts.
  */
 import { variablesDuJour, type JourService } from "./compteurs/variables.ts";
+import { evenementRetenu, type EvenementCandidat } from "./evenements.ts";
 
 /** Situation d'un employé un jour donné. « justifie » : absent avec un événement d'absence (congé, maladie...). */
 export type StatutJour = "a_l_heure" | "en_retard" | "absent" | "justifie" | "attendu" | "sans_horaire";
 
 /** Événement en journées entières attribué à l'employé (Absences et événements), bornes comprises. */
-export type EvenementEnJournees = { debut: string; fin: string; type: "absence" | "presence" };
+export type EvenementEnJournees = EvenementCandidat & { debut: string; fin: string; type: "absence" | "presence"; code?: string; nom?: string };
 
 export type EmployeStatistiques = {
   id: string;
@@ -27,23 +28,37 @@ export type Maintenant = { jour: string; minute: number };
 export const estEnPoste = (employe: Pick<EmployeStatistiques, "debutEmploi" | "finEmploi">, jour: string) =>
   (employe.debutEmploi === null || employe.debutEmploi <= jour) && (employe.finEmploi === null || jour <= employe.finEmploi);
 
-/** Type de l'événement qui couvre ce jour en entier, ou null (deux saisies d'un employé ne se chevauchent jamais). */
-export function evenementDuJour(employe: Pick<EmployeStatistiques, "evenements">, jour: string): EvenementEnJournees["type"] | null {
-  return employe.evenements?.find((evenement) => evenement.debut <= jour && jour <= evenement.fin)?.type ?? null;
+/** Événement retenu ce jour-là parmi ceux qui couvrent la journée entière, ou null. */
+function evenementRetenuDuJour(employe: Pick<EmployeStatistiques, "evenements">, jour: string, aPointe: boolean): EvenementEnJournees | null {
+  const candidats = (employe.evenements ?? []).filter((evenement) => evenement.debut <= jour && jour <= evenement.fin);
+  return evenementRetenu(candidats, aPointe);
 }
+
+/**
+ * Type de l'événement retenu ce jour-là parmi ceux qui couvrent la journée entière (priorité, et
+ * pointage qui l'emporte sauf sur un événement qui neutralise le pointage), ou null.
+ */
+export function evenementDuJour(employe: Pick<EmployeStatistiques, "evenements">, jour: string, aPointe = false): EvenementEnJournees["type"] | null {
+  return evenementRetenuDuJour(employe, jour, aPointe)?.type ?? null;
+}
+
+/** Événement retenu pour une journée de service (ses pointages comptent). */
+const evenementDeLaJournee = (employe: Pick<EmployeStatistiques, "evenements">, journee: JourService) =>
+  evenementDuJour(employe, journee.jour, journee.pointages.length > 0);
 
 /**
  * Statut d'une journée : présent à l'heure ou en retard (retard d'au moins une minute), absent,
  * « attendu » (aujourd'hui, l'heure prévue d'arrivée n'est pas encore passée), ou sans horaire
- * (repos, aucun planning). Sans pointage, un événement change le statut : présence (formation,
- * mission) = présent, absence (congé, maladie) = absence justifiée. Les pointages passent avant.
+ * (repos, aucun planning). `evenement` : l'événement retenu ce jour-là (`evenementDuJour`, qui a
+ * déjà départagé pointages et priorités) : présence (formation, mission) = présent, absence (congé,
+ * maladie) = absence justifiée.
  */
 export function statutDuJour(jour: JourService, maintenant: Maintenant, evenement: EvenementEnJournees["type"] | null = null): StatutJour {
   if (!jour.horaire) return "sans_horaire";
-  const valeurs = variablesDuJour(jour);
-  if (valeurs.PRESENT === 1) return (valeurs.RETARD_MIN ?? 0) > 0 ? "en_retard" : "a_l_heure";
   if (evenement === "presence") return "a_l_heure";
   if (evenement === "absence") return "justifie";
+  const valeurs = variablesDuJour(jour);
+  if (valeurs.PRESENT === 1) return (valeurs.RETARD_MIN ?? 0) > 0 ? "en_retard" : "a_l_heure";
   return jour.jour === maintenant.jour && maintenant.minute < jour.horaire.debutPrevu ? "attendu" : "absent";
 }
 
@@ -69,7 +84,7 @@ export function bilanDuJour(employes: readonly EmployeStatistiques[], jour: stri
   const enPoste = employes.filter((employe) => estEnPoste(employe, jour));
   const journees = enPoste.flatMap((employe) => employe.jours.filter((j) => j.jour === jour));
   const statuts = enPoste.flatMap((employe) =>
-    employe.jours.filter((j) => j.jour === jour).map((journee) => statutDuJour(journee, maintenant, evenementDuJour(employe, jour))),
+    employe.jours.filter((j) => j.jour === jour).map((journee) => statutDuJour(journee, maintenant, evenementDeLaJournee(employe, journee))),
   );
   const valeurs = journees.map(variablesDuJour);
   const compter = (statut: StatutJour) => statuts.filter((s) => s === statut).length;
@@ -109,7 +124,7 @@ export function presenceParDepartement(employes: readonly EmployeStatistiques[],
   for (const employe of employes) {
     const journee = employe.jours.find((j) => j.jour === maintenant.jour);
     if (!journee || !estEnPoste(employe, maintenant.jour)) continue;
-    const statut = statutDuJour(journee, maintenant, evenementDuJour(employe, maintenant.jour));
+    const statut = statutDuJour(journee, maintenant, evenementDeLaJournee(employe, journee));
     if (statut === "sans_horaire" || statut === "attendu" || statut === "justifie") continue;
     const compte = parDepartement.get(employe.departement) ?? { aLHeure: 0, enRetard: 0, absents: 0 };
     if (statut === "a_l_heure") compte.aLHeure += 1;
@@ -137,4 +152,40 @@ export function arriveesParHeure(employes: readonly EmployeStatistiques[], jour:
   if (heures.length === 0) return [];
   const [min, max] = [Math.min(...heures), Math.max(...heures)];
   return Array.from({ length: max - min + 1 }, (_, rang) => ({ heure: min + rang, arrivees: heures.filter((heure) => heure === min + rang).length }));
+}
+
+/** Numéro du jour de la semaine (0 = lundi ... 6 = dimanche) d'un jour AAAA-MM-JJ. */
+export const rangJourSemaine = (jour: string) => (new Date(`${jour}T12:00:00Z`).getUTCDay() + 6) % 7;
+
+/** Retards et absences de la période cumulés par jour de la semaine (lundi en premier). */
+export function parJourDeSemaine(bilans: readonly BilanJour[]): { retards: number; absents: number; minutesRetard: number }[] {
+  const semaine = Array.from({ length: 7 }, () => ({ retards: 0, absents: 0, minutesRetard: 0 }));
+  for (const bilan of bilans) {
+    const cumul = semaine[rangJourSemaine(bilan.jour)];
+    cumul.retards += bilan.enRetard;
+    cumul.absents += bilan.absents;
+    cumul.minutesRetard += bilan.minutesRetard;
+  }
+  return semaine;
+}
+
+export type JoursEvenement = { code: string; nom: string; type: EvenementEnJournees["type"]; jours: number };
+
+/**
+ * Jours retenus par événement sur la période (employés en poste, jours avec horaire seulement,
+ * mêmes règles de départage que le statut du jour), du plus fréquent au moins fréquent.
+ */
+export function joursParEvenement(employes: readonly EmployeStatistiques[]): JoursEvenement[] {
+  const parCode = new Map<string, JoursEvenement>();
+  for (const employe of employes) {
+    for (const journee of employe.jours) {
+      if (!journee.horaire || !estEnPoste(employe, journee.jour)) continue;
+      const retenu = evenementRetenuDuJour(employe, journee.jour, journee.pointages.length > 0);
+      if (!retenu?.code) continue;
+      const cumul = parCode.get(retenu.code) ?? { code: retenu.code, nom: retenu.nom ?? retenu.code, type: retenu.type, jours: 0 };
+      cumul.jours += 1;
+      parCode.set(retenu.code, cumul);
+    }
+  }
+  return [...parCode.values()].sort((a, b) => b.jours - a.jours || a.code.localeCompare(b.code));
 }
