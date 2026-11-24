@@ -195,9 +195,10 @@ UPDATE employes e JOIN departements d ON d.id = e.departement_id
   WHERE e.id LIKE '00000000-0000-4000-8000-%';
 
 -- 10. Horaire dynamique : premier pointage du matin → Matin, de l'après-midi → Après-midi (lundi à vendredi).
-INSERT INTO regles_horaires (id, debut_minutes, fin_minutes, jours_semaine, profil_id, est_actif) VALUES
-  ('00000000-0000-4000-8000-000000000501', 300, 480, '12345', '00000000-0000-4000-8000-000000000402', 1),
-  ('00000000-0000-4000-8000-000000000502', 720, 900, '12345', '00000000-0000-4000-8000-000000000403', 1);
+-- Une couleur par règle : Matin en orange, Après-midi en bleu (pastilles du rapport des présences).
+INSERT INTO regles_horaires (id, debut_minutes, fin_minutes, jours_semaine, profil_id, est_actif, couleur) VALUES
+  ('00000000-0000-4000-8000-000000000501', 300, 480, '12345', '00000000-0000-4000-8000-000000000402', 1, 'orange'),
+  ('00000000-0000-4000-8000-000000000502', 720, 900, '12345', '00000000-0000-4000-8000-000000000403', 1, 'bleu');
 -- Employés en horaire dynamique : Salma Idrissi (T002, après-midi), Youssef Amrani (T003, matin),
 -- Nadia Tazi (T004, un jour le matin, un jour l'après-midi). Les autres gardent leur rotation.
 UPDATE employes SET horaire_dynamique = 1

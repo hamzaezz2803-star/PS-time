@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { CalendarClock, CircleHelp, Clock, RotateCw, SearchX } from "lucide-react";
 import { ChampRecherche } from "@/components/ui/champ-recherche";
+import { PastilleRegle } from "@/components/horaire-dynamique/couleur-regle";
 import { Pastille } from "@/components/ui/pastille";
 import { RAPPORT_LIGNES_MAX } from "@/lib/constantes";
 import { formaterJour } from "@/lib/formats";
