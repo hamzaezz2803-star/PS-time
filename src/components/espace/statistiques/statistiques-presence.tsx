@@ -4,10 +4,11 @@ import { CHEMIN_ESPACE, STATISTIQUES_EMPLOYES_MAX, STATISTIQUES_PERIODES } from 
 import type { DonneesStatistiques } from "@/lib/donnees/statistiques-presence";
 import { formaterJour, formaterJourCourt } from "@/lib/formats";
 import { formaterDuree } from "@/lib/metier/programme";
-import { arriveesParHeure, bilanDuJour, cumulerBilans, presenceParDepartement, tauxPresence } from "@/lib/metier/statistiques-presence";
+import { arriveesParHeure, bilanDuJour, cumulerBilans, joursParEvenement, parJourDeSemaine, presenceParDepartement, tauxPresence } from "@/lib/metier/statistiques-presence";
 import { TEXTES_PRESENCE } from "@/lib/textes/presence";
 import { cn } from "@/lib/utils";
 import { BarresDepartements } from "./barres-departements";
+import { BarresEvenements } from "./barres-evenements";
 import { GraphiqueColonnes } from "./graphique-colonnes";
 import { RepartitionJour } from "./repartition-jour";
 import { TuileStatistique } from "./tuile-statistique";
@@ -46,6 +47,8 @@ export function StatistiquesPresence({ donnees, periode }: { donnees: DonneesSta
   const tauxJour = tauxPresence(aujourdhui);
   const tauxPeriode = tauxPresence(cumul);
   const arrivees = arriveesParHeure(employes, maintenant.jour);
+  const semaine = parJourDeSemaine(bilans);
+  const g = textes.graphiques;
   const pourcent = (taux: number | null) => (taux === null ? textes.tuiles.sansDonnee : textes.pourcentage(taux));
   const t = textes.tuiles;
 
@@ -109,6 +112,42 @@ export function StatistiquesPresence({ donnees, periode }: { donnees: DonneesSta
         </div>
         <div className={CARTE}>
           <BarresDepartements lignes={presenceParDepartement(employes, maintenant)} />
+        </div>
+
+        <div className={cn(CARTE, "lg:col-span-2")}>
+          <GraphiqueColonnes
+            id="ecarts-jours"
+            titre={g.ecarts}
+            aide={g.ecartsAide}
+            etiquettes={jours.map(formaterJourCourt)}
+            etiquettesLongues={jours.map(formaterJour)}
+            mode="groupe"
+            unite="heures"
+            series={[
+              { cle: "retard", nom: g.retardCumule, couleur: "bg-graphe-retard", valeurs: bilans.map((b) => b.minutesRetard) },
+              { cle: "heures_sup", nom: g.heuresSup, couleur: "bg-primaire", valeurs: bilans.map((b) => b.minutesSupplementaires) },
+            ]}
+          />
+        </div>
+        <div className={CARTE}>
+          <BarresEvenements lignes={joursParEvenement(employes)} periode={periode} />
+        </div>
+
+        <div className={cn(CARTE, "lg:col-span-3")}>
+          <GraphiqueColonnes
+            id="jours-semaine"
+            titre={g.semaine}
+            aide={g.semaineAide(periode)}
+            etiquettes={[...g.joursSemaine]}
+            etiquettesLongues={[...g.joursSemaineLongs]}
+            mode="groupe"
+            unite="nombre"
+            libelleCategorie={g.jourSemaine}
+            series={[
+              { cle: "retards", nom: g.retards, couleur: "bg-graphe-retard", valeurs: semaine.map((s) => s.retards) },
+              { cle: "absents", nom: g.absents, couleur: "bg-graphe-absent", valeurs: semaine.map((s) => s.absents) },
+            ]}
+          />
         </div>
 
         <div className={cn(CARTE, "lg:col-span-3")}>

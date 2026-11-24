@@ -59,8 +59,8 @@ export async function chargerStatistiques(nombreJours: number, maintenantInstant
     evenementsEnJourneesDeLaPeriode(debut, maintenant.jour),
   ]);
   const evenementsParEmploye = new Map<string, EvenementEnJournees[]>();
-  for (const { employeId, debut: du, fin: au, type, priorite, neutralisePointage } of evenementsPeriode) {
-    evenementsParEmploye.set(employeId, [...(evenementsParEmploye.get(employeId) ?? []), { debut: du, fin: au, type, priorite, neutralisePointage }]);
+  for (const { employeId, debut: du, fin: au, code, nom, type, priorite, neutralisePointage } of evenementsPeriode) {
+    evenementsParEmploye.set(employeId, [...(evenementsParEmploye.get(employeId) ?? []), { debut: du, fin: au, code, nom, type, priorite, neutralisePointage }]);
   }
   const estTronque = lignesEmployes.length > STATISTIQUES_EMPLOYES_MAX;
   const equipe = lignesEmployes.slice(0, STATISTIQUES_EMPLOYES_MAX);
