@@ -10,7 +10,7 @@ import { evenementRetenu, type EvenementCandidat } from "./evenements.ts";
 export type StatutJour = "a_l_heure" | "en_retard" | "absent" | "justifie" | "attendu" | "sans_horaire";
 
 /** Événement en journées entières attribué à l'employé (Absences et événements), bornes comprises. */
-export type EvenementEnJournees = EvenementCandidat & { debut: string; fin: string; type: "absence" | "presence" };
+export type EvenementEnJournees = EvenementCandidat & { debut: string; fin: string; type: "absence" | "presence"; code?: string; nom?: string };
 
 export type EmployeStatistiques = {
   id: string;
@@ -28,13 +28,18 @@ export type Maintenant = { jour: string; minute: number };
 export const estEnPoste = (employe: Pick<EmployeStatistiques, "debutEmploi" | "finEmploi">, jour: string) =>
   (employe.debutEmploi === null || employe.debutEmploi <= jour) && (employe.finEmploi === null || jour <= employe.finEmploi);
 
+/** Événement retenu ce jour-là parmi ceux qui couvrent la journée entière, ou null. */
+function evenementRetenuDuJour(employe: Pick<EmployeStatistiques, "evenements">, jour: string, aPointe: boolean): EvenementEnJournees | null {
+  const candidats = (employe.evenements ?? []).filter((evenement) => evenement.debut <= jour && jour <= evenement.fin);
+  return evenementRetenu(candidats, aPointe);
+}
+
 /**
  * Type de l'événement retenu ce jour-là parmi ceux qui couvrent la journée entière (priorité, et
  * pointage qui l'emporte sauf sur un événement qui neutralise le pointage), ou null.
  */
 export function evenementDuJour(employe: Pick<EmployeStatistiques, "evenements">, jour: string, aPointe = false): EvenementEnJournees["type"] | null {
-  const candidats = (employe.evenements ?? []).filter((evenement) => evenement.debut <= jour && jour <= evenement.fin);
-  return evenementRetenu(candidats, aPointe)?.type ?? null;
+  return evenementRetenuDuJour(employe, jour, aPointe)?.type ?? null;
 }
 
 /** Événement retenu pour une journée de service (ses pointages comptent). */
@@ -147,4 +152,40 @@ export function arriveesParHeure(employes: readonly EmployeStatistiques[], jour:
   if (heures.length === 0) return [];
   const [min, max] = [Math.min(...heures), Math.max(...heures)];
   return Array.from({ length: max - min + 1 }, (_, rang) => ({ heure: min + rang, arrivees: heures.filter((heure) => heure === min + rang).length }));
+}
+
+/** Numéro du jour de la semaine (0 = lundi ... 6 = dimanche) d'un jour AAAA-MM-JJ. */
+export const rangJourSemaine = (jour: string) => (new Date(`${jour}T12:00:00Z`).getUTCDay() + 6) % 7;
+
+/** Retards et absences de la période cumulés par jour de la semaine (lundi en premier). */
+export function parJourDeSemaine(bilans: readonly BilanJour[]): { retards: number; absents: number; minutesRetard: number }[] {
+  const semaine = Array.from({ length: 7 }, () => ({ retards: 0, absents: 0, minutesRetard: 0 }));
+  for (const bilan of bilans) {
+    const cumul = semaine[rangJourSemaine(bilan.jour)];
+    cumul.retards += bilan.enRetard;
+    cumul.absents += bilan.absents;
+    cumul.minutesRetard += bilan.minutesRetard;
+  }
+  return semaine;
+}
+
+export type JoursEvenement = { code: string; nom: string; type: EvenementEnJournees["type"]; jours: number };
+
+/**
+ * Jours retenus par événement sur la période (employés en poste, jours avec horaire seulement,
+ * mêmes règles de départage que le statut du jour), du plus fréquent au moins fréquent.
+ */
+export function joursParEvenement(employes: readonly EmployeStatistiques[]): JoursEvenement[] {
+  const parCode = new Map<string, JoursEvenement>();
+  for (const employe of employes) {
+    for (const journee of employe.jours) {
+      if (!journee.horaire || !estEnPoste(employe, journee.jour)) continue;
+      const retenu = evenementRetenuDuJour(employe, journee.jour, journee.pointages.length > 0);
+      if (!retenu?.code) continue;
+      const cumul = parCode.get(retenu.code) ?? { code: retenu.code, nom: retenu.nom ?? retenu.code, type: retenu.type, jours: 0 };
+      cumul.jours += 1;
+      parCode.set(retenu.code, cumul);
+    }
+  }
+  return [...parCode.values()].sort((a, b) => b.jours - a.jours || a.code.localeCompare(b.code));
 }
