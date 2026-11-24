@@ -10,6 +10,8 @@ import { listerOptionsSites } from "@/lib/donnees/sites";
 import { TEXTES_SITES } from "@/lib/textes/sites";
 import { validerInformations, type Information } from "@/lib/metier/employes";
 import { TEXTES_PERSONNES } from "@/lib/textes/personnes";
+import type { AccesPointage } from "@/lib/metier/acces-pointage";
+import { accesVersValeurs, lireAccesPointage, validerAccesPointage } from "@/lib/validation/acces-pointage";
 import { CHAMPS_EMPLOYE, lireTexte, validerEmploye, type DonneesEmploye } from "@/lib/validation/employe";
 import type { EtatFormulaireEmploye } from "@/types";
 
@@ -46,7 +48,7 @@ async function lirePhoto(formulaire: FormData): Promise<{ ok: true; changement: 
 }
 
 type Preparation =
-  | { ok: true; donnees: DonneesEmploye; informations: Information[]; photo: ChangementPhoto; retour: EtatFormulaireEmploye }
+  | { ok: true; donnees: DonneesEmploye; acces: AccesPointage; informations: Information[]; photo: ChangementPhoto; retour: EtatFormulaireEmploye }
   | { ok: false; etat: EtatFormulaireEmploye };
 
 /**
@@ -55,14 +57,19 @@ type Preparation =
  */
 export async function preparerEmploye(formulaire: FormData): Promise<Preparation> {
   const [departements, postes, sites] = await Promise.all([listerDepartements(), listerPostes(), listerOptionsSites()]);
-  const valeurs = Object.fromEntries(CHAMPS_EMPLOYE.map((nom) => [nom, lireTexte(formulaire.get(nom))]));
+  const valeurs = {
+    ...Object.fromEntries(CHAMPS_EMPLOYE.map((nom) => [nom, lireTexte(formulaire.get(nom))])),
+    ...accesVersValeurs(lireAccesPointage(formulaire)),
+  };
   const saisieInformations = lireInformations(formulaire);
   const retour = { valeurs, informations: saisieInformations };
 
   const validation = validerEmploye(formulaire);
+  const acces = validerAccesPointage(formulaire);
   const informations = validerInformations(saisieInformations);
   const photo = await lirePhoto(formulaire);
   const erreursChamps: Record<string, string | undefined> = validation.ok ? {} : { ...validation.erreursChamps };
+  if (!acces.ok) Object.assign(erreursChamps, acces.erreursChamps);
   if (!photo.ok) erreursChamps.photo = photo.erreur;
   for (const [index, erreur] of Object.entries(informations.erreurs)) {
     if (erreur.libelle) erreursChamps[`information_${index}_libelle`] = erreurs.informations[erreur.libelle];
@@ -87,10 +94,10 @@ export async function preparerEmploye(formulaire: FormData): Promise<Preparation
       etat: { ...retour, erreursChamps, message: erreurs.tropDInformations(LIMITE_INFORMATIONS_EMPLOYE) },
     };
   }
-  if (!validation.ok || !photo.ok || Object.values(erreursChamps).some(Boolean)) {
+  if (!validation.ok || !acces.ok || !photo.ok || Object.values(erreursChamps).some(Boolean)) {
     return { ok: false, etat: { ...retour, erreursChamps } };
   }
-  return { ok: true, donnees: validation.donnees, informations: informations.informations, photo: photo.changement, retour };
+  return { ok: true, donnees: validation.donnees, acces: acces.donnees, informations: informations.informations, photo: photo.changement, retour };
 }
 
 /** Traduit une erreur d'enregistrement en état du formulaire (doublon ou échec général). */

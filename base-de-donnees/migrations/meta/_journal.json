@@ -239,6 +239,13 @@
       "when": 1795539469208,
       "tag": "0033_regles_horaires_couleur",
       "breakpoints": true
+    },
+    {
+      "idx": 34,
+      "version": "5",
+      "when": 1795540104699,
+      "tag": "0034_employes_pointage_distance_doigts",
+      "breakpoints": true
     }
   ]
 }

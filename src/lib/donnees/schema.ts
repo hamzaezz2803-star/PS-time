@@ -384,10 +384,25 @@ export const employes = mysqlTable(
     dateFinEmploi: jour("date_fin_emploi"),
     // Vrai : son horaire du jour est reconnu d'après son premier pointage (règles horaires).
     horaireDynamique: boolean("horaire_dynamique").notNull().default(false),
+    // Pointage hors badgeuse (PC, tablette, téléphone) : autorisation et conditions exigées.
+    pointageDistance: boolean("pointage_distance").notNull().default(false),
+    // Appareils autorisés, codes séparés par des virgules (ex. « pc,tablette ») ; vide si non autorisé.
+    appareilsDistance: varchar("appareils_distance", { length: 30 }).notNull().default(""),
+    distanceExigePosition: boolean("distance_exige_position").notNull().default(false),
+    distanceExigePhoto: boolean("distance_exige_photo").notNull().default(false),
+    // Doigts prévus pour l'enrôlement sur la badgeuse (chiffres 0 à 9, ex. « 56 »). Jamais d'empreinte.
+    doigtsAEnroler: varchar("doigts_a_enroler", { length: 10 }).notNull().default(""),
     creeLe: dateCreation(),
     modifieLe: dateModification(),
   },
   (table) => [
+    check("employes_appareils_distance_valides", sql`${table.appareilsDistance} REGEXP '^((pc|tablette|telephone)(,(pc|tablette|telephone)){0,2})?$'`),
+    check("employes_doigts_valides", sql`${table.doigtsAEnroler} REGEXP '^[0-9]{0,10}$'`),
+    // Sans autorisation, aucun appareil ni condition n'est gardé.
+    check(
+      "employes_distance_coherente",
+      sql`${table.pointageDistance} = 1 OR (${table.appareilsDistance} = '' AND ${table.distanceExigePosition} = 0 AND ${table.distanceExigePhoto} = 0)`,
+    ),
     uniqueIndex("employes_matricule_idx").on(table.matricule),
     uniqueIndex("employes_numero_badge_idx").on(table.numeroBadge),
     uniqueIndex("employes_piece_identite_idx").on(table.typePieceIdentite, table.numeroPieceIdentite),

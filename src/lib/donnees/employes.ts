@@ -8,6 +8,7 @@ import type { DonneesEmploye } from "@/lib/validation/employe";
 import type { EmployeDetail, EmployeListe } from "@/types";
 import { obtenirBase } from "./base";
 import type { Information } from "@/lib/metier/employes";
+import { appareilsVersTexte, doigtsVersTexte, texteVersAppareils, texteVersDoigts, type AccesPointage } from "@/lib/metier/acces-pointage";
 import { appliquerChangementPhoto, type ChangementPhoto } from "./photos-employes";
 import { affectations, departements, employes, informationsEmployes, photosEmployes, postes, sites } from "./schema";
 
@@ -77,15 +78,27 @@ export async function compterEmployes(recherche = SANS_RECHERCHE): Promise<numbe
   return resultat?.total ?? 0;
 }
 
+/** Colonnes de l'accès au pointage (pointage à distance, doigts à enrôler). */
+function colonnesAcces(acces: AccesPointage) {
+  return {
+    pointageDistance: acces.pointageDistance,
+    appareilsDistance: appareilsVersTexte(acces.appareils),
+    distanceExigePosition: acces.exigePosition,
+    distanceExigePhoto: acces.exigePhoto,
+    doigtsAEnroler: doigtsVersTexte(acces.doigts),
+  };
+}
+
 /** Crée l'employé, ses informations supplémentaires et sa photo dans une seule transaction. */
 export async function insererEmploye(
   donnees: DonneesEmploye,
+  acces: AccesPointage,
   informations: Information[],
   photo: ChangementPhoto = { action: "garder" },
 ): Promise<string> {
   const id = crypto.randomUUID();
   await obtenirBase().transaction(async (transaction) => {
-    await transaction.insert(employes).values({ id, ...donnees });
+    await transaction.insert(employes).values({ id, ...donnees, ...colonnesAcces(acces) });
     if (informations.length > 0) {
       await transaction
         .insert(informationsEmployes)
@@ -123,6 +136,11 @@ export async function obtenirEmploye(id: string): Promise<EmployeDetail | null> 
       dateDebutEmploi: employes.dateDebutEmploi,
       dateFinEmploi: employes.dateFinEmploi,
       photoModifieeLe: photosEmployes.modifieLe,
+      pointageDistance: employes.pointageDistance,
+      appareilsDistance: employes.appareilsDistance,
+      exigePosition: employes.distanceExigePosition,
+      exigePhoto: employes.distanceExigePhoto,
+      doigtsAEnroler: employes.doigtsAEnroler,
     })
     .from(employes)
     .innerJoin(departements, eq(departements.id, employes.departementId))
@@ -132,13 +150,15 @@ export async function obtenirEmploye(id: string): Promise<EmployeDetail | null> 
     .where(eq(employes.id, id))
     .limit(1);
   if (!employe) return null;
+  const { pointageDistance, appareilsDistance, exigePosition, exigePhoto, doigtsAEnroler, ...fiche } = employe;
+  const acces = { pointageDistance, appareils: texteVersAppareils(appareilsDistance), exigePosition, exigePhoto, doigts: texteVersDoigts(doigtsAEnroler) };
 
   const informations = await base
     .select({ libelle: informationsEmployes.libelle, valeur: informationsEmployes.valeur })
     .from(informationsEmployes)
     .where(eq(informationsEmployes.employeId, id))
     .orderBy(asc(informationsEmployes.creeLe), asc(informationsEmployes.libelle));
-  return { ...employe, informations };
+  return { ...fiche, acces, informations };
 }
 
 /**
@@ -149,6 +169,7 @@ export async function obtenirEmploye(id: string): Promise<EmployeDetail | null> 
 export async function mettreAJourEmploye(
   id: string,
   donnees: DonneesEmploye,
+  acces: AccesPointage,
   informations: Information[],
   photo: ChangementPhoto = { action: "garder" },
 ): Promise<boolean> {
@@ -161,7 +182,7 @@ export async function mettreAJourEmploye(
       .for("update");
     if (!existant) return false;
 
-    await transaction.update(employes).set(donnees).where(eq(employes.id, id));
+    await transaction.update(employes).set({ ...donnees, ...colonnesAcces(acces) }).where(eq(employes.id, id));
     await transaction.delete(informationsEmployes).where(eq(informationsEmployes.employeId, id));
     if (informations.length > 0) {
       await transaction

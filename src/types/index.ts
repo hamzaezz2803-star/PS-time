@@ -171,6 +171,8 @@ export type EmployeDetail = {
   dateFinEmploi: string | null;
   /** Date de la photo de profil, null sans photo. */
   photoModifieeLe: Date | null;
+  /** Pointage à distance et doigts prévus pour l'enrôlement (aucune donnée biométrique). */
+  acces: import("@/lib/metier/acces-pointage").AccesPointage;
   informations: { libelle: string; valeur: string }[];
 };
 

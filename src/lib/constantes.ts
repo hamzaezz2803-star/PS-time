@@ -174,6 +174,20 @@ export const LONGUEUR_MAX_CODE_PAIE = 20;
 export const PRIORITE_EVENEMENT_MAX = 255;
 export const UNITES_SAISIE_EVENEMENT = ["journee", "demi_journee", "heures"] as const;
 
+/** Appareils hors badgeuse depuis lesquels un employé peut être autorisé à pointer. */
+export const APPAREILS_POINTAGE = ["pc", "tablette", "telephone"] as const;
+export type AppareilPointage = (typeof APPAREILS_POINTAGE)[number];
+
+/**
+ * Doigts à enrôler sur la badgeuse, numérotés comme les badgeuses ZKTeco : 0 = auriculaire
+ * gauche ... 4 = pouce gauche, 5 = pouce droit ... 9 = auriculaire droit. Aucune empreinte n'est
+ * stockée par l'application : seulement la liste des doigts prévus.
+ */
+export const DOIGTS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9] as const;
+export type Doigt = (typeof DOIGTS)[number];
+/** Nombre de doigts conseillé (un de secours si le premier est blessé ou mal lu). */
+export const DOIGTS_CONSEILLES = 2;
+
 /** Couleurs proposées pour une règle d'horaire dynamique (palette fixe, contrastes vérifiés dans globals.css). */
 export const COULEURS_REGLE = ["bleu", "vert", "orange", "rouge", "turquoise", "rose", "jaune", "ardoise"] as const;
 export type CouleurRegle = (typeof COULEURS_REGLE)[number];
