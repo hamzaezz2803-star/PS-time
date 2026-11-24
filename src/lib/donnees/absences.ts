@@ -177,12 +177,13 @@ export async function evenementsDuJour(employeId: string, jour: string): Promise
   return lignes.map((ligne) => ({ ...ligne, type: typeEvenement(ligne.type) }));
 }
 
-export type JourneesEvenement = SaisieEvenement & EvenementCandidat & { employeId: string; code: string; nom: string; type: "absence" | "presence" };
+export type JourneesEvenement = SaisieEvenement & EvenementCandidat & { id: string; employeId: string; code: string; nom: string; type: "absence" | "presence" };
 
 /** Événements en journées entières qui touchent la période, pour tous les employés (statistiques). */
 export async function evenementsEnJourneesDeLaPeriode(debut: string, fin: string): Promise<JourneesEvenement[]> {
   const lignes = await obtenirBase()
     .select({
+      id: evenementsEmployes.id,
       employeId: evenementsEmployes.employeId,
       code: evenements.code,
       nom: evenements.nom,

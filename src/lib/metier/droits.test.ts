@@ -41,6 +41,7 @@ describe("pages proposées dans le choix des droits", () => {
   it("ne propose plus Absences et événements (page masquée), mais garde les autres", () => {
     assert.equal(PAGES_PROPOSEES.includes("absences"), false);
     assert.deepEqual(pagesProposees("presence"), ["pointages_manuels", "evenements", "droits_conges", "compteurs", "detail_jour"]);
-    assert.equal(PAGES_PROPOSEES.length, 15);
+    assert.equal(PAGES_PROPOSEES.length, 19);
+    assert.deepEqual(pagesProposees("etats"), ["etat_presences", "etat_evenements", "etat_conges", "etat_pointages"]);
   });
 });
