@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { couvreLaJournee, heuresEnMinutes, minutesEnHeures, niveauPriorite, nombreDeJours, saisiesSeChevauchent } from "./evenements.ts";
+import { couvreLaJournee, evenementRetenu, heuresEnMinutes, minutesEnHeures, niveauPriorite, nombreDeJours, saisiesSeChevauchent } from "./evenements.ts";
 
 describe("durée d'un événement en heures", () => {
   it("lit un nombre d'heures entier ou décimal (virgule ou point)", () => {
@@ -57,5 +57,27 @@ describe("saisies d'événements d'un employé", () => {
     assert.equal(couvreLaJournee(rendezVous(600, 720), "2026-12-10"), false);
     assert.equal(nombreDeJours(conge), 5);
     assert.equal(nombreDeJours(rendezVous(600, 720)), 1);
+  });
+});
+
+describe("événement retenu un même jour", () => {
+  const conge = { code: "CP", priorite: 10, neutralisePointage: false };
+  const maladie = { code: "MAL", priorite: 50, neutralisePointage: false };
+  const mission = { code: "MIS", priorite: 30, neutralisePointage: true };
+
+  it("retient la plus grande priorité : la maladie neutralise le congé", () => {
+    assert.equal(evenementRetenu([conge, maladie], false), maladie);
+    assert.equal(evenementRetenu([maladie, conge, mission], false), maladie);
+  });
+
+  it("laisse le pointage l'emporter, sauf sur un événement qui neutralise le pointage", () => {
+    assert.equal(evenementRetenu([conge, maladie], true), null);
+    assert.equal(evenementRetenu([conge, maladie, mission], true), mission);
+  });
+
+  it("garde le premier à priorité égale, et rien sans événement", () => {
+    const autreConge = { ...conge, code: "CP2" };
+    assert.equal(evenementRetenu([conge, autreConge], false), conge);
+    assert.equal(evenementRetenu([], false), null);
   });
 });

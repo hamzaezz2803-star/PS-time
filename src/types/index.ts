@@ -411,6 +411,10 @@ export type EvenementDuJour = {
   code: string;
   nom: string;
   type: "absence" | "presence";
+  priorite: number;
+  neutralisePointage: boolean;
+  /** Journée entière : retenu ce jour-là (priorité, pointages) ou non validé ; null pour une saisie en heures. */
+  estValide: boolean | null;
   debut: string;
   fin: string;
   debutMinutes: number | null;

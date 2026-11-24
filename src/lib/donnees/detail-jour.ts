@@ -6,7 +6,8 @@ import { calculerCompteurs, historiqueJournalier, type CacheFormules, type Valeu
 import { ajouterJours, periodesDeLaDate, type Periodicite } from "@/lib/metier/compteurs/periodes";
 import { jourDansFuseau } from "@/lib/metier/dates";
 import { messageErreurFormule } from "@/lib/textes/formules";
-import type { DetailJour, ValeurAffichee } from "@/types";
+import { evenementRetenu } from "@/lib/metier/evenements";
+import type { DetailJour, EvenementDuJour, ValeurAffichee } from "@/types";
 import { evenementsDuJour } from "./absences";
 import { obtenirBase } from "./base";
 import { aujourdhuiLocal, chargerJoursService, estJourValide } from "./compteurs-calcul";
@@ -56,6 +57,12 @@ async function pointagesDuJour(employe: { id: string; groupeId: string | null },
   const duJour = lignes.filter((ligne) => jourDansFuseau(ligne.horodatage, FUSEAU_HORAIRE) === date).slice(0, DETAIL_POINTAGES_MAX);
   const statuts = await evaluerPointages(duJour.map((ligne) => ({ employeId: employe.id, groupeId: employe.groupeId, horodatage: ligne.horodatage, etat: ligne.etat })));
   return duJour.map((ligne, index) => ({ ...ligne, horodatage: ligne.horodatage.toISOString(), statut: statuts[index] }));
+}
+
+/** Marque l'événement retenu parmi ceux de la journée entière ; les autres sont « non validés ». */
+function validerEvenements(evenementsJour: Omit<EvenementDuJour, "estValide">[], aPointe: boolean): EvenementDuJour[] {
+  const retenu = evenementRetenu(evenementsJour.filter((evenement) => evenement.debutMinutes === null), aPointe);
+  return evenementsJour.map((evenement) => ({ ...evenement, estValide: evenement.debutMinutes === null ? evenement === retenu : null }));
 }
 
 export type ResultatDetailJour = { ok: true; detail: DetailJour } | { ok: false; erreur: "date" | "futur" | "employe" };
@@ -108,7 +115,7 @@ export async function chargerDetailJour(employeId: string, date: string, nombreJ
             }
           : null,
       pointages: pointagesJour,
-      evenements: evenementsJour,
+      evenements: validerEvenements(evenementsJour, tries.length > 0),
       compteurs,
       valeurs: { JOUR: parPeriodicite("JOUR"), SEMAINE: parPeriodicite("SEMAINE"), MOIS: parPeriodicite("MOIS") },
       periodes: { JOUR: jour, SEMAINE: semaine, MOIS: mois },
