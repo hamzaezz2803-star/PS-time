@@ -10,7 +10,7 @@ import { MessageErreur } from "@/components/ui/message-erreur";
 import { CHEMIN_ETAT, RAPPORT_LIGNES_MAX } from "@/lib/constantes";
 import { aujourdhuiLocal } from "@/lib/donnees/compteurs-calcul";
 import { preparerExportEtat } from "@/lib/export/etats";
-import { estEtat, type Etat } from "@/lib/metier/etats";
+import { ETATS, estEtat, type Etat } from "@/lib/metier/etats";
 import { TEXTES_CONNEXION } from "@/lib/textes/connexion";
 import { TEXTES_ETATS } from "@/lib/textes/etats";
 import { TEXTES_NAVIGATION } from "@/lib/textes/navigation";
@@ -19,6 +19,9 @@ import { TEXTES_RAPPORT } from "@/lib/textes/rapport-presences";
 import { chaineEtat, lireRechercheEtat } from "@/lib/validation/etats";
 
 export const metadata: Metadata = { title: TEXTES_NAVIGATION.etats, robots: { index: false } };
+
+/** Les quatre états sont connus : leurs pages sont préparées au build (Cache Components). */
+export const generateStaticParams = () => ETATS.map((etat) => ({ etat }));
 
 type ParametresRecherche = Promise<Record<string, string | string[] | undefined>>;
 

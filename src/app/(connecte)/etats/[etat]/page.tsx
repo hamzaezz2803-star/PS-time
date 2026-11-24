@@ -8,9 +8,12 @@ import { aujourdhuiLocal } from "@/lib/donnees/compteurs-calcul";
 import { listerDepartements } from "@/lib/donnees/departements";
 import { chargerEtat, type TableauEtat as Tableau } from "@/lib/donnees/etats";
 import { COLONNES_ETATS, maintenantLocal, peutVoirEtat } from "@/lib/export/etats";
-import { estEtat, type Etat } from "@/lib/metier/etats";
+import { ETATS, estEtat, type Etat } from "@/lib/metier/etats";
 import { TEXTES_ETATS as textes } from "@/lib/textes/etats";
 import { lireRechercheEtat } from "@/lib/validation/etats";
+
+/** Les quatre états sont connus : leurs pages sont préparées au build (Cache Components). */
+export const generateStaticParams = () => ETATS.map((etat) => ({ etat }));
 
 type ParametresRecherche = Promise<Record<string, string | string[] | undefined>>;
 
