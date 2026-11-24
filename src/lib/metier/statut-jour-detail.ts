@@ -13,12 +13,18 @@ export type StatutJourDetail =
   | "absence_justifiee"
   | "evenement_presence"
   | "repos"
-  | "repos_travaille";
+  | "repos_travaille"
+  | "en_cours"
+  | "pas_encore_pointe";
 
-export function statutJourDetail(jour: Pick<ResumeJour, "profilCode" | "entree" | "sortie" | "retardMinutes" | "evenement">): StatutJourDetail {
+/** Aujourd'hui, la journée n'est pas finie : pas encore de pointage, ou pas encore de sortie, n'est pas une anomalie. */
+export function statutJourDetail(
+  jour: Pick<ResumeJour, "profilCode" | "entree" | "sortie" | "retardMinutes" | "evenement">,
+  estAujourdhui = false,
+): StatutJourDetail {
   if (jour.evenement) return jour.evenement.type === "presence" ? "evenement_presence" : "absence_justifiee";
   if (jour.profilCode === null) return jour.entree === null ? "repos" : "repos_travaille";
-  if (jour.entree === null) return "sans_pointage";
-  if (jour.sortie === null) return "incomplet";
+  if (jour.entree === null) return estAujourdhui ? "pas_encore_pointe" : "sans_pointage";
+  if (jour.sortie === null) return estAujourdhui ? "en_cours" : "incomplet";
   return (jour.retardMinutes ?? 0) > 0 ? "retard" : "a_l_heure";
 }

@@ -12,6 +12,12 @@ describe("statutJourDetail", () => {
     assert.equal(statutJourDetail({ ...jour, entree: null, sortie: null, retardMinutes: null }), "sans_pointage");
   });
 
+  it("aujourd'hui, ni l'absence de sortie ni l'absence de pointage ne sont des anomalies", () => {
+    assert.equal(statutJourDetail({ ...jour, sortie: null }, true), "en_cours");
+    assert.equal(statutJourDetail({ ...jour, entree: null, sortie: null, retardMinutes: null }, true), "pas_encore_pointe");
+    assert.equal(statutJourDetail({ ...jour, retardMinutes: 5 }, true), "retard");
+  });
+
   it("un retard inconnu ne compte pas comme un retard", () => {
     assert.equal(statutJourDetail({ ...jour, retardMinutes: null }), "a_l_heure");
   });

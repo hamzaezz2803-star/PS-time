@@ -1,5 +1,7 @@
-import { ArrowRight, Briefcase, CalendarCheck, CalendarX2, CircleCheck, CircleX, Clock, Moon, Plane, TriangleAlert, type LucideIcon } from "lucide-react";
+import { ArrowRight, Briefcase, CalendarCheck, CalendarX2, CircleCheck, CircleX, Clock, Hourglass, Moon, Plane, TriangleAlert, type LucideIcon } from "lucide-react";
+import { FUSEAU_HORAIRE } from "@/lib/constantes";
 import { formaterMinutes } from "@/lib/metier/compteurs/format";
+import { jourDansFuseau } from "@/lib/metier/dates";
 import { minutesVersHeure } from "@/lib/metier/programme";
 import { statutJourDetail, type StatutJourDetail } from "@/lib/metier/statut-jour-detail";
 import { cn } from "@/lib/utils";
@@ -17,11 +19,13 @@ const STATUTS: Record<StatutJourDetail, { Icone: LucideIcon; teinte: string }> =
   evenement_presence: { Icone: Plane, teinte: "bg-ciel text-primaire" },
   repos: { Icone: Moon, teinte: "bg-canevas text-texte-secondaire" },
   repos_travaille: { Icone: Briefcase, teinte: "bg-ciel text-primaire" },
+  en_cours: { Icone: Briefcase, teinte: "bg-succes/10 text-succes" },
+  pas_encore_pointe: { Icone: Hourglass, teinte: "bg-canevas text-texte-secondaire" },
 };
 
 /** Statut de la journée en une étiquette (icône + mot, jamais la couleur seule), avec le retard en minutes. */
 export function StatutJour({ jour }: { jour: JourDetail }) {
-  const statut = statutJourDetail(jour);
+  const statut = statutJourDetail(jour, jour.jour === jourDansFuseau(new Date(), FUSEAU_HORAIRE));
   const { Icone, teinte } = STATUTS[statut];
   return (
     <span className={cn("inline-flex items-center gap-1.5 whitespace-nowrap rounded-md px-2 py-1 text-sm font-medium", teinte)}>
@@ -55,7 +59,9 @@ export function PresenceJour({ jour }: { jour: JourDetail }) {
       <span className={HEURE}>{entree}</span>
       <ArrowRight className="size-3.5 shrink-0 text-texte-secondaire" aria-hidden="true" />
       <span className="sr-only">{textes.jusqua}</span>
-      {jour.sortie === null ? (
+      {jour.sortie === null && jour.jour === jourDansFuseau(new Date(), FUSEAU_HORAIRE) ? (
+        <span className="text-texte-secondaire">{textes.sortieEnCours}</span>
+      ) : jour.sortie === null ? (
         <span className="inline-flex items-center gap-1 rounded-md bg-attention/10 px-1.5 py-0.5 text-attention">
           <TriangleAlert className="size-3.5 shrink-0" aria-hidden="true" />
           {textes.sortieManquante}

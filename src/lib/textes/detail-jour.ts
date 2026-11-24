@@ -108,6 +108,7 @@ export const TEXTES_DETAIL_JOUR = {
     nonValides: (codes: string) => `Non validé : ${codes}`,
     entreeSortie: (entree: string, sortie: string) => `${entree} à ${sortie}`,
     jusqua: "à",
+    sortieEnCours: "en cours",
     statut: "Statut",
     statuts: {
       a_l_heure: "À l'heure",
@@ -118,6 +119,8 @@ export const TEXTES_DETAIL_JOUR = {
       evenement_presence: "Présent (événement)",
       repos: "Repos",
       repos_travaille: "Travail un jour de repos",
+      en_cours: "Au travail",
+      pas_encore_pointe: "Pas encore pointé",
     },
     retardDe: (duree: string) => `de ${duree}`,
     sortieManquante: "sortie manquante",
