@@ -15,6 +15,13 @@
       "when": 1795601454371,
       "tag": "0001_noms_sans_casse",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1795601620605,
+      "tag": "0002_cles_differables",
+      "breakpoints": true
     }
   ]
 }

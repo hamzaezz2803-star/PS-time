@@ -20,9 +20,14 @@ export type ErreurSauvegarde = "signature" | "format" | "migration" | "tables" |
 export type SauvegardeLue = { ok: true; enTete: EnTeteSauvegarde; insertions: Insertion[] } | { ok: false; erreur: ErreurSauvegarde };
 
 const PREFIXE_SIGNATURE = "-- signature: ";
-/** Instructions fixes acceptées telles quelles (utiles si le fichier est rejoué dans phpMyAdmin). */
-const INSTRUCTIONS_FIXES = new Set(["SET NAMES utf8mb4;", "SET FOREIGN_KEY_CHECKS = 0;", "SET FOREIGN_KEY_CHECKS = 1;"]);
-const SUPPRESSION = /^DELETE FROM `([a-z][a-z0-9_]{0,63})`;$/;
+/**
+ * Instructions fixes acceptées telles quelles : le fichier se rejoue aussi dans DBeaver ou psql, en une
+ * transaction où les clés étrangères (différables) ne sont vérifiées qu'à la fin.
+ */
+const DEBUT_TRANSACTION = ["SET client_encoding = 'UTF8';", "BEGIN;", "SET CONSTRAINTS ALL DEFERRED;"];
+export const FIN_TRANSACTION = "COMMIT;";
+const INSTRUCTIONS_FIXES = new Set([...DEBUT_TRANSACTION, FIN_TRANSACTION]);
+const SUPPRESSION = /^DELETE FROM "([a-z][a-z0-9_]{0,62})";$/;
 
 const FORMAT_NOM_FICHIER = new Intl.DateTimeFormat("sv-SE", { timeZone: FUSEAU_HORAIRE, dateStyle: "short", timeStyle: "medium" });
 
@@ -39,8 +44,7 @@ export function texteEnTete(enTete: EnTeteSauvegarde): string {
     `-- comptes: ${enTete.avecComptes ? "oui" : "non"}`,
     `-- cree-le: ${enTete.creeLe}`,
     `-- tables: ${enTete.tables.join(",")}`,
-    "SET NAMES utf8mb4;",
-    "SET FOREIGN_KEY_CHECKS = 0;",
+    ...DEBUT_TRANSACTION,
     "",
   ].join("\n");
 }

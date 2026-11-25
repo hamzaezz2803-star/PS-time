@@ -1,38 +1,34 @@
 /**
- * Écriture et relecture des instructions INSERT d'une sauvegarde. La relecture n'exécute rien :
+ * Écriture et relecture des instructions INSERT d'une sauvegarde (syntaxe PostgreSQL).
+ * Toutes les valeurs sont écrites en texte (`E'...'`) ou NULL : PostgreSQL les convertit vers le
+ * type de la colonne (date, booléen, nombre, octets en `\x...`). La relecture n'exécute rien :
  * elle transforme une ligne en données (table, colonnes, valeurs), refusée au moindre écart.
  * Fonctions pures, testées dans sauvegarde-sql.test.ts.
  */
 
-/** Valeur relue : texte (nombres compris, MySQL les convertit), NULL ou octets. */
-export type ValeurSql = string | null | Buffer;
+/** Valeur relue : texte (PostgreSQL le convertit vers le type de la colonne) ou NULL. */
+export type ValeurSql = string | null;
 
 export type Insertion = { table: string; colonnes: string[]; lignes: ValeurSql[][] };
 
-const ECHAPPEMENTS: Record<string, string> = { "\\": "\\\\", "'": "\\'", "\0": "\\0", "\n": "\\n", "\r": "\\r", "\x1a": "\\Z" };
-const DESECHAPPEMENTS: Record<string, string> = { "\\": "\\", "'": "'", '"': '"', "0": "\0", n: "\n", r: "\r", t: "\t", b: "\b", Z: "\x1a" };
-const NOM_SQL = /^[a-z][a-z0-9_]{0,63}$/;
-const NOMBRE = /^-?\d+(\.\d+)?(e[+-]?\d+)?/i;
+const ECHAPPEMENTS: Record<string, string> = { "\\": "\\\\", "'": "\\'", "\n": "\\n", "\r": "\\r" };
+const DESECHAPPEMENTS: Record<string, string> = { "\\": "\\", "'": "'", n: "\n", r: "\r" };
+const NOM_SQL = /^[a-z][a-z0-9_]{0,62}$/;
 
 export const estNomSql = (nom: string) => NOM_SQL.test(nom);
 
-/** Littéral SQL d'une valeur lue en base (dates déjà en texte). Pas de retour à la ligne : une instruction = une ligne. */
-export function valeurSql(valeur: unknown): string {
-  if (valeur === null || valeur === undefined) return "NULL";
-  if (typeof valeur === "number") {
-    if (!Number.isFinite(valeur)) throw new Error("Nombre non représentable");
-    return String(valeur);
-  }
-  if (typeof valeur === "bigint") return valeur.toString();
-  if (typeof valeur === "boolean") return valeur ? "1" : "0";
-  if (Buffer.isBuffer(valeur)) return `X'${valeur.toString("hex")}'`;
-  if (typeof valeur === "string") return `'${valeur.replace(/[\\'\0\n\r\x1a]/g, (c) => ECHAPPEMENTS[c])}'`;
-  throw new Error("Type de valeur non sauvegardable");
+/** Littéral SQL d'une valeur lue en texte. Pas de retour à la ligne : une instruction = une ligne. */
+export function valeurSql(valeur: string | null): string {
+  if (valeur === null) return "NULL";
+  if (valeur.includes("\0")) throw new Error("Caractère nul non sauvegardable");
+  return `E'${valeur.replace(/[\\'\n\r]/g, (caractere) => ECHAPPEMENTS[caractere])}'`;
 }
+
+const nomSql = (nom: string) => `"${nom}"`;
 
 export function instructionInsert(table: string, colonnes: readonly string[], lignes: readonly string[][]): string {
   const valeurs = lignes.map((ligne) => `(${ligne.join(",")})`).join(",");
-  return `INSERT INTO \`${table}\` (${colonnes.map((c) => `\`${c}\``).join(",")}) VALUES ${valeurs};`;
+  return `INSERT INTO ${nomSql(table)} (${colonnes.map(nomSql).join(",")}) VALUES ${valeurs};`;
 }
 
 /** Lecteur pas à pas d'une ligne ; chaque méthode renvoie null si le texte attendu n'est pas là. */
@@ -51,9 +47,9 @@ class Lecteur {
     return true;
   }
 
-  nomEntreAccents(): string | null {
-    if (!this.lire("`")) return null;
-    const fin = this.texte.indexOf("`", this.position);
+  nomEntreGuillemets(): string | null {
+    if (!this.lire('"')) return null;
+    const fin = this.texte.indexOf('"', this.position);
     if (fin < 0) return null;
     const nom = this.texte.slice(this.position, fin);
     this.position = fin + 1;
@@ -61,14 +57,12 @@ class Lecteur {
   }
 
   chaine(): string | null {
-    if (!this.lire("'")) return null;
+    if (!this.lire("E'")) return null;
     let resultat = "";
     while (!this.fini()) {
       const caractere = this.texte[this.position++];
-      if (caractere === "'") {
-        if (!this.lire("'")) return resultat;
-        resultat += "'";
-      } else if (caractere === "\\") {
+      if (caractere === "'") return resultat;
+      if (caractere === "\\") {
         const suivant = DESECHAPPEMENTS[this.texte[this.position++]];
         if (suivant === undefined) return null;
         resultat += suivant;
@@ -77,21 +71,10 @@ class Lecteur {
     return null;
   }
 
-  /** Une valeur : NULL, nombre, 'texte' ou X'hexa'. `undefined` si rien de reconnu. */
+  /** Une valeur : NULL ou E'texte'. `undefined` si rien de reconnu. */
   valeur(): ValeurSql | undefined {
     if (this.lire("NULL")) return null;
-    if (this.lire("X'")) {
-      const fin = this.texte.indexOf("'", this.position);
-      const hexa = fin < 0 ? "" : this.texte.slice(this.position, fin);
-      if (fin < 0 || hexa.length % 2 !== 0 || !/^[0-9a-f]*$/i.test(hexa)) return undefined;
-      this.position = fin + 1;
-      return Buffer.from(hexa, "hex");
-    }
-    if (this.texte[this.position] === "'") return this.chaine() ?? undefined;
-    const nombre = NOMBRE.exec(this.texte.slice(this.position, this.position + 40));
-    if (!nombre) return undefined;
-    this.position += nombre[0].length;
-    return nombre[0];
+    return this.chaine() ?? undefined;
   }
 
   liste<T>(lireElement: () => T | undefined): T[] | null {
@@ -106,13 +89,13 @@ class Lecteur {
   }
 }
 
-/** Relit une ligne `INSERT INTO `t` (`a`,`b`) VALUES (...),(...);` ; null si elle ne suit pas exactement ce format. */
+/** Relit une ligne `INSERT INTO "t" ("a","b") VALUES (...),(...);` ; null si elle ne suit pas exactement ce format. */
 export function lireInsertion(ligne: string): Insertion | null {
   const lecteur = new Lecteur(ligne);
   if (!lecteur.lire("INSERT INTO ")) return null;
-  const table = lecteur.nomEntreAccents();
+  const table = lecteur.nomEntreGuillemets();
   if (!table || !lecteur.lire(" ")) return null;
-  const colonnes = lecteur.liste(() => lecteur.nomEntreAccents() ?? undefined);
+  const colonnes = lecteur.liste(() => lecteur.nomEntreGuillemets() ?? undefined);
   if (!colonnes || !lecteur.lire(" VALUES ")) return null;
   const lignes: ValeurSql[][] = [];
   do {

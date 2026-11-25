@@ -273,7 +273,7 @@ export const sites = pgTable(
 
 /** Site facultatif d'un département, d'un poste ou d'un employé. */
 const referenceSite = () =>
-  uuid("site_id").references(() => sites.id, { onDelete: "restrict" });
+  uuid("site_id").references(() => sites.id, { onDelete: "no action" });
 
 /**
  * Départements de l'entreprise, organisés en arbre (un parent, plusieurs enfants).
@@ -286,7 +286,7 @@ export const departements = pgTable(
     nom: varchar("nom", { length: 100 }).notNull(),
     parentId: uuid("parent_id").references(
       (): AnyPgColumn => departements.id,
-      { onDelete: "restrict" },
+      { onDelete: "no action" },
     ),
     siteId: referenceSite(),
     creeLe: dateCreation(),
@@ -319,7 +319,7 @@ export const postes = pgTable(
     ordre: int("ordre").notNull().default(99999),
     parentId: uuid("parent_id").references(
       (): AnyPgColumn => postes.id,
-      { onDelete: "restrict" },
+      { onDelete: "no action" },
     ),
     siteId: referenceSite(),
     creeLe: dateCreation(),
@@ -357,7 +357,7 @@ export const employes = pgTable(
     nom: varchar("nom", { length: 100 }).notNull(),
     departementId: uuid("departement_id")
       .notNull()
-      .references(() => departements.id, { onDelete: "restrict" }),
+      .references(() => departements.id, { onDelete: "no action" }),
     posteId: uuid("poste_id").references(() => postes.id, {
       onDelete: "set null",
     }),
@@ -638,7 +638,7 @@ export const joursRotation = pgTable(
     // Un profil utilisé par une rotation ne peut pas être supprimé.
     profilId: uuid("profil_id")
       .notNull()
-      .references(() => profilsHoraires.id, { onDelete: "restrict" }),
+      .references(() => profilsHoraires.id, { onDelete: "no action" }),
     creeLe: dateCreation(),
     modifieLe: dateModification(),
   },
@@ -659,10 +659,10 @@ export const affectations = pgTable(
     id: identifiantUnique(),
     rotationId: uuid("rotation_id")
       .notNull()
-      .references(() => rotations.id, { onDelete: "restrict" }),
+      .references(() => rotations.id, { onDelete: "no action" }),
     // restrict : les affectations d'un groupe ou d'un employé sont supprimées avec lui, dans une transaction.
-    groupeId: uuid("groupe_id").references(() => groupes.id, { onDelete: "restrict" }),
-    employeId: uuid("employe_id").references(() => employes.id, { onDelete: "restrict" }),
+    groupeId: uuid("groupe_id").references(() => groupes.id, { onDelete: "no action" }),
+    employeId: uuid("employe_id").references(() => employes.id, { onDelete: "no action" }),
     dateDebut: jour("date_debut").notNull(),
     // Vide = sans date de fin.
     dateFin: jour("date_fin"),
@@ -694,7 +694,7 @@ export const reglesHoraires = pgTable(
     // Un profil utilisé par une règle ne peut pas être supprimé.
     profilId: uuid("profil_id")
       .notNull()
-      .references(() => profilsHoraires.id, { onDelete: "restrict" }),
+      .references(() => profilsHoraires.id, { onDelete: "no action" }),
     estActif: boolean("est_actif").notNull().default(true),
     // Couleur de la pastille dans le rapport des présences (palette fixe).
     couleur: varchar("couleur", { length: 15 }).notNull().default(COULEUR_REGLE_DEFAUT),
@@ -761,7 +761,7 @@ export const compteursVersions = pgTable(
     id: identifiantUnique(),
     compteurId: uuid("compteur_id")
       .notNull()
-      .references(() => compteurs.id, { onDelete: "restrict" }),
+      .references(() => compteurs.id, { onDelete: "no action" }),
     version: int("version").notNull(),
     formule: varchar("formule", { length: 2000 }).notNull(),
     journalier: boolean("journalier").notNull(),
@@ -834,7 +834,7 @@ export const evenementsEmployes = pgTable(
       .references(() => employes.id, { onDelete: "cascade" }),
     evenementId: uuid("evenement_id")
       .notNull()
-      .references(() => evenements.id, { onDelete: "restrict" }),
+      .references(() => evenements.id, { onDelete: "no action" }),
     dateDebut: jour("date_debut").notNull(),
     dateFin: jour("date_fin").notNull(),
     // Vides : journées entières.
@@ -880,7 +880,7 @@ export const droitsConges = pgTable(
       .references(() => employes.id, { onDelete: "cascade" }),
     evenementId: uuid("evenement_id")
       .notNull()
-      .references(() => evenements.id, { onDelete: "restrict" }),
+      .references(() => evenements.id, { onDelete: "no action" }),
     dateDebut: jour("date_debut").notNull(),
     dateFin: jour("date_fin").notNull(),
     joursAcquis: joursDroit("jours_acquis").notNull(),

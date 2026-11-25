@@ -287,7 +287,7 @@ export const CHEMIN_APPAREILS = "/appareils";
 export const CHEMIN_SAUVEGARDE = "/administration/sauvegarde";
 export const CHEMIN_EXPORT_SAUVEGARDE = "/administration/sauvegarde/export";
 export const CHEMIN_IMPORT_SAUVEGARDE = "/administration/sauvegarde/import";
-export const FORMAT_SAUVEGARDE = 1;
+export const FORMAT_SAUVEGARDE = 2;
 /** Jamais sauvegardées : sessions ouvertes et jetons temporaires (on pourrait s'en servir pour se connecter). */
 export const TABLES_JAMAIS_SAUVEGARDEES = ["sessions", "verifications"] as const;
 /** Comptes de connexion : sauvegardés seulement si la case « comptes » est cochée. */
