@@ -339,12 +339,16 @@ export type DetailJour = {
     id: string;
     horodatage: string;
     etat: string;
-    /** « badgeuse » ou « manuel ». */
+    /** « badgeuse », « manuel » ou « distance ». */
     source: string;
     remarque: string | null;
     /** Compte qui a saisi un pointage manuel (vide pour la badgeuse ou un compte supprimé). */
     saisiParNom: string | null;
     saisiParIdentifiant: string | null;
+    /** Pointage à distance : appareil, position (si exigée) et photo (gardée 90 jours). */
+    appareil: string | null;
+    position: { latitude: number; longitude: number } | null;
+    aPhoto: boolean;
     statut: import("@/lib/metier/statut-pointage").StatutPointage;
   }[];
   /** Absences et événements de l'employé ce jour-là. */
