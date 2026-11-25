@@ -9,6 +9,7 @@ export const CHAMPS_ACCES = {
   exigePosition: "distanceExigePosition",
   exigePhoto: "distanceExigePhoto",
   doigts: "doigts",
+  reinitialiserMotDePasse: "reinitialiserMotDePasse",
 } as const;
 
 /** Saisie telle quelle (valeurs inconnues ignorées), avant les règles de cohérence. */

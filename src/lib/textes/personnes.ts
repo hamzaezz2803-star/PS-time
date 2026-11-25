@@ -172,7 +172,15 @@ export const TEXTES_PERSONNES = {
     aideExigePosition: "Donnée personnelle : à n'exiger que si le lieu de travail doit être contrôlé.",
     exigePhoto: "Joindre une photo prise sur le moment",
     aideExigePhoto: "Vérifie que c'est bien l'employé qui pointe.",
-    aVenir: "Le pointage depuis ces appareils sera ouvert avec l'espace employé. Ces réglages sont déjà enregistrés.",
+    compte: "Connexion de l'employé",
+    compteExplication:
+      "L'employé se connecte sur la page de connexion habituelle, depuis un appareil autorisé. Identifiant : son matricule. Mot de passe provisoire : son matricule, tel qu'il est écrit ; il devra le changer à sa première connexion.",
+    compteActif: (identifiant: string) => `Compte actif, identifiant « ${identifiant} »`,
+    compteProvisoire: "Mot de passe provisoire pas encore changé",
+    compteACreer: "Le compte sera créé à l'enregistrement.",
+    compteDesactive: "Sans autorisation, le compte de connexion de l'employé est désactivé (il le retrouve si l'autorisation revient).",
+    reinitialiser: "Remettre le matricule comme mot de passe",
+    aideReinitialiser: "Mot de passe oublié : l'employé se reconnecte avec son matricule, puis choisit un nouveau mot de passe.",
     visage: "Reconnaissance du visage",
     aideVisage: "Vérifiez le cadrage : visage de face, bien éclairé, sans lunettes de soleil ni casquette.",
     demarrerCamera: "Démarrer la caméra",
@@ -198,6 +206,9 @@ export const TEXTES_PERSONNES = {
   },
   erreurs: {
     aucunAppareil: "Cochez au moins un appareil, ou retirez l'autorisation.",
+    matriculeNonIdentifiant:
+      "Le matricule sert d'identifiant de connexion : 3 caractères au moins, sans accent ni espace (lettres, chiffres, « . », « - », « _ »).",
+    identifiantDejaPris: "Ce matricule est déjà l'identifiant d'un autre compte de connexion. Changez le matricule ou l'identifiant de ce compte.",
     photoFormat: "Choisissez une image JPEG, PNG ou WebP.",
     photoTaille: "Cette image est trop lourde. Choisissez-en une autre.",
     photoLecture: "Cette image n'a pas pu être lue. Choisissez-en une autre.",
