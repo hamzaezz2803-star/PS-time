@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { adresseCarteIntegree, detecterAppareil, identifiantDepuisMatricule, lienCarte, positionValide } from "./pointage-distance.ts";
+import { adresseCarteIntegree, detecterAppareil, etatPropose, identifiantDepuisMatricule, lienCarte, photoPointageValide, positionValide } from "./pointage-distance.ts";
 
 describe("identifiantDepuisMatricule", () => {
   it("met le matricule en minuscules", () => {
@@ -49,5 +49,33 @@ describe("cartes", () => {
   });
   it("donne un lien vers la position", () => {
     assert.equal(lienCarte(33.5731, -7.5898), "https://www.openstreetmap.org/?mlat=33.5731&mlon=-7.5898#map=17/33.5731/-7.5898");
+  });
+});
+
+describe("etatPropose", () => {
+  it("propose une entrée en début de journée, puis la suite logique", () => {
+    assert.equal(etatPropose(null), "entree");
+    assert.equal(etatPropose("entree"), "sortie");
+    assert.equal(etatPropose("debut_pause"), "fin_pause");
+    assert.equal(etatPropose("fin_pause"), "sortie");
+    assert.equal(etatPropose("debut_heures_sup"), "fin_heures_sup");
+    assert.equal(etatPropose("sortie"), "entree");
+  });
+});
+
+describe("photoPointageValide", () => {
+  const jpeg = (taille: number) => {
+    const octets = new Uint8Array(taille);
+    octets.set([0xff, 0xd8, 0xff]);
+    return octets;
+  };
+  it("accepte un JPEG de 200 Ko au plus", () => {
+    assert.equal(photoPointageValide(jpeg(50_000)), true);
+    assert.equal(photoPointageValide(jpeg(204_800)), true);
+  });
+  it("refuse une image trop lourde, vide ou d'un autre format", () => {
+    assert.equal(photoPointageValide(jpeg(204_801)), false);
+    assert.equal(photoPointageValide(new Uint8Array()), false);
+    assert.equal(photoPointageValide(new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])), false);
   });
 });

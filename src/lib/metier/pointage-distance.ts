@@ -4,12 +4,17 @@
  */
 import {
   CARTE_DEMI_CADRE_DEGRES,
+  ETATS_POINTAGE,
   FORMAT_IDENTIFIANT,
   LONGUEUR_MAX_IDENTIFIANT,
   LONGUEUR_MIN_IDENTIFIANT,
+  PHOTO_POINTAGE_TAILLE_MAX_OCTETS,
   PRECISION_POSITION_MAX_METRES,
   type AppareilPointage,
 } from "../constantes.ts";
+import { detecterTypePhoto } from "./photo.ts";
+
+type EtatPointage = (typeof ETATS_POINTAGE)[number];
 
 /**
  * Identifiant de connexion de l'employé : son matricule en minuscules. null si le matricule ne
@@ -64,4 +69,25 @@ export function lienCarte(latitude: number, longitude: number): string {
   const lat = arrondir(latitude);
   const lon = arrondir(longitude);
   return `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lon}#map=17/${lat}/${lon}`;
+}
+
+/** État proposé pour le prochain pointage d'après le dernier de la journée (l'employé peut en choisir un autre). */
+export function etatPropose(dernierEtat: string | null): EtatPointage {
+  switch (dernierEtat) {
+    case "entree":
+    case "fin_pause":
+    case "fin_heures_sup":
+      return "sortie";
+    case "debut_pause":
+      return "fin_pause";
+    case "debut_heures_sup":
+      return "fin_heures_sup";
+    default:
+      return "entree";
+  }
+}
+
+/** Photo de pointage acceptée : JPEG (vérifié par sa signature), non vide, 200 Ko au plus. */
+export function photoPointageValide(octets: Uint8Array): boolean {
+  return octets.length > 0 && octets.length <= PHOTO_POINTAGE_TAILLE_MAX_OCTETS && detecterTypePhoto(octets) === "image/jpeg";
 }
