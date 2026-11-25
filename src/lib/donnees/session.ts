@@ -4,7 +4,7 @@ import { cache } from "react";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { connection } from "next/server";
-import { CHEMIN_CHANGER_MOT_DE_PASSE, CHEMIN_CONNEXION } from "@/lib/constantes";
+import { CHEMIN_CHANGER_MOT_DE_PASSE, CHEMIN_CONNEXION, CHEMIN_ESPACE, CHEMIN_POINTAGE_EMPLOYE } from "@/lib/constantes";
 import { modulesAccessibles, pagesAccessibles, type Module, type Page } from "@/lib/metier/droits";
 import { auth } from "./authentification";
 import { listerPagesAccordees } from "./utilisateurs";
@@ -16,6 +16,8 @@ export type UtilisateurConnecte = {
   identifiant: string;
   doitChangerMotDePasse: boolean;
   estSuperAdmin: boolean;
+  /** Employé dont c'est le compte (pointage à distance), ou null pour un administrateur. */
+  employeId: string | null;
   /** Pages que ce compte peut voir et gérer (toutes pour un super administrateur), relues à chaque requête. */
   pages: Page[];
   /** Modules dont le compte a au moins une page (menu, tableau de bord). */
@@ -36,7 +38,9 @@ export const obtenirUtilisateurConnecte = cache(async (): Promise<UtilisateurCon
   if (!session || !session.user.estActif) redirect(CHEMIN_CONNEXION);
 
   const { user } = session;
-  const accordees = user.estSuperAdmin ? [] : await listerPagesAccordees(user.id);
+  const employeId = user.employeId ?? null;
+  // Un compte d'employé n'a jamais de page, même si une ligne en base en accordait une.
+  const accordees = user.estSuperAdmin || employeId ? [] : await listerPagesAccordees(user.id);
   const droits = { estSuperAdmin: user.estSuperAdmin, pages: accordees };
   return {
     id: user.id,
@@ -46,6 +50,7 @@ export const obtenirUtilisateurConnecte = cache(async (): Promise<UtilisateurCon
     identifiant: user.username ?? "",
     doitChangerMotDePasse: user.doitChangerMotDePasse,
     estSuperAdmin: user.estSuperAdmin,
+    employeId,
     pages: pagesAccessibles(droits),
     modules: modulesAccessibles(droits),
   };
@@ -53,10 +58,21 @@ export const obtenirUtilisateurConnecte = cache(async (): Promise<UtilisateurCon
 
 /**
  * Pour les pages du tableau de bord : comme obtenirUtilisateurConnecte, et renvoie
- * vers le changement de mot de passe tant qu'il est obligatoire.
+ * vers le changement de mot de passe tant qu'il est obligatoire. Un employé est renvoyé
+ * vers son espace de pointage.
  */
 export async function obtenirUtilisateurPourEspace(): Promise<UtilisateurConnecte> {
   const utilisateur = await obtenirUtilisateurConnecte();
   if (utilisateur.doitChangerMotDePasse) redirect(CHEMIN_CHANGER_MOT_DE_PASSE);
+  if (utilisateur.employeId) redirect(CHEMIN_POINTAGE_EMPLOYE);
   return utilisateur;
+}
+
+/** Pour l'espace de pointage : un compte d'employé uniquement (sinon le tableau de bord). */
+export async function obtenirEmployeConnecte(): Promise<UtilisateurConnecte & { employeId: string }> {
+  const utilisateur = await obtenirUtilisateurConnecte();
+  if (utilisateur.doitChangerMotDePasse) redirect(CHEMIN_CHANGER_MOT_DE_PASSE);
+  const { employeId } = utilisateur;
+  if (!employeId) redirect(CHEMIN_ESPACE);
+  return { ...utilisateur, employeId };
 }

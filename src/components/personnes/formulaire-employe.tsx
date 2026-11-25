@@ -29,8 +29,9 @@ const ETAT_CREATION: EtatFormulaire = { numeroReponse: 0 };
 
 /** Valeurs initiales du formulaire en modification (les champs vides deviennent « »). */
 function etatModification(employe: EmployeDetail): EtatFormulaire {
-  const { id, departement, poste, site, informations, acces, ...champs } = employe;
+  const { id, departement, poste, site, informations, acces, compte, ...champs } = employe;
   void id;
+  void compte;
   void departement;
   void poste;
   void site;
@@ -50,7 +51,7 @@ function ongletDuChamp(cle: string): IdOnglet | null {
   if (["genre", "typePieceIdentite", "numeroPieceIdentite", "telephone", "email"].includes(cle)) return "identite-contact";
   if (["typeEmploi", "dateEmbauche", "dateDebutEmploi", "dateFinEmploi"].includes(cle)) return "emploi";
   if (cle.startsWith("information_")) return "informations";
-  if (cle === CHAMPS_ACCES.appareils) return "distance";
+  if (cle === CHAMPS_ACCES.appareils || cle === CHAMPS_ACCES.pointageDistance) return "distance";
   return null;
 }
 
@@ -150,7 +151,7 @@ export function FormulaireEmploye({
             <InformationsEmploye initiales={etat.informations ?? []} erreurs={erreurs} />
           </PanneauOnglet>
           <PanneauOnglet base="employe" id="distance" actif={onglet}>
-            <ChampsPointageDistance valeurs={valeurs} erreurs={erreurs} />
+            <ChampsPointageDistance valeurs={valeurs} erreurs={erreurs} estModification={Boolean(employe)} compte={employe?.compte ?? null} />
           </PanneauOnglet>
           <PanneauOnglet base="employe" id="biometrie" actif={onglet}>
             <div className="flex flex-col gap-8">

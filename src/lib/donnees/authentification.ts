@@ -63,6 +63,8 @@ export const auth = betterAuth({
         defaultValue: false,
         input: false,
       },
+      // Compte d'un employé (pointage à distance) : seulement l'espace de pointage.
+      employeId: { type: "string", required: false, input: false },
     },
   },
   session: {

@@ -77,6 +77,7 @@ export function FicheEmploye({ employe }: { employe: EmployeDetail }) {
       </Section>
       <Section titre={textes.ongletDistance}>
         <Element libelle={textes.ongletDistance} valeur={resumeDistance(employe)} />
+        <Element libelle={acces.compte} valeur={employe.compte && [acces.compteActif(employe.compte.identifiant), employe.compte.motDePasseProvisoire && acces.compteProvisoire].filter(Boolean).join(" · ")} />
       </Section>
       <Section titre={textes.ongletBiometrie}>
         <Element libelle={acces.empreintes} valeur={employe.acces.doigts.length > 0 ? employe.acces.doigts.map(nomDoigt).join(", ") : null} />
