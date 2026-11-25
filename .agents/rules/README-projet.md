@@ -197,7 +197,8 @@ src/
   lib/donnees/compteurs-calcul.ts  chargement des journées de service (pointages + horaire prévu) et calcul pour un employé et une date
   lib/client-authentification.ts  client Better Auth du navigateur
   proxy.ts              redirection rapide des pages connectées
-scripts/                scripts d'installation (création du premier administrateur) et sauvegarde en ligne de commande (sauvegarde.mts)
+scripts/                scripts d'installation (création du premier administrateur), sauvegarde en ligne de commande (sauvegarde.mts) et conversion d'un export MySQL en PostgreSQL (mysql-vers-postgres.mts)
+base-de-donnees/postgres/    rôles et base PostgreSQL (moindre privilège) ; guide : docs/migration-postgresql.md
 base-de-donnees/migrations/  migrations SQL versionnées
 base-de-donnees/annulations/ scripts d'annulation manuelle d'une migration
   lib/validation/       schémas zod
@@ -242,6 +243,7 @@ npm run dev
 - Premier compte : sur `/connexion`, identifiant `pstime` et mot de passe du jour, puis choisir l'identifiant et le mot de passe de l'administrateur dans la fenêtre qui s'ouvre, et se reconnecter avec. Ne fonctionne que sur une base sans utilisateur.
 - Sauvegarde et restauration : Administration > Sauvegarde, ou `npm run sauvegarde:exporter` / `npm run sauvegarde:importer` sur le serveur (voir Sauvegarde ci-dessus).
 - Alternative en ligne de commande : `npm run admin:creer -- --identifiant admin --email admin@client.ma --nom "Nom Prénom"`.
+- Passage à PostgreSQL (demandé le 25/11/2026, base convertie, code pas encore migré) : `npm run db:convertir-postgres -- --source export-phpmyadmin.sql` écrit `sauvegardes/ps-time-postgres.sql` (tables, données, 76 CHECK, index, clés étrangères ; sans sessions ni jetons). Étapes DBeaver et séparation application / base : `docs/migration-postgresql.md`.
 
 - `BETTER_AUTH_SECRET` est différent pour chaque client (commande de génération dans `.env.example`).
 - `admin:creer` affiche une seule fois un mot de passe temporaire, à changer à la première connexion.
