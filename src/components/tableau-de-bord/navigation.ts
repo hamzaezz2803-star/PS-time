@@ -3,7 +3,8 @@ import {
   Building2,
   CalendarCheck,
   CalendarClock,
-  CalendarCog,
+  CalendarDays,
+  Eye,
   CalendarRange,
   CalendarSearch,
   CalendarX2,
@@ -44,6 +45,7 @@ import {
   CHEMIN_HISTORIQUE,
   CHEMIN_HORAIRE_DYNAMIQUE,
   CHEMIN_PERSONNES,
+  CHEMIN_PLANNING_VUE,
   CHEMIN_POINTAGES_MANUELS,
   CHEMIN_POSTES,
   CHEMIN_PROFILS_HORAIRES,
@@ -94,10 +96,19 @@ export const MENUS_NAVIGATION: MenuNavigation[] = [
     ],
   },
   {
-    libelle: T.planning,
-    icone: CalendarCog,
+    // Sur le modèle de Gestor : Consultation > Planning, puis le paramétrage du programme.
+    libelle: T.consultation,
+    icone: Eye,
     sections: [
       {
+        titre: T.planning,
+        liens: [
+          { libelle: T.planningMensuel, description: T.descriptions.planningMensuel, icone: CalendarDays, href: CHEMIN_PLANNING_VUE("mensuel"), page: "planning" },
+          { libelle: T.planningAnnuel, description: T.descriptions.planningAnnuel, icone: CalendarRange, href: CHEMIN_PLANNING_VUE("annuel"), page: "planning" },
+        ],
+      },
+      {
+        titre: T.programme,
         liens: [
           { libelle: T.profilsHoraires, description: T.descriptions.profilsHoraires, icone: CalendarClock, href: CHEMIN_PROFILS_HORAIRES, page: "profils_horaires" },
           { libelle: T.rotations, description: T.descriptions.rotations, icone: Repeat, href: CHEMIN_ROTATIONS, page: "rotations" },

@@ -67,3 +67,16 @@ export function formaterJourEnDeux(jour: string): { semaine: string; date: strin
 export function formaterJour(jour: string): string {
   return formatDate.format(new Date(`${jour}T12:00:00Z`));
 }
+
+const formatMois = new Intl.DateTimeFormat(LANGUE_FORMATS, { month: "long", year: "numeric", timeZone: "UTC" });
+const formatNomMois = new Intl.DateTimeFormat(LANGUE_FORMATS, { month: "short", timeZone: "UTC" });
+
+/** « 2026-11 » donne « novembre 2026 ». */
+export function formaterMois(mois: string): string {
+  return formatMois.format(new Date(`${mois}-01T12:00:00Z`));
+}
+
+/** Rang 0 à 11 donne « janv. », « févr. »... (colonnes du planning annuel). */
+export function nomMoisCourt(rang: number): string {
+  return formatNomMois.format(new Date(Date.UTC(2026, rang, 1, 12)));
+}

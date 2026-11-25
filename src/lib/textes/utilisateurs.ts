@@ -58,6 +58,7 @@ export const TEXTES_UTILISATEURS = {
     departements: { libelle: "Départements", detail: "Arbre des départements" },
     postes: { libelle: "Postes", detail: "Arbre des postes" },
     personnes: { libelle: "Personnes", detail: "Fiches des employés et exports" },
+    planning: { libelle: "Planning", detail: "Planning mensuel et annuel d'un employé" },
     profils_horaires: { libelle: "Profils horaires", detail: "Plages de la journée" },
     rotations: { libelle: "Rotations", detail: "Semaines types et cycles" },
     groupes: { libelle: "Groupes", detail: "Membres de chaque groupe" },

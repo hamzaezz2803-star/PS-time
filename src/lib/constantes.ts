@@ -39,7 +39,7 @@ export const MODULES = ["personnel", "planning", "presence", "etats"] as const;
  */
 export const PAGES_PAR_MODULE = {
   personnel: ["sites", "departements", "postes", "personnes"],
-  planning: ["profils_horaires", "rotations", "groupes", "affectations", "horaire_dynamique", "rapport_presences"],
+  planning: ["planning", "profils_horaires", "rotations", "groupes", "affectations", "horaire_dynamique", "rapport_presences"],
   presence: ["pointages_manuels", "evenements", "absences", "droits_conges", "compteurs", "detail_jour"],
   etats: ["etat_presences", "etat_evenements", "etat_conges", "etat_pointages"],
 } as const;
@@ -287,6 +287,14 @@ export const DETAIL_POINTAGES_MAX = 200;
 export const DUREES_HISTORIQUE = [7, 14, 30] as const;
 /** Rapport des présences (horaire dynamique) : chemins, période par défaut et maximale, lignes au plus. */
 export const CHEMIN_RAPPORT_PRESENCES = "/programme/rapport-presences";
+/**
+ * Consultation > Planning (sur le modèle de Gestor) : planning mensuel ou annuel d'un employé,
+ * calculé à l'affichage (horaire prévu, événements, pointages). Une année = 366 jours au plus.
+ */
+export const CHEMIN_PLANNING = "/consultation/planning";
+export const VUES_PLANNING = ["mensuel", "annuel"] as const;
+export const CHEMIN_PLANNING_VUE = (vue: (typeof VUES_PLANNING)[number]) => `${CHEMIN_PLANNING}/${vue}`;
+export const PLANNING_JOURS_MAX = 366;
 export const CHEMIN_EXPORT_RAPPORT_PRESENCES = "/programme/rapport-presences/export-excel";
 export const CHEMIN_IMPRESSION_RAPPORT_PRESENCES = "/impression/rapport-presences";
 export const RAPPORT_JOURS_DEFAUT = 30;
