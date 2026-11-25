@@ -22,6 +22,10 @@ describe("jourDePlanning", () => {
     assert.deepEqual(jourDePlanning(journee("2026-11-17", []), [], new Set(), AUJOURDHUI).anomalies, ["absence"]);
     assert.deepEqual(jourDePlanning(journee("2026-11-19", [500]), [], new Set(), AUJOURDHUI).anomalies, ["retard", "sortie_manquante"]);
   });
+  it("ne signale rien hors de la période d'emploi", () => {
+    const avant = jourDePlanning(journee("2026-11-17", []), [], new Set(), AUJOURDHUI, { debutEmploi: "2026-11-20", finEmploi: null });
+    assert.deepEqual(avant.anomalies, []);
+  });
   it("ne signale rien pour un événement, un repos, aujourd'hui sans pointage ou un jour futur", () => {
     const conge = jourDePlanning(journee("2026-11-16", []), [CONGE], new Set(), AUJOURDHUI);
     assert.deepEqual(conge.anomalies, []);

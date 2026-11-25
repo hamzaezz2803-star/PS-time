@@ -6,6 +6,10 @@
 import { ajouterJours } from "./compteurs/periodes.ts";
 import type { JourService } from "./compteurs/variables.ts";
 import { resumerJour, type EvenementPeriode, type ResumeJour } from "./resume-jour.ts";
+import { estEnPoste } from "./statistiques-presence.ts";
+
+/** Période d'emploi : en dehors, aucune anomalie n'est signalée (comme les statistiques). */
+export type PeriodeEmploi = { debutEmploi: string | null; finEmploi: string | null };
 
 /** Anomalie d'une journée passée : signalée par une étoile, comme dans Gestor. */
 export type Anomalie = "absence" | "retard" | "sortie_manquante";
@@ -36,6 +40,7 @@ export function jourDePlanning(
   evenements: readonly EvenementPeriode[],
   joursEnHeures: ReadonlySet<string>,
   aujourdhui: string,
+  emploi: PeriodeEmploi = { debutEmploi: null, finEmploi: null },
 ): JourPlanning {
   const resume = resumerJour(journee, evenements);
   return {
@@ -43,7 +48,7 @@ export function jourDePlanning(
     theoriqueMinutes: journee.horaire?.dureePrevue ?? null,
     aEvenementEnHeures: joursEnHeures.has(journee.jour),
     estFutur: journee.jour > aujourdhui,
-    anomalies: anomaliesDuJour(journee, resume, aujourdhui),
+    anomalies: estEnPoste(emploi, journee.jour) ? anomaliesDuJour(journee, resume, aujourdhui) : [],
   };
 }
 
