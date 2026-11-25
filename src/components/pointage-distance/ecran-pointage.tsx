@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { CirclePause, CirclePlay, ClockArrowDown, ClockArrowUp, Fingerprint, LoaderCircle, LogIn, LogOut } from "lucide-react";
 import { pointerADistance } from "@/app/pointage/actions";
 import { Bouton } from "@/components/ui/bouton";
@@ -25,8 +25,20 @@ const OPTIONS: OptionCarte<EtatPointage>[] = ETATS_POINTAGE.map((etat) => ({ val
 /**
  * Écran de pointage de l'employé : position détectée (si exigée), photo prise sur le moment
  * (si exigée), type de pointage, puis un seul bouton « Pointer ». L'heure est celle du serveur.
+ * Sur ordinateur : position et photo côte à côte, puis le pointage à côté de `aCote`
+ * (pointages du jour).
  */
-export function EcranPointage({ exigePosition, exigePhoto, dernierEtat }: { exigePosition: boolean; exigePhoto: boolean; dernierEtat: string | null }) {
+export function EcranPointage({
+  exigePosition,
+  exigePhoto,
+  dernierEtat,
+  aCote,
+}: {
+  exigePosition: boolean;
+  exigePhoto: boolean;
+  dernierEtat: string | null;
+  aCote: ReactNode;
+}) {
   const position = usePosition(exigePosition);
   const [photo, setPhoto] = useState<Blob | null>(null);
   const [numeroPhoto, setNumeroPhoto] = useState(0);
@@ -60,32 +72,39 @@ export function EcranPointage({ exigePosition, exigePhoto, dernierEtat }: { exig
   }
 
   return (
-    <div className="flex flex-col gap-5">
-      {exigePosition && <CartePosition etat={position.etat} onActualiser={position.actualiser} />}
-      {exigePhoto && <PrisePhoto key={numeroPhoto} onChanger={setPhoto} />}
-
-      <section className="flex flex-col gap-4 rounded-xl border border-bordure bg-surface p-5 shadow-carte" aria-labelledby="titre-choix">
-        <h2 id="titre-choix" className="flex items-center gap-2 text-lg font-semibold text-marine">
-          <Fingerprint className="size-5 text-primaire" aria-hidden="true" />
-          {textes.choix.titre}
-        </h2>
-        <ChoixCartes nom={CHAMPS_POINTAGE_DISTANCE.etat} legende={textes.choix.legende} options={OPTIONS} valeur={etat} onChanger={setEtat} classeGrille="grid-cols-2 sm:grid-cols-3" />
-
-        <div aria-live="polite">
-          {message?.type === "succes" && <MessageSucces message={message.texte} />}
-          {message?.type === "erreur" && <MessageErreur message={message.texte} className="rounded-lg border border-erreur/30 bg-erreur/5 p-3" />}
+    <>
+      {(exigePosition || exigePhoto) && (
+        <div className={exigePosition && exigePhoto ? "grid gap-5 lg:grid-cols-2 lg:gap-6" : "grid gap-5"}>
+          {exigePosition && <CartePosition etat={position.etat} onActualiser={position.actualiser} />}
+          {exigePhoto && <PrisePhoto key={numeroPhoto} onChanger={setPhoto} />}
         </div>
+      )}
 
-        <Bouton onClick={pointer} disabled={enCours || manque !== null} className="min-h-14 w-full text-lg lg:min-h-14" aria-describedby={manque ? "pointage-manque" : undefined}>
-          {enCours ? <LoaderCircle className="size-6 animate-spin motion-reduce:animate-none" aria-hidden="true" /> : <Fingerprint className="size-6" aria-hidden="true" />}
-          {enCours ? textes.enCours : `${textes.pointer} : ${etats[etat]}`}
-        </Bouton>
-        {manque && (
-          <p id="pointage-manque" className="text-center text-sm text-texte-secondaire">
-            {manque}
-          </p>
-        )}
-      </section>
-    </div>
+      <div className="grid gap-5 lg:grid-cols-3 lg:items-start lg:gap-6">
+        <section className="flex flex-col gap-4 rounded-xl border border-bordure bg-surface p-5 shadow-carte lg:col-span-2 lg:p-6" aria-labelledby="titre-choix">
+          <h2 id="titre-choix" className="flex items-center gap-2 text-lg font-semibold text-marine">
+            <Fingerprint className="size-5 text-primaire" aria-hidden="true" />
+            {textes.choix.titre}
+          </h2>
+          <ChoixCartes nom={CHAMPS_POINTAGE_DISTANCE.etat} legende={textes.choix.legende} options={OPTIONS} valeur={etat} onChanger={setEtat} classeGrille="grid-cols-2 sm:grid-cols-3" />
+
+          <div aria-live="polite">
+            {message?.type === "succes" && <MessageSucces message={message.texte} />}
+            {message?.type === "erreur" && <MessageErreur message={message.texte} className="rounded-lg border border-erreur/30 bg-erreur/5 p-3" />}
+          </div>
+
+          <Bouton onClick={pointer} disabled={enCours || manque !== null} className="min-h-14 w-full text-lg lg:min-h-14" aria-describedby={manque ? "pointage-manque" : undefined}>
+            {enCours ? <LoaderCircle className="size-6 animate-spin motion-reduce:animate-none" aria-hidden="true" /> : <Fingerprint className="size-6" aria-hidden="true" />}
+            {enCours ? textes.enCours : `${textes.pointer} : ${etats[etat]}`}
+          </Bouton>
+          {manque && (
+            <p id="pointage-manque" className="text-center text-sm text-texte-secondaire">
+              {manque}
+            </p>
+          )}
+        </section>
+        {aCote}
+      </div>
+    </>
   );
 }

@@ -16,7 +16,7 @@ const MESSAGES_ECHEC = { refusee: textes.refusee, indisponible: textes.indisponi
  */
 export function CartePosition({ etat, onActualiser }: { etat: EtatPosition; onActualiser: () => void }) {
   return (
-    <section className="flex flex-col gap-3 rounded-xl border border-bordure bg-surface p-5 shadow-carte" aria-labelledby="titre-position">
+    <section className="flex h-full flex-col gap-3 rounded-xl border border-bordure bg-surface p-5 shadow-carte" aria-labelledby="titre-position">
       <div className="flex items-start justify-between gap-3">
         <div className="flex flex-col gap-1">
           <h2 id="titre-position" className="flex items-center gap-2 text-lg font-semibold text-marine">
@@ -30,7 +30,7 @@ export function CartePosition({ etat, onActualiser }: { etat: EtatPosition; onAc
         </Bouton>
       </div>
 
-      <div className="relative aspect-[4/3] w-full overflow-hidden rounded-lg border border-bordure bg-canevas sm:aspect-video" aria-live="polite">
+      <div className="relative aspect-[3/4] w-full overflow-hidden rounded-lg border border-bordure bg-canevas sm:aspect-video" aria-live="polite">
         {etat.etat === "trouvee" ? (
           <iframe
             key={`${etat.position.latitude},${etat.position.longitude}`}

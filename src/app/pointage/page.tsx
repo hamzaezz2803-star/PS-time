@@ -23,7 +23,7 @@ export default function PagePointage() {
   return (
     <div className="flex min-h-dvh flex-col bg-fond">
       <EnTeteEspace />
-      <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-5 px-4 py-6 sm:py-10">
+      <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-5 px-4 py-6 sm:py-8 lg:gap-6">
         <Suspense fallback={<Chargement message={textes.chargement} />}>
           <ContenuPointage />
         </Suspense>
@@ -58,11 +58,20 @@ async function ContenuPointage() {
     <>
       <AccueilEmploye employe={employe} maintenant={maintenant} />
       {refus ? (
-        <RefusPointage message={refus} />
+        <div className="grid gap-5 lg:grid-cols-3 lg:items-start lg:gap-6">
+          <div className="lg:col-span-2">
+            <RefusPointage message={refus} />
+          </div>
+          <PointagesDuJour pointages={pointages} />
+        </div>
       ) : (
-        <EcranPointage exigePosition={employe.exigePosition} exigePhoto={employe.exigePhoto} dernierEtat={pointages.at(-1)?.etat ?? null} />
+        <EcranPointage
+          exigePosition={employe.exigePosition}
+          exigePhoto={employe.exigePhoto}
+          dernierEtat={pointages.at(-1)?.etat ?? null}
+          aCote={<PointagesDuJour pointages={pointages} />}
+        />
       )}
-      <PointagesDuJour pointages={pointages} />
     </>
   );
 }

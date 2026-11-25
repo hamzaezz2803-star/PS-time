@@ -1,10 +1,21 @@
 import type { NextConfig } from "next";
 
+/**
+ * Test depuis un téléphone du réseau local (npm run dev:telephone) : les adresses listées dans
+ * BETTER_AUTH_TRUSTED_ORIGINS (ex. https://192.168.1.20:3000) sont aussi acceptées par le serveur
+ * de développement. Sans effet en production.
+ */
+const originesDeDeveloppement = (process.env.BETTER_AUTH_TRUSTED_ORIGINS ?? "")
+  .split(",")
+  .map((origine) => URL.parse(origine.trim())?.hostname)
+  .filter((nom): nom is string => Boolean(nom));
+
 const nextConfig: NextConfig = {
   /* config options here */
   cacheComponents: true,
   // Bouton « N » des outils de Next.js masqué (développement seulement) : les erreurs restent affichées.
   devIndicators: false,
+  allowedDevOrigins: originesDeDeveloppement,
   // Pas encore de page d'accueil : la racine mène à la connexion (307, non mis en cache).
   redirects: async () => [
     { source: "/", destination: "/connexion", permanent: false },

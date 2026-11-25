@@ -171,7 +171,7 @@ export const TEXTES_PERSONNES = {
     exigePosition: "Joindre la position (géolocalisation)",
     aideExigePosition: "Donnée personnelle : à n'exiger que si le lieu de travail doit être contrôlé.",
     exigePhoto: "Joindre une photo prise sur le moment",
-    aideExigePhoto: "Vérifie que c'est bien l'employé qui pointe.",
+    aideExigePhoto: "Photo du lieu ou de l'employé, prise au moment du pointage (caméra arrière ou avant).",
     compte: "Connexion de l'employé",
     compteExplication:
       "L'employé se connecte sur la page de connexion habituelle, depuis un appareil autorisé. Identifiant : son matricule. Mot de passe provisoire : son matricule, tel qu'il est écrit ; il devra le changer à sa première connexion.",

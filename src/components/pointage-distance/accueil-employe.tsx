@@ -18,18 +18,23 @@ function Info({ libelle, valeur }: { libelle: string; valeur: string | null }) {
   );
 }
 
-/** « Bonjour, Prénom », date, horloge et informations de l'employé (jamais de donnée sensible). */
+/**
+ * « Bonjour, Prénom », date, horloge et informations de l'employé (jamais de donnée sensible).
+ * Empilé sur téléphone, en bandeau sur une ligne sur ordinateur.
+ */
 export function AccueilEmploye({ employe, maintenant }: { employe: EmployePourPointage; maintenant: Date }) {
   return (
-    <section className={`${CARTE} flex flex-col gap-5`} aria-labelledby="titre-bonjour">
-      <div className="flex flex-col items-center gap-3 text-center">
-        <h1 id="titre-bonjour" className="text-2xl font-bold text-marine sm:text-3xl">
-          {textes.bonjour(employe.prenom)}
-        </h1>
-        <p className="text-base capitalize text-texte-secondaire">{formaterDate(maintenant)}</p>
+    <section className={`${CARTE} flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between lg:gap-8 lg:p-6`} aria-labelledby="titre-bonjour">
+      <div className="flex flex-col items-center gap-3 text-center lg:flex-row lg:gap-8 lg:text-left">
+        <div className="flex flex-col gap-1">
+          <h1 id="titre-bonjour" className="text-2xl font-bold text-marine sm:text-3xl">
+            {textes.bonjour(employe.prenom)}
+          </h1>
+          <p className="text-base capitalize text-texte-secondaire">{formaterDate(maintenant)}</p>
+        </div>
         <HorlogePalettes libelle={textes.horloge} />
       </div>
-      <dl className="grid grid-cols-2 gap-x-4 gap-y-3 border-t border-bordure pt-4">
+      <dl className="grid grid-cols-2 gap-x-6 gap-y-3 border-t border-bordure pt-4 lg:border-l lg:border-t-0 lg:pl-8 lg:pt-0">
         <Info libelle={textes.infos.matricule} valeur={employe.matricule} />
         <Info libelle={textes.infos.departement} valeur={employe.departement} />
         <Info libelle={textes.infos.poste} valeur={employe.poste} />
