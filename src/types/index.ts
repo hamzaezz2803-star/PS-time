@@ -173,6 +173,8 @@ export type EmployeDetail = {
   photoModifieeLe: Date | null;
   /** Pointage à distance et doigts prévus pour l'enrôlement (aucune donnée biométrique). */
   acces: import("@/lib/metier/acces-pointage").AccesPointage;
+  /** Compte de connexion actif (pointage à distance), ou null. Jamais le mot de passe. */
+  compte: { identifiant: string; motDePasseProvisoire: boolean } | null;
   informations: { libelle: string; valeur: string }[];
 };
 
