@@ -1,6 +1,6 @@
 import "server-only";
 
-import { inArray, sql } from "drizzle-orm";
+import { inArray } from "drizzle-orm";
 import { cacheLife, cacheTag } from "next/cache";
 import { APPARENCE_PAR_DEFAUT, apparenceDepuisReglages, reglagesDepuisApparence, type Apparence } from "@/lib/metier/apparence";
 import { obtenirBase } from "./base";
@@ -37,7 +37,7 @@ export async function enregistrerApparence(apparence: Apparence, auteurId: strin
       await transaction
         .insert(parametres)
         .values({ cle, valeur, modifiePar: auteurId })
-        .onDuplicateKeyUpdate({ set: { valeur: sql`values(${parametres.valeur})`, modifiePar: auteurId } });
+        .onConflictDoUpdate({ target: parametres.cle, set: { valeur, modifiePar: auteurId } });
     }
   });
 }

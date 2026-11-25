@@ -33,7 +33,7 @@ const dates = { createdAt: "creeLe", updatedAt: "modifieLe" } as const;
 export const auth = betterAuth({
   appName: "PS Time",
   database: drizzleAdapter(obtenirBase(), {
-    provider: "mysql",
+    provider: "pg",
     schema: { utilisateurs, sessions, comptes, verifications },
   }),
   advanced: {

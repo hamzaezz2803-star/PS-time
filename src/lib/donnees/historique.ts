@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, count, desc, eq, gte, like, lt, or, type SQL } from "drizzle-orm";
+import { and, count, desc, eq, gte, ilike, lt, or, type SQL } from "drizzle-orm";
 import {
   CONSERVATION_HISTORIQUE_JOURS,
   FUSEAU_HORAIRE,
@@ -63,7 +63,7 @@ function conditions(recherche: RechercheHistorique): SQL | undefined {
     fin ? lt(historique.creeLe, fin) : undefined,
     recherche.auteurId ? eq(historique.auteurId, recherche.auteurId) : undefined,
     recherche.module ? eq(historique.module, recherche.module) : undefined,
-    motif ? or(like(historique.libelle, motif), like(historique.auteurNom, motif), like(historique.auteurIdentifiant, motif)) : undefined,
+    motif ? or(ilike(historique.libelle, motif), ilike(historique.auteurNom, motif), ilike(historique.auteurIdentifiant, motif)) : undefined,
   );
 }
 

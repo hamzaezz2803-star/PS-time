@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, asc, count, desc, eq, gte, inArray, isNull, like, lte, or, type SQL } from "drizzle-orm";
+import { and, asc, count, desc, eq, gte, inArray, isNull, ilike, lte, or, type SQL } from "drizzle-orm";
 import { FUSEAU_HORAIRE } from "@/lib/constantes";
 import { jourDansFuseau } from "@/lib/metier/dates";
 import { saisiesSeChevauchent, type EvenementCandidat, type SaisieEvenement } from "@/lib/metier/evenements";
@@ -19,7 +19,7 @@ function conditionRecherche(recherche: RechercheAbsences): SQL | undefined {
   const conditions: (SQL | undefined)[] = [];
   if (recherche.employe) {
     const motif = motifContient(recherche.employe);
-    conditions.push(or(like(employes.nom, motif), like(employes.prenom, motif), like(employes.matricule, motif)));
+    conditions.push(or(ilike(employes.nom, motif), ilike(employes.prenom, motif), ilike(employes.matricule, motif)));
   }
   if (recherche.jour) conditions.push(lte(evenementsEmployes.dateDebut, recherche.jour), gte(evenementsEmployes.dateFin, recherche.jour));
   return and(...conditions);
@@ -145,8 +145,8 @@ export async function enregistrerAbsences(donnees: DonneesAbsences, saisiPar: st
 
 /** Supprime une absence. Renvoie false si elle n'existe plus. */
 export async function supprimerAbsence(id: string): Promise<boolean> {
-  const [resultat] = await obtenirBase().delete(evenementsEmployes).where(eq(evenementsEmployes.id, id));
-  return resultat.affectedRows > 0;
+  const resultat = await obtenirBase().delete(evenementsEmployes).where(eq(evenementsEmployes.id, id));
+  return (resultat.rowCount ?? 0) > 0;
 }
 
 /** Vrai si l'événement est attribué à au moins un employé (sa suppression serait refusée par la base). */

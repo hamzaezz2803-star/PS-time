@@ -67,8 +67,8 @@ export async function enregistrerAffectation(id: string | null, donnees: Donnees
       return { ok: false, erreur: "chevauchement" };
     }
     if (id) {
-      const [resultat] = await transaction.update(affectations).set(donnees).where(eq(affectations.id, id));
-      return resultat.affectedRows > 0 ? { ok: true, id } : { ok: false, erreur: "introuvable" };
+      const resultat = await transaction.update(affectations).set(donnees).where(eq(affectations.id, id));
+      return (resultat.rowCount ?? 0) > 0 ? { ok: true, id } : { ok: false, erreur: "introuvable" };
     }
     const nouvelId = crypto.randomUUID();
     await transaction.insert(affectations).values({ id: nouvelId, ...donnees });

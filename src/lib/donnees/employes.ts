@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, asc, count, eq, inArray, isNotNull, like, or, type SQL } from "drizzle-orm";
+import { and, asc, count, eq, inArray, isNotNull, ilike, or, type SQL } from "drizzle-orm";
 import { idsDescendants } from "@/lib/metier/arbre";
 import { motifContient } from "@/lib/metier/recherche";
 import type { RechercheEmployes } from "@/lib/validation/recherche-employes";
@@ -23,11 +23,11 @@ async function conditionRecherche(recherche: RechercheEmployes): Promise<SQL | u
   const conditions: (SQL | undefined)[] = [];
   if (recherche.nom) {
     const motif = motifContient(recherche.nom);
-    conditions.push(or(like(employes.nom, motif), like(employes.prenom, motif)));
+    conditions.push(or(ilike(employes.nom, motif), ilike(employes.prenom, motif)));
   }
   if (recherche.matricule) {
     const motif = motifContient(recherche.matricule);
-    conditions.push(or(like(employes.matricule, motif), like(employes.numeroBadge, motif)));
+    conditions.push(or(ilike(employes.matricule, motif), ilike(employes.numeroBadge, motif)));
   }
   if (recherche.departementId) {
     const tous = await obtenirBase().select({ id: departements.id, nom: departements.nom, parentId: departements.parentId }).from(departements);

@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, asc, desc, eq, gte, inArray, like, lt, lte, or, type SQL } from "drizzle-orm";
+import { and, asc, desc, eq, gte, inArray, ilike, lt, lte, or, type SQL } from "drizzle-orm";
 import { FUSEAU_HORAIRE, RAPPORT_LIGNES_MAX, STATISTIQUES_EMPLOYES_MAX, UN_JOUR_MILLISECONDES } from "@/lib/constantes";
 import { decrirePeriode } from "@/components/absences/periode-absence";
 import { formaterJour } from "@/lib/formats";
@@ -37,7 +37,7 @@ async function conditionEmployes(recherche: RechercheEtat): Promise<SQL | undefi
   }
   if (recherche.employe) {
     const motif = motifContient(recherche.employe);
-    conditions.push(or(like(employes.nom, motif), like(employes.prenom, motif), like(employes.matricule, motif)));
+    conditions.push(or(ilike(employes.nom, motif), ilike(employes.prenom, motif), ilike(employes.matricule, motif)));
   }
   return and(...conditions);
 }

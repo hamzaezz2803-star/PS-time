@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, count, desc, eq, gte, inArray, like, lt, or, sql, type SQL } from "drizzle-orm";
+import { and, count, desc, eq, gte, ilike, inArray, lt, or, type SQL } from "drizzle-orm";
 import { FUSEAU_HORAIRE } from "@/lib/constantes";
 import { heureLocaleVersUtc } from "@/lib/metier/pointages";
 import { motifContient } from "@/lib/metier/recherche";
@@ -16,7 +16,7 @@ function conditionRecherche(recherche: RecherchePointages): SQL | undefined {
   const conditions: (SQL | undefined)[] = [eq(pointages.source, "manuel")];
   if (recherche.employe) {
     const motif = motifContient(recherche.employe);
-    conditions.push(or(like(employes.nom, motif), like(employes.prenom, motif), like(employes.matricule, motif)));
+    conditions.push(or(ilike(employes.nom, motif), ilike(employes.prenom, motif), ilike(employes.matricule, motif)));
   }
   const debutJour = recherche.jour ? heureLocaleVersUtc(recherche.jour, "00:00", FUSEAU_HORAIRE) : null;
   if (debutJour) {
@@ -91,16 +91,16 @@ export async function insererPointagesManuels(donnees: DonneesPointages, saisiPa
         })),
       )
       // Saisie simultanée du même pointage : le doublon est laissé tel quel, les autres erreurs restent signalées.
-      .onDuplicateKeyUpdate({ set: { id: sql`${pointages.id}` } });
+      .onConflictDoNothing({ target: [pointages.employeId, pointages.horodatage, pointages.etat] });
     return nouveaux.length;
   });
 }
 
 /** Supprime un pointage manuel (jamais un pointage de badgeuse). Renvoie false s'il n'existe plus. */
 export async function supprimerPointageManuel(id: string): Promise<boolean> {
-  const [resultat] = await obtenirBase()
+  const resultat = await obtenirBase()
     .delete(pointages)
     .where(and(eq(pointages.id, id), eq(pointages.source, "manuel")));
-  return resultat.affectedRows > 0;
+  return (resultat.rowCount ?? 0) > 0;
 }
 
