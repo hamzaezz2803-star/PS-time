@@ -159,7 +159,7 @@ export const JOURS_PAR_SEMAINE = 7;
 export const CHEMIN_POINTAGES_MANUELS = "/exceptions/pointages-manuels";
 /** États d'un pointage, dans l'ordre d'une journée. */
 export const ETATS_POINTAGE = ["entree", "sortie", "debut_pause", "fin_pause", "debut_heures_sup", "fin_heures_sup"] as const;
-export const SOURCES_POINTAGE = ["manuel", "badgeuse"] as const;
+export const SOURCES_POINTAGE = ["manuel", "badgeuse", "distance"] as const;
 export const POINTAGES_PAR_PAGE = 50;
 /**
  * Événements : motifs d'absence ou de présence (congé, maladie, formation, mission...).
@@ -177,6 +177,25 @@ export const UNITES_SAISIE_EVENEMENT = ["journee", "demi_journee", "heures"] as 
 /** Appareils hors badgeuse depuis lesquels un employé peut être autorisé à pointer. */
 export const APPAREILS_POINTAGE = ["pc", "tablette", "telephone"] as const;
 export type AppareilPointage = (typeof APPAREILS_POINTAGE)[number];
+
+/**
+ * Espace de pointage de l'employé (compte créé avec le pointage à distance : identifiant et
+ * mot de passe provisoire = son matricule). Photo réduite dans le navigateur, gardée 90 jours.
+ */
+export const CHEMIN_POINTAGE_EMPLOYE = "/pointage";
+export const CHEMIN_PHOTO_POINTAGE = (id: string) => `/presence/detail-jour/photo-pointage/${id}`;
+export const PHOTO_POINTAGE_COTE_MAX_PIXELS = 640;
+export const PHOTO_POINTAGE_QUALITE_JPEG = 0.8;
+export const PHOTO_POINTAGE_TAILLE_MAX_OCTETS = 204_800;
+export const CONSERVATION_PHOTOS_POINTAGE_JOURS = 90;
+/** Précision GPS acceptée au plus (mètres) : au-delà, la position est trop vague pour être utile. */
+export const PRECISION_POSITION_MAX_METRES = 100_000;
+/** Délai d'attente de la géolocalisation du navigateur. */
+export const DELAI_POSITION_MILLISECONDES = 20_000;
+/** Pointages à distance par employé et par minute au plus (double clic, envoi répété). */
+export const POINTAGES_DISTANCE_PAR_MINUTE = 3;
+/** Zoom de la carte OpenStreetMap : demi-largeur du cadre autour de la position, en degrés. */
+export const CARTE_DEMI_CADRE_DEGRES = 0.004;
 
 /**
  * Doigts à enrôler sur la badgeuse, numérotés comme les badgeuses ZKTeco : 0 = auriculaire
