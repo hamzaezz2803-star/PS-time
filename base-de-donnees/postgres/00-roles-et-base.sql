@@ -25,3 +25,9 @@ GRANT CONNECT ON DATABASE ps_time TO ps_time_app;
 --   GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO ps_time_app;
 -- ALTER DEFAULT PRIVILEGES FOR ROLE ps_time_proprietaire IN SCHEMA public
 --   GRANT USAGE, SELECT ON SEQUENCES TO ps_time_app;
+
+-- ===== Partie C : connecté en « ps_time_proprietaire » sur « ps_time », APRÈS npm run db:migrer =====
+-- (ou après le chargement d'une base convertie). L'application lit la version de la base
+-- (page Sauvegarde) dans le suivi des migrations de Drizzle, en lecture seule.
+-- GRANT USAGE ON SCHEMA drizzle TO ps_time_app;
+-- GRANT SELECT ON drizzle.__drizzle_migrations TO ps_time_app;

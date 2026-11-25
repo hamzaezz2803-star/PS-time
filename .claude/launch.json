@@ -16,17 +16,6 @@
         "BETTER_AUTH_URL": "http://localhost:3001"
       },
       "port": 3001
-    },
-    {
-      "name": "ps-time-postgres-essai",
-      "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "start", "--", "-p", "3002"],
-      "env": {
-        "DATABASE_URL": "postgres://postgres:postgres@127.0.0.1:54329/postgres",
-        "DATABASE_MAX_CONNEXIONS": "1",
-        "BETTER_AUTH_URL": "http://localhost:3002"
-      },
-      "port": 3002
     }
   ]
 }
