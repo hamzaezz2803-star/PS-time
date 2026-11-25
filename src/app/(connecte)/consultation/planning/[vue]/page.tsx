@@ -11,6 +11,7 @@ import { ResumePlanning } from "@/components/planning/resume-planning";
 import { Chargement } from "@/components/ui/chargement";
 import { EnTetePage } from "@/components/ui/en-tete-page";
 import { MessageErreur } from "@/components/ui/message-erreur";
+import { VUES_PLANNING } from "@/lib/constantes";
 import { aujourdhuiLocal } from "@/lib/donnees/compteurs-calcul";
 import { listerDepartements } from "@/lib/donnees/departements";
 import { listerEmployesSelection } from "@/lib/donnees/groupes";
@@ -22,6 +23,9 @@ import { TEXTES_PLANNING as textes } from "@/lib/textes/planning";
 import { lireSelectionPlanning, lireVuePlanning, type SelectionPlanning, type VuePlanning } from "@/lib/validation/planning-consultation";
 
 export const metadata: Metadata = { title: textes.titrePage };
+
+// Les deux affichages sont connus : leurs adresses sont préparées à la construction.
+export const generateStaticParams = () => VUES_PLANNING.map((vue) => ({ vue }));
 
 type ParametresRecherche = Promise<Record<string, string | string[] | undefined>>;
 
