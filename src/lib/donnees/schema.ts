@@ -1,62 +1,57 @@
 import { sql } from "drizzle-orm";
 import {
-  type AnyMySqlColumn,
+  type AnyPgColumn,
   boolean,
-  char,
   check,
   customType,
   date as dateCalendrier,
-  datetime,
-  decimal,
   foreignKey,
   index,
-  int,
-  mysqlTable,
+  integer as int,
+  numeric,
+  pgTable,
   primaryKey,
   text,
+  timestamp,
   uniqueIndex,
+  uuid,
   varchar,
-} from "drizzle-orm/mysql-core";
+} from "drizzle-orm/pg-core";
 import { ACTIONS_HISTORIQUE, COULEUR_REGLE_DEFAUT, COULEURS_REGLE, COULEURS_PERSONNALISABLES,MODULES_HISTORIQUE, PAGES, POLICES, TAILLES_TEXTE, THEMES, TYPES_EVENEMENT, TYPES_PIECE_JOINTE, UNITES_SAISIE_EVENEMENT, DUREE_EVENEMENT_MAX_MINUTES, PIECE_JOINTE_TAILLE_MAX_OCTETS } from "../constantes.ts";
 
 /**
  * Schéma de la base. Toute modification passe par une migration :
  * `npm run db:generer -- --name <nom>` puis `npm run db:migrer`.
  *
- * Compatible MariaDB 10.4+ et MySQL 8.0.16+.
- * Les dates sont en UTC (la connexion force time_zone = '+00:00').
+ * PostgreSQL 13 ou plus. Dates en `timestamptz` (UTC) ; `modifie_le` est tenu à jour par le
+ * déclencheur `maj_modifie_le` (migration 0000, que Drizzle ne sait pas écrire).
  * Les tables utilisateurs, sessions, comptes et verifications suivent le
  * modèle de Better Auth (voir src/lib/donnees/authentification.ts).
  */
 
-// UUID() de MariaDB/MySQL est un v1 (horodaté, devinable) : l'application fournit un v4 aléatoire.
-// Le défaut SQL ne sert que pour une insertion manuelle (phpMyAdmin).
+// UUID v4 aléatoire fourni par l'application ; le défaut SQL sert à une insertion manuelle (DBeaver).
 const identifiantUnique = () =>
-  char("id", { length: 36 })
+  uuid("id")
     .primaryKey()
-    .default(sql`(uuid())`)
+    .defaultRandom()
     .$defaultFn(() => crypto.randomUUID());
 
 /** Liste SQL `'a', 'b'` tirée d'une constante de l'application (valeurs fixes, jamais saisies). */
 const listeSql = (valeurs: readonly string[]) => sql.raw(valeurs.map((valeur) => `'${valeur}'`).join(", "));
 
 const referenceUtilisateur = () =>
-  char("utilisateur_id", { length: 36 })
+  uuid("utilisateur_id")
     .notNull()
     .references(() => utilisateurs.id, { onDelete: "cascade" });
 
-const date = (nom: string) => datetime(nom, { fsp: 3, mode: "date" });
+const date = (nom: string) => timestamp(nom, { precision: 3, withTimezone: true, mode: "date" });
 
-const dateCreation = () =>
-  date("cree_le").notNull().default(sql`CURRENT_TIMESTAMP(3)`);
+const dateCreation = () => date("cree_le").notNull().defaultNow();
 
-// Drizzle n'offre « ON UPDATE » que pour TIMESTAMP (limité à 2038) : on l'écrit dans le défaut.
-const dateModification = () =>
-  date("modifie_le")
-    .notNull()
-    .default(sql`CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3)`);
+// Mise à jour automatique : déclencheur `maj_modifie_le` sur chaque table (voir l'en-tête).
+const dateModification = () => date("modifie_le").notNull().defaultNow();
 
-export const utilisateurs = mysqlTable(
+export const utilisateurs = pgTable(
   "utilisateurs",
   {
     id: identifiantUnique(),
@@ -79,21 +74,20 @@ export const utilisateurs = mysqlTable(
   (table) => [
     uniqueIndex("utilisateurs_identifiant_idx").on(table.identifiant),
     uniqueIndex("utilisateurs_email_idx").on(table.email),
-    // Comparaison binaire : la collation par défaut ignore la casse.
     check(
       "utilisateurs_email_minuscules",
-      sql`CAST(${table.email} AS BINARY) = CAST(LOWER(${table.email}) AS BINARY)`,
+      sql`${table.email} = lower(${table.email})`,
     ),
     check(
       "utilisateurs_identifiant_minuscules",
-      sql`CAST(${table.identifiant} AS BINARY) = CAST(LOWER(${table.identifiant}) AS BINARY)`,
+      sql`${table.identifiant} = lower(${table.identifiant})`,
     ),
-    check("utilisateurs_nom_non_vide", sql`CHAR_LENGTH(TRIM(${table.nom})) > 0`),
+    check("utilisateurs_nom_non_vide", sql`char_length(trim(${table.nom})) > 0`),
   ],
 );
 
 /** Sessions de connexion. Le jeton est stocké dans un cookie httpOnly. */
-export const sessions = mysqlTable(
+export const sessions = pgTable(
   "sessions",
   {
     id: identifiantUnique(),
@@ -113,7 +107,7 @@ export const sessions = mysqlTable(
 );
 
 /** Moyens de connexion d'un utilisateur. Pour l'instant : mot de passe (fournisseur « credential »). */
-export const comptes = mysqlTable(
+export const comptes = pgTable(
   "comptes",
   {
     id: identifiantUnique(),
@@ -145,7 +139,7 @@ export const comptes = mysqlTable(
  * Pages qu'un administrateur a le droit de voir et de gérer (une ligne par page accordée).
  * Un super administrateur a tous les droits sans ligne ici. Supprimées avec l'utilisateur.
  */
-export const autorisationsPages = mysqlTable(
+export const autorisationsPages = pgTable(
   "autorisations_pages",
   {
     id: identifiantUnique(),
@@ -165,13 +159,13 @@ export const autorisationsPages = mysqlTable(
  * thème, police, taille du texte et couleurs personnalisées (`#rrggbb`). La base n'accepte
  * que les valeurs connues de l'application.
  */
-export const parametres = mysqlTable(
+export const parametres = pgTable(
   "parametres",
   {
     id: identifiantUnique(),
     cle: varchar("cle", { length: 30 }).notNull(),
     valeur: varchar("valeur", { length: 50 }).notNull(),
-    modifiePar: char("modifie_par", { length: 36 }).references(() => utilisateurs.id, { onDelete: "set null" }),
+    modifiePar: uuid("modifie_par").references(() => utilisateurs.id, { onDelete: "set null" }),
     creeLe: dateCreation(),
     modifieLe: dateModification(),
   },
@@ -180,7 +174,7 @@ export const parametres = mysqlTable(
     index("parametres_modifie_par_idx").on(table.modifiePar),
     check(
       "parametres_valeur_valide",
-      sql`(${table.cle} = 'theme' AND ${table.valeur} IN (${listeSql(THEMES)})) OR (${table.cle} = 'police' AND ${table.valeur} IN (${listeSql(POLICES)})) OR (${table.cle} = 'taille_texte' AND ${table.valeur} IN (${listeSql(TAILLES_TEXTE)})) OR (${table.cle} IN (${listeSql(COULEURS_PERSONNALISABLES.map((couleur) => `couleur_${couleur}`))}) AND ${table.valeur} REGEXP '^#[0-9a-f]{6}$')`,
+      sql`(${table.cle} = 'theme' AND ${table.valeur} IN (${listeSql(THEMES)})) OR (${table.cle} = 'police' AND ${table.valeur} IN (${listeSql(POLICES)})) OR (${table.cle} = 'taille_texte' AND ${table.valeur} IN (${listeSql(TAILLES_TEXTE)})) OR (${table.cle} IN (${listeSql(COULEURS_PERSONNALISABLES.map((couleur) => `couleur_${couleur}`))}) AND ${table.valeur} ~ '^#[0-9a-f]{6}$')`,
     ),
   ],
 );
@@ -190,7 +184,7 @@ export const parametres = mysqlTable(
  * quoi sur quel élément (`libelle` : nom affiché, jamais de pièce d'identité ni de contact).
  * Visible selon le module ; `administration` est réservé au super administrateur.
  */
-export const notifications = mysqlTable(
+export const notifications = pgTable(
   "notifications",
   {
     id: identifiantUnique(),
@@ -200,7 +194,7 @@ export const notifications = mysqlTable(
     libelle: varchar("libelle", { length: 150 }),
     lien: varchar("lien", { length: 200 }),
     // Auteur : gardé par son nom si le compte est supprimé ensuite.
-    auteurId: char("auteur_id", { length: 36 }).references(() => utilisateurs.id, { onDelete: "set null" }),
+    auteurId: uuid("auteur_id").references(() => utilisateurs.id, { onDelete: "set null" }),
     auteurNom: varchar("auteur_nom", { length: 100 }).notNull(),
     creeLe: dateCreation(),
     modifieLe: dateModification(),
@@ -220,7 +214,7 @@ export const notifications = mysqlTable(
  * comptes. `libelle` : nom affiché, jamais de pièce d'identité, de contact ni de mot de passe.
  * L'auteur est gardé par son nom et son identifiant si le compte est supprimé ensuite.
  */
-export const historique = mysqlTable(
+export const historique = pgTable(
   "historique",
   {
     id: identifiantUnique(),
@@ -229,7 +223,7 @@ export const historique = mysqlTable(
     module: varchar("module", { length: 20 }).notNull(),
     libelle: varchar("libelle", { length: 150 }),
     lien: varchar("lien", { length: 200 }),
-    auteurId: char("auteur_id", { length: 36 }).references(() => utilisateurs.id, { onDelete: "set null" }),
+    auteurId: uuid("auteur_id").references(() => utilisateurs.id, { onDelete: "set null" }),
     auteurNom: varchar("auteur_nom", { length: 100 }).notNull(),
     auteurIdentifiant: varchar("auteur_identifiant", { length: 50 }),
     creeLe: dateCreation(),
@@ -245,7 +239,7 @@ export const historique = mysqlTable(
 );
 
 /** Jetons temporaires (réinitialisation de mot de passe, vérification d'e-mail). */
-export const verifications = mysqlTable(
+export const verifications = pgTable(
   "verifications",
   {
     id: identifiantUnique(),
@@ -262,7 +256,7 @@ export const verifications = mysqlTable(
  * Sites (entreprises ou établissements gérés par l'installation). Un département, un poste
  * ou un employé peut être rattaché à un site ; un site encore utilisé ne peut pas être supprimé.
  */
-export const sites = mysqlTable(
+export const sites = pgTable(
   "sites",
   {
     id: identifiantUnique(),
@@ -272,26 +266,26 @@ export const sites = mysqlTable(
     modifieLe: dateModification(),
   },
   (table) => [
-    uniqueIndex("sites_nom_idx").on(table.nom),
-    check("sites_nom_non_vide", sql`CHAR_LENGTH(TRIM(${table.nom})) > 0`),
+    uniqueIndex("sites_nom_idx").on(sql`lower(${table.nom})`),
+    check("sites_nom_non_vide", sql`char_length(trim(${table.nom})) > 0`),
   ],
 );
 
 /** Site facultatif d'un département, d'un poste ou d'un employé. */
 const referenceSite = () =>
-  char("site_id", { length: 36 }).references(() => sites.id, { onDelete: "restrict" });
+  uuid("site_id").references(() => sites.id, { onDelete: "restrict" });
 
 /**
  * Départements de l'entreprise, organisés en arbre (un parent, plusieurs enfants).
  * Un département qui a des sous-départements ne peut pas être supprimé (restrict).
  */
-export const departements = mysqlTable(
+export const departements = pgTable(
   "departements",
   {
     id: identifiantUnique(),
     nom: varchar("nom", { length: 100 }).notNull(),
-    parentId: char("parent_id", { length: 36 }).references(
-      (): AnyMySqlColumn => departements.id,
+    parentId: uuid("parent_id").references(
+      (): AnyPgColumn => departements.id,
       { onDelete: "restrict" },
     ),
     siteId: referenceSite(),
@@ -301,10 +295,10 @@ export const departements = mysqlTable(
   (table) => [
     // Deux sous-départements d'un même parent ne peuvent pas porter le même nom.
     // (À la racine, parent_id est NULL : l'application fait la vérification.)
-    uniqueIndex("departements_parent_nom_idx").on(table.parentId, table.nom),
+    uniqueIndex("departements_parent_nom_idx").on(table.parentId, sql`lower(${table.nom})`),
     index("departements_parent_idx").on(table.parentId),
     index("departements_site_idx").on(table.siteId),
-    check("departements_nom_non_vide", sql`CHAR_LENGTH(TRIM(${table.nom})) > 0`),
+    check("departements_nom_non_vide", sql`char_length(trim(${table.nom})) > 0`),
     check(
       "departements_pas_son_propre_parent",
       sql`${table.parentId} IS NULL OR ${table.parentId} <> ${table.id}`,
@@ -316,15 +310,15 @@ export const departements = mysqlTable(
  * Postes (fonctions) de l'entreprise, organisés en arbre comme les départements.
  * Le numéro est unique ; « ordre » règle l'ordre d'affichage (plus petit en premier).
  */
-export const postes = mysqlTable(
+export const postes = pgTable(
   "postes",
   {
     id: identifiantUnique(),
     code: varchar("code", { length: 30 }).notNull(),
     nom: varchar("nom", { length: 100 }).notNull(),
     ordre: int("ordre").notNull().default(99999),
-    parentId: char("parent_id", { length: 36 }).references(
-      (): AnyMySqlColumn => postes.id,
+    parentId: uuid("parent_id").references(
+      (): AnyPgColumn => postes.id,
       { onDelete: "restrict" },
     ),
     siteId: referenceSite(),
@@ -332,12 +326,12 @@ export const postes = mysqlTable(
     modifieLe: dateModification(),
   },
   (table) => [
-    uniqueIndex("postes_code_idx").on(table.code),
-    uniqueIndex("postes_parent_nom_idx").on(table.parentId, table.nom),
+    uniqueIndex("postes_code_idx").on(sql`lower(${table.code})`),
+    uniqueIndex("postes_parent_nom_idx").on(table.parentId, sql`lower(${table.nom})`),
     index("postes_parent_idx").on(table.parentId),
     index("postes_site_idx").on(table.siteId),
-    check("postes_code_non_vide", sql`CHAR_LENGTH(TRIM(${table.code})) > 0`),
-    check("postes_nom_non_vide", sql`CHAR_LENGTH(TRIM(${table.nom})) > 0`),
+    check("postes_code_non_vide", sql`char_length(trim(${table.code})) > 0`),
+    check("postes_nom_non_vide", sql`char_length(trim(${table.nom})) > 0`),
     check("postes_ordre_borne", sql`${table.ordre} BETWEEN 0 AND 99999`),
     check(
       "postes_pas_son_propre_parent",
@@ -353,7 +347,7 @@ const jour = (nom: string) => dateCalendrier(nom, { mode: "string" });
  * Employés (personnes pointées). Seules les informations utiles au pointage sont
  * collectées : pas de date de naissance, de CIN ni de genre (minimisation).
  */
-export const employes = mysqlTable(
+export const employes = pgTable(
   "employes",
   {
     id: identifiantUnique(),
@@ -361,13 +355,13 @@ export const employes = mysqlTable(
     numeroBadge: varchar("numero_badge", { length: 30 }).notNull(),
     prenom: varchar("prenom", { length: 100 }).notNull(),
     nom: varchar("nom", { length: 100 }).notNull(),
-    departementId: char("departement_id", { length: 36 })
+    departementId: uuid("departement_id")
       .notNull()
       .references(() => departements.id, { onDelete: "restrict" }),
-    posteId: char("poste_id", { length: 36 }).references(() => postes.id, {
+    posteId: uuid("poste_id").references(() => postes.id, {
       onDelete: "set null",
     }),
-    groupeId: char("groupe_id", { length: 36 }).references((): AnyMySqlColumn => groupes.id, {
+    groupeId: uuid("groupe_id").references((): AnyPgColumn => groupes.id, {
       onDelete: "set null",
     }),
     siteId: referenceSite(),
@@ -396,27 +390,27 @@ export const employes = mysqlTable(
     modifieLe: dateModification(),
   },
   (table) => [
-    check("employes_appareils_distance_valides", sql`${table.appareilsDistance} REGEXP '^((pc|tablette|telephone)(,(pc|tablette|telephone)){0,2})?$'`),
-    check("employes_doigts_valides", sql`${table.doigtsAEnroler} REGEXP '^[0-9]{0,10}$'`),
+    check("employes_appareils_distance_valides", sql`${table.appareilsDistance} ~ '^((pc|tablette|telephone)(,(pc|tablette|telephone)){0,2})?$'`),
+    check("employes_doigts_valides", sql`${table.doigtsAEnroler} ~ '^[0-9]{0,10}$'`),
     // Sans autorisation, aucun appareil ni condition n'est gardé.
     check(
       "employes_distance_coherente",
-      sql`${table.pointageDistance} = 1 OR (${table.appareilsDistance} = '' AND ${table.distanceExigePosition} = 0 AND ${table.distanceExigePhoto} = 0)`,
+      sql`${table.pointageDistance} OR (${table.appareilsDistance} = '' AND NOT ${table.distanceExigePosition} AND NOT ${table.distanceExigePhoto})`,
     ),
-    uniqueIndex("employes_matricule_idx").on(table.matricule),
-    uniqueIndex("employes_numero_badge_idx").on(table.numeroBadge),
-    uniqueIndex("employes_piece_identite_idx").on(table.typePieceIdentite, table.numeroPieceIdentite),
-    // Plusieurs NULL sont permis par un index unique MySQL : l'e-mail reste facultatif.
+    uniqueIndex("employes_matricule_idx").on(sql`lower(${table.matricule})`),
+    uniqueIndex("employes_numero_badge_idx").on(sql`lower(${table.numeroBadge})`),
+    uniqueIndex("employes_piece_identite_idx").on(table.typePieceIdentite, sql`lower(${table.numeroPieceIdentite})`),
+    // Plusieurs NULL sont permis par un index unique : l'e-mail reste facultatif.
     uniqueIndex("employes_email_idx").on(table.email),
     index("employes_departement_idx").on(table.departementId),
     index("employes_poste_idx").on(table.posteId),
     index("employes_groupe_idx").on(table.groupeId),
     index("employes_site_idx").on(table.siteId),
     index("employes_nom_idx").on(table.nom, table.prenom),
-    check("employes_matricule_non_vide", sql`CHAR_LENGTH(TRIM(${table.matricule})) > 0`),
-    check("employes_prenom_non_vide", sql`CHAR_LENGTH(TRIM(${table.prenom})) > 0`),
-    check("employes_nom_non_vide", sql`CHAR_LENGTH(TRIM(${table.nom})) > 0`),
-    check("employes_numero_badge_non_vide", sql`CHAR_LENGTH(TRIM(${table.numeroBadge})) > 0`),
+    check("employes_matricule_non_vide", sql`char_length(trim(${table.matricule})) > 0`),
+    check("employes_prenom_non_vide", sql`char_length(trim(${table.prenom})) > 0`),
+    check("employes_nom_non_vide", sql`char_length(trim(${table.nom})) > 0`),
+    check("employes_numero_badge_non_vide", sql`char_length(trim(${table.numeroBadge})) > 0`),
     check("employes_genre_valide", sql`${table.genre} IS NULL OR ${table.genre} IN ('homme', 'femme')`),
     check(
       "employes_type_piece_valide",
@@ -429,11 +423,11 @@ export const employes = mysqlTable(
     ),
     check(
       "employes_email_minuscules",
-      sql`${table.email} IS NULL OR CAST(${table.email} AS BINARY) = CAST(LOWER(${table.email}) AS BINARY)`,
+      sql`${table.email} IS NULL OR ${table.email} = lower(${table.email})`,
     ),
     check(
       "employes_telephone_e164",
-      sql`${table.telephone} IS NULL OR ${table.telephone} REGEXP '^[+][1-9][0-9]{7,14}$'`,
+      sql`${table.telephone} IS NULL OR ${table.telephone} ~ '^[+][1-9][0-9]{7,14}$'`,
     ),
     check(
       "employes_type_emploi_valide",
@@ -455,11 +449,11 @@ export const employes = mysqlTable(
  * Informations supplémentaires propres à un employé (ex. « Taille de blouse : M »),
  * saisies à sa création. Supprimées avec l'employé.
  */
-export const informationsEmployes = mysqlTable(
+export const informationsEmployes = pgTable(
   "informations_employes",
   {
     id: identifiantUnique(),
-    employeId: char("employe_id", { length: 36 })
+    employeId: uuid("employe_id")
       .notNull()
       .references(() => employes.id, { onDelete: "cascade" }),
     libelle: varchar("libelle", { length: 60 }).notNull(),
@@ -468,29 +462,29 @@ export const informationsEmployes = mysqlTable(
     modifieLe: dateModification(),
   },
   (table) => [
-    uniqueIndex("informations_employes_employe_libelle_idx").on(table.employeId, table.libelle),
-    check("informations_employes_libelle_non_vide", sql`CHAR_LENGTH(TRIM(${table.libelle})) > 0`),
-    check("informations_employes_valeur_non_vide", sql`CHAR_LENGTH(TRIM(${table.valeur})) > 0`),
+    uniqueIndex("informations_employes_employe_libelle_idx").on(table.employeId, sql`lower(${table.libelle})`),
+    check("informations_employes_libelle_non_vide", sql`char_length(trim(${table.libelle})) > 0`),
+    check("informations_employes_valeur_non_vide", sql`char_length(trim(${table.valeur})) > 0`),
   ],
 );
 
-// Drizzle n'a pas de type BLOB pour MySQL : MEDIUMBLOB (16 Mo au plus) lu et écrit en Buffer.
-const mediumBlob = customType<{ data: Buffer; driverData: Buffer }>({
-  dataType: () => "mediumblob",
+// Contenu binaire (photo, pièce jointe), lu et écrit en Buffer.
+const binaire = customType<{ data: Buffer; driverData: Buffer }>({
+  dataType: () => "bytea",
 });
 
 /**
  * Photo de profil d'un employé (facultative, une au plus), gardée en base : sauvegardée
  * avec elle et jamais servie publiquement. Format et taille vérifiés par l'application.
  */
-export const photosEmployes = mysqlTable(
+export const photosEmployes = pgTable(
   "photos_employes",
   {
-    employeId: char("employe_id", { length: 36 })
+    employeId: uuid("employe_id")
       .primaryKey()
       .references(() => employes.id, { onDelete: "cascade" }),
     typeMime: varchar("type_mime", { length: 20 }).notNull(),
-    contenu: mediumBlob("contenu").notNull(),
+    contenu: binaire("contenu").notNull(),
     tailleOctets: int("taille_octets").notNull(),
     creeLe: dateCreation(),
     modifieLe: dateModification(),
@@ -506,11 +500,11 @@ export const photosEmployes = mysqlTable(
  * (gestion des exceptions) ; la badgeuse les ajoutera avec la source « badgeuse ».
  * L'horodatage est en UTC ; un même état ne peut pas être pointé deux fois au même instant.
  */
-export const pointages = mysqlTable(
+export const pointages = pgTable(
   "pointages",
   {
     id: identifiantUnique(),
-    employeId: char("employe_id", { length: 36 })
+    employeId: uuid("employe_id")
       .notNull()
       .references(() => employes.id, { onDelete: "cascade" }),
     horodatage: date("horodatage").notNull(),
@@ -518,7 +512,7 @@ export const pointages = mysqlTable(
     source: varchar("source", { length: 20 }).notNull().default("manuel"),
     remarque: varchar("remarque", { length: 255 }),
     // Qui a saisi le pointage (journal) ; gardé si ce compte est supprimé.
-    saisiPar: char("saisi_par", { length: 36 }).references(() => utilisateurs.id, { onDelete: "set null" }),
+    saisiPar: uuid("saisi_par").references(() => utilisateurs.id, { onDelete: "set null" }),
     creeLe: dateCreation(),
     modifieLe: dateModification(),
   },
@@ -538,7 +532,7 @@ export const pointages = mysqlTable(
  * Profils horaires (modèle d'une journée) : code de 3 caractères, libellé, type « travail » ou
  * « repos », badgé ou non. Les plages de la journée sont dans `plages_profils`.
  */
-export const profilsHoraires = mysqlTable(
+export const profilsHoraires = pgTable(
   "profils_horaires",
   {
     id: identifiantUnique(),
@@ -554,9 +548,9 @@ export const profilsHoraires = mysqlTable(
   },
   (table) => [
     uniqueIndex("profils_horaires_code_idx").on(table.code),
-    uniqueIndex("profils_horaires_nom_idx").on(table.nom),
-    check("profils_horaires_code_valide", sql`${table.code} REGEXP '^[A-Z0-9]{1,3}$'`),
-    check("profils_horaires_nom_non_vide", sql`CHAR_LENGTH(TRIM(${table.nom})) > 0`),
+    uniqueIndex("profils_horaires_nom_idx").on(sql`lower(${table.nom})`),
+    check("profils_horaires_code_valide", sql`${table.code} ~ '^[A-Z0-9]{1,3}$'`),
+    check("profils_horaires_nom_non_vide", sql`char_length(trim(${table.nom})) > 0`),
     check("profils_horaires_type_valide", sql`${table.type} IN ('travail', 'repos')`),
     check(
       "profils_horaires_repas_borne",
@@ -569,11 +563,11 @@ export const profilsHoraires = mysqlTable(
  * Plages d'un profil : de `debut` à `fin` (minutes depuis minuit, fin exclue, 1440 = 24:00).
  * Bout à bout de 00:00 à 24:00 (vérifié par l'application). Supprimées avec leur profil.
  */
-export const plagesProfils = mysqlTable(
+export const plagesProfils = pgTable(
   "plages_profils",
   {
     id: identifiantUnique(),
-    profilId: char("profil_id", { length: 36 })
+    profilId: uuid("profil_id")
       .notNull()
       .references(() => profilsHoraires.id, { onDelete: "cascade" }),
     debutMinutes: int("debut_minutes").notNull(),
@@ -593,7 +587,7 @@ export const plagesProfils = mysqlTable(
 );
 
 /** Groupes d'employés, auxquels on affecte une rotation d'un seul coup. */
-export const groupes = mysqlTable(
+export const groupes = pgTable(
   "groupes",
   {
     id: identifiantUnique(),
@@ -603,8 +597,8 @@ export const groupes = mysqlTable(
     modifieLe: dateModification(),
   },
   (table) => [
-    uniqueIndex("groupes_nom_idx").on(table.nom),
-    check("groupes_nom_non_vide", sql`CHAR_LENGTH(TRIM(${table.nom})) > 0`),
+    uniqueIndex("groupes_nom_idx").on(sql`lower(${table.nom})`),
+    check("groupes_nom_non_vide", sql`char_length(trim(${table.nom})) > 0`),
   ],
 );
 
@@ -612,7 +606,7 @@ export const groupes = mysqlTable(
  * Rotations : « hebdomadaire » (7 jours, du lundi au dimanche) ou « cycle » de N jours
  * qui recommence à partir de la date de début de l'affectation.
  */
-export const rotations = mysqlTable(
+export const rotations = pgTable(
   "rotations",
   {
     id: identifiantUnique(),
@@ -623,8 +617,8 @@ export const rotations = mysqlTable(
     modifieLe: dateModification(),
   },
   (table) => [
-    uniqueIndex("rotations_nom_idx").on(table.nom),
-    check("rotations_nom_non_vide", sql`CHAR_LENGTH(TRIM(${table.nom})) > 0`),
+    uniqueIndex("rotations_nom_idx").on(sql`lower(${table.nom})`),
+    check("rotations_nom_non_vide", sql`char_length(trim(${table.nom})) > 0`),
     check(
       "rotations_type_et_duree",
       sql`(${table.type} = 'hebdomadaire' AND ${table.nombreJours} = 7) OR (${table.type} = 'cycle' AND ${table.nombreJours} BETWEEN 1 AND 31)`,
@@ -633,16 +627,16 @@ export const rotations = mysqlTable(
 );
 
 /** Profil horaire de chaque jour d'une rotation (un jour absent = repos). */
-export const joursRotation = mysqlTable(
+export const joursRotation = pgTable(
   "jours_rotation",
   {
     id: identifiantUnique(),
-    rotationId: char("rotation_id", { length: 36 })
+    rotationId: uuid("rotation_id")
       .notNull()
       .references(() => rotations.id, { onDelete: "cascade" }),
     numeroJour: int("numero_jour").notNull(),
     // Un profil utilisé par une rotation ne peut pas être supprimé.
-    profilId: char("profil_id", { length: 36 })
+    profilId: uuid("profil_id")
       .notNull()
       .references(() => profilsHoraires.id, { onDelete: "restrict" }),
     creeLe: dateCreation(),
@@ -659,17 +653,16 @@ export const joursRotation = mysqlTable(
  * Affectation d'une rotation à un groupe OU à un employé, sur une période.
  * L'affectation d'un employé passe avant celle de son groupe.
  */
-export const affectations = mysqlTable(
+export const affectations = pgTable(
   "affectations",
   {
     id: identifiantUnique(),
-    rotationId: char("rotation_id", { length: 36 })
+    rotationId: uuid("rotation_id")
       .notNull()
       .references(() => rotations.id, { onDelete: "restrict" }),
-    // restrict (et non cascade) : MySQL 8 refuse un CHECK sur une colonne à suppression en cascade.
-    // Les affectations d'un groupe ou d'un employé sont supprimées avec lui, dans une transaction.
-    groupeId: char("groupe_id", { length: 36 }).references(() => groupes.id, { onDelete: "restrict" }),
-    employeId: char("employe_id", { length: 36 }).references(() => employes.id, { onDelete: "restrict" }),
+    // restrict : les affectations d'un groupe ou d'un employé sont supprimées avec lui, dans une transaction.
+    groupeId: uuid("groupe_id").references(() => groupes.id, { onDelete: "restrict" }),
+    employeId: uuid("employe_id").references(() => employes.id, { onDelete: "restrict" }),
     dateDebut: jour("date_debut").notNull(),
     // Vide = sans date de fin.
     dateFin: jour("date_fin"),
@@ -691,7 +684,7 @@ export const affectations = mysqlTable(
  * Jours : chiffres de 1 (lundi) à 7 (dimanche), ex. « 12345 ». Pas de fenêtre après minuit
  * (pas de service de nuit pour l'instant). Le non-chevauchement est vérifié par l'application.
  */
-export const reglesHoraires = mysqlTable(
+export const reglesHoraires = pgTable(
   "regles_horaires",
   {
     id: identifiantUnique(),
@@ -699,7 +692,7 @@ export const reglesHoraires = mysqlTable(
     finMinutes: int("fin_minutes").notNull(),
     joursSemaine: varchar("jours_semaine", { length: 7 }).notNull().default("1234567"),
     // Un profil utilisé par une règle ne peut pas être supprimé.
-    profilId: char("profil_id", { length: 36 })
+    profilId: uuid("profil_id")
       .notNull()
       .references(() => profilsHoraires.id, { onDelete: "restrict" }),
     estActif: boolean("est_actif").notNull().default(true),
@@ -712,12 +705,12 @@ export const reglesHoraires = mysqlTable(
     index("regles_horaires_profil_idx").on(table.profilId),
     check("regles_horaires_couleur_valide", sql`${table.couleur} IN (${listeSql(COULEURS_REGLE)})`),
     check("regles_horaires_bornes", sql`${table.debutMinutes} BETWEEN 0 AND 1439 AND ${table.finMinutes} BETWEEN 1 AND 1440 AND ${table.finMinutes} > ${table.debutMinutes}`),
-    check("regles_horaires_jours_valides", sql`${table.joursSemaine} REGEXP '^[1-7]{1,7}$'`),
+    check("regles_horaires_jours_valides", sql`${table.joursSemaine} ~ '^[1-7]{1,7}$'`),
   ],
 );
 
 /** Auteur d'une création ou d'une modification : gardé vide si le compte est supprimé. */
-const referenceAuteur = (nom: string) => char(nom, { length: 36 }).references(() => utilisateurs.id, { onDelete: "set null" });
+const referenceAuteur = (nom: string) => uuid(nom).references(() => utilisateurs.id, { onDelete: "set null" });
 
 /**
  * Compteurs (retard, heures sup., absences du mois...) : une formule calculée sur les variables
@@ -725,13 +718,13 @@ const referenceAuteur = (nom: string) => char(nom, { length: 36 }).references(()
  * stockées. Supprimer un compteur supprime aussi ses versions (dans une transaction) ; le
  * désactiver garde son historique.
  */
-export const compteurs = mysqlTable(
+export const compteurs = pgTable(
   "compteurs",
   {
     id: identifiantUnique(),
     // Identifiant lisible, en majuscules (ex. RETARD_JOUR).
     code: varchar("code", { length: 30 }).notNull(),
-    // Unique sans tenir compte des majuscules ni des accents (interclassement *_ci de la base).
+    // Unique sans tenir compte des majuscules (index sur lower()).
     libelle: varchar("libelle", { length: 100 }).notNull(),
     formule: varchar("formule", { length: 2000 }).notNull(),
     journalier: boolean("journalier").notNull().default(false),
@@ -749,12 +742,12 @@ export const compteurs = mysqlTable(
   },
   (table) => [
     uniqueIndex("compteurs_code_idx").on(table.code),
-    uniqueIndex("compteurs_libelle_idx").on(table.libelle),
+    uniqueIndex("compteurs_libelle_idx").on(sql`lower(${table.libelle})`),
     index("compteurs_cree_par_idx").on(table.creePar),
     index("compteurs_modifie_par_idx").on(table.modifiePar),
-    check("compteurs_code_valide", sql`${table.code} REGEXP '^[A-Z0-9][A-Z0-9_-]{0,29}$'`),
-    check("compteurs_libelle_non_vide", sql`CHAR_LENGTH(TRIM(${table.libelle})) > 0`),
-    check("compteurs_formule_non_vide", sql`CHAR_LENGTH(TRIM(${table.formule})) > 0`),
+    check("compteurs_code_valide", sql`${table.code} ~ '^[A-Z0-9][A-Z0-9_-]{0,29}$'`),
+    check("compteurs_libelle_non_vide", sql`char_length(trim(${table.libelle})) > 0`),
+    check("compteurs_formule_non_vide", sql`char_length(trim(${table.formule})) > 0`),
     check("compteurs_une_periodicite", sql`${table.journalier} OR ${table.hebdomadaire} OR ${table.mensuel}`),
     check("compteurs_unite_valide", sql`${table.unite} IN ('minutes', 'heures', 'jours', 'nombre', 'pourcentage')`),
     check("compteurs_version_positive", sql`${table.version} >= 1`),
@@ -762,11 +755,11 @@ export const compteurs = mysqlTable(
 );
 
 /** Versions successives d'un compteur (piste d'audit) : formule, unité et périodicités de chaque version. */
-export const compteursVersions = mysqlTable(
+export const compteursVersions = pgTable(
   "compteurs_versions",
   {
     id: identifiantUnique(),
-    compteurId: char("compteur_id", { length: 36 })
+    compteurId: uuid("compteur_id")
       .notNull()
       .references(() => compteurs.id, { onDelete: "restrict" }),
     version: int("version").notNull(),
@@ -792,7 +785,7 @@ export const compteursVersions = mysqlTable(
  * `unite_saisie` : journée, demi-journée ou heures ; `duree_minutes` : durée d'un événement en heures.
  * `code_paie` vide : l'événement n'est pas transmis à la paie.
  */
-export const evenements = mysqlTable(
+export const evenements = pgTable(
   "evenements",
   {
     id: identifiantUnique(),
@@ -812,9 +805,9 @@ export const evenements = mysqlTable(
   },
   (table) => [
     uniqueIndex("evenements_code_idx").on(table.code),
-    uniqueIndex("evenements_nom_idx").on(table.nom),
-    check("evenements_code_valide", sql`${table.code} REGEXP '^[A-Z0-9]{1,3}$'`),
-    check("evenements_nom_non_vide", sql`CHAR_LENGTH(TRIM(${table.nom})) > 0`),
+    uniqueIndex("evenements_nom_idx").on(sql`lower(${table.nom})`),
+    check("evenements_code_valide", sql`${table.code} ~ '^[A-Z0-9]{1,3}$'`),
+    check("evenements_nom_non_vide", sql`char_length(trim(${table.nom})) > 0`),
     check("evenements_type_valide", sql`${table.type} IN (${listeSql(TYPES_EVENEMENT)})`),
     check("evenements_priorite_bornee", sql`${table.priorite} BETWEEN 0 AND 255`),
     check("evenements_unite_valide", sql`${table.uniteSaisie} IN (${listeSql(UNITES_SAISIE_EVENEMENT)})`),
@@ -832,14 +825,14 @@ export const evenements = mysqlTable(
  * jour. Pas de chevauchement pour un même employé (vérifié dans une transaction qui verrouille
  * les employés). Un événement utilisé ne peut pas être supprimé (`restrict`).
  */
-export const evenementsEmployes = mysqlTable(
+export const evenementsEmployes = pgTable(
   "evenements_employes",
   {
     id: identifiantUnique(),
-    employeId: char("employe_id", { length: 36 })
+    employeId: uuid("employe_id")
       .notNull()
       .references(() => employes.id, { onDelete: "cascade" }),
-    evenementId: char("evenement_id", { length: 36 })
+    evenementId: uuid("evenement_id")
       .notNull()
       .references(() => evenements.id, { onDelete: "restrict" }),
     dateDebut: jour("date_debut").notNull(),
@@ -865,7 +858,7 @@ export const evenementsEmployes = mysqlTable(
   ],
 );
 
-const joursDroit = (nom: string) => decimal(nom, { precision: 4, scale: 1, mode: "number" });
+const joursDroit = (nom: string) => numeric(nom, { precision: 4, scale: 1, mode: "number" });
 
 /**
  * Droits aux congés : jours acquis par un employé pour un événement (congé payé, récupération...)
@@ -878,14 +871,14 @@ const joursDroit = (nom: string) => decimal(nom, { precision: 4, scale: 1, mode:
  * `est_confirme` : faux = droit provisoire, ses jours ne sont pas encore utilisables.
  * `est_reporte` : le solde restant en fin de période s'ajoute au droit suivant (calculé à l'affichage).
  */
-export const droitsConges = mysqlTable(
+export const droitsConges = pgTable(
   "droits_conges",
   {
     id: identifiantUnique(),
-    employeId: char("employe_id", { length: 36 })
+    employeId: uuid("employe_id")
       .notNull()
       .references(() => employes.id, { onDelete: "cascade" }),
-    evenementId: char("evenement_id", { length: 36 })
+    evenementId: uuid("evenement_id")
       .notNull()
       .references(() => evenements.id, { onDelete: "restrict" }),
     dateDebut: jour("date_debut").notNull(),
@@ -911,11 +904,11 @@ export const droitsConges = mysqlTable(
     index("droits_conges_saisi_par_idx").on(table.saisiPar),
     check("droits_conges_dates_coherentes", sql`${table.dateFin} >= ${table.dateDebut}`),
     // De 0 à 366 jours, par demi-journée.
-    check("droits_conges_acquis_valide", sql`${table.joursAcquis} BETWEEN 0 AND 366 AND ${table.joursAcquis} * 2 = FLOOR(${table.joursAcquis} * 2)`),
-    check("droits_conges_reliquat_valide", sql`${table.joursReliquat} BETWEEN 0 AND 366 AND ${table.joursReliquat} * 2 = FLOOR(${table.joursReliquat} * 2)`),
-    check("droits_conges_supplement_1_valide", sql`${table.supplement1} BETWEEN 0 AND 366 AND ${table.supplement1} * 2 = FLOOR(${table.supplement1} * 2)`),
-    check("droits_conges_supplement_2_valide", sql`${table.supplement2} BETWEEN 0 AND 366 AND ${table.supplement2} * 2 = FLOOR(${table.supplement2} * 2)`),
-    check("droits_conges_supplement_3_valide", sql`${table.supplement3} BETWEEN 0 AND 366 AND ${table.supplement3} * 2 = FLOOR(${table.supplement3} * 2)`),
+    check("droits_conges_acquis_valide", sql`${table.joursAcquis} BETWEEN 0 AND 366 AND ${table.joursAcquis} * 2 = floor(${table.joursAcquis} * 2)`),
+    check("droits_conges_reliquat_valide", sql`${table.joursReliquat} BETWEEN 0 AND 366 AND ${table.joursReliquat} * 2 = floor(${table.joursReliquat} * 2)`),
+    check("droits_conges_supplement_1_valide", sql`${table.supplement1} BETWEEN 0 AND 366 AND ${table.supplement1} * 2 = floor(${table.supplement1} * 2)`),
+    check("droits_conges_supplement_2_valide", sql`${table.supplement2} BETWEEN 0 AND 366 AND ${table.supplement2} * 2 = floor(${table.supplement2} * 2)`),
+    check("droits_conges_supplement_3_valide", sql`${table.supplement3} BETWEEN 0 AND 366 AND ${table.supplement3} * 2 = floor(${table.supplement3} * 2)`),
     check("droits_conges_unite_valide", sql`${table.uniteSaisie} IN (${listeSql(UNITES_SAISIE_EVENEMENT)})`),
   ],
 );
@@ -925,14 +918,14 @@ export const droitsConges = mysqlTable(
  * seulement aux comptes qui ont la page Droits aux congés. Une même pièce peut justifier les
  * droits de plusieurs employés (attribution groupée) : liens dans `droits_conges_pieces_jointes`.
  */
-export const piecesJointes = mysqlTable(
+export const piecesJointes = pgTable(
   "pieces_jointes",
   {
     id: identifiantUnique(),
     nomFichier: varchar("nom_fichier", { length: 150 }).notNull(),
     typeMime: varchar("type_mime", { length: 30 }).notNull(),
     tailleOctets: int("taille_octets").notNull(),
-    contenu: mediumBlob("contenu").notNull(),
+    contenu: binaire("contenu").notNull(),
     ajoutePar: referenceAuteur("ajoute_par"),
     creeLe: dateCreation(),
     modifieLe: dateModification(),
@@ -941,23 +934,23 @@ export const piecesJointes = mysqlTable(
     index("pieces_jointes_ajoute_par_idx").on(table.ajoutePar),
     check("pieces_jointes_type_mime", sql`${table.typeMime} IN (${listeSql(TYPES_PIECE_JOINTE)})`),
     check("pieces_jointes_taille", sql`${table.tailleOctets} BETWEEN 1 AND ${sql.raw(String(PIECE_JOINTE_TAILLE_MAX_OCTETS))}`),
-    check("pieces_jointes_nom_non_vide", sql`CHAR_LENGTH(TRIM(${table.nomFichier})) > 0`),
+    check("pieces_jointes_nom_non_vide", sql`char_length(trim(${table.nomFichier})) > 0`),
   ],
 );
 
 /** Pièces jointes d'un droit aux congés ; une pièce sans aucun lien est supprimée par l'application. */
-export const droitsCongesPiecesJointes = mysqlTable(
+export const droitsCongesPiecesJointes = pgTable(
   "droits_conges_pieces_jointes",
   {
-    droitId: char("droit_id", { length: 36 })
+    droitId: uuid("droit_id")
       .notNull()
       .references(() => droitsConges.id, { onDelete: "cascade" }),
-    pieceJointeId: char("piece_jointe_id", { length: 36 }).notNull(),
+    pieceJointeId: uuid("piece_jointe_id").notNull(),
     creeLe: dateCreation(),
   },
   (table) => [
-    primaryKey({ columns: [table.droitId, table.pieceJointeId] }),
-    // Nom court : le nom automatique dépasse les 64 caractères permis par MySQL et MariaDB.
+    primaryKey({ name: "droits_conges_pieces_jointes_pkey", columns: [table.droitId, table.pieceJointeId] }),
+    // Nom court : le nom automatique dépasse les 63 caractères permis par PostgreSQL.
     foreignKey({ name: "droits_conges_pj_piece_fk", columns: [table.pieceJointeId], foreignColumns: [piecesJointes.id] }).onDelete("cascade"),
     index("droits_conges_pieces_jointes_piece_idx").on(table.pieceJointeId),
   ],

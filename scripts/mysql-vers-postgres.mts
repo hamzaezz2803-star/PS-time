@@ -6,8 +6,11 @@
  *   npm run db:convertir-postgres -- --source C:\chemin\ps-time.sql [--fichier sauvegardes\ps-time-postgres.sql]
  *
  * Le script produit s'exécute dans une base PostgreSQL vide (13 ou plus), en une seule transaction.
+ * La base obtenue est celle de la migration 0000 (même schéma, vérifié) et la note comme appliquée :
+ * `npm run db:migrer` applique ensuite les migrations suivantes.
  * Il contient des données personnelles et les empreintes des mots de passe : le garder hors de Git.
  */
+import { createHash } from "node:crypto";
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { basename, dirname, resolve } from "node:path";
 import { parseArgs } from "node:util";
@@ -37,7 +40,8 @@ function defautPostgres(colonne: Colonne): string | null {
   const { defaut, type } = colonne;
   if (defaut === null) return null;
   if (defaut === "uuid()") return "gen_random_uuid()";
-  if (defaut.startsWith("current_timestamp")) return "CURRENT_TIMESTAMP";
+  if (defaut.startsWith("current_timestamp")) return "now()";
+  if (type === "decimal(4,1)") return String(Number(defaut));
   if (type === "tinyint(1)") return defaut === "0" ? "false" : "true";
   return defaut;
 }
@@ -113,6 +117,20 @@ BEGIN
 END;
 $$;`;
 
+/** Note la migration 0000 comme appliquée, comme le fait `drizzle-kit migrate` (empreinte SHA-256 du fichier). */
+function migrationInitialeAppliquee(): string {
+  const dossier = resolve("base-de-donnees/migrations");
+  const journal = JSON.parse(readFileSync(resolve(dossier, "meta/_journal.json"), "utf8")) as { entries: { tag: string; when: number }[] };
+  const initiale = journal.entries[0];
+  const empreinte = createHash("sha256").update(readFileSync(resolve(dossier, `${initiale.tag}.sql`), "utf8")).digest("hex");
+  return [
+    `-- Suivi des migrations Drizzle : la base correspond à ${initiale.tag}.`,
+    "CREATE SCHEMA IF NOT EXISTS drizzle;",
+    "CREATE TABLE IF NOT EXISTS drizzle.__drizzle_migrations (id SERIAL PRIMARY KEY, hash text NOT NULL, created_at bigint);",
+    `INSERT INTO drizzle.__drizzle_migrations (hash, created_at) VALUES ('${empreinte}', ${Number(initiale.when)});`,
+  ].join("\n");
+}
+
 function convertir(cheminSource: string): { sql: string; resume: string[] } {
   const { tables, insertions } = lireExportMysql(readFileSync(cheminSource, "utf8"));
   const tablesGardees = [...tables.values()].filter((table) => !TABLES_IGNOREES.has(table.nom));
@@ -150,6 +168,7 @@ function convertir(cheminSource: string): { sql: string; resume: string[] } {
     ...cles,
     "-- Date de modification automatique",
     ...declencheurs,
+    migrationInitialeAppliquee(),
     "COMMIT;",
   ].join("\n\n");
   return { sql: `${sql}\n`, resume };
