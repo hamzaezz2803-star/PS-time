@@ -66,6 +66,8 @@ export const utilisateurs = pgTable(
       .default(true),
     estActif: boolean("est_actif").notNull().default(true),
     estSuperAdmin: boolean("est_super_admin").notNull().default(false),
+    // Compte d'un employé (pointage à distance) : aucune page, seulement l'espace de pointage.
+    employeId: uuid("employe_id").references((): AnyPgColumn => employes.id, { onDelete: "cascade" }),
     // Dernière ouverture des notifications : les plus récentes sont « non lues ».
     notificationsLuesLe: date("notifications_lues_le"),
     creeLe: dateCreation(),
@@ -74,6 +76,8 @@ export const utilisateurs = pgTable(
   (table) => [
     uniqueIndex("utilisateurs_identifiant_idx").on(table.identifiant),
     uniqueIndex("utilisateurs_email_idx").on(table.email),
+    uniqueIndex("utilisateurs_employe_idx").on(table.employeId),
+    check("utilisateurs_employe_sans_super_admin", sql`${table.employeId} IS NULL OR NOT ${table.estSuperAdmin}`),
     check(
       "utilisateurs_email_minuscules",
       sql`${table.email} = lower(${table.email})`,
@@ -513,10 +517,20 @@ export const pointages = pgTable(
     remarque: varchar("remarque", { length: 255 }),
     // Qui a saisi le pointage (journal) ; gardé si ce compte est supprimé.
     saisiPar: uuid("saisi_par").references(() => utilisateurs.id, { onDelete: "set null" }),
+    // Pointage à distance : appareil reconnu et position GPS si l'employé doit la joindre.
+    appareil: varchar("appareil", { length: 10 }),
+    latitude: numeric("latitude", { precision: 9, scale: 6, mode: "number" }),
+    longitude: numeric("longitude", { precision: 9, scale: 6, mode: "number" }),
+    precisionMetres: int("precision_metres"),
     creeLe: dateCreation(),
     modifieLe: dateModification(),
   },
   (table) => [
+    check("pointages_appareil", sql`${table.appareil} IS NULL OR ${table.appareil} IN ('pc', 'tablette', 'telephone')`),
+    check(
+      "pointages_position",
+      sql`(${table.latitude} IS NULL AND ${table.longitude} IS NULL AND ${table.precisionMetres} IS NULL) OR (${table.latitude} BETWEEN -90 AND 90 AND ${table.longitude} BETWEEN -180 AND 180 AND ${table.precisionMetres} BETWEEN 0 AND 100000)`,
+    ),
     uniqueIndex("pointages_employe_horodatage_etat_idx").on(table.employeId, table.horodatage, table.etat),
     index("pointages_horodatage_idx").on(table.horodatage),
     index("pointages_saisi_par_idx").on(table.saisiPar),
@@ -524,7 +538,30 @@ export const pointages = pgTable(
       "pointages_etat",
       sql`${table.etat} IN ('entree', 'sortie', 'debut_pause', 'fin_pause', 'debut_heures_sup', 'fin_heures_sup')`,
     ),
-    check("pointages_source", sql`${table.source} IN ('manuel', 'badgeuse')`),
+    check("pointages_source", sql`${table.source} IN ('manuel', 'badgeuse', 'distance')`),
+  ],
+);
+
+/**
+ * Photo prise par l'employé au moment d'un pointage à distance (JPEG réduit dans le navigateur,
+ * 200 Ko au plus). Aucune reconnaissance faciale. Supprimée après 90 jours ou avec le pointage.
+ */
+export const photosPointages = pgTable(
+  "photos_pointages",
+  {
+    pointageId: uuid("pointage_id")
+      .primaryKey()
+      .references(() => pointages.id, { onDelete: "cascade" }),
+    typeMime: varchar("type_mime", { length: 20 }).notNull(),
+    contenu: binaire("contenu").notNull(),
+    tailleOctets: int("taille_octets").notNull(),
+    creeLe: dateCreation(),
+    modifieLe: dateModification(),
+  },
+  (table) => [
+    index("photos_pointages_cree_le_idx").on(table.creeLe),
+    check("photos_pointages_type_mime", sql`${table.typeMime} = 'image/jpeg'`),
+    check("photos_pointages_taille", sql`${table.tailleOctets} BETWEEN 1 AND 204800`),
   ],
 );
 
