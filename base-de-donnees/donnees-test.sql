@@ -1,4 +1,5 @@
 -- Données de test FICTIVES pour remplir l'application en développement.
+-- PostgreSQL : à exécuter dans DBeaver (Alt+X) ou avec psql, connecté en propriétaire des tables.
 -- Noms inventés, téléphones factices (+2126000000xx), e-mails en @exemple.test (domaine réservé aux tests).
 -- Aucune pièce d'identité. Ne jamais exécuter chez un client.
 --
@@ -6,28 +7,29 @@
 -- Pour seulement les retirer : base-de-donnees/supprimer-donnees-test.sql.
 -- Tous les identifiants commencent par 00000000-0000-4000-8000- (repérables et supprimables).
 
-START TRANSACTION;
+BEGIN;
 
 -- 1. Retrait des données de test précédentes (enfants avant parents).
 -- Compteurs de test et leurs versions (avant les comptes et profils).
-DELETE FROM compteurs_versions WHERE compteur_id LIKE '00000000-0000-4000-8000-%';
-DELETE FROM compteurs WHERE id LIKE '00000000-0000-4000-8000-%';
+DELETE FROM compteurs_versions WHERE compteur_id::text LIKE '00000000-0000-4000-8000-%';
+DELETE FROM compteurs WHERE id::text LIKE '00000000-0000-4000-8000-%';
 -- Absences de test, et celles saisies dans l'application pour un employé ou un événement de test.
-DELETE FROM evenements_employes WHERE id LIKE '00000000-0000-4000-8000-%' OR employe_id LIKE '00000000-0000-4000-8000-%' OR evenement_id LIKE '00000000-0000-4000-8000-%';
+DELETE FROM evenements_employes WHERE id::text LIKE '00000000-0000-4000-8000-%' OR employe_id::text LIKE '00000000-0000-4000-8000-%' OR evenement_id::text LIKE '00000000-0000-4000-8000-%';
 -- Droits aux congés de test, et ceux saisis dans l'application pour un employé ou un événement de test.
-DELETE FROM droits_conges WHERE id LIKE '00000000-0000-4000-8000-%' OR employe_id LIKE '00000000-0000-4000-8000-%' OR evenement_id LIKE '00000000-0000-4000-8000-%';
--- Événements de test (leurs périodes de prise partent avec eux).
-DELETE FROM evenements WHERE id LIKE '00000000-0000-4000-8000-%';
+DELETE FROM droits_conges WHERE id::text LIKE '00000000-0000-4000-8000-%' OR employe_id::text LIKE '00000000-0000-4000-8000-%' OR evenement_id::text LIKE '00000000-0000-4000-8000-%';
+-- Événements de test.
+DELETE FROM evenements WHERE id::text LIKE '00000000-0000-4000-8000-%';
 -- Règles d'horaire dynamique de test, et celles saisies dans l'application sur un profil de test.
-DELETE FROM regles_horaires WHERE id LIKE '00000000-0000-4000-8000-%' OR profil_id LIKE '00000000-0000-4000-8000-%';
-DELETE FROM affectations WHERE id LIKE '00000000-0000-4000-8000-%';
-DELETE FROM employes WHERE id LIKE '00000000-0000-4000-8000-%';
-DELETE FROM groupes WHERE id LIKE '00000000-0000-4000-8000-%';
-DELETE FROM rotations WHERE id LIKE '00000000-0000-4000-8000-%';
-DELETE FROM profils_horaires WHERE id LIKE '00000000-0000-4000-8000-%';
-DELETE FROM departements WHERE id LIKE '00000000-0000-4000-8000-%' ORDER BY id DESC;
-DELETE FROM postes WHERE id LIKE '00000000-0000-4000-8000-%' ORDER BY id DESC;
-DELETE FROM sites WHERE id LIKE '00000000-0000-4000-8000-%';
+DELETE FROM regles_horaires WHERE id::text LIKE '00000000-0000-4000-8000-%' OR profil_id::text LIKE '00000000-0000-4000-8000-%';
+DELETE FROM affectations WHERE id::text LIKE '00000000-0000-4000-8000-%';
+DELETE FROM employes WHERE id::text LIKE '00000000-0000-4000-8000-%';
+DELETE FROM groupes WHERE id::text LIKE '00000000-0000-4000-8000-%';
+DELETE FROM rotations WHERE id::text LIKE '00000000-0000-4000-8000-%';
+DELETE FROM profils_horaires WHERE id::text LIKE '00000000-0000-4000-8000-%';
+-- Parents et enfants supprimés dans la même instruction : la clé de l'arbre est vérifiée à la fin.
+DELETE FROM departements WHERE id::text LIKE '00000000-0000-4000-8000-%';
+DELETE FROM postes WHERE id::text LIKE '00000000-0000-4000-8000-%';
+DELETE FROM sites WHERE id::text LIKE '00000000-0000-4000-8000-%';
 
 -- 1 bis. Sites (adresses inventées). Rattachés aux départements, postes et employés en fin de fichier.
 INSERT INTO sites (id, nom, adresse) VALUES
@@ -57,12 +59,12 @@ INSERT INTO postes (id, code, nom, ordre, parent_id) VALUES
 -- 4. Profils horaires : la journée de 00:00 à 24:00 découpée en plages (minutes depuis minuit : 480 = 08:00).
 --    Théorique = somme des plages fixes. J8 reprend le schéma du responsable (8 h).
 INSERT INTO profils_horaires (id, code, nom, type, est_badge, repas_minimum_minutes, repas_maximum_minutes) VALUES
-  ('00000000-0000-4000-8000-000000000401', 'J8', 'Journée de 8 h', 'travail', 1, 45, 120),
-  ('00000000-0000-4000-8000-000000000402', 'MAT', 'Matin', 'travail', 1, 20, 30),
-  ('00000000-0000-4000-8000-000000000403', 'APM', 'Après-midi', 'travail', 1, 20, 30),
-  ('00000000-0000-4000-8000-000000000404', 'BUR', 'Bureau', 'travail', 1, 45, 60),
-  ('00000000-0000-4000-8000-000000000405', 'SAM', 'Samedi matin', 'travail', 0, NULL, NULL),
-  ('00000000-0000-4000-8000-000000000406', 'REP', 'Repos', 'repos', 0, NULL, NULL);
+  ('00000000-0000-4000-8000-000000000401', 'J8', 'Journée de 8 h', 'travail', true, 45, 120),
+  ('00000000-0000-4000-8000-000000000402', 'MAT', 'Matin', 'travail', true, 20, 30),
+  ('00000000-0000-4000-8000-000000000403', 'APM', 'Après-midi', 'travail', true, 20, 30),
+  ('00000000-0000-4000-8000-000000000404', 'BUR', 'Bureau', 'travail', true, 45, 60),
+  ('00000000-0000-4000-8000-000000000405', 'SAM', 'Samedi matin', 'travail', false, NULL, NULL),
+  ('00000000-0000-4000-8000-000000000406', 'REP', 'Repos', 'repos', false, NULL, NULL);
 
 INSERT INTO plages_profils (id, profil_id, debut_minutes, fin_minutes, type) VALUES
   -- J8 : 00-07 interdite, 07-08 variable, 08-12 fixe, 12-14 repas, 14-18 fixe, 18-19 variable, 19-24 interdite.
@@ -190,57 +192,57 @@ UPDATE postes SET site_id = '00000000-0000-4000-8000-000000000902'
 UPDATE postes SET site_id = '00000000-0000-4000-8000-000000000901'
   WHERE id IN ('00000000-0000-4000-8000-000000000201', '00000000-0000-4000-8000-000000000205', '00000000-0000-4000-8000-000000000206');
 -- Chaque employé de test prend le site de son département.
-UPDATE employes e JOIN departements d ON d.id = e.departement_id
-  SET e.site_id = d.site_id
-  WHERE e.id LIKE '00000000-0000-4000-8000-%';
+UPDATE employes e SET site_id = d.site_id
+  FROM departements d
+  WHERE d.id = e.departement_id AND e.id::text LIKE '00000000-0000-4000-8000-%';
 
 -- 9 bis. Pointage à distance et doigts à enrôler (jamais d'empreinte) : Hamid Bouzid (T011), souvent en
 -- mission, peut pointer depuis son téléphone ou une tablette, position et photo exigées ; Karim Benali
 -- (T001) depuis son PC. Doigts prévus : index droit et index gauche pour T001, pouces pour T011.
-UPDATE employes SET pointage_distance = 1, appareils_distance = 'tablette,telephone', distance_exige_position = 1, distance_exige_photo = 1, doigts_a_enroler = '45'
+UPDATE employes SET pointage_distance = true, appareils_distance = 'tablette,telephone', distance_exige_position = true, distance_exige_photo = true, doigts_a_enroler = '45'
   WHERE id = '00000000-0000-4000-8000-000000000311';
-UPDATE employes SET pointage_distance = 1, appareils_distance = 'pc', doigts_a_enroler = '36'
+UPDATE employes SET pointage_distance = true, appareils_distance = 'pc', doigts_a_enroler = '36'
   WHERE id = '00000000-0000-4000-8000-000000000301';
 
 -- 10. Horaire dynamique : premier pointage du matin → Matin, de l'après-midi → Après-midi (lundi à vendredi).
 -- Une couleur par règle : Matin en orange, Après-midi en bleu (pastilles du rapport des présences).
 INSERT INTO regles_horaires (id, debut_minutes, fin_minutes, jours_semaine, profil_id, est_actif, couleur) VALUES
-  ('00000000-0000-4000-8000-000000000501', 300, 480, '12345', '00000000-0000-4000-8000-000000000402', 1, 'orange'),
-  ('00000000-0000-4000-8000-000000000502', 720, 900, '12345', '00000000-0000-4000-8000-000000000403', 1, 'bleu');
+  ('00000000-0000-4000-8000-000000000501', 300, 480, '12345', '00000000-0000-4000-8000-000000000402', true, 'orange'),
+  ('00000000-0000-4000-8000-000000000502', 720, 900, '12345', '00000000-0000-4000-8000-000000000403', true, 'bleu');
 -- Employés en horaire dynamique : Salma Idrissi (T002, après-midi), Youssef Amrani (T003, matin),
 -- Nadia Tazi (T004, un jour le matin, un jour l'après-midi). Les autres gardent leur rotation.
-UPDATE employes SET horaire_dynamique = 1
+UPDATE employes SET horaire_dynamique = true
   WHERE id IN ('00000000-0000-4000-8000-000000000302', '00000000-0000-4000-8000-000000000303', '00000000-0000-4000-8000-000000000304');
 
 -- 11. Compteurs (formules d'exemple) et leur première version. Un compteur inactif pour le filtre.
 INSERT INTO compteurs (id, code, libelle, formule, journalier, hebdomadaire, mensuel, unite, description, est_actif) VALUES
-  ('00000000-0000-4000-8000-000000001601', 'RETARD', 'Retard', 'RETARD_MIN', 1, 1, 1, 'minutes', 'Minutes de retard à l''arrivée.', 1),
-  ('00000000-0000-4000-8000-000000001602', 'TEMPS_TRAVAILLE', 'Temps travaillé', 'DUREE_TRAVAILLEE_MIN', 1, 1, 1, 'minutes', 'Du premier au dernier pointage.', 1),
-  ('00000000-0000-4000-8000-000000001603', 'HEURES_SUP', 'Heures supplémentaires', 'IF(DEPASSEMENT_MIN > 15, DEPASSEMENT_MIN, 0)', 1, 1, 1, 'minutes', 'Dépassement compté au-delà de 15 minutes.', 1),
-  ('00000000-0000-4000-8000-000000001604', 'ABSENCES', 'Absences', 'NB_ABSENCES', 0, 1, 1, 'jours', 'Jours planifiés sans pointage.', 1),
-  ('00000000-0000-4000-8000-000000001605', 'TAUX_PRESENCE', 'Taux de présence', 'ROUND(NB_JOURS_TRAVAILLES / NB_JOURS_PLANIFIES * 100, 1)', 0, 1, 1, 'pourcentage', 'Jours travaillés sur jours planifiés.', 1),
-  ('00000000-0000-4000-8000-000000001606', 'JOURS_INCOMPLETS', 'Jours incomplets', 'NB_JOURS_INCOMPLETS', 0, 1, 1, 'jours', 'Présent sans sortie pointée.', 1),
-  ('00000000-0000-4000-8000-000000001607', 'RETARDS_5MIN', 'Retards de plus de 5 min', 'IF(COALESCE(RETARD_MIN, 0) > 5, 1, 0)', 1, 0, 0, 'nombre', NULL, 1),
-  ('00000000-0000-4000-8000-000000001608', 'RETARD_HEURES', 'Retard en heures', 'ROUND(RETARD_MIN / 60, 2)', 1, 0, 0, 'heures', 'Exemple de compteur désactivé.', 0);
+  ('00000000-0000-4000-8000-000000001601', 'RETARD', 'Retard', 'RETARD_MIN', true, true, true, 'minutes', 'Minutes de retard à l''arrivée.', true),
+  ('00000000-0000-4000-8000-000000001602', 'TEMPS_TRAVAILLE', 'Temps travaillé', 'DUREE_TRAVAILLEE_MIN', true, true, true, 'minutes', 'Du premier au dernier pointage.', true),
+  ('00000000-0000-4000-8000-000000001603', 'HEURES_SUP', 'Heures supplémentaires', 'IF(DEPASSEMENT_MIN > 15, DEPASSEMENT_MIN, 0)', true, true, true, 'minutes', 'Dépassement compté au-delà de 15 minutes.', true),
+  ('00000000-0000-4000-8000-000000001604', 'ABSENCES', 'Absences', 'NB_ABSENCES', false, true, true, 'jours', 'Jours planifiés sans pointage.', true),
+  ('00000000-0000-4000-8000-000000001605', 'TAUX_PRESENCE', 'Taux de présence', 'ROUND(NB_JOURS_TRAVAILLES / NB_JOURS_PLANIFIES * 100, 1)', false, true, true, 'pourcentage', 'Jours travaillés sur jours planifiés.', true),
+  ('00000000-0000-4000-8000-000000001606', 'JOURS_INCOMPLETS', 'Jours incomplets', 'NB_JOURS_INCOMPLETS', false, true, true, 'jours', 'Présent sans sortie pointée.', true),
+  ('00000000-0000-4000-8000-000000001607', 'RETARDS_5MIN', 'Retards de plus de 5 min', 'IF(COALESCE(RETARD_MIN, 0) > 5, 1, 0)', true, false, false, 'nombre', NULL, true),
+  ('00000000-0000-4000-8000-000000001608', 'RETARD_HEURES', 'Retard en heures', 'ROUND(RETARD_MIN / 60, 2)', true, false, false, 'heures', 'Exemple de compteur désactivé.', false);
 
 INSERT INTO compteurs_versions (id, compteur_id, version, formule, journalier, hebdomadaire, mensuel, unite)
-SELECT CONCAT('00000000-0000-4000-8000-0000000017', RIGHT(id, 2)), id, 1, formule, journalier, hebdomadaire, mensuel, unite
-FROM compteurs WHERE id LIKE '00000000-0000-4000-8000-%';
+SELECT ('00000000-0000-4000-8000-0000000017' || right(id::text, 2))::uuid, id, 1, formule, journalier, hebdomadaire, mensuel, unite
+FROM compteurs WHERE id::text LIKE '00000000-0000-4000-8000-%';
 
 -- 12. Événements : motifs d'absence et de présence courants, à la journée, à la demi-journée ou en heures.
 -- La récupération est non active. Congés payés, reportés et récupération sont soumis à la gestion des droits.
 INSERT INTO evenements (id, code, nom, type, unite_saisie, duree_minutes, est_prioritaire_sur_pointages, est_visible_planning, priorite, code_paie, est_soumis_droits) VALUES
-  ('00000000-0000-4000-8000-000000001801', 'CP', 'Congé payé', 'absence', 'journee', NULL, 0, 1, 10, 'CP', 1),
-  ('00000000-0000-4000-8000-000000001802', 'CPR', 'Congés reportés', 'absence', 'journee', NULL, 0, 1, 10, 'CP-REP', 1),
-  ('00000000-0000-4000-8000-000000001803', 'MAL', 'Maladie', 'absence', 'journee', NULL, 0, 1, 50, 'MAL', 0),
-  ('00000000-0000-4000-8000-000000001804', 'AT', 'Accident du travail', 'absence', 'journee', NULL, 0, 1, 60, 'AT', 0),
-  ('00000000-0000-4000-8000-000000001805', 'MAT', 'Congé de maternité', 'absence', 'journee', NULL, 0, 1, 70, 'MAT', 0),
-  ('00000000-0000-4000-8000-000000001806', 'PAT', 'Congé de paternité', 'absence', 'journee', NULL, 0, 1, 40, 'PAT', 0),
-  ('00000000-0000-4000-8000-000000001807', 'CSS', 'Congé sans solde', 'absence', 'demi_journee', NULL, 0, 1, 10, 'CSS', 0),
-  ('00000000-0000-4000-8000-000000001808', 'ABA', 'Absence autorisée', 'absence', 'heures', 120, 0, 1, 20, NULL, 0),
-  ('00000000-0000-4000-8000-000000001809', 'FOR', 'Formation', 'presence', 'heures', 120, 1, 1, 30, 'FOR', 0),
-  ('00000000-0000-4000-8000-000000001810', 'MIS', 'Mission', 'presence', 'journee', NULL, 1, 1, 30, 'MIS', 0),
-  ('00000000-0000-4000-8000-000000001811', 'RCP', 'Récupération', 'absence', 'heures', 120, 0, 0, 15, NULL, 1);
+  ('00000000-0000-4000-8000-000000001801', 'CP', 'Congé payé', 'absence', 'journee', NULL, false, true, 10, 'CP', true),
+  ('00000000-0000-4000-8000-000000001802', 'CPR', 'Congés reportés', 'absence', 'journee', NULL, false, true, 10, 'CP-REP', true),
+  ('00000000-0000-4000-8000-000000001803', 'MAL', 'Maladie', 'absence', 'journee', NULL, false, true, 50, 'MAL', false),
+  ('00000000-0000-4000-8000-000000001804', 'AT', 'Accident du travail', 'absence', 'journee', NULL, false, true, 60, 'AT', false),
+  ('00000000-0000-4000-8000-000000001805', 'MAT', 'Congé de maternité', 'absence', 'journee', NULL, false, true, 70, 'MAT', false),
+  ('00000000-0000-4000-8000-000000001806', 'PAT', 'Congé de paternité', 'absence', 'journee', NULL, false, true, 40, 'PAT', false),
+  ('00000000-0000-4000-8000-000000001807', 'CSS', 'Congé sans solde', 'absence', 'demi_journee', NULL, false, true, 10, 'CSS', false),
+  ('00000000-0000-4000-8000-000000001808', 'ABA', 'Absence autorisée', 'absence', 'heures', 120, false, true, 20, NULL, false),
+  ('00000000-0000-4000-8000-000000001809', 'FOR', 'Formation', 'presence', 'heures', 120, true, true, 30, 'FOR', false),
+  ('00000000-0000-4000-8000-000000001810', 'MIS', 'Mission', 'presence', 'journee', NULL, true, true, 30, 'MIS', false),
+  ('00000000-0000-4000-8000-000000001811', 'RCP', 'Récupération', 'absence', 'heures', 120, false, false, 15, NULL, true);
 
 -- 13. Absences et événements des employés, autour de la date du jour (en jours : -2 = avant-hier).
 -- Cas couverts : congé en cours, passé et à venir ; maladie ; accident du travail ; paternité ;
@@ -248,11 +250,13 @@ INSERT INTO evenements (id, code, nom, type, unite_saisie, duree_minutes, est_pr
 -- l'emporte sur le congé, marqué « Non validé ») ; congé posé mais employée venue pointer (le
 -- pointage l'emporte) ; mission pendant laquelle l'employé a pointé (la mission neutralise le
 -- pointage) ; formation (compté présent) ; absences et formation de quelques heures.
+-- « Aujourd'hui » = date UTC : (now() AT TIME ZONE 'UTC')::date ; date + n = n jours plus tard.
 INSERT INTO evenements_employes (id, employe_id, evenement_id, date_debut, date_fin, debut_minutes, fin_minutes, remarque, saisi_par)
-SELECT a.id, a.employe, a.evenement, DATE_ADD(UTC_DATE(), INTERVAL a.du DAY), DATE_ADD(UTC_DATE(), INTERVAL a.au DAY), a.de, a.a, a.remarque,
-  (SELECT id FROM utilisateurs WHERE est_super_admin = 1 ORDER BY cree_le LIMIT 1)
+SELECT a.id::uuid, a.employe::uuid, a.evenement::uuid,
+  (now() AT TIME ZONE 'UTC')::date + a.du, (now() AT TIME ZONE 'UTC')::date + a.au, a.de, a.a, a.remarque,
+  (SELECT id FROM utilisateurs WHERE est_super_admin ORDER BY cree_le LIMIT 1)
 FROM (
-  SELECT '00000000-0000-4000-8000-000000002001' AS id, '00000000-0000-4000-8000-000000000306' AS employe, '00000000-0000-4000-8000-000000001801' AS evenement, -2 AS du, 2 AS au, NULL AS de, NULL AS a, 'Congé validé par le chef d''atelier' AS remarque
+  SELECT '00000000-0000-4000-8000-000000002001' AS id, '00000000-0000-4000-8000-000000000306' AS employe, '00000000-0000-4000-8000-000000001801' AS evenement, -2 AS du, 2 AS au, NULL::integer AS de, NULL::integer AS a, 'Congé validé par le chef d''atelier' AS remarque
   UNION ALL SELECT '00000000-0000-4000-8000-000000002002', '00000000-0000-4000-8000-000000000307', '00000000-0000-4000-8000-000000001803', -3, 0, NULL, NULL, 'Certificat médical reçu'
   UNION ALL SELECT '00000000-0000-4000-8000-000000002003', '00000000-0000-4000-8000-000000000310', '00000000-0000-4000-8000-000000001809', 0, 0, NULL, NULL, 'Formation sécurité chariots élévateurs'
   UNION ALL SELECT '00000000-0000-4000-8000-000000002004', '00000000-0000-4000-8000-000000000301', '00000000-0000-4000-8000-000000001808', 2, 2, 600, 720, 'Rendez-vous administratif'
@@ -260,9 +264,9 @@ FROM (
   UNION ALL SELECT '00000000-0000-4000-8000-000000002006', '00000000-0000-4000-8000-000000000307', '00000000-0000-4000-8000-000000001801', -3, -2, NULL, NULL, 'Congé posé avant l''arrêt maladie'
   UNION ALL SELECT '00000000-0000-4000-8000-000000002007', '00000000-0000-4000-8000-000000000311', '00000000-0000-4000-8000-000000001810', -8, -6, NULL, NULL, 'Mission chez un fournisseur, a badgé sur place'
   UNION ALL SELECT '00000000-0000-4000-8000-000000002008', '00000000-0000-4000-8000-000000000313', '00000000-0000-4000-8000-000000001801',
-    -- Toujours un jour ouvré : une semaine avant le dernier jour ouvré.
-    -(CASE DAYOFWEEK(UTC_DATE()) WHEN 2 THEN 3 WHEN 1 THEN 2 ELSE 1 END + 7),
-    -(CASE DAYOFWEEK(UTC_DATE()) WHEN 2 THEN 3 WHEN 1 THEN 2 ELSE 1 END + 7),
+    -- Toujours un jour ouvré : une semaine avant le dernier jour ouvré (dow : 0 = dimanche, 1 = lundi).
+    -(CASE extract(dow FROM (now() AT TIME ZONE 'UTC')::date) WHEN 1 THEN 3 WHEN 0 THEN 2 ELSE 1 END + 7),
+    -(CASE extract(dow FROM (now() AT TIME ZONE 'UTC')::date) WHEN 1 THEN 3 WHEN 0 THEN 2 ELSE 1 END + 7),
     NULL, NULL, 'Congé posé, finalement venue travailler'
   UNION ALL SELECT '00000000-0000-4000-8000-000000002009', '00000000-0000-4000-8000-000000000308', '00000000-0000-4000-8000-000000001804', -20, -15, NULL, NULL, 'Déclaration d''accident envoyée'
   UNION ALL SELECT '00000000-0000-4000-8000-000000002010', '00000000-0000-4000-8000-000000000309', '00000000-0000-4000-8000-000000001807', -12, -12, NULL, NULL, 'Convenance personnelle'
@@ -297,63 +301,63 @@ FROM (
 -- Alaoui, venue quand même), ni avant l'embauche, ni le jour des pointages manuels de la section 15.
 INSERT INTO pointages (id, employe_id, horodatage, etat, source)
 SELECT
-  CONCAT('00000000-0000-4000-8000-', LPAD(100000 + t.n * 10000 + t.d * 10 + t.k, 12, '0')),
+  ('00000000-0000-4000-8000-' || lpad((100000 + t.n * 10000 + t.d * 10 + t.k)::text, 12, '0'))::uuid,
   t.id,
   t.horodatage,
-  ELT(t.k + 1, 'entree', 'debut_pause', 'fin_pause', 'sortie', 'debut_heures_sup', 'fin_heures_sup'),
+  (ARRAY['entree', 'debut_pause', 'fin_pause', 'sortie', 'debut_heures_sup', 'fin_heures_sup'])[t.k + 1],
   'badgeuse'
 FROM (
   SELECT m.n, m.id, m.d, m.k,
-    m.jour + INTERVAL (m.minutes - IF(MONTH(m.jour) BETWEEN 4 AND 10, 60, 0)) MINUTE AS horodatage
+    (m.jour + make_interval(mins => m.minutes - CASE WHEN extract(month FROM m.jour) BETWEEN 4 AND 10 THEN 60 ELSE 0 END)) AT TIME ZONE 'UTC' AS horodatage
   FROM (
     -- Une ligne par pointage possible (k) : entrée, début et fin de repas, sortie, début et fin d'heures sup.
     SELECT b.n, b.id, b.d, b.jour, k.k,
       CASE k.k
-        WHEN 0 THEN b.e + CASE b.sp WHEN 1 THEN 25 + MOD(b.h, 20) WHEN 5 THEN -50 ELSE 0 END
-        WHEN 1 THEN IF(b.sp <> 7 AND (b.poste IN ('BUR', 'J8') OR b.sp = 6), b.p1, NULL)
-        WHEN 2 THEN IF(b.sp <> 7 AND (b.poste IN ('BUR', 'J8') OR b.sp = 6), b.p2 + IF(b.sp = 6, 30, 0), NULL)
+        WHEN 0 THEN b.e + CASE b.sp WHEN 1 THEN 25 + mod(b.h, 20) WHEN 5 THEN -50 ELSE 0 END
+        WHEN 1 THEN CASE WHEN b.sp <> 7 AND (b.poste IN ('BUR', 'J8') OR b.sp = 6) THEN b.p1 END
+        WHEN 2 THEN CASE WHEN b.sp <> 7 AND (b.poste IN ('BUR', 'J8') OR b.sp = 6) THEN b.p2 + CASE WHEN b.sp = 6 THEN 30 ELSE 0 END END
         WHEN 3 THEN CASE b.sp WHEN 3 THEN NULL WHEN 2 THEN b.s - 45 ELSE b.s END
-        WHEN 4 THEN IF(b.sp = 4, b.s + 10, NULL)
-        ELSE IF(b.sp = 4, b.s + 100, NULL)
+        WHEN 4 THEN CASE WHEN b.sp = 4 THEN b.s + 10 END
+        ELSE CASE WHEN b.sp = 4 THEN b.s + 100 END
       END AS minutes
     FROM (
       -- Heures normales du jour selon le poste (minutes depuis minuit), avec un petit écart propre à chacun.
       SELECT x.n, x.id, x.d, x.jour, x.h, x.poste,
-        IF(x.poste IN ('REPOS', 'NONRECO'), 99, MOD(x.n * 7 + x.d * 11, 29)) AS sp,
+        CASE WHEN x.poste IN ('REPOS', 'NONRECO') THEN 99 ELSE mod(x.n * 7 + x.d * 11, 29) END AS sp,
         CASE x.poste
-          WHEN 'BUR' THEN 495 + MOD(x.h, 20)
-          WHEN 'MAT' THEN 345 + MOD(x.h, 20)
-          WHEN 'APM' THEN 825 + MOD(x.h, 20)
-          WHEN 'J8' THEN 450 + MOD(x.h, 35)
+          WHEN 'BUR' THEN 495 + mod(x.h, 20)
+          WHEN 'MAT' THEN 345 + mod(x.h, 20)
+          WHEN 'APM' THEN 825 + mod(x.h, 20)
+          WHEN 'J8' THEN 450 + mod(x.h, 35)
           WHEN 'NONRECO' THEN 630
-          ELSE IF(MOD(x.n + x.d, 9) = 0, 480, NULL)
+          ELSE CASE WHEN mod(x.n + x.d, 9) = 0 THEN 480 END
         END AS e,
-        CASE x.poste WHEN 'BUR' THEN 750 + MOD(x.h, 8) WHEN 'MAT' THEN 600 + MOD(x.h, 5) WHEN 'APM' THEN 1080 + MOD(x.h, 5) WHEN 'J8' THEN 720 + MOD(x.h, 20) END AS p1,
-        CASE x.poste WHEN 'BUR' THEN 800 + MOD(x.h, 12) WHEN 'MAT' THEN 625 + MOD(x.h, 8) WHEN 'APM' THEN 1105 + MOD(x.h, 8) WHEN 'J8' THEN 810 + MOD(x.h, 40) END AS p2,
+        CASE x.poste WHEN 'BUR' THEN 750 + mod(x.h, 8) WHEN 'MAT' THEN 600 + mod(x.h, 5) WHEN 'APM' THEN 1080 + mod(x.h, 5) WHEN 'J8' THEN 720 + mod(x.h, 20) END AS p1,
+        CASE x.poste WHEN 'BUR' THEN 800 + mod(x.h, 12) WHEN 'MAT' THEN 625 + mod(x.h, 8) WHEN 'APM' THEN 1105 + mod(x.h, 8) WHEN 'J8' THEN 810 + mod(x.h, 40) END AS p2,
         CASE x.poste
-          WHEN 'BUR' THEN 1050 + IF(MOD(x.h, 3) = 0, 0, MOD(x.h, 20))
-          WHEN 'MAT' THEN 840 + MOD(x.h, 15)
-          WHEN 'APM' THEN 1320 + MOD(x.h, 15)
-          WHEN 'J8' THEN 1080 + MOD(x.h, 30)
+          WHEN 'BUR' THEN 1050 + CASE WHEN mod(x.h, 3) = 0 THEN 0 ELSE mod(x.h, 20) END
+          WHEN 'MAT' THEN 840 + mod(x.h, 15)
+          WHEN 'APM' THEN 1320 + mod(x.h, 15)
+          WHEN 'J8' THEN 1080 + mod(x.h, 30)
           WHEN 'NONRECO' THEN 1080
           ELSE 720
         END AS s
       FROM (
-        -- Poste de chaque employé pour chaque jour (WEEKDAY : 0 = lundi ... 6 = dimanche).
+        -- Poste de chaque employé pour chaque jour (js : 0 = lundi ... 6 = dimanche).
         SELECT e.n, e.id, j.d, j.jour, e.n * 37 + j.d * 53 AS h,
           CASE
-            WHEN e.horaire = 'alterne' AND WEEKDAY(j.jour) = 3 THEN 'NONRECO'
-            WHEN e.horaire = 'bureau' THEN IF(WEEKDAY(j.jour) < 5, 'BUR', 'REPOS')
-            WHEN e.horaire = 'j8' THEN IF(WEEKDAY(j.jour) < 6, 'J8', 'REPOS')
-            WHEN e.horaire = 'libre' THEN IF(WEEKDAY(j.jour) < 5, 'J8', 'REPOS')
-            WHEN e.horaire = 'matin' THEN IF(WEEKDAY(j.jour) < 5, 'MAT', 'REPOS')
-            WHEN e.horaire = 'apm' THEN IF(WEEKDAY(j.jour) < 5, 'APM', 'REPOS')
-            WHEN e.horaire = 'alterne' THEN IF(WEEKDAY(j.jour) < 5, IF(MOD(j.d, 2) = 0, 'MAT', 'APM'), 'REPOS')
-            ELSE ELT(MOD(DATEDIFF(j.jour, e.debut_cycle), 6) + 1, 'MAT', 'MAT', 'APM', 'APM', 'REPOS', 'REPOS')
+            WHEN e.horaire = 'alterne' AND j.js = 3 THEN 'NONRECO'
+            WHEN e.horaire = 'bureau' THEN CASE WHEN j.js < 5 THEN 'BUR' ELSE 'REPOS' END
+            WHEN e.horaire = 'j8' THEN CASE WHEN j.js < 6 THEN 'J8' ELSE 'REPOS' END
+            WHEN e.horaire = 'libre' THEN CASE WHEN j.js < 5 THEN 'J8' ELSE 'REPOS' END
+            WHEN e.horaire = 'matin' THEN CASE WHEN j.js < 5 THEN 'MAT' ELSE 'REPOS' END
+            WHEN e.horaire = 'apm' THEN CASE WHEN j.js < 5 THEN 'APM' ELSE 'REPOS' END
+            WHEN e.horaire = 'alterne' THEN CASE WHEN j.js < 5 THEN CASE WHEN mod(j.d, 2) = 0 THEN 'MAT' ELSE 'APM' END ELSE 'REPOS' END
+            ELSE (ARRAY['MAT', 'MAT', 'APM', 'APM', 'REPOS', 'REPOS'])[mod(j.jour - e.debut_cycle, 6) + 1]
           END AS poste
         FROM (
           -- n : numéro de l'employé ; horaire : son planning ; debut_cycle : début de l'affectation de son équipe en 2 × 8.
-          SELECT 1 AS n, '00000000-0000-4000-8000-000000000301' AS id, 'bureau' AS horaire, DATE('2026-01-05') AS debut_cycle
+          SELECT 1 AS n, '00000000-0000-4000-8000-000000000301'::uuid AS id, 'bureau' AS horaire, DATE '2026-01-05' AS debut_cycle
           UNION ALL SELECT 2, '00000000-0000-4000-8000-000000000302', 'apm', '2026-01-05'
           UNION ALL SELECT 3, '00000000-0000-4000-8000-000000000303', 'matin', '2026-01-05'
           UNION ALL SELECT 4, '00000000-0000-4000-8000-000000000304', 'alterne', '2026-01-05'
@@ -372,17 +376,14 @@ FROM (
         ) e
         JOIN employes emp ON emp.id = e.id
         CROSS JOIN (
-          -- d : de 0 (aujourd'hui) à 30 jours en arrière.
-          SELECT u.c + 10 * z.c AS d, DATE_SUB(UTC_DATE(), INTERVAL u.c + 10 * z.c DAY) AS jour
-          FROM (SELECT 0 AS c UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4
-                UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9) u
-          CROSS JOIN (SELECT 0 AS c UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3) z
-          WHERE u.c + 10 * z.c <= 30
+          -- d : de 0 (aujourd'hui) à 30 jours en arrière ; js : jour de la semaine (isodow 1 = lundi).
+          SELECT jours.d, jours.jour, extract(isodow FROM jours.jour)::int - 1 AS js
+          FROM (SELECT d, (now() AT TIME ZONE 'UTC')::date - d AS jour FROM generate_series(0, 30) AS d) jours
         ) j
         WHERE j.jour >= emp.date_debut_emploi
           AND (emp.date_fin_emploi IS NULL OR j.jour <= emp.date_fin_emploi)
           -- Jour des pointages manuels de Zineb Alaoui et Anas Mansouri (section 15).
-          AND NOT (e.n IN (13, 14) AND j.jour = DATE_SUB(UTC_DATE(), INTERVAL CASE DAYOFWEEK(UTC_DATE()) WHEN 2 THEN 3 WHEN 1 THEN 2 ELSE 1 END DAY))
+          AND NOT (e.n IN (13, 14) AND j.jour = (now() AT TIME ZONE 'UTC')::date - CASE extract(dow FROM (now() AT TIME ZONE 'UTC')::date) WHEN 1 THEN 3 WHEN 0 THEN 2 ELSE 1 END)
           AND NOT EXISTS (
             SELECT 1 FROM evenements_employes ee JOIN evenements ev ON ev.id = ee.evenement_id
             WHERE ee.employe_id = e.id AND ev.type = 'absence' AND ee.debut_minutes IS NULL
@@ -391,12 +392,12 @@ FROM (
           )
       ) x
     ) b
-    CROSS JOIN (SELECT 0 AS k UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5) k
+    CROSS JOIN generate_series(0, 5) AS k(k)
     WHERE b.e IS NOT NULL AND b.sp <> 0
   ) m
   WHERE m.minutes IS NOT NULL
 ) t
-WHERE t.horodatage <= UTC_TIMESTAMP();
+WHERE t.horodatage <= now();
 
 -- 15. Pointages saisis à la main (page Pointage manuel), le dernier jour ouvré avant aujourd'hui :
 -- deux employés de bureau (08:30-17:30) : Zineb Alaoui (T013) a oublié son badge (à l'heure) et a fait
@@ -404,13 +405,13 @@ WHERE t.horodatage <= UTC_TIMESTAMP();
 -- retard de 15 minutes. Saisis au nom du premier super administrateur (vide s'il n'existe pas encore).
 INSERT INTO pointages (id, employe_id, horodatage, etat, source, remarque, saisi_par)
 SELECT
-  CONCAT('00000000-0000-4000-8000-0000000400', m.n),
-  m.employe,
-  j.jour + INTERVAL (m.minutes - IF(MONTH(j.jour) BETWEEN 4 AND 10, 60, 0)) MINUTE,
+  ('00000000-0000-4000-8000-0000000400' || m.n)::uuid,
+  m.employe::uuid,
+  (j.jour + make_interval(mins => m.minutes - CASE WHEN extract(month FROM j.jour) BETWEEN 4 AND 10 THEN 60 ELSE 0 END)) AT TIME ZONE 'UTC',
   m.etat,
   'manuel',
   m.remarque,
-  (SELECT id FROM utilisateurs WHERE est_super_admin = 1 ORDER BY cree_le LIMIT 1)
+  (SELECT id FROM utilisateurs WHERE est_super_admin ORDER BY cree_le LIMIT 1)
 FROM (
   SELECT '01' AS n, '00000000-0000-4000-8000-000000000313' AS employe, 510 AS minutes, 'entree' AS etat, 'Oubli de badge' AS remarque
   UNION ALL SELECT '02', '00000000-0000-4000-8000-000000000313', 1050, 'sortie', 'Oubli de badge'
@@ -421,7 +422,7 @@ FROM (
 ) m
 CROSS JOIN (
   -- Lundi → vendredi précédent, dimanche → vendredi, sinon la veille.
-  SELECT DATE_SUB(UTC_DATE(), INTERVAL CASE DAYOFWEEK(UTC_DATE()) WHEN 2 THEN 3 WHEN 1 THEN 2 ELSE 1 END DAY) AS jour
+  SELECT (now() AT TIME ZONE 'UTC')::date - CASE extract(dow FROM (now() AT TIME ZONE 'UTC')::date) WHEN 1 THEN 3 WHEN 0 THEN 2 ELSE 1 END AS jour
 ) j;
 
 -- 16. Droits aux congés, pour l'année en cours (sauf mention). Cas couverts :
@@ -432,21 +433,22 @@ CROSS JOIN (
 -- (T002) : droit provisoire « À confirmer » ; Sanaa Kettani (T012) : congés reportés ; Anas Mansouri
 -- (T014) : droit en demi-journées ; Omar Chraibi (T005) : récupération en heures.
 INSERT INTO droits_conges (id, employe_id, evenement_id, date_debut, date_fin, jours_acquis, jours_reliquat, supplement_1, unite_saisie, est_confirme, est_reporte, est_bloquant, remarque, saisi_par)
-SELECT d.id, d.employe, d.evenement,
-  MAKEDATE(YEAR(UTC_DATE()) + d.annee, 1), DATE(CONCAT(YEAR(UTC_DATE()) + d.annee, '-12-31')),
+SELECT d.id::uuid, d.employe::uuid, d.evenement::uuid,
+  make_date(extract(year FROM (now() AT TIME ZONE 'UTC')::date)::int + d.annee, 1, 1),
+  make_date(extract(year FROM (now() AT TIME ZONE 'UTC')::date)::int + d.annee, 12, 31),
   d.acquis, d.reliquat, d.supplement, d.unite, d.confirme, d.reporte, d.bloquant, d.remarque,
-  (SELECT id FROM utilisateurs WHERE est_super_admin = 1 ORDER BY cree_le LIMIT 1)
+  (SELECT id FROM utilisateurs WHERE est_super_admin ORDER BY cree_le LIMIT 1)
 FROM (
-  SELECT '00000000-0000-4000-8000-000000002100' AS id, '00000000-0000-4000-8000-000000000301' AS employe, '00000000-0000-4000-8000-000000001801' AS evenement, -1 AS annee, 4 AS acquis, 0 AS reliquat, 0 AS supplement, 'journee' AS unite, 1 AS confirme, 1 AS reporte, 0 AS bloquant, 'Solde de l''an dernier reporté' AS remarque
-  UNION ALL SELECT '00000000-0000-4000-8000-000000002101', '00000000-0000-4000-8000-000000000301', '00000000-0000-4000-8000-000000001801', 0, 18, 0, 0, 'journee', 1, 1, 0, '1,5 jour par mois travaillé'
-  UNION ALL SELECT '00000000-0000-4000-8000-000000002102', '00000000-0000-4000-8000-000000000306', '00000000-0000-4000-8000-000000001801', 0, 18, 2, 0, 'journee', 1, 0, 1, 'Solde bloquant : pas de congé au-delà du droit'
-  UNION ALL SELECT '00000000-0000-4000-8000-000000002103', '00000000-0000-4000-8000-000000000307', '00000000-0000-4000-8000-000000001801', 0, 18, 0, 0, 'journee', 1, 0, 0, NULL
-  UNION ALL SELECT '00000000-0000-4000-8000-000000002104', '00000000-0000-4000-8000-000000000315', '00000000-0000-4000-8000-000000001801', 0, 3, 0, 0, 'journee', 1, 0, 0, 'Embauchée en cours d''année'
-  UNION ALL SELECT '00000000-0000-4000-8000-000000002105', '00000000-0000-4000-8000-000000000313', '00000000-0000-4000-8000-000000001801', 0, 18, 0, 2, 'journee', 1, 0, 0, 'Supplément d''ancienneté'
-  UNION ALL SELECT '00000000-0000-4000-8000-000000002106', '00000000-0000-4000-8000-000000000302', '00000000-0000-4000-8000-000000001801', 0, 18, 0, 0, 'journee', 0, 0, 0, 'En attente de validation par les ressources humaines'
-  UNION ALL SELECT '00000000-0000-4000-8000-000000002107', '00000000-0000-4000-8000-000000000312', '00000000-0000-4000-8000-000000001802', 0, 5, 0, 0, 'journee', 1, 0, 0, NULL
-  UNION ALL SELECT '00000000-0000-4000-8000-000000002108', '00000000-0000-4000-8000-000000000314', '00000000-0000-4000-8000-000000001801', 0, 9.5, 0, 0, 'demi_journee', 1, 0, 0, 'Contrat à durée déterminée, au prorata'
-  UNION ALL SELECT '00000000-0000-4000-8000-000000002109', '00000000-0000-4000-8000-000000000305', '00000000-0000-4000-8000-000000001811', 0, 16, 0, 0, 'heures', 1, 0, 0, 'Heures de récupération'
+  SELECT '00000000-0000-4000-8000-000000002100' AS id, '00000000-0000-4000-8000-000000000301' AS employe, '00000000-0000-4000-8000-000000001801' AS evenement, -1 AS annee, 4::numeric AS acquis, 0 AS reliquat, 0 AS supplement, 'journee' AS unite, true AS confirme, true AS reporte, false AS bloquant, 'Solde de l''an dernier reporté' AS remarque
+  UNION ALL SELECT '00000000-0000-4000-8000-000000002101', '00000000-0000-4000-8000-000000000301', '00000000-0000-4000-8000-000000001801', 0, 18, 0, 0, 'journee', true, true, false, '1,5 jour par mois travaillé'
+  UNION ALL SELECT '00000000-0000-4000-8000-000000002102', '00000000-0000-4000-8000-000000000306', '00000000-0000-4000-8000-000000001801', 0, 18, 2, 0, 'journee', true, false, true, 'Solde bloquant : pas de congé au-delà du droit'
+  UNION ALL SELECT '00000000-0000-4000-8000-000000002103', '00000000-0000-4000-8000-000000000307', '00000000-0000-4000-8000-000000001801', 0, 18, 0, 0, 'journee', true, false, false, NULL
+  UNION ALL SELECT '00000000-0000-4000-8000-000000002104', '00000000-0000-4000-8000-000000000315', '00000000-0000-4000-8000-000000001801', 0, 3, 0, 0, 'journee', true, false, false, 'Embauchée en cours d''année'
+  UNION ALL SELECT '00000000-0000-4000-8000-000000002105', '00000000-0000-4000-8000-000000000313', '00000000-0000-4000-8000-000000001801', 0, 18, 0, 2, 'journee', true, false, false, 'Supplément d''ancienneté'
+  UNION ALL SELECT '00000000-0000-4000-8000-000000002106', '00000000-0000-4000-8000-000000000302', '00000000-0000-4000-8000-000000001801', 0, 18, 0, 0, 'journee', false, false, false, 'En attente de validation par les ressources humaines'
+  UNION ALL SELECT '00000000-0000-4000-8000-000000002107', '00000000-0000-4000-8000-000000000312', '00000000-0000-4000-8000-000000001802', 0, 5, 0, 0, 'journee', true, false, false, NULL
+  UNION ALL SELECT '00000000-0000-4000-8000-000000002108', '00000000-0000-4000-8000-000000000314', '00000000-0000-4000-8000-000000001801', 0, 9.5, 0, 0, 'demi_journee', true, false, false, 'Contrat à durée déterminée, au prorata'
+  UNION ALL SELECT '00000000-0000-4000-8000-000000002109', '00000000-0000-4000-8000-000000000305', '00000000-0000-4000-8000-000000001811', 0, 16, 0, 0, 'heures', true, false, false, 'Heures de récupération'
 ) d;
 
 COMMIT;

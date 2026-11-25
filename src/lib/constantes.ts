@@ -287,6 +287,7 @@ export const CHEMIN_APPAREILS = "/appareils";
 export const CHEMIN_SAUVEGARDE = "/administration/sauvegarde";
 export const CHEMIN_EXPORT_SAUVEGARDE = "/administration/sauvegarde/export";
 export const CHEMIN_IMPORT_SAUVEGARDE = "/administration/sauvegarde/import";
+/** Format 2 : PostgreSQL. Un fichier au format 1 (ancienne base MySQL) est refusé. */
 export const FORMAT_SAUVEGARDE = 2;
 /** Jamais sauvegardées : sessions ouvertes et jetons temporaires (on pourrait s'en servir pour se connecter). */
 export const TABLES_JAMAIS_SAUVEGARDEES = ["sessions", "verifications"] as const;
@@ -295,5 +296,7 @@ export const TABLES_COMPTES = ["utilisateurs", "comptes", "autorisations_pages"]
 export const TAILLE_MAX_IMPORT_OCTETS = 100 * 1024 * 1024;
 export const MOT_CONFIRMATION_IMPORT = "IMPORTER";
 export const LIGNES_PAR_LECTURE_SAUVEGARDE = 500;
-/** Taille d'une instruction INSERT du fichier (reste sous max_allowed_packet, 16 Mo par défaut). */
+/** Taille d'une instruction INSERT du fichier (lignes courtes, faciles à relire). */
 export const TAILLE_MAX_INSTRUCTION_SAUVEGARDE = 1_000_000;
+/** Valeurs par requête d'import (PostgreSQL en accepte 65 535 au plus). */
+export const PARAMETRES_MAX_PAR_REQUETE = 60_000;

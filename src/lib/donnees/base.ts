@@ -19,7 +19,9 @@ export function creerPool(url: string | undefined, maximumConnexions?: number): 
 
 /** Connexions brutes : seulement pour la sauvegarde, qui lit et réécrit des tables entières. */
 export function obtenirPool(): Pool {
-  globalPourBase.poolPsTime ??= creerPool(process.env.DATABASE_URL);
+  // Facultatif : connexions simultanées (10 par défaut), à régler selon le serveur de base.
+  const maximum = Number(process.env.DATABASE_MAX_CONNEXIONS) || undefined;
+  globalPourBase.poolPsTime ??= creerPool(process.env.DATABASE_URL, maximum);
   return globalPourBase.poolPsTime;
 }
 

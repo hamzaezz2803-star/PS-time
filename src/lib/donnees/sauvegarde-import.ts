@@ -1,9 +1,9 @@
 import "server-only";
 
-import type { Pool, PoolConnection, RowDataPacket } from "mysql2/promise";
-import { TABLES_COMPTES } from "../constantes.ts";
+import { escapeIdentifier, type Pool, type PoolClient } from "pg";
+import { PARAMETRES_MAX_PAR_REQUETE, TABLES_COMPTES } from "../constantes.ts";
 import { lireSauvegarde, type ErreurSauvegarde } from "../metier/sauvegarde.ts";
-import type { Insertion } from "../metier/sauvegarde-sql.ts";
+import type { Insertion, ValeurSql } from "../metier/sauvegarde-sql.ts";
 import { colonnesParTable, ecrireSauvegardeSurDisque, lireVersionMigrations } from "./sauvegarde-export.ts";
 
 /**
@@ -26,48 +26,68 @@ class RefusImport extends Error {
   }
 }
 
-type CleEtrangere = { table: string; colonne: string; tableCible: string; colonneCible: string };
+const CODE_CLE_ETRANGERE = "23503";
+const nom = escapeIdentifier;
 
-async function lireClesEtrangeres(connexion: PoolConnection): Promise<CleEtrangere[]> {
-  const [lignes] = await connexion.query<RowDataPacket[]>(
-    `SELECT TABLE_NAME AS \`table\`, COLUMN_NAME AS colonne, REFERENCED_TABLE_NAME AS tableCible, REFERENCED_COLUMN_NAME AS colonneCible
-     FROM information_schema.KEY_COLUMN_USAGE WHERE TABLE_SCHEMA = DATABASE() AND REFERENCED_TABLE_NAME IS NOT NULL`,
+type CleEtrangere = { table: string; colonne: string; table_cible: string; colonne_cible: string };
+
+/** Clés étrangères du schéma public (toutes sur une seule colonne). */
+async function lireClesEtrangeres(connexion: PoolClient): Promise<CleEtrangere[]> {
+  const { rows } = await connexion.query<CleEtrangere>(
+    `SELECT e.relname AS table, ae.attname AS colonne, c.relname AS table_cible, ac.attname AS colonne_cible
+     FROM pg_constraint k
+     JOIN pg_class e ON e.oid = k.conrelid
+     JOIN pg_class c ON c.oid = k.confrelid
+     JOIN pg_attribute ae ON ae.attrelid = k.conrelid AND ae.attnum = k.conkey[1]
+     JOIN pg_attribute ac ON ac.attrelid = k.confrelid AND ac.attnum = k.confkey[1]
+     WHERE k.contype = 'f' AND k.connamespace = 'public'::regnamespace`,
   );
-  return lignes as CleEtrangere[];
+  return rows;
 }
 
-/** Lignes dont la clé étrangère pointe vers une ligne absente (jointure gauche sans correspondance). */
-const JOINTURE = "?? AS e LEFT JOIN ?? AS c ON e.?? = c.??";
-const SANS_CIBLE = "e.?? IS NOT NULL AND c.?? IS NULL";
-const valeursJointure = (cle: CleEtrangere) => [cle.table, cle.tableCible, cle.colonne, cle.colonneCible];
-const valeursSansCible = (cle: CleEtrangere) => [cle.colonne, cle.colonneCible];
+/** Condition « la clé pointe vers une ligne absente » sur la table `e`. */
+const sansCible = (cle: CleEtrangere) =>
+  `e.${nom(cle.colonne)} IS NOT NULL AND NOT EXISTS (SELECT 1 FROM ${nom(cle.table_cible)} c WHERE c.${nom(cle.colonne_cible)} = e.${nom(cle.colonne)})`;
 
 /**
  * Sans comptes dans le fichier, les comptes actuels sont gardés : un auteur inconnu d'ici devient vide
  * (comme à la suppression d'un compte). Puis aucune clé étrangère ne doit pointer dans le vide.
  */
-async function verifierCoherence(connexion: PoolConnection, avecComptes: boolean): Promise<void> {
+async function verifierCoherence(connexion: PoolClient, avecComptes: boolean): Promise<void> {
   const cles = await lireClesEtrangeres(connexion);
   if (!avecComptes) {
-    for (const cle of cles.filter((cle) => cle.tableCible === "utilisateurs" && !(TABLES_COMPTES as readonly string[]).includes(cle.table))) {
-      await connexion.query(`UPDATE ${JOINTURE} SET e.?? = NULL WHERE ${SANS_CIBLE}`, [...valeursJointure(cle), cle.colonne, ...valeursSansCible(cle)]);
+    for (const cle of cles.filter((cle) => cle.table_cible === "utilisateurs" && !(TABLES_COMPTES as readonly string[]).includes(cle.table))) {
+      await connexion.query(`UPDATE ${nom(cle.table)} e SET ${nom(cle.colonne)} = NULL WHERE ${sansCible(cle)}`);
     }
   }
   for (const cle of cles) {
-    const [lignes] = await connexion.query<RowDataPacket[]>(`SELECT COUNT(*) AS nombre FROM ${JOINTURE} WHERE ${SANS_CIBLE}`, [...valeursJointure(cle), ...valeursSansCible(cle)]);
-    if (Number(lignes[0].nombre) > 0) throw new RefusImport("incoherent");
+    const { rows } = await connexion.query<{ nombre: number }>(`SELECT count(*)::int AS nombre FROM ${nom(cle.table)} e WHERE ${sansCible(cle)}`);
+    if (rows[0].nombre > 0) throw new RefusImport("incoherent");
   }
-  const [admins] = await connexion.query<RowDataPacket[]>("SELECT COUNT(*) AS nombre FROM `utilisateurs` WHERE `est_super_admin` = 1 AND `est_actif` = 1");
-  if (Number(admins[0].nombre) === 0) throw new RefusImport("sans_super_admin");
+  const { rows } = await connexion.query<{ nombre: number }>("SELECT count(*)::int AS nombre FROM utilisateurs WHERE est_super_admin AND est_actif");
+  if (rows[0].nombre === 0) throw new RefusImport("sans_super_admin");
 }
 
-async function remplacerDonnees(connexion: PoolConnection, tables: readonly string[], insertions: readonly Insertion[], avecComptes: boolean): Promise<void> {
-  for (const table of tables) await connexion.query("DELETE FROM ??", [table]);
-  for (const { table, colonnes, lignes } of insertions) await connexion.query("INSERT INTO ?? (??) VALUES ?", [table, colonnes, lignes]);
+/** Insère des lignes par paquets ($1, $2, ...) : les valeurs ne sont jamais écrites dans la requête. */
+async function inserer(connexion: PoolClient, { table, colonnes, lignes }: Insertion): Promise<void> {
+  const lignesParRequete = Math.max(1, Math.floor(PARAMETRES_MAX_PAR_REQUETE / colonnes.length));
+  for (let debut = 0; debut < lignes.length; debut += lignesParRequete) {
+    const paquet = lignes.slice(debut, debut + lignesParRequete);
+    const marqueurs = paquet.map((_, rang) => `(${colonnes.map((__, position) => `$${rang * colonnes.length + position + 1}`).join(",")})`);
+    const valeurs: ValeurSql[] = paquet.flat();
+    await connexion.query(`INSERT INTO ${nom(table)} (${colonnes.map(nom).join(",")}) VALUES ${marqueurs.join(",")}`, valeurs);
+  }
+}
+
+async function remplacerDonnees(connexion: PoolClient, tables: readonly string[], insertions: readonly Insertion[], avecComptes: boolean): Promise<void> {
+  // Clés étrangères vérifiées à la fin de la transaction : l'ordre des tables est libre.
+  await connexion.query("SET CONSTRAINTS ALL DEFERRED");
+  for (const table of tables) await connexion.query(`DELETE FROM ${nom(table)}`);
+  for (const insertion of insertions) await inserer(connexion, insertion);
   // Comptes remplacés : toutes les sessions et tous les jetons sont fermés, chacun se reconnecte.
   if (avecComptes) {
-    await connexion.query("DELETE FROM `sessions`");
-    await connexion.query("DELETE FROM `verifications`");
+    await connexion.query("DELETE FROM sessions");
+    await connexion.query("DELETE FROM verifications");
   }
   await verifierCoherence(connexion, avecComptes);
 }
@@ -85,19 +105,18 @@ export async function importerSauvegarde(pool: Pool, secret: string, texte: stri
     return { ok: false, erreur: "sauvegarde_avant" };
   }
 
-  const connexion = await pool.getConnection();
+  const connexion = await pool.connect();
   try {
-    // Contrôle des clés coupé le temps du remplacement (ordre des tables libre), revérifié par verifierCoherence.
-    await connexion.query("SET FOREIGN_KEY_CHECKS = 0");
-    await connexion.beginTransaction();
+    await connexion.query("BEGIN");
     await remplacerDonnees(connexion, lu.enTete.tables, lu.insertions, lu.enTete.avecComptes);
-    await connexion.commit();
+    await connexion.query("COMMIT");
   } catch (erreur) {
-    await connexion.rollback();
+    await connexion.query("ROLLBACK").catch(() => undefined);
     if (erreur instanceof RefusImport) return { ok: false, erreur: erreur.raison };
+    // Clé étrangère refusée au COMMIT : même réponse que la vérification de cohérence.
+    if ((erreur as { code?: string }).code === CODE_CLE_ETRANGERE) return { ok: false, erreur: "incoherent" };
     throw erreur;
   } finally {
-    await connexion.query("SET FOREIGN_KEY_CHECKS = 1");
     connexion.release();
   }
   const lignes = lu.insertions.reduce((total, insertion) => total + insertion.lignes.length, 0);
