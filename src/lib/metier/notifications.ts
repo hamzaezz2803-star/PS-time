@@ -23,6 +23,8 @@ export const MODULE_DE_L_OBJET = {
   regle_horaire: "planning",
   horaire_dynamique: "planning",
   pointage: "presence",
+  // Pointage fait par l'employé depuis son appareil (Mon pointage).
+  pointage_distance: "presence",
   evenement: "presence",
   absence: "presence",
   droit_conge: "presence",
@@ -51,6 +53,8 @@ const PAGE_DE_L_OBJET: Record<ObjetNotification, Page | null> = {
   regle_horaire: "horaire_dynamique",
   horaire_dynamique: "horaire_dynamique",
   pointage: "pointages_manuels",
+  // Vu là où le pointage s'affiche, avec sa position et sa photo.
+  pointage_distance: "detail_jour",
   evenement: "evenements",
   absence: "absences",
   droit_conge: "droits_conges",

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Bell, BellOff, KeyRound, Pencil, Plus, Trash2, type LucideIcon } from "lucide-react";
+import { Bell, BellOff, Fingerprint, Hand, KeyRound, Pencil, Plus, Trash2, type LucideIcon } from "lucide-react";
 import { useMenuDeroulant } from "@/components/ui/utiliser-menu-deroulant";
 import { lireNotifications, marquerLues, type EtatNotifications } from "@/lib/actions/notifications";
 import { CONSERVATION_NOTIFICATIONS_JOURS, INTERVALLE_NOTIFICATIONS_MS } from "@/lib/constantes";
@@ -22,6 +22,14 @@ const ICONES: Record<Notification["action"], { Icone: LucideIcon; teinte: string
   suppression: { Icone: Trash2, teinte: "bg-erreur/10 text-erreur" },
 };
 
+/** Icône propre à certains éléments : mot de passe, pointage à distance, saisie manuelle de pointages. */
+function iconeDe(notification: Notification): { Icone: LucideIcon; teinte: string } {
+  if (notification.objet === "mot_de_passe") return { Icone: KeyRound, teinte: "bg-ciel text-primaire" };
+  if (notification.objet === "pointage_distance") return { Icone: Fingerprint, teinte: "bg-ciel text-primaire" };
+  if (notification.objet === "pointage" && notification.action === "creation") return { Icone: Hand, teinte: "bg-succes/10 text-succes" };
+  return ICONES[notification.action];
+}
+
 /** « il y a 5 min », puis la date et l'heure au-delà d'un jour. */
 function quand(date: Date, maintenant: number): string {
   const minutes = Math.max(0, Math.floor((maintenant - date.getTime()) / MILLISECONDES_PAR_MINUTE));
@@ -29,7 +37,7 @@ function quand(date: Date, maintenant: number): string {
 }
 
 function Element({ notification, estNouvelle, estDeMoi, maintenant, onOuvrir }: { notification: Notification; estNouvelle: boolean; estDeMoi: boolean; maintenant: number; onOuvrir: () => void }) {
-  const { Icone, teinte } = notification.objet === "mot_de_passe" ? { Icone: KeyRound, teinte: "bg-ciel text-primaire" } : ICONES[notification.action];
+  const { Icone, teinte } = iconeDe(notification);
   const contenu = (
     <>
       <span className={cn("mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-lg", teinte)}>

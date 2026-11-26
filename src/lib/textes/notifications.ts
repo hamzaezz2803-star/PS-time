@@ -14,6 +14,7 @@ const OBJETS: Record<Notification["objet"], { avec: string; sans: string }> = {
   regle_horaire: { avec: "la règle horaire", sans: "une règle horaire" },
   horaire_dynamique: { avec: "les employés en horaire dynamique", sans: "les employés en horaire dynamique" },
   pointage: { avec: "le pointage", sans: "un pointage" },
+  pointage_distance: { avec: "le pointage à distance", sans: "un pointage à distance" },
   evenement: { avec: "l'événement", sans: "un événement" },
   absence: { avec: "l'absence", sans: "une absence" },
   droit_conge: { avec: "le droit aux congés de", sans: "un droit aux congés" },
@@ -51,7 +52,10 @@ export const TEXTES_NOTIFICATIONS = {
       return `${auteur} a attribué des droits aux congés${notification.libelle ? ` : ${notification.libelle}` : ""}`;
     }
     if (notification.objet === "pointage" && notification.action === "creation") {
-      return `${auteur} a saisi des pointages${notification.libelle ? ` : ${notification.libelle}` : ""}`;
+      return `${auteur} a saisi des pointages manuels${notification.libelle ? ` : ${notification.libelle}` : ""}`;
+    }
+    if (notification.objet === "pointage_distance" && notification.action === "creation") {
+      return `${auteur} a pointé à distance${notification.libelle ? ` : ${notification.libelle}` : ""}`;
     }
     const objet = OBJETS[notification.objet];
     return notification.libelle
@@ -61,4 +65,11 @@ export const TEXTES_NOTIFICATIONS = {
   /** Libellé d'une saisie de pointages : « Entrée · 3 employés ». */
   libelleAbsences: (evenement: string, nombre: number) => `${evenement} · ${nombre} employé${nombre > 1 ? "s" : ""}`,
   libellePointages: (etat: string, nombre: number) => `${etat} · ${nombre} employé${nombre > 1 ? "s" : ""}`,
+  /** Pointage à distance : « Entrée · depuis un téléphone · position et photo jointes ». */
+  libellePointageDistance: (etat: string, appareil: string, aPosition: boolean, aPhoto: boolean) =>
+    [etat, `depuis ${appareil}`, aPosition && aPhoto ? "position et photo jointes" : aPosition ? "position jointe" : aPhoto ? "photo jointe" : null]
+      .filter(Boolean)
+      .join(" · "),
+  /** Appareil avec son article, pour « depuis un téléphone ». */
+  appareils: { pc: "un ordinateur", tablette: "une tablette", telephone: "un téléphone" } as Record<string, string>,
 };

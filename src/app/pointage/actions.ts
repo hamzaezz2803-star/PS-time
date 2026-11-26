@@ -2,14 +2,16 @@
 
 import { headers } from "next/headers";
 import { refresh } from "next/cache";
-import { tracer } from "@/lib/actions/notifier";
-import { POINTAGES_DISTANCE_PAR_MINUTE } from "@/lib/constantes";
+import { notifier } from "@/lib/actions/notifier";
+import { CHEMIN_DETAIL_JOUR, FUSEAU_HORAIRE, POINTAGES_DISTANCE_PAR_MINUTE } from "@/lib/constantes";
 import { insererPointageDistance, lireEmployePourPointage } from "@/lib/donnees/pointage-distance";
 import { obtenirEmployeConnecte } from "@/lib/donnees/session";
 import { formaterHeure } from "@/lib/formats";
+import { jourDansFuseau } from "@/lib/metier/dates";
 import { creerLimiteur } from "@/lib/metier/limiteur";
 import { detecterAppareil, photoPointageValide } from "@/lib/metier/pointage-distance";
 import { TEXTES_EXCEPTIONS } from "@/lib/textes/exceptions";
+import { TEXTES_NOTIFICATIONS } from "@/lib/textes/notifications";
 import { TEXTES_POINTAGE_DISTANCE } from "@/lib/textes/pointage-distance";
 import { lireEtatPointage, lireFichierPhoto, lirePosition } from "@/lib/validation/pointage-distance";
 import type { Resultat } from "@/types";
@@ -54,8 +56,11 @@ export async function pointerADistance(formulaire: FormData): Promise<Resultat<{
 
   // Journal d'audit sans position ni photo.
   console.info("Pointage à distance enregistré", { identifiant: utilisateur.identifiant, etat, appareil });
-  await tracer("creation", "pointage", `${employe.prenom} ${employe.nom}`);
-  refresh();
+  // Cloche et historique : qui (l'employé, auteur lu dans la session), quoi, depuis quel appareil ; lien vers son Détail jour.
   const libelleEtat = TEXTES_EXCEPTIONS.pointages.etats[etat];
+  const libelle = TEXTES_NOTIFICATIONS.libellePointageDistance(libelleEtat, TEXTES_NOTIFICATIONS.appareils[appareil], position !== null, photo !== null);
+  const lien = `${CHEMIN_DETAIL_JOUR}?employe=${utilisateur.employeId}&date=${jourDansFuseau(horodatage, FUSEAU_HORAIRE)}`;
+  await notifier("pointage_distance", "creation", libelle, lien);
+  refresh();
   return { ok: true, donnees: { message: TEXTES_POINTAGE_DISTANCE.reussite(libelleEtat, formaterHeure(horodatage)) } };
 }
