@@ -106,14 +106,13 @@ export function ChampCalendrier(proprietes: ProprietesCalendrier) {
         aria-expanded={estOuvert}
         aria-controls={idCalendrier}
         aria-label={libelleJour ? textes.ouvrir(libelle, libelleJour) : textes.ouvrirVide(libelle)}
-        aria-invalid={proprietes["aria-invalid"]}
+        data-invalide={proprietes["aria-invalid"] ? "" : undefined}
         aria-describedby={proprietes["aria-describedby"]}
-        aria-required={required}
         onClick={() => calendrier.current?.togglePopover()}
         className={cn(
           "flex h-11 w-full items-center gap-2.5 rounded-lg border border-bordure-champ bg-surface ps-3 pe-2.5 text-start text-base text-texte shadow-[0_1px_2px_rgb(15_27_51/0.04)] transition-colors duration-150 lg:h-10",
           "hover:border-primaire/60 focus-visible:border-primaire focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-primaire",
-          "aria-invalid:border-erreur aria-expanded:border-primaire disabled:cursor-not-allowed disabled:opacity-60",
+          "data-invalide:border-erreur aria-expanded:border-primaire disabled:cursor-not-allowed disabled:opacity-60",
         )}
       >
         <CalendarDays className="size-5 shrink-0 text-primaire" aria-hidden="true" />

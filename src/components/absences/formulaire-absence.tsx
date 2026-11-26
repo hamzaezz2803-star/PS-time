@@ -48,7 +48,7 @@ function EvenementEtPeriode({ etat, evenements, aujourdhui }: { etat: EtatFormul
         optionVide={textes.choisirEvenement}
         // Non contrôlé : React vide le formulaire après l'envoi ; la valeur par défaut, elle, est gardée.
         defaultValue={evenementId}
-        onChange={setEvenementId}
+        onChange={(evenement) => setEvenementId(evenement.target.value)}
         aide={textes.aideEvenement}
         erreur={erreurs?.evenementId}
         required
