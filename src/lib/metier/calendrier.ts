@@ -3,7 +3,6 @@
  * clavier. Fonctions pures, testées dans calendrier.test.ts.
  */
 import { ajouterJours } from "./compteurs/periodes.ts";
-import { moisVoisin, semainesDuMois } from "./planning-consultation.ts";
 
 export type CaseCalendrier = { jour: string; estDuMois: boolean };
 
@@ -19,14 +18,37 @@ export function estJourValide(valeur: string): boolean {
 /** Mois « AAAA-MM » d'un jour. */
 export const moisDuJour = (jour: string) => jour.slice(0, 7);
 
+/** Premier et dernier jour d'un mois « AAAA-MM ». */
+export function bornesDuMois(mois: string): { debut: string; fin: string } {
+  const [annee, rang] = mois.split("-").map(Number);
+  const nombreJours = new Date(Date.UTC(annee, rang, 0)).getUTCDate();
+  return { debut: `${mois}-01`, fin: `${mois}-${String(nombreJours).padStart(2, "0")}` };
+}
+
+/** Mois voisin d'un mois « AAAA-MM » (-1 : précédent, +1 : suivant). */
+export function moisVoisin(mois: string, decalage: number): string {
+  const [annee, rang] = mois.split("-").map(Number);
+  const date = new Date(Date.UTC(annee, rang - 1 + decalage, 1));
+  return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}`;
+}
+
+/** Rang du jour dans la semaine : 0 = lundi ... 6 = dimanche. */
+const rangDansSemaine = (jour: string) => (new Date(`${jour}T12:00:00Z`).getUTCDay() + 6) % 7;
+
 /**
  * Semaines du lundi au dimanche qui couvrent le mois, avec les jours des mois voisins (grisés à
  * l'affichage, mais cliquables) pour garder une grille pleine.
  */
 export function grilleCalendrier(mois: string): CaseCalendrier[][] {
-  return semainesDuMois(mois).map((semaine) =>
-    semaine.jours.map((jour, rang) => ({ jour: jour ?? ajouterJours(semaine.debut, rang), estDuMois: jour !== null })),
-  );
+  const { debut, fin } = bornesDuMois(mois);
+  const semaines: CaseCalendrier[][] = [];
+  for (let lundi = ajouterJours(debut, -rangDansSemaine(debut)); lundi <= fin; lundi = ajouterJours(lundi, 7)) {
+    semaines.push(Array.from({ length: 7 }, (_, rang) => {
+      const jour = ajouterJours(lundi, rang);
+      return { jour, estDuMois: jour >= debut && jour <= fin };
+    }));
+  }
+  return semaines;
 }
 
 /** Jour permis par les bornes facultatives (incluses). */
@@ -49,7 +71,7 @@ const DECALAGES_TOUCHES: Record<string, number> = { ArrowLeft: -1, ArrowRight: 1
  */
 export function jourApresTouche(jour: string, touche: string): string | null {
   if (touche in DECALAGES_TOUCHES) return ajouterJours(jour, DECALAGES_TOUCHES[touche]);
-  const rangSemaine = (new Date(`${jour}T12:00:00Z`).getUTCDay() + 6) % 7;
+  const rangSemaine = rangDansSemaine(jour);
   if (touche === "Home") return ajouterJours(jour, -rangSemaine);
   if (touche === "End") return ajouterJours(jour, 6 - rangSemaine);
   if (touche === "PageUp" || touche === "PageDown") return memeJourAutreMois(jour, touche === "PageUp" ? -1 : 1);

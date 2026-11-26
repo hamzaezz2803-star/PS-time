@@ -3,6 +3,7 @@
  * anomalies, la grille d'un mois (semaines du lundi au dimanche) et les totaux. Fonctions pures,
  * testées dans planning-consultation.test.ts ; mêmes règles que les compteurs et le Détail jour.
  */
+import { bornesDuMois, moisVoisin } from "./calendrier.ts";
 import { ajouterJours } from "./compteurs/periodes.ts";
 import type { JourService } from "./compteurs/variables.ts";
 import { resumerJour, type EvenementPeriode, type ResumeJour } from "./resume-jour.ts";
@@ -63,12 +64,8 @@ export function numeroSemaine(jour: string): number {
   return 1 + Math.round((date.getTime() - premierJeudi.getTime()) / (7 * 24 * 60 * 60 * 1000));
 }
 
-/** Premier et dernier jour d'un mois « AAAA-MM ». */
-export function bornesDuMois(mois: string): { debut: string; fin: string } {
-  const [annee, rang] = mois.split("-").map(Number);
-  const nombreJours = new Date(Date.UTC(annee, rang, 0)).getUTCDate();
-  return { debut: `${mois}-01`, fin: `${mois}-${String(nombreJours).padStart(2, "0")}` };
-}
+// Définis dans calendrier.ts (léger, partagé avec le calendrier du navigateur).
+export { bornesDuMois, moisVoisin };
 
 export type SemaineDuMois = { numero: number; debut: string; jours: (string | null)[] };
 
@@ -84,12 +81,6 @@ export function semainesDuMois(mois: string): SemaineDuMois[] {
   return semaines;
 }
 
-/** Mois voisin d'un mois « AAAA-MM » (-1 : précédent, +1 : suivant). */
-export function moisVoisin(mois: string, decalage: number): string {
-  const [annee, rang] = mois.split("-").map(Number);
-  const date = new Date(Date.UTC(annee, rang - 1 + decalage, 1));
-  return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}`;
-}
 
 export type TotauxPlanning = {
   joursPlanifies: number;
