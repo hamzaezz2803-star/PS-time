@@ -9,7 +9,7 @@ import { obtenirEmployeConnecte } from "@/lib/donnees/session";
 import { formaterHeure } from "@/lib/formats";
 import { jourDansFuseau } from "@/lib/metier/dates";
 import { creerLimiteur } from "@/lib/metier/limiteur";
-import { detecterAppareil, photoPointageValide } from "@/lib/metier/pointage-distance";
+import { detecterAppareil, etatsAutorises, photoPointageValide } from "@/lib/metier/pointage-distance";
 import { TEXTES_EXCEPTIONS } from "@/lib/textes/exceptions";
 import { TEXTES_NOTIFICATIONS } from "@/lib/textes/notifications";
 import { TEXTES_POINTAGE_DISTANCE } from "@/lib/textes/pointage-distance";
@@ -34,6 +34,8 @@ export async function pointerADistance(formulaire: FormData): Promise<Resultat<{
 
   const etat = lireEtatPointage(formulaire);
   if (!etat) return { ok: false, erreur: erreurs.etat };
+  // Seuls les types de pointage accordés sur la fiche (présence, mission, heures sup.) sont acceptés.
+  if (!etatsAutorises(employe.droits).includes(etat)) return { ok: false, erreur: erreurs.etatNonAccorde };
   // Minimisation : position et photo ne sont gardées que si la fiche de l'employé les exige.
   const position = employe.exigePosition ? lirePosition(formulaire) : null;
   if (employe.exigePosition && !position) return { ok: false, erreur: erreurs.position };

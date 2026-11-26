@@ -9,11 +9,14 @@ import { nomDoigt } from "./nom-doigt";
 
 const { formulaire: textes, details, liste, acces } = TEXTES_PERSONNES;
 
-/** « Autorisé : Ordinateur (PC), Tablette · position exigée », ou « Non autorisé... ». */
+/** « Autorisé : Ordinateur (PC), Tablette · pointages : P. Présence, P. Mission · position exigée », ou « Non autorisé... ». */
 function resumeDistance({ acces: valeur }: EmployeDetail): string {
   if (!valeur.pointageDistance) return acces.nonAutorise;
   const appareils = valeur.appareils.map((appareil) => acces.nomsAppareils[appareil]).join(", ");
-  return [acces.resumeDistance(appareils), valeur.exigePosition && acces.resumePosition, valeur.exigePhoto && acces.resumePhoto].filter(Boolean).join(" · ");
+  const droits = [acces.presence, ...valeur.droits.map((droit) => acces.nomsDroits[droit])].join(", ");
+  return [acces.resumeDistance(appareils), acces.resumeDroits(droits), valeur.exigePosition && acces.resumePosition, valeur.exigePhoto && acces.resumePhoto]
+    .filter(Boolean)
+    .join(" · ");
 }
 
 /** Libellé lisible d'une valeur codée (« cdi » donne « CDI »), ou la valeur telle quelle. */

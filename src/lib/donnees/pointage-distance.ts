@@ -1,8 +1,8 @@
 import "server-only";
 
 import { and, asc, eq, gte, lt } from "drizzle-orm";
-import { CONSERVATION_PHOTOS_POINTAGE_JOURS, FUSEAU_HORAIRE, UN_JOUR_MILLISECONDES, type AppareilPointage } from "@/lib/constantes";
-import { texteVersAppareils } from "@/lib/metier/acces-pointage";
+import { CONSERVATION_PHOTOS_POINTAGE_JOURS, FUSEAU_HORAIRE, UN_JOUR_MILLISECONDES, type AppareilPointage, type DroitPointageDistance } from "@/lib/constantes";
+import { droitsDepuisColonnes, texteVersAppareils } from "@/lib/metier/acces-pointage";
 import { jourDansFuseau } from "@/lib/metier/dates";
 import type { Position } from "@/lib/metier/pointage-distance";
 import type { EtatPointage } from "@/lib/validation/pointage";
@@ -21,6 +21,8 @@ export type EmployePourPointage = {
   appareils: AppareilPointage[];
   exigePosition: boolean;
   exigePhoto: boolean;
+  /** Droits accordés en plus de la présence : mission, heures sup. */
+  droits: DroitPointageDistance[];
 };
 
 export async function lireEmployePourPointage(employeId: string): Promise<EmployePourPointage | null> {
@@ -36,6 +38,8 @@ export async function lireEmployePourPointage(employeId: string): Promise<Employ
       appareils: employes.appareilsDistance,
       exigePosition: employes.distanceExigePosition,
       exigePhoto: employes.distanceExigePhoto,
+      droitMission: employes.distanceDroitMission,
+      droitHeuresSup: employes.distanceDroitHeuresSup,
     })
     .from(employes)
     .innerJoin(departements, eq(departements.id, employes.departementId))
@@ -43,7 +47,9 @@ export async function lireEmployePourPointage(employeId: string): Promise<Employ
     .leftJoin(sites, eq(sites.id, employes.siteId))
     .where(eq(employes.id, employeId))
     .limit(1);
-  return ligne ? { ...ligne, appareils: texteVersAppareils(ligne.appareils) } : null;
+  if (!ligne) return null;
+  const { droitMission, droitHeuresSup, ...employe } = ligne;
+  return { ...employe, appareils: texteVersAppareils(ligne.appareils), droits: droitsDepuisColonnes(droitMission, droitHeuresSup) };
 }
 
 export type PointageDuJourEmploye = { id: string; horodatage: string; etat: string };

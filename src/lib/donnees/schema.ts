@@ -388,6 +388,9 @@ export const employes = pgTable(
     appareilsDistance: varchar("appareils_distance", { length: 30 }).notNull().default(""),
     distanceExigePosition: boolean("distance_exige_position").notNull().default(false),
     distanceExigePhoto: boolean("distance_exige_photo").notNull().default(false),
+    // Droits en plus de la présence (entrée, sortie, pauses), toujours accordée : mission, heures sup.
+    distanceDroitMission: boolean("distance_droit_mission").notNull().default(false),
+    distanceDroitHeuresSup: boolean("distance_droit_heures_sup").notNull().default(false),
     // Doigts prévus pour l'enrôlement sur la badgeuse (chiffres 0 à 9, ex. « 56 »). Jamais d'empreinte.
     doigtsAEnroler: varchar("doigts_a_enroler", { length: 10 }).notNull().default(""),
     creeLe: dateCreation(),
@@ -396,10 +399,10 @@ export const employes = pgTable(
   (table) => [
     check("employes_appareils_distance_valides", sql`${table.appareilsDistance} ~ '^((pc|tablette|telephone)(,(pc|tablette|telephone)){0,2})?$'`),
     check("employes_doigts_valides", sql`${table.doigtsAEnroler} ~ '^[0-9]{0,10}$'`),
-    // Sans autorisation, aucun appareil ni condition n'est gardé.
+    // Sans autorisation, aucun appareil, condition ni droit n'est gardé.
     check(
       "employes_distance_coherente",
-      sql`${table.pointageDistance} OR (${table.appareilsDistance} = '' AND NOT ${table.distanceExigePosition} AND NOT ${table.distanceExigePhoto})`,
+      sql`${table.pointageDistance} OR (${table.appareilsDistance} = '' AND NOT ${table.distanceExigePosition} AND NOT ${table.distanceExigePhoto} AND NOT ${table.distanceDroitMission} AND NOT ${table.distanceDroitHeuresSup})`,
     ),
     uniqueIndex("employes_matricule_idx").on(sql`lower(${table.matricule})`),
     uniqueIndex("employes_numero_badge_idx").on(sql`lower(${table.numeroBadge})`),
@@ -536,7 +539,7 @@ export const pointages = pgTable(
     index("pointages_saisi_par_idx").on(table.saisiPar),
     check(
       "pointages_etat",
-      sql`${table.etat} IN ('entree', 'sortie', 'debut_pause', 'fin_pause', 'debut_heures_sup', 'fin_heures_sup')`,
+      sql`${table.etat} IN ('entree', 'sortie', 'debut_pause', 'fin_pause', 'debut_mission', 'fin_mission', 'debut_heures_sup', 'fin_heures_sup')`,
     ),
     check("pointages_source", sql`${table.source} IN ('manuel', 'badgeuse', 'distance')`),
   ],

@@ -11,7 +11,7 @@ import { MessageErreur } from "@/components/ui/message-erreur";
 import { CHEMIN_CHANGER_MOT_DE_PASSE } from "@/lib/constantes";
 import { lireEmployePourPointage, listerPointagesDuJour } from "@/lib/donnees/pointage-distance";
 import { obtenirEmployeConnecte } from "@/lib/donnees/session";
-import { detecterAppareil } from "@/lib/metier/pointage-distance";
+import { detecterAppareil, etatsAutorises } from "@/lib/metier/pointage-distance";
 import { TEXTES_POINTAGE_DISTANCE } from "@/lib/textes/pointage-distance";
 
 const textes = TEXTES_POINTAGE_DISTANCE;
@@ -68,6 +68,7 @@ async function ContenuPointage() {
         <EcranPointage
           exigePosition={employe.exigePosition}
           exigePhoto={employe.exigePhoto}
+          etats={etatsAutorises(employe.droits)}
           dernierEtat={pointages.at(-1)?.etat ?? null}
           aCote={<PointagesDuJour pointages={pointages} />}
         />

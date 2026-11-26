@@ -1,4 +1,4 @@
-import { accesCoherent, appareilsVersTexte, doigtsVersTexte, normaliserAppareils, normaliserDoigts, type AccesPointage } from "@/lib/metier/acces-pointage";
+import { accesCoherent, appareilsVersTexte, doigtsVersTexte, normaliserAppareils, normaliserDoigts, normaliserDroits, type AccesPointage } from "@/lib/metier/acces-pointage";
 import { TEXTES_PERSONNES } from "@/lib/textes/personnes";
 import { lireTexte } from "./employe";
 
@@ -8,6 +8,7 @@ export const CHAMPS_ACCES = {
   appareils: "appareilsDistance",
   exigePosition: "distanceExigePosition",
   exigePhoto: "distanceExigePhoto",
+  droits: "droitsDistance",
   doigts: "doigts",
   reinitialiserMotDePasse: "reinitialiserMotDePasse",
 } as const;
@@ -19,6 +20,7 @@ export function lireAccesPointage(formulaire: FormData): AccesPointage {
     appareils: normaliserAppareils(formulaire.getAll(CHAMPS_ACCES.appareils).map(lireTexte)),
     exigePosition: formulaire.get(CHAMPS_ACCES.exigePosition) === "oui",
     exigePhoto: formulaire.get(CHAMPS_ACCES.exigePhoto) === "oui",
+    droits: normaliserDroits(formulaire.getAll(CHAMPS_ACCES.droits).map(lireTexte)),
     doigts: normaliserDoigts(formulaire.getAll(CHAMPS_ACCES.doigts).map(lireTexte)),
   };
 }
@@ -44,6 +46,7 @@ export function accesVersValeurs(acces: AccesPointage): Record<string, string> {
     [CHAMPS_ACCES.appareils]: appareilsVersTexte(acces.appareils),
     [CHAMPS_ACCES.exigePosition]: acces.exigePosition ? "oui" : "",
     [CHAMPS_ACCES.exigePhoto]: acces.exigePhoto ? "oui" : "",
+    [CHAMPS_ACCES.droits]: acces.droits.join(","),
     [CHAMPS_ACCES.doigts]: doigtsVersTexte(acces.doigts),
   };
 }

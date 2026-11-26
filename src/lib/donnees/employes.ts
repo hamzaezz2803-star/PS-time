@@ -8,7 +8,7 @@ import type { DonneesEmploye } from "@/lib/validation/employe";
 import type { EmployeDetail, EmployeListe } from "@/types";
 import { obtenirBase } from "./base";
 import type { Information } from "@/lib/metier/employes";
-import { appareilsVersTexte, doigtsVersTexte, texteVersAppareils, texteVersDoigts, type AccesPointage } from "@/lib/metier/acces-pointage";
+import { appareilsVersTexte, doigtsVersTexte, droitsDepuisColonnes, droitsVersColonnes, texteVersAppareils, texteVersDoigts, type AccesPointage } from "@/lib/metier/acces-pointage";
 import { synchroniserCompteEmploye } from "./comptes-employes";
 import { appliquerChangementPhoto, type ChangementPhoto } from "./photos-employes";
 import { affectations, departements, employes, informationsEmployes, photosEmployes, postes, sites, utilisateurs } from "./schema";
@@ -86,6 +86,7 @@ function colonnesAcces(acces: AccesPointage) {
     appareilsDistance: appareilsVersTexte(acces.appareils),
     distanceExigePosition: acces.exigePosition,
     distanceExigePhoto: acces.exigePhoto,
+    ...droitsVersColonnes(acces.droits),
     doigtsAEnroler: doigtsVersTexte(acces.doigts),
   };
 }
@@ -145,6 +146,8 @@ export async function obtenirEmploye(id: string): Promise<EmployeDetail | null> 
       appareilsDistance: employes.appareilsDistance,
       exigePosition: employes.distanceExigePosition,
       exigePhoto: employes.distanceExigePhoto,
+      droitMission: employes.distanceDroitMission,
+      droitHeuresSup: employes.distanceDroitHeuresSup,
       doigtsAEnroler: employes.doigtsAEnroler,
       compteIdentifiant: utilisateurs.identifiant,
       compteActif: utilisateurs.estActif,
@@ -159,9 +162,9 @@ export async function obtenirEmploye(id: string): Promise<EmployeDetail | null> 
     .where(eq(employes.id, id))
     .limit(1);
   if (!employe) return null;
-  const { pointageDistance, appareilsDistance, exigePosition, exigePhoto, doigtsAEnroler, compteIdentifiant, compteActif, compteMotDePasseProvisoire, ...fiche } = employe;
+  const { pointageDistance, appareilsDistance, exigePosition, exigePhoto, droitMission, droitHeuresSup, doigtsAEnroler, compteIdentifiant, compteActif, compteMotDePasseProvisoire, ...fiche } = employe;
   const compte = compteIdentifiant && compteActif ? { identifiant: compteIdentifiant, motDePasseProvisoire: compteMotDePasseProvisoire === true } : null;
-  const acces = { pointageDistance, appareils: texteVersAppareils(appareilsDistance), exigePosition, exigePhoto, doigts: texteVersDoigts(doigtsAEnroler) };
+  const acces = { pointageDistance, appareils: texteVersAppareils(appareilsDistance), exigePosition, exigePhoto, droits: droitsDepuisColonnes(droitMission, droitHeuresSup), doigts: texteVersDoigts(doigtsAEnroler) };
 
   const informations = await base
     .select({ libelle: informationsEmployes.libelle, valeur: informationsEmployes.valeur })

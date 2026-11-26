@@ -1,11 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { Info, KeyRound, Monitor, Smartphone, Tablet, type LucideIcon } from "lucide-react";
+import { BriefcaseBusiness, ClockArrowUp, Info, KeyRound, LogIn, Monitor, Smartphone, Tablet, type LucideIcon } from "lucide-react";
 import { CaseACocher } from "@/components/ui/case-a-cocher";
 import { MessageErreur } from "@/components/ui/message-erreur";
-import { APPAREILS_POINTAGE, type AppareilPointage } from "@/lib/constantes";
-import { texteVersAppareils } from "@/lib/metier/acces-pointage";
+import { APPAREILS_POINTAGE, DROITS_POINTAGE_DISTANCE, type AppareilPointage, type DroitPointageDistance } from "@/lib/constantes";
+import { normaliserDroits, texteVersAppareils } from "@/lib/metier/acces-pointage";
 import { TEXTES_PERSONNES } from "@/lib/textes/personnes";
 import { cn } from "@/lib/utils";
 import { CHAMPS_ACCES } from "@/lib/validation/acces-pointage";
@@ -13,24 +13,72 @@ import type { EmployeDetail } from "@/types";
 
 const textes = TEXTES_PERSONNES.acces;
 const ICONES: Record<AppareilPointage, LucideIcon> = { pc: Monitor, tablette: Tablet, telephone: Smartphone };
+const ICONES_DROITS: Record<DroitPointageDistance, LucideIcon> = { mission: BriefcaseBusiness, heures_sup: ClockArrowUp };
 
-/** Carte cochable d'un appareil : icône, nom et aide, bordure épaisse et fond quand il est coché. */
-function CarteAppareil({ appareil, estCoche, onBasculer }: { appareil: AppareilPointage; estCoche: boolean; onBasculer: () => void }) {
-  const Icone = ICONES[appareil];
+/**
+ * Carte cochable (appareil, type de pointage) : icône, nom et aide, bordure épaisse et fond quand
+ * elle est cochée. Sans `onBasculer`, la case est cochée et figée (droit toujours accordé).
+ */
+function CarteCochable({
+  nom,
+  valeur,
+  Icone,
+  libelle,
+  aide,
+  estCoche,
+  onBasculer,
+}: {
+  nom: string;
+  valeur: string;
+  Icone: LucideIcon;
+  libelle: string;
+  aide: string;
+  estCoche: boolean;
+  onBasculer?: () => void;
+}) {
+  const estFige = !onBasculer;
   return (
     <label
       className={cn(
-        "flex min-h-11 cursor-pointer items-start gap-3 rounded-lg border p-3 transition-colors duration-150 has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-primaire",
+        "flex min-h-11 items-start gap-3 rounded-lg border p-3 transition-colors duration-150 has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-primaire",
+        estFige ? "cursor-default" : "cursor-pointer",
         estCoche ? "border-2 border-primaire bg-ciel" : "border-bordure-champ bg-surface hover:bg-fond",
       )}
     >
-      <input type="checkbox" name={CHAMPS_ACCES.appareils} value={appareil} checked={estCoche} onChange={onBasculer} className="mt-1 size-5 shrink-0 accent-primaire" />
+      <input type="checkbox" name={estFige ? undefined : nom} value={valeur} checked={estCoche} onChange={onBasculer} disabled={estFige} className="mt-1 size-5 shrink-0 accent-primaire" />
       <Icone className={cn("mt-0.5 size-6 shrink-0", estCoche ? "text-primaire" : "text-texte-secondaire")} aria-hidden="true" />
       <span className="flex flex-col">
-        <span className="font-medium text-texte">{textes.nomsAppareils[appareil]}</span>
-        <span className="text-sm text-texte-secondaire">{textes.aidesAppareils[appareil]}</span>
+        <span className="font-medium text-texte">{libelle}</span>
+        <span className="text-sm text-texte-secondaire">{aide}</span>
       </span>
     </label>
+  );
+}
+
+/** Types de pointage : la présence, toujours accordée, puis la mission et les heures sup. à cocher. */
+function ChoixDroits({ valeurInitiale }: { valeurInitiale: string }) {
+  const [droits, setDroits] = useState<DroitPointageDistance[]>(() => normaliserDroits(valeurInitiale.split(",")));
+  const basculer = (droit: DroitPointageDistance) =>
+    setDroits((actuels) => (actuels.includes(droit) ? actuels.filter((element) => element !== droit) : [...actuels, droit]));
+  return (
+    <fieldset className="flex flex-col gap-2">
+      <legend className="mb-2 text-sm font-medium text-texte">{textes.droits}</legend>
+      <div className="grid gap-3 sm:grid-cols-3">
+        <CarteCochable nom={CHAMPS_ACCES.droits} valeur="presence" Icone={LogIn} libelle={textes.presence} aide={textes.aidePresence} estCoche />
+        {DROITS_POINTAGE_DISTANCE.map((droit) => (
+          <CarteCochable
+            key={droit}
+            nom={CHAMPS_ACCES.droits}
+            valeur={droit}
+            Icone={ICONES_DROITS[droit]}
+            libelle={textes.nomsDroits[droit]}
+            aide={textes.aidesDroits[droit]}
+            estCoche={droits.includes(droit)}
+            onBasculer={() => basculer(droit)}
+          />
+        ))}
+      </div>
+    </fieldset>
   );
 }
 
@@ -90,11 +138,21 @@ export function ChampsPointageDistance({
             <legend className="mb-2 text-sm font-medium text-texte">{textes.appareils} *</legend>
             <div className="grid gap-3 sm:grid-cols-3">
               {APPAREILS_POINTAGE.map((appareil) => (
-                <CarteAppareil key={appareil} appareil={appareil} estCoche={appareils.includes(appareil)} onBasculer={() => basculer(appareil)} />
+                <CarteCochable
+                  key={appareil}
+                  nom={CHAMPS_ACCES.appareils}
+                  valeur={appareil}
+                  Icone={ICONES[appareil]}
+                  libelle={textes.nomsAppareils[appareil]}
+                  aide={textes.aidesAppareils[appareil]}
+                  estCoche={appareils.includes(appareil)}
+                  onBasculer={() => basculer(appareil)}
+                />
               ))}
             </div>
             <MessageErreur message={erreurs?.[CHAMPS_ACCES.appareils]} />
           </fieldset>
+          <ChoixDroits valeurInitiale={valeurs[CHAMPS_ACCES.droits] ?? ""} />
           <fieldset className="flex flex-col gap-1">
             <legend className="mb-1 text-sm font-medium text-texte">{textes.conditions}</legend>
             <CaseACocher nom={CHAMPS_ACCES.exigePosition} libelle={textes.exigePosition} aide={textes.aideExigePosition} defaultChecked={valeurs[CHAMPS_ACCES.exigePosition] === "oui"} />

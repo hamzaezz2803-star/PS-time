@@ -64,6 +64,7 @@ export const TEXTES_POINTAGE_DISTANCE = {
     droits: "Le pointage à distance n'est pas autorisé pour votre compte.",
     appareil: "Le pointage n'est pas autorisé depuis cet appareil.",
     etat: "Choisissez le type de pointage.",
+    etatNonAccorde: "Ce type de pointage ne vous est pas accordé. Demandez-le à votre responsable.",
     position: "Votre position est nécessaire pour pointer. Autorisez la localisation, puis réessayez.",
     photo: "Votre photo est nécessaire pour pointer. Prenez-la, puis réessayez.",
     photoInvalide: "La photo n'a pas pu être lue. Reprenez-la.",

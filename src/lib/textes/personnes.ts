@@ -172,6 +172,12 @@ export const TEXTES_PERSONNES = {
     aideExigePosition: "Donnée personnelle : à n'exiger que si le lieu de travail doit être contrôlé.",
     exigePhoto: "Joindre une photo prise sur le moment",
     aideExigePhoto: "Photo du lieu ou de l'employé, prise au moment du pointage (caméra arrière ou avant).",
+    droits: "Types de pointage accordés",
+    presence: "P. Présence",
+    aidePresence: "Toujours accordé : Entrée, Sortie, Début et Fin de pause.",
+    nomsDroits: { mission: "P. Mission", heures_sup: "P. Heures supp." },
+    aidesDroits: { mission: "Début et Fin de mission.", heures_sup: "Début et Fin des heures supplémentaires." },
+    resumeDroits: (droits: string) => `pointages : ${droits}`,
     compte: "Connexion de l'employé",
     compteExplication:
       "L'employé se connecte sur la page de connexion habituelle, depuis un appareil autorisé. Identifiant : son matricule. Mot de passe provisoire : son matricule, tel qu'il est écrit ; il devra le changer à sa première connexion.",

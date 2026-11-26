@@ -8,7 +8,7 @@ import { jourEtMinuteLocaux } from "./dates.ts";
 import { planningDuJour, type DonneesPlanning } from "./planning-jour.ts";
 import { plageDuPointage, pointValide, type Sens } from "./profil-horaire.ts";
 
-export type EtatPointageEvalue = "entree" | "sortie" | "debut_pause" | "fin_pause" | "debut_heures_sup" | "fin_heures_sup";
+export type EtatPointageEvalue = "entree" | "sortie" | "debut_pause" | "fin_pause" | "debut_mission" | "fin_mission" | "debut_heures_sup" | "fin_heures_sup";
 
 export type CodeStatut =
   | "aucun_planning"
@@ -28,13 +28,15 @@ export type CodeStatut =
 /** Résultat : code, écart en minutes s'il y a lieu, profil de référence et point validé (minutes). */
 export type StatutPointage = { code: CodeStatut; minutes?: number; profil?: ProfilHoraire; pointValide?: number };
 
-/** Une entrée ou un retour de pause est une arrivée ; le reste, un départ. */
+/** Une entrée, un retour de pause, un début de mission ou d'heures sup. est une arrivée ; le reste, un départ. */
 const SENS: Record<EtatPointageEvalue, Sens> = {
   entree: "arrivee",
   fin_pause: "arrivee",
+  debut_mission: "arrivee",
   debut_heures_sup: "arrivee",
   sortie: "depart",
   debut_pause: "depart",
+  fin_mission: "depart",
   fin_heures_sup: "depart",
 };
 

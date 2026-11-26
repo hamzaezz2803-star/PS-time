@@ -1,13 +1,12 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
-import { CirclePause, CirclePlay, ClockArrowDown, ClockArrowUp, Fingerprint, LoaderCircle, LogIn, LogOut } from "lucide-react";
+import { Briefcase, BriefcaseBusiness, CirclePause, CirclePlay, ClockArrowDown, ClockArrowUp, Fingerprint, LoaderCircle, LogIn, LogOut } from "lucide-react";
 import { pointerADistance } from "@/app/pointage/actions";
 import { Bouton } from "@/components/ui/bouton";
 import { ChoixCartes, type OptionCarte } from "@/components/ui/choix-cartes";
 import { MessageErreur } from "@/components/ui/message-erreur";
 import { MessageSucces } from "@/components/ui/message-succes";
-import { ETATS_POINTAGE } from "@/lib/constantes";
 import { etatPropose } from "@/lib/metier/pointage-distance";
 import { TEXTES_EXCEPTIONS } from "@/lib/textes/exceptions";
 import { TEXTES_POINTAGE_DISTANCE } from "@/lib/textes/pointage-distance";
@@ -19,30 +18,41 @@ import { usePosition } from "./utiliser-position";
 
 const textes = TEXTES_POINTAGE_DISTANCE;
 const { etats, etatsBadgeuse } = TEXTES_EXCEPTIONS.pointages;
-const ICONES = { entree: LogIn, sortie: LogOut, debut_pause: CirclePause, fin_pause: CirclePlay, debut_heures_sup: ClockArrowUp, fin_heures_sup: ClockArrowDown };
-const OPTIONS: OptionCarte<EtatPointage>[] = ETATS_POINTAGE.map((etat) => ({ valeur: etat, libelle: etats[etat], aide: etatsBadgeuse[etat], Icone: ICONES[etat] }));
+const ICONES = {
+  entree: LogIn,
+  sortie: LogOut,
+  debut_pause: CirclePause,
+  fin_pause: CirclePlay,
+  debut_mission: BriefcaseBusiness,
+  fin_mission: Briefcase,
+  debut_heures_sup: ClockArrowUp,
+  fin_heures_sup: ClockArrowDown,
+};
 
 /**
  * Écran de pointage de l'employé : position détectée (si exigée), photo prise sur le moment
- * (si exigée), type de pointage, puis un seul bouton « Pointer ». L'heure est celle du serveur.
+ * (si exigée), type de pointage parmi `etats` (ceux accordés sur sa fiche), puis un seul bouton « Pointer ». L'heure est celle du serveur.
  * Sur ordinateur : position et photo côte à côte, puis le pointage à côté de `aCote`
  * (pointages du jour).
  */
 export function EcranPointage({
   exigePosition,
   exigePhoto,
+  etats: etatsAccordes,
   dernierEtat,
   aCote,
 }: {
   exigePosition: boolean;
   exigePhoto: boolean;
+  etats: EtatPointage[];
   dernierEtat: string | null;
   aCote: ReactNode;
 }) {
   const position = usePosition(exigePosition);
   const [photo, setPhoto] = useState<Blob | null>(null);
   const [numeroPhoto, setNumeroPhoto] = useState(0);
-  const [etat, setEtat] = useState<EtatPointage>(() => etatPropose(dernierEtat));
+  const options: OptionCarte<EtatPointage>[] = etatsAccordes.map((valeur) => ({ valeur, libelle: etats[valeur], aide: etatsBadgeuse[valeur], Icone: ICONES[valeur] }));
+  const [etat, setEtat] = useState<EtatPointage>(() => etatPropose(dernierEtat, etatsAccordes));
   const [enCours, setEnCours] = useState(false);
   const [message, setMessage] = useState<{ type: "succes" | "erreur"; texte: string } | null>(null);
 
@@ -66,7 +76,7 @@ export function EcranPointage({
     if (!resultat.ok) return setMessage({ type: "erreur", texte: resultat.erreur });
     setMessage({ type: "succes", texte: resultat.donnees.message });
     // Pointage suivant : nouvelle photo, état suivant proposé.
-    setEtat(etatPropose(etat));
+    setEtat(etatPropose(etat, etatsAccordes));
     setPhoto(null);
     setNumeroPhoto((numero) => numero + 1);
   }
@@ -86,7 +96,7 @@ export function EcranPointage({
             <Fingerprint className="size-5 text-primaire" aria-hidden="true" />
             {textes.choix.titre}
           </h2>
-          <ChoixCartes nom={CHAMPS_POINTAGE_DISTANCE.etat} legende={textes.choix.legende} options={OPTIONS} valeur={etat} onChanger={setEtat} classeGrille="grid-cols-2 sm:grid-cols-3" />
+          <ChoixCartes nom={CHAMPS_POINTAGE_DISTANCE.etat} legende={textes.choix.legende} options={options} valeur={etat} onChanger={setEtat} classeGrille="grid-cols-2" />
 
           <div aria-live="polite">
             {message?.type === "succes" && <MessageSucces message={message.texte} />}

@@ -1,4 +1,4 @@
-import { Coffee, LogIn, LogOut, Timer, TimerOff, type LucideIcon } from "lucide-react";
+import { Briefcase, BriefcaseBusiness, Coffee, LogIn, LogOut, Timer, TimerOff, type LucideIcon } from "lucide-react";
 import { Pastille } from "@/components/ui/pastille";
 import { ETATS_POINTAGE } from "@/lib/constantes";
 import { TEXTES_EXCEPTIONS } from "@/lib/textes/exceptions";
@@ -10,6 +10,8 @@ const ICONES_ETAT: Record<Etat, LucideIcon> = {
   sortie: LogOut,
   debut_pause: Coffee,
   fin_pause: Coffee,
+  debut_mission: BriefcaseBusiness,
+  fin_mission: Briefcase,
   debut_heures_sup: Timer,
   fin_heures_sup: TimerOff,
 };
@@ -19,7 +21,7 @@ const estEtat = (valeur: string): valeur is Etat => (ETATS_POINTAGE as readonly 
 export function PastilleEtat({ etat }: { etat: string }) {
   if (!estEtat(etat)) return <Pastille ton="neutre">{etat}</Pastille>;
   return (
-    <Pastille Icone={ICONES_ETAT[etat]} ton={etat === "entree" || etat === "fin_pause" || etat === "debut_heures_sup" ? "info" : "neutre"}>
+    <Pastille Icone={ICONES_ETAT[etat]} ton={etat === "entree" || etat === "fin_pause" || etat === "debut_mission" || etat === "debut_heures_sup" ? "info" : "neutre"}>
       {TEXTES_EXCEPTIONS.pointages.etats[etat]}
     </Pastille>
   );

@@ -158,7 +158,16 @@ export const JOURS_PAR_SEMAINE = 7;
 /** Gestion des exceptions : pointages saisis à la main (corrections, tests). */
 export const CHEMIN_POINTAGES_MANUELS = "/exceptions/pointages-manuels";
 /** États d'un pointage, dans l'ordre d'une journée. */
-export const ETATS_POINTAGE = ["entree", "sortie", "debut_pause", "fin_pause", "debut_heures_sup", "fin_heures_sup"] as const;
+export const ETATS_POINTAGE = [
+  "entree",
+  "sortie",
+  "debut_pause",
+  "fin_pause",
+  "debut_mission",
+  "fin_mission",
+  "debut_heures_sup",
+  "fin_heures_sup",
+] as const;
 export const SOURCES_POINTAGE = ["manuel", "badgeuse", "distance"] as const;
 export const POINTAGES_PAR_PAGE = 50;
 /**
@@ -177,6 +186,17 @@ export const UNITES_SAISIE_EVENEMENT = ["journee", "demi_journee", "heures"] as 
 /** Appareils hors badgeuse depuis lesquels un employé peut être autorisé à pointer. */
 export const APPAREILS_POINTAGE = ["pc", "tablette", "telephone"] as const;
 export type AppareilPointage = (typeof APPAREILS_POINTAGE)[number];
+/**
+ * Types de pointage à distance. La présence (entrée, sortie, pauses) est toujours accordée à un
+ * employé autorisé ; la mission et les heures supplémentaires sont des droits cochés en plus.
+ */
+export const DROITS_POINTAGE_DISTANCE = ["mission", "heures_sup"] as const;
+export type DroitPointageDistance = (typeof DROITS_POINTAGE_DISTANCE)[number];
+export const ETATS_POINTAGE_PRESENCE = ["entree", "sortie", "debut_pause", "fin_pause"] as const;
+export const ETATS_PAR_DROIT_POINTAGE: Record<DroitPointageDistance, readonly (typeof ETATS_POINTAGE)[number][]> = {
+  mission: ["debut_mission", "fin_mission"],
+  heures_sup: ["debut_heures_sup", "fin_heures_sup"],
+};
 
 /**
  * Espace de pointage de l'employé (compte créé avec le pointage à distance : identifiant et
