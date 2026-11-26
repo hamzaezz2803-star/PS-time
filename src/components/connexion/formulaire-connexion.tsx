@@ -2,7 +2,7 @@
 
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { LoaderCircle } from "lucide-react";
+import { LoaderCircle, LockKeyhole, UserRound } from "lucide-react";
 import { verifierCodeInstallation } from "@/app/connexion/actions";
 import { Bouton } from "@/components/ui/bouton";
 import { ChampSaisie } from "@/components/ui/champ-saisie";
@@ -15,6 +15,7 @@ import { CHEMIN_ESPACE, IDENTIFIANT_INSTALLATION, LONGUEUR_MAX_IDENTIFIANT } fro
 import { TEXTES_CONNEXION } from "@/lib/textes/connexion";
 import { validerIdentifiants } from "@/lib/validation/connexion";
 import type { ErreursChampsConnexion } from "@/types";
+import { ChampAvecIcone } from "./champ-avec-icone";
 import { ChampMotDePasse } from "./champ-mot-de-passe";
 import { messagePourErreurConnexion } from "./erreurs-connexion";
 import { FormulairePremierCompte } from "./formulaire-premier-compte";
@@ -81,34 +82,40 @@ export function FormulaireConnexion() {
         <MessageSucces message={messageSucces} />
         <div className="flex flex-col gap-2">
           <Etiquette htmlFor="identifiant">{champs.identifiant.libelle}</Etiquette>
-          <ChampSaisie
-            id="identifiant"
-            name="identifiant"
-            type="text"
-            autoComplete="username"
-            autoCapitalize="none"
-            spellCheck={false}
-            maxLength={LONGUEUR_MAX_IDENTIFIANT}
-            defaultValue={saisie.identifiant}
-            placeholder={champs.identifiant.exemple}
-            required
-            aria-invalid={erreurIdentifiant ? true : undefined}
-            aria-describedby={erreurIdentifiant ? "erreur-identifiant" : undefined}
-          />
+          <ChampAvecIcone icone={UserRound}>
+            <ChampSaisie
+              id="identifiant"
+              className="ps-11"
+              name="identifiant"
+              type="text"
+              autoComplete="username"
+              autoCapitalize="none"
+              spellCheck={false}
+              maxLength={LONGUEUR_MAX_IDENTIFIANT}
+              defaultValue={saisie.identifiant}
+              placeholder={champs.identifiant.exemple}
+              required
+              aria-invalid={erreurIdentifiant ? true : undefined}
+              aria-describedby={erreurIdentifiant ? "erreur-identifiant" : undefined}
+            />
+          </ChampAvecIcone>
           <MessageErreur id="erreur-identifiant" message={erreurIdentifiant} />
         </div>
 
         <div className="flex flex-col gap-2">
           <Etiquette htmlFor="motDePasse">{champs.motDePasse.libelle}</Etiquette>
-          <ChampMotDePasse
-            id="motDePasse"
-            name="motDePasse"
-            autoComplete="current-password"
-            required
-            autoFocus={saisie.numero > 0}
-            aria-invalid={erreurMotDePasse ? true : undefined}
-            aria-describedby={erreurMotDePasse ? "erreur-mot-de-passe" : undefined}
-          />
+          <ChampAvecIcone icone={LockKeyhole}>
+            <ChampMotDePasse
+              id="motDePasse"
+              className="ps-11"
+              name="motDePasse"
+              autoComplete="current-password"
+              required
+              autoFocus={saisie.numero > 0}
+              aria-invalid={erreurMotDePasse ? true : undefined}
+              aria-describedby={erreurMotDePasse ? "erreur-mot-de-passe" : undefined}
+            />
+          </ChampAvecIcone>
           <MessageErreur id="erreur-mot-de-passe" message={erreurMotDePasse} />
         </div>
 

@@ -4,13 +4,15 @@ import { useState, type InputHTMLAttributes } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { ChampSaisie } from "@/components/ui/champ-saisie";
 import { TEXTES_CONNEXION } from "@/lib/textes/connexion";
+import { cn } from "@/lib/utils";
 
 const { afficher, masquer } = TEXTES_CONNEXION.champs.motDePasse;
 
 /** Champ mot de passe avec un bouton pour afficher ou masquer la saisie. */
-export function ChampMotDePasse(
-  props: Omit<InputHTMLAttributes<HTMLInputElement>, "type">,
-) {
+export function ChampMotDePasse({
+  className,
+  ...props
+}: Omit<InputHTMLAttributes<HTMLInputElement>, "type">) {
   const [estVisible, setEstVisible] = useState(false);
   const Icone = estVisible ? EyeOff : Eye;
 
@@ -19,7 +21,7 @@ export function ChampMotDePasse(
       <ChampSaisie
         {...props}
         type={estVisible ? "text" : "password"}
-        className="pe-14"
+        className={cn("pe-14", className)}
       />
       <button
         type="button"

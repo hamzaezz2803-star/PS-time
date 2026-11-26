@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import { Suspense } from "react";
 import { FormulaireConnexion } from "@/components/connexion/formulaire-connexion";
 import { MessageMotDePasseChange } from "@/components/connexion/message-mot-de-passe-change";
@@ -12,38 +11,39 @@ export const metadata: Metadata = {
 
 export default function PageConnexion() {
   return (
-    <div className="flex min-h-dvh">
-      <PanneauMarque />
+    <div className="relative isolate flex min-h-dvh items-center justify-center overflow-hidden bg-canevas px-4 py-8 sm:px-8">
+      {/* Disques décoratifs du fond, aux couleurs du thème. */}
+      <span
+        className="absolute -start-24 -top-24 -z-10 size-80 rounded-full bg-primaire/10"
+        aria-hidden="true"
+      />
+      <span
+        className="absolute -bottom-32 -end-20 -z-10 size-96 rounded-full bg-accent/10"
+        aria-hidden="true"
+      />
 
-      <main className="flex flex-1 items-center justify-center px-4 py-10 sm:px-8">
-        <div className="w-full max-w-md">
-          <Image
-            src="/logo-ps-time.webp"
-            alt={TEXTES_CONNEXION.altLogo}
-            width={1155}
-            height={1163}
-            priority
-            sizes="96px"
-            className="mx-auto mb-6 size-24 lg:hidden"
-          />
+      <main className="grid w-full max-w-md overflow-hidden rounded-2xl bg-surface shadow-flottant lg:min-h-[36rem] lg:max-w-5xl lg:grid-cols-2">
+        <PanneauMarque />
 
-          <div className="rounded-xl border border-bordure bg-surface shadow-carte p-6 shadow-sm sm:p-8">
-            <h1 className="text-2xl font-bold text-marine sm:text-3xl">
-              {TEXTES_CONNEXION.titre}
-            </h1>
-            <p className="mb-8 mt-2 text-base text-texte-secondaire">
-              {TEXTES_CONNEXION.sousTitre}
-            </p>
-            <Suspense>
-              <MessageMotDePasseChange />
-            </Suspense>
-            <FormulaireConnexion />
-          </div>
+        <section className="flex flex-col justify-center px-6 pb-8 pt-4 sm:px-10 lg:px-14 lg:py-12">
+          <p className="text-sm font-semibold uppercase tracking-wider text-primaire">
+            {TEXTES_CONNEXION.surTitre}
+          </p>
+          <h1 className="mt-1 text-2xl font-bold text-marine sm:text-3xl">
+            {TEXTES_CONNEXION.titre}
+          </h1>
+          <p className="mb-8 mt-2 text-base text-texte-secondaire">
+            {TEXTES_CONNEXION.sousTitre}
+          </p>
+          <Suspense>
+            <MessageMotDePasseChange />
+          </Suspense>
+          <FormulaireConnexion />
 
-          <p className="mt-6 text-center text-sm text-texte-secondaire">
+          <p className="mt-8 border-t border-bordure pt-5 text-center text-sm text-texte-secondaire">
             {TEXTES_CONNEXION.aide}
           </p>
-        </div>
+        </section>
       </main>
     </div>
   );
