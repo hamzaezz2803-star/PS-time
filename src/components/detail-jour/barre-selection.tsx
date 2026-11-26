@@ -1,9 +1,10 @@
 "use client";
 
 import { CalendarDays, ChevronLeft, ChevronRight } from "lucide-react";
-import { CHAMP_CHOIX, ChoixEmployeUnique } from "@/components/employes/choix-employe-unique";
+import { ChoixEmployeUnique } from "@/components/employes/choix-employe-unique";
 import type { EmployeChoisissable } from "@/components/employes/choix-employes";
 import { BoutonIcone } from "@/components/ui/bouton-icone";
+import { ChampCalendrier } from "@/components/ui/champ-calendrier";
 import { Etiquette } from "@/components/ui/etiquette";
 import type { ElementArbre } from "@/lib/metier/arbre";
 import { ajouterJours } from "@/lib/metier/compteurs/periodes";
@@ -25,13 +26,15 @@ export function BarreSelection({ employes, departements, aujourdhui }: { employe
         <Etiquette htmlFor="choix-date">{textes.date}</Etiquette>
         <div className="flex flex-wrap items-center gap-1">
           <BoutonIcone libelle={textes.jourPrecedent} Icone={ChevronLeft} onClick={() => naviguer({ date: ajouterJours(selection.date, -1) })} />
-          <input
+          <ChampCalendrier
             id="choix-date"
-            type="date"
+            libelle={textes.date}
             value={selection.date}
+            aujourdhui={aujourdhui}
             max={aujourdhui}
-            onChange={(e) => e.target.value && e.target.value <= aujourdhui && naviguer({ date: e.target.value })}
-            className={`${CHAMP_CHOIX} w-auto min-w-38 flex-1 tabular-nums sm:flex-none`}
+            required
+            onChange={(jour) => jour && jour <= aujourdhui && naviguer({ date: jour })}
+            className="min-w-52 flex-1 sm:flex-none"
           />
           <BoutonIcone libelle={textes.jourSuivant} Icone={ChevronRight} onClick={() => naviguer({ date: ajouterJours(selection.date, 1) })} disabled={estAujourdhui} />
           <button

@@ -5,7 +5,7 @@ import { UserRound, UsersRound } from "lucide-react";
 import { enregistrerAffectation } from "@/app/(connecte)/programme/affectations/actions";
 import type { ProprietesFormulaireListe } from "@/components/liste/gestion-liste";
 import { useFormulaireListe, valeurSaisie, type EtatFormulaireListe } from "@/components/liste/utiliser-formulaire-liste";
-import { ChampFormulaire } from "@/components/ui/champ-formulaire";
+import { ChampDate } from "@/components/ui/champ-date";
 import { ChampSelection, type OptionSelection } from "@/components/ui/champ-selection";
 import { MessageErreur } from "@/components/ui/message-erreur";
 import { PiedFormulaire } from "@/components/ui/pied-formulaire";
@@ -82,8 +82,8 @@ function ContenuAffectation({ etat, affectation, options }: { etat: EtatFormulai
       )}
       <ChampSelection nom="rotationId" libelle={textes.rotation} options={options.rotations} optionVide={textes.choisirRotation} defaultValue={valeurSaisie(etat, "rotationId", affectation?.rotationId ?? "")} erreur={erreurs?.rotationId} />
       <div className="grid gap-4 sm:grid-cols-2">
-        <ChampFormulaire nom="dateDebut" libelle={textes.dateDebut} type="date" defaultValue={valeurSaisie(etat, "dateDebut", affectation?.dateDebut ?? "")} required erreur={erreurs?.dateDebut} />
-        <ChampFormulaire nom="dateFin" libelle={textes.dateFin} type="date" defaultValue={valeurSaisie(etat, "dateFin", affectation?.dateFin ?? "")} aide={textes.aideDateFin} erreur={erreurs?.dateFin} />
+        <ChampDate nom="dateDebut" libelle={textes.dateDebut} defaultValue={valeurSaisie(etat, "dateDebut", affectation?.dateDebut ?? "")} required erreur={erreurs?.dateDebut} />
+        <ChampDate nom="dateFin" libelle={textes.dateFin} defaultValue={valeurSaisie(etat, "dateFin", affectation?.dateFin ?? "")} aide={textes.aideDateFin} erreur={erreurs?.dateFin} />
       </div>
     </div>
   );

@@ -7,6 +7,7 @@ import { ChoixEmployes, type EmployeChoisissable } from "@/components/employes/c
 import { useFormulaireListe, valeurSaisie } from "@/components/liste/utiliser-formulaire-liste";
 import { SectionFormulaire } from "@/components/programme/section-formulaire";
 import { Bouton } from "@/components/ui/bouton";
+import { ChampDate } from "@/components/ui/champ-date";
 import { ChampFormulaire } from "@/components/ui/champ-formulaire";
 import { ChampSelection } from "@/components/ui/champ-selection";
 import { MessageErreur } from "@/components/ui/message-erreur";
@@ -68,7 +69,7 @@ export function FormulairePointage({
         </SectionFormulaire>
         <SectionFormulaire titre={textes.sectionPointage} icone={Clock}>
           <div className="grid gap-4 sm:grid-cols-3">
-            <ChampFormulaire nom="jour" libelle={textes.jour} type="date" required defaultValue={valeurSaisie(etat, "jour", jourDansFuseau(maintenant, FUSEAU_HORAIRE))} erreur={erreurs?.jour} className="tabular-nums" />
+            <ChampDate nom="jour" libelle={textes.jour} required defaultValue={valeurSaisie(etat, "jour", jourDansFuseau(maintenant, FUSEAU_HORAIRE))} erreur={erreurs?.jour} />
             <ChampFormulaire nom="heure" libelle={textes.heure} type="time" required defaultValue={valeurSaisie(etat, "heure", formaterHeure(maintenant))} aide={textes.aideHeure} erreur={erreurs?.heure} className="tabular-nums" />
             <ChampSelection nom="etat" libelle={textes.etat} options={OPTIONS_ETAT} defaultValue={valeurSaisie(etat, "etat", ETATS_POINTAGE[0])} required erreur={erreurs?.etat} />
           </div>

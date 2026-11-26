@@ -1,6 +1,6 @@
 "use client";
 
-import { ChampFormulaire } from "@/components/ui/champ-formulaire";
+import { ChampDate } from "@/components/ui/champ-date";
 import { ChampSelection } from "@/components/ui/champ-selection";
 import { TYPES_EMPLOI } from "@/lib/constantes";
 import { TEXTES_PERSONNES } from "@/lib/textes/personnes";
@@ -19,9 +19,9 @@ export function ChampsEmploi({
   return (
     <div className="grid gap-x-6 gap-y-4 sm:grid-cols-2">
       <ChampSelection nom="typeEmploi" libelle={textes.typeEmploi} options={OPTIONS_TYPE_EMPLOI} optionVide={textes.aucunTypeEmploi} defaultValue={valeurs.typeEmploi ?? ""} erreur={erreurs?.typeEmploi} />
-      <ChampFormulaire nom="dateEmbauche" libelle={textes.dateEmbauche} type="date" defaultValue={valeurs.dateEmbauche ?? ""} erreur={erreurs?.dateEmbauche} />
-      <ChampFormulaire nom="dateDebutEmploi" libelle={textes.dateDebutEmploi} type="date" defaultValue={valeurs.dateDebutEmploi ?? ""} aide={textes.aideDateDebut} erreur={erreurs?.dateDebutEmploi} />
-      <ChampFormulaire nom="dateFinEmploi" libelle={textes.dateFinEmploi} type="date" defaultValue={valeurs.dateFinEmploi ?? ""} aide={textes.aideDateFin} erreur={erreurs?.dateFinEmploi} />
+      <ChampDate nom="dateEmbauche" libelle={textes.dateEmbauche} defaultValue={valeurs.dateEmbauche ?? ""} erreur={erreurs?.dateEmbauche} />
+      <ChampDate nom="dateDebutEmploi" libelle={textes.dateDebutEmploi} defaultValue={valeurs.dateDebutEmploi ?? ""} aide={textes.aideDateDebut} erreur={erreurs?.dateDebutEmploi} />
+      <ChampDate nom="dateFinEmploi" libelle={textes.dateFinEmploi} defaultValue={valeurs.dateFinEmploi ?? ""} aide={textes.aideDateFin} erreur={erreurs?.dateFinEmploi} />
     </div>
   );
 }

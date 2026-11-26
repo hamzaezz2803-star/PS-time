@@ -4,6 +4,7 @@ import { useState } from "react";
 import { CalendarRange, Calculator, Check, CircleMinus, CirclePlus, Paperclip, X } from "lucide-react";
 import { caseSaisie, valeurSaisie, type EtatFormulaireListe } from "@/components/liste/utiliser-formulaire-liste";
 import { SectionFormulaire } from "@/components/programme/section-formulaire";
+import { ChampDate } from "@/components/ui/champ-date";
 import { ChampFormulaire } from "@/components/ui/champ-formulaire";
 import { ChoixCartes, type OptionCarte } from "@/components/ui/choix-cartes";
 import { MessageErreur } from "@/components/ui/message-erreur";
@@ -125,8 +126,8 @@ export function ChampsDroit({ etat, initiales, anneeCourante, bilan }: { etat: E
           <BoutonAnnee annee={anneeCourante + 1} onChoisir={choisirAnnee} />
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
-          <ChampFormulaire nom="du" libelle={textes.du} type="date" required value={du} onChange={(evenement) => setDu(evenement.target.value)} erreur={erreurs?.du} className="tabular-nums" />
-          <ChampFormulaire nom="au" libelle={textes.au} type="date" required value={au} onChange={(evenement) => setAu(evenement.target.value)} erreur={erreurs?.au} className="tabular-nums" />
+          <ChampDate nom="du" libelle={textes.du} required value={du} onChange={setDu} erreur={erreurs?.du} />
+          <ChampDate nom="au" libelle={textes.au} required value={au} onChange={setAu} erreur={erreurs?.au} />
         </div>
       </SectionFormulaire>
 

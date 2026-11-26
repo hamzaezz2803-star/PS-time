@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { FileSpreadsheet, FileText, Search } from "lucide-react";
 import { Bouton } from "@/components/ui/bouton";
+import { ChampCalendrier } from "@/components/ui/champ-calendrier";
 import { Etiquette } from "@/components/ui/etiquette";
 import { CHEMIN_ETAT, CHEMIN_EXPORT_ETAT, CHEMIN_IMPRESSION_ETAT, LONGUEUR_MAX_RECHERCHE, RAPPORT_JOURS_DEFAUT, RAPPORT_JOURS_MAX } from "@/lib/constantes";
 import { aplatirArbre, construireArbre, type ElementArbre } from "@/lib/metier/arbre";
@@ -33,11 +34,11 @@ export function FiltresEtat({ etat, recherche, departements, aujourdhui }: { eta
       <form action={CHEMIN_ETAT(etat)} className="grid grid-cols-[minmax(0,1fr)] items-end gap-3 sm:grid-cols-2 lg:grid-cols-[10rem_10rem_minmax(0,1fr)_minmax(0,1fr)_auto]">
         <div className="flex flex-col gap-2">
           <Etiquette htmlFor="etat-du">{textes.du}</Etiquette>
-          <input id="etat-du" name="du" type="date" defaultValue={recherche.du} max={aujourdhui} className={cn(CHAMP, "tabular-nums")} />
+          <ChampCalendrier id="etat-du" name="du" libelle={textes.du} defaultValue={recherche.du} max={aujourdhui} aujourdhui={aujourdhui} required />
         </div>
         <div className="flex flex-col gap-2">
           <Etiquette htmlFor="etat-au">{textes.au}</Etiquette>
-          <input id="etat-au" name="au" type="date" defaultValue={recherche.au} max={aujourdhui} className={cn(CHAMP, "tabular-nums")} />
+          <ChampCalendrier id="etat-au" name="au" libelle={textes.au} defaultValue={recherche.au} max={aujourdhui} aujourdhui={aujourdhui} required />
         </div>
         <div className="flex flex-col gap-2">
           <Etiquette htmlFor="etat-departement">{textes.departement}</Etiquette>

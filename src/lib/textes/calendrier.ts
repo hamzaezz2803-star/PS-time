@@ -1,9 +1,8 @@
 /** Textes du calendrier de choix d'une date (composant commun `components/ui/champ-calendrier.tsx`). */
 export const TEXTES_CALENDRIER = {
   choisir: "Choisir une date",
-  aucuneDate: "Aucune date",
-  ouvrir: (date: string) => `Ouvrir le calendrier, date choisie : ${date}`,
-  ouvrirVide: "Ouvrir le calendrier, aucune date choisie",
+  ouvrir: (libelle: string, date: string) => `${libelle} : ${date}. Ouvrir le calendrier`,
+  ouvrirVide: (libelle: string) => `${libelle} : aucune date. Ouvrir le calendrier`,
   fenetre: "Calendrier",
   moisPrecedent: "Mois précédent",
   moisSuivant: "Mois suivant",

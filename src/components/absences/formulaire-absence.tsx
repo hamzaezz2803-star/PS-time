@@ -6,6 +6,7 @@ import { creerAbsences } from "@/app/(connecte)/exceptions/absences/actions";
 import { ChoixEmployes, type EmployeChoisissable } from "@/components/employes/choix-employes";
 import { useFormulaireListe, valeurSaisie, type EtatFormulaireListe } from "@/components/liste/utiliser-formulaire-liste";
 import { SectionFormulaire } from "@/components/programme/section-formulaire";
+import { ChampDate } from "@/components/ui/champ-date";
 import { ChampFormulaire } from "@/components/ui/champ-formulaire";
 import { ChampSelection } from "@/components/ui/champ-selection";
 import { ChoixCartes, type OptionCarte } from "@/components/ui/choix-cartes";
@@ -47,7 +48,7 @@ function EvenementEtPeriode({ etat, evenements, aujourdhui }: { etat: EtatFormul
         optionVide={textes.choisirEvenement}
         // Non contrôlé : React vide le formulaire après l'envoi ; la valeur par défaut, elle, est gardée.
         defaultValue={evenementId}
-        onChange={(evenement) => setEvenementId(evenement.target.value)}
+        onChange={setEvenementId}
         aide={textes.aideEvenement}
         erreur={erreurs?.evenementId}
         required
@@ -60,12 +61,12 @@ function EvenementEtPeriode({ etat, evenements, aujourdhui }: { etat: EtatFormul
 
       {dureeEffective === "journees" ? (
         <div className="grid gap-4 sm:grid-cols-2">
-          <ChampFormulaire nom="du" libelle={textes.du} type="date" required defaultValue={valeurSaisie(etat, "du", aujourdhui)} erreur={erreurs?.du} className="tabular-nums" />
-          <ChampFormulaire nom="au" libelle={textes.au} type="date" required defaultValue={valeurSaisie(etat, "au", aujourdhui)} erreur={erreurs?.au} className="tabular-nums" />
+          <ChampDate nom="du" libelle={textes.du} required defaultValue={valeurSaisie(etat, "du", aujourdhui)} erreur={erreurs?.du} />
+          <ChampDate nom="au" libelle={textes.au} required defaultValue={valeurSaisie(etat, "au", aujourdhui)} erreur={erreurs?.au} />
         </div>
       ) : (
         <div className="grid gap-4 sm:grid-cols-3">
-          <ChampFormulaire nom="jour" libelle={textes.jour} type="date" required defaultValue={valeurSaisie(etat, "jour", aujourdhui)} erreur={erreurs?.jour} className="tabular-nums" />
+          <ChampDate nom="jour" libelle={textes.jour} required defaultValue={valeurSaisie(etat, "jour", aujourdhui)} erreur={erreurs?.jour} />
           <ChampFormulaire nom="de" libelle={textes.de} type="time" required defaultValue={valeurSaisie(etat, "de", "")} aide={textes.aideHeures} erreur={erreurs?.de} className="tabular-nums" />
           <ChampFormulaire nom="a" libelle={textes.a} type="time" required defaultValue={valeurSaisie(etat, "a", "")} erreur={erreurs?.a} className="tabular-nums" />
         </div>

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { RotateCcw, Search } from "lucide-react";
 import { Bouton } from "@/components/ui/bouton";
+import { ChampCalendrier } from "@/components/ui/champ-calendrier";
 import { Etiquette } from "@/components/ui/etiquette";
 import { ACTIONS_HISTORIQUE, CHEMIN_HISTORIQUE, CONSERVATION_HISTORIQUE_JOURS, HISTORIQUE_JOURS_DEFAUT, HISTORIQUE_JOURS_MAX, LONGUEUR_MAX_RECHERCHE, MODULES_HISTORIQUE } from "@/lib/constantes";
 import { ajouterJours } from "@/lib/metier/compteurs/periodes";
@@ -26,11 +27,11 @@ export function FiltresHistorique({ recherche, auteurs, aujourdhui }: { recherch
       <form action={CHEMIN_HISTORIQUE} className="grid grid-cols-[minmax(0,1fr)] items-end gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-[9.5rem_9.5rem_repeat(3,minmax(0,1fr))_minmax(0,1.3fr)]">
         <div className="flex flex-col gap-2">
           <Etiquette htmlFor="historique-du">{textes.du}</Etiquette>
-          <input id="historique-du" name="du" type="date" defaultValue={recherche.du} max={aujourdhui} className={cn(CHAMP, "tabular-nums")} />
+          <ChampCalendrier id="historique-du" name="du" libelle={textes.du} defaultValue={recherche.du} max={aujourdhui} aujourdhui={aujourdhui} required />
         </div>
         <div className="flex flex-col gap-2">
           <Etiquette htmlFor="historique-au">{textes.au}</Etiquette>
-          <input id="historique-au" name="au" type="date" defaultValue={recherche.au} max={aujourdhui} className={cn(CHAMP, "tabular-nums")} />
+          <ChampCalendrier id="historique-au" name="au" libelle={textes.au} defaultValue={recherche.au} max={aujourdhui} aujourdhui={aujourdhui} required />
         </div>
         <div className="flex flex-col gap-2">
           <Etiquette htmlFor="historique-auteur">{textes.auteur}</Etiquette>

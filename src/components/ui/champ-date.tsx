@@ -2,7 +2,7 @@ import { ChampCalendrier, type ProprietesCalendrier } from "./champ-calendrier";
 import { Etiquette } from "./etiquette";
 import { MessageErreur } from "./message-erreur";
 
-type ProprietesChampDate = Omit<ProprietesCalendrier, "id" | "name" | "aria-invalid" | "aria-describedby"> & {
+type ProprietesChampDate = Omit<ProprietesCalendrier, "id" | "libelle" | "name" | "aria-invalid" | "aria-describedby"> & {
   nom: string;
   libelle: string;
   aide?: string;
@@ -18,7 +18,7 @@ export function ChampDate({ nom, libelle, aide, erreur, ...proprietes }: Proprie
   return (
     <div className="flex flex-col gap-2">
       <Etiquette htmlFor={nom}>{libelle}</Etiquette>
-      <ChampCalendrier id={nom} name={nom} aria-invalid={erreur ? true : undefined} aria-describedby={decritPar} {...proprietes} />
+      <ChampCalendrier id={nom} name={nom} libelle={libelle} aria-invalid={erreur ? true : undefined} aria-describedby={decritPar} {...proprietes} />
       {aide && (
         <p id={idAide} className="text-sm text-texte-secondaire">
           {aide}

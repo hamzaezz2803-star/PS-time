@@ -15,6 +15,8 @@ const MARGE_ECRAN_PIXELS = 8;
 
 export type ProprietesCalendrier = {
   id: string;
+  /** Nom du champ, lu avec la date par les lecteurs d'écran (« Du : jeu. 26 nov. 2026 »). */
+  libelle: string;
   /** Nom envoyé avec le formulaire (champ caché), facultatif hors formulaire. */
   name?: string;
   /** Jour choisi (« AAAA-MM-JJ », vide = aucun) : champ contrôlé. Sinon `defaultValue`. */
@@ -39,7 +41,7 @@ export type ProprietesCalendrier = {
  * navigateur (au-dessus des fenêtres modales), utilisable entièrement au clavier.
  */
 export function ChampCalendrier(proprietes: ProprietesCalendrier) {
-  const { id, name, value, defaultValue = "", onChange, aujourdhui, min, max, required, disabled, className } = proprietes;
+  const { id, libelle, name, value, defaultValue = "", onChange, aujourdhui, min, max, required, disabled, className } = proprietes;
   const [jourInterne, setJourInterne] = useState(defaultValue);
   const jour = value ?? jourInterne;
   const champ = useRef<HTMLInputElement>(null);
@@ -103,7 +105,7 @@ export function ChampCalendrier(proprietes: ProprietesCalendrier) {
         aria-haspopup="dialog"
         aria-expanded={estOuvert}
         aria-controls={idCalendrier}
-        aria-label={libelleJour ? textes.ouvrir(libelleJour) : textes.ouvrirVide}
+        aria-label={libelleJour ? textes.ouvrir(libelle, libelleJour) : textes.ouvrirVide(libelle)}
         aria-invalid={proprietes["aria-invalid"]}
         aria-describedby={proprietes["aria-describedby"]}
         aria-required={required}

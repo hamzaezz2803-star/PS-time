@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { FileSpreadsheet, FileText, Search } from "lucide-react";
 import { Bouton } from "@/components/ui/bouton";
+import { ChampCalendrier } from "@/components/ui/champ-calendrier";
 import { Etiquette } from "@/components/ui/etiquette";
 import { CHEMIN_EXPORT_RAPPORT_PRESENCES, CHEMIN_IMPRESSION_RAPPORT_PRESENCES, CHEMIN_RAPPORT_PRESENCES, RAPPORT_JOURS_DEFAUT, RAPPORT_JOURS_MAX } from "@/lib/constantes";
 import { aplatirArbre, construireArbre, type ElementArbre } from "@/lib/metier/arbre";
@@ -31,11 +32,11 @@ export function FiltresRapport({ recherche, departements, aujourdhui }: { recher
       <form action={CHEMIN_RAPPORT_PRESENCES} className="grid grid-cols-[minmax(0,1fr)] items-end gap-3 sm:grid-cols-2 lg:grid-cols-[10rem_10rem_minmax(0,1fr)_auto]">
         <div className="flex flex-col gap-2">
           <Etiquette htmlFor="rapport-du">{textes.du}</Etiquette>
-          <input id="rapport-du" name="du" type="date" defaultValue={recherche.du} max={aujourdhui} className={cn(CHAMP, "tabular-nums")} />
+          <ChampCalendrier id="rapport-du" name="du" libelle={textes.du} defaultValue={recherche.du} max={aujourdhui} aujourdhui={aujourdhui} required />
         </div>
         <div className="flex flex-col gap-2">
           <Etiquette htmlFor="rapport-au">{textes.au}</Etiquette>
-          <input id="rapport-au" name="au" type="date" defaultValue={recherche.au} max={aujourdhui} className={cn(CHAMP, "tabular-nums")} />
+          <ChampCalendrier id="rapport-au" name="au" libelle={textes.au} defaultValue={recherche.au} max={aujourdhui} aujourdhui={aujourdhui} required />
         </div>
         <div className="flex flex-col gap-2">
           <Etiquette htmlFor="rapport-departement">{textes.departement}</Etiquette>
