@@ -1,14 +1,18 @@
 import type { NextConfig } from "next";
+import { adressesReseauLocal } from "./src/lib/reseau-developpement";
 
 /**
- * Test depuis un téléphone du réseau local (npm run dev:telephone) : les adresses listées dans
- * BETTER_AUTH_TRUSTED_ORIGINS (ex. https://192.168.1.20:3000) sont aussi acceptées par le serveur
- * de développement. Sans effet en production.
+ * Test depuis un téléphone du réseau local (npm run dev:telephone) : l'adresse du PC est
+ * détectée à chaque démarrage, plus celles de BETTER_AUTH_TRUSTED_ORIGINS (tunnel, autre nom).
+ * Ne concerne que le serveur de développement.
  */
-const originesDeDeveloppement = (process.env.BETTER_AUTH_TRUSTED_ORIGINS ?? "")
-  .split(",")
-  .map((origine) => URL.parse(origine.trim())?.hostname)
-  .filter((nom): nom is string => Boolean(nom));
+const originesDeDeveloppement = [
+  ...adressesReseauLocal(),
+  ...(process.env.BETTER_AUTH_TRUSTED_ORIGINS ?? "")
+    .split(",")
+    .map((origine) => URL.parse(origine.trim())?.hostname)
+    .filter((nom): nom is string => Boolean(nom)),
+];
 
 const nextConfig: NextConfig = {
   /* config options here */

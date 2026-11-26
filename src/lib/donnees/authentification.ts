@@ -16,6 +16,7 @@ import {
   PROLONGATION_SESSION_SECONDES,
   TENTATIVES_CONNEXION_MAX,
 } from "@/lib/constantes";
+import { originesDeveloppement } from "@/lib/reseau-developpement";
 import { obtenirBase } from "./base";
 import { comptes, sessions, utilisateurs, verifications } from "./schema";
 import { enregistrerHistorique } from "./historique";
@@ -39,6 +40,9 @@ export const auth = betterAuth({
   advanced: {
     database: { generateId: () => crypto.randomUUID() },
   },
+  // Développement : PC et téléphone du même réseau (adresses détectées). Vide en production ;
+  // BETTER_AUTH_TRUSTED_ORIGINS reste lu en plus par Better Auth.
+  trustedOrigins: originesDeveloppement(),
   emailAndPassword: {
     enabled: true,
     // Les comptes sont créés par un administrateur, jamais par inscription libre.
