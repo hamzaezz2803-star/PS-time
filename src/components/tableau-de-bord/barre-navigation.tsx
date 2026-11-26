@@ -15,9 +15,13 @@ import { TiroirNavigation } from "./tiroir-navigation";
 // Entrée active : texte en gras et trait sous l'entrée (jamais la couleur seule).
 // Le fond de survol est un repère unique qui glisse d'une entrée à l'autre (voir BarreNavigation).
 const ENTREE =
-  "relative flex h-10 items-center gap-2 whitespace-nowrap rounded-lg px-3 text-sm font-medium text-texte-secondaire transition-colors duration-150 hover:text-texte focus-visible:outline-2 focus-visible:outline-primaire";
+  "relative flex h-10 items-center gap-1.5 whitespace-nowrap rounded-lg px-2.5 text-sm font-medium text-texte-secondaire transition-colors duration-150 hover:text-texte focus-visible:outline-2 focus-visible:outline-primaire";
 const ENTREE_ACTIVE =
-  "font-semibold text-marine after:absolute after:inset-x-3 after:-bottom-[13px] after:h-0.5 after:rounded-full after:bg-primaire";
+  "font-semibold text-marine after:absolute after:inset-x-2.5 after:-bottom-[13px] after:h-0.5 after:rounded-full after:bg-primaire";
+
+// Icônes des menus seulement sur un grand écran et un texte de taille normale ou grande :
+// sinon, la barre manquerait de place (mesuré de 1280 à 1920 px).
+const ICONE_ENTREE = "hidden size-4 shrink-0 min-[1800px]:not-in-data-[taille=tres_grande]:block";
 
 /** Vrai pour une souris : au doigt, le menu s'ouvre seulement au toucher (sinon il s'ouvrirait puis se refermerait). */
 const estSouris = (evenement: PointerEvent) => evenement.pointerType === "mouse";
@@ -43,7 +47,7 @@ function MenuDeroulant({ menu, chemin, alignerAFin }: { menu: MenuNavigation; ch
         aria-controls={idPanneau}
         className={cn(ENTREE, contientPageActive && ENTREE_ACTIVE, estOuvert && "text-texte")}
       >
-        <Icone className="hidden size-4 shrink-0 xl:block" aria-hidden="true" />
+        <Icone className={ICONE_ENTREE} aria-hidden="true" />
         {menu.libelle}
         <ChevronDown
           className={cn("size-4 shrink-0 transition-transform duration-200 motion-reduce:transition-none", estOuvert && "rotate-180")}
@@ -54,6 +58,10 @@ function MenuDeroulant({ menu, chemin, alignerAFin }: { menu: MenuNavigation; ch
     </div>
   );
 }
+
+/** Menus dans la barre à partir de 1280 px (1536 px avec le texte très grand) ; tiroir en dessous. */
+export const MENUS_VISIBLES = "hidden xl:block in-data-[taille=tres_grande]:max-2xl:hidden";
+export const TIROIR_VISIBLE = "xl:hidden in-data-[taille=tres_grande]:max-2xl:block";
 
 type Repere = { gauche: number; largeur: number };
 
@@ -73,8 +81,8 @@ export function BarreNavigation({ droits }: { droits: Droits }) {
 
   return (
     <>
-      <nav aria-label={TEXTES_NAVIGATION.menuPrincipal} className="hidden lg:block">
-        <ul className="relative flex items-center gap-1" onPointerLeave={() => setEstRepereVisible(false)}>
+      <nav aria-label={TEXTES_NAVIGATION.menuPrincipal} className={MENUS_VISIBLES}>
+        <ul className="relative flex items-center gap-0.5" onPointerLeave={() => setEstRepereVisible(false)}>
           {repere && (
             <span
               aria-hidden="true"
@@ -100,7 +108,7 @@ export function BarreNavigation({ droits }: { droits: Droits }) {
             return (
               <li key={menu.libelle} onPointerEnter={survoler}>
                 <Link href={menu.href} aria-current={estActif ? "page" : undefined} className={cn(ENTREE, estActif && ENTREE_ACTIVE)}>
-                  <Icone className="hidden size-4 shrink-0 xl:block" aria-hidden="true" />
+                  <Icone className={ICONE_ENTREE} aria-hidden="true" />
                   {menu.libelle}
                 </Link>
               </li>

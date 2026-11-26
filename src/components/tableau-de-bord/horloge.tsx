@@ -34,8 +34,9 @@ export function Horloge() {
       <Clock className="size-4 shrink-0 text-primaire" aria-hidden="true" />
       {maintenant ? (
         <>
-          <span className="hidden capitalize sm:inline">{formaterDate(maintenant)}</span>
-          <span className="hidden h-4 w-px bg-bordure sm:inline-block" aria-hidden="true" />
+          {/* La date ne s'affiche que sur un grand écran, pour laisser la place aux menus. */}
+          <span className="hidden capitalize min-[1800px]:not-in-data-[taille=tres_grande]:inline">{formaterDate(maintenant)}</span>
+          <span className="hidden h-4 w-px bg-bordure min-[1800px]:not-in-data-[taille=tres_grande]:inline-block" aria-hidden="true" />
           <time
             dateTime={maintenant.toISOString()}
             className="font-semibold tabular-nums text-marine"

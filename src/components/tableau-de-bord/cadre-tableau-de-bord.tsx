@@ -7,6 +7,8 @@ import { Menu } from "lucide-react";
 import { CHEMIN_ESPACE } from "@/lib/constantes";
 import { TEXTES_CONNEXION } from "@/lib/textes/connexion";
 import { TEXTES_NAVIGATION } from "@/lib/textes/navigation";
+import { cn } from "@/lib/utils";
+import { MENUS_VISIBLES } from "./barre-navigation";
 import { ContexteMenu, type EtatMenu } from "./contexte-menu";
 import { FilAriane } from "./fil-ariane";
 import { Horloge } from "./horloge";
@@ -24,7 +26,7 @@ function Marque() {
       <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-surface p-1 shadow-carte ring-1 ring-bordure">
         <Image src="/logo-ps-time.webp" alt={TEXTES_CONNEXION.altLogo} width={1155} height={1163} sizes="28px" className="size-7" />
       </span>
-      <span className="hidden min-w-0 sm:block lg:hidden xl:block">
+      <span className="hidden min-w-0 sm:block xl:hidden 2xl:block">
         <span className="block text-base font-bold leading-tight tracking-tight text-marine">{TEXTES_NAVIGATION.nomApplication}</span>
         <span className="block text-sm leading-tight text-texte-secondaire">{TEXTES_NAVIGATION.sousTitreApplication}</span>
       </span>
@@ -46,18 +48,18 @@ export function CadreTableauDeBord({ navigation, compte, children }: { navigatio
     <ContexteMenu value={etat}>
       <div className="flex min-h-dvh flex-col bg-fond">
         <header className="sticky top-0 z-30 border-b border-bordure bg-surface/95 backdrop-blur">
-          <div className="flex h-16 items-center gap-2 px-2 sm:px-4 lg:gap-4 lg:px-6">
+          <div className="flex h-16 items-center gap-2 px-2 sm:px-4 lg:gap-3 lg:px-6">
             <button
               type="button"
               onClick={basculerMobile}
               aria-label={TEXTES_NAVIGATION.ouvrirMenu}
               aria-expanded={estOuvertMobile}
-              className={`${BOUTON_ICONE} lg:hidden`}
+              className={cn(BOUTON_ICONE, "xl:hidden in-data-[taille=tres_grande]:max-2xl:flex")}
             >
               <Menu className="size-5" aria-hidden="true" />
             </button>
             <Marque />
-            <span className="hidden h-6 w-px bg-bordure lg:block" aria-hidden="true" />
+            <span className={cn("h-6 w-px bg-bordure", MENUS_VISIBLES)} aria-hidden="true" />
             <div className="min-w-0 flex-1">{navigation}</div>
             <Notifications />
             <span className="hidden xl:block">

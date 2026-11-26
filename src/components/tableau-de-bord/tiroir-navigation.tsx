@@ -38,7 +38,7 @@ export function TiroirNavigation({ menus, chemin }: { menus: MenuNavigation[]; c
   if (!estOuvertMobile) return null;
 
   return (
-    <div className="fixed inset-0 z-40 lg:hidden" role="dialog" aria-modal="true" aria-label={TEXTES_NAVIGATION.menuPrincipal}>
+    <div className=cn("fixed inset-0 z-40", TIROIR_VISIBLE) role="dialog" aria-modal="true" aria-label={TEXTES_NAVIGATION.menuPrincipal}>
       <div className="absolute inset-0 bg-marine/50" onClick={fermerMobile} aria-hidden="true" />
       <nav
         aria-label={TEXTES_NAVIGATION.menuPrincipal}
