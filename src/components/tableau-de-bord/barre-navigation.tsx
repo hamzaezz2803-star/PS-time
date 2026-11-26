@@ -8,7 +8,7 @@ import { useMenuDeroulant } from "@/components/ui/utiliser-menu-deroulant";
 import type { Droits } from "@/lib/metier/droits";
 import { TEXTES_NAVIGATION } from "@/lib/textes/navigation";
 import { cn } from "@/lib/utils";
-import { MENUS_VISIBLES, estLienActif, menusVisibles, type MenuNavigation } from "./navigation";
+import { DETAIL_GRAND_ECRAN, MENUS_VISIBLES, estLienActif, menusVisibles, type MenuNavigation } from "./navigation";
 import { PanneauMenu } from "./panneau-menu";
 import { TiroirNavigation } from "./tiroir-navigation";
 
@@ -19,9 +19,8 @@ const ENTREE =
 const ENTREE_ACTIVE =
   "font-semibold text-marine after:absolute after:inset-x-2.5 after:-bottom-[13px] after:h-0.5 after:rounded-full after:bg-primaire";
 
-// Icônes des menus seulement sur un grand écran et un texte de taille normale ou grande :
-// sinon, la barre manquerait de place (mesuré de 1280 à 1920 px).
-const ICONE_ENTREE = "hidden size-4 shrink-0 min-[1800px]:not-in-data-[taille=tres_grande]:block";
+// Icônes des menus seulement sur un grand écran (voir DETAIL_GRAND_ECRAN) : sinon, la place manque.
+const ICONE_ENTREE = cn("size-4 shrink-0", DETAIL_GRAND_ECRAN);
 
 /** Vrai pour une souris : au doigt, le menu s'ouvre seulement au toucher (sinon il s'ouvrirait puis se refermerait). */
 const estSouris = (evenement: PointerEvent) => evenement.pointerType === "mouse";

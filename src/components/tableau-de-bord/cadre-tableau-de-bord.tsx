@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
 import { ContexteMenu, type EtatMenu } from "./contexte-menu";
 import { FilAriane } from "./fil-ariane";
 import { Horloge } from "./horloge";
-import { MENUS_VISIBLES } from "./navigation";
+import { BOUTON_TIROIR_VISIBLE, MENUS_VISIBLES, SOUS_TITRE_LOGO } from "./navigation";
 import { Notifications } from "./notifications";
 
 const BOUTON_ICONE =
@@ -26,7 +26,7 @@ function Marque() {
       <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-surface p-1 shadow-carte ring-1 ring-bordure">
         <Image src="/logo-ps-time.webp" alt={TEXTES_CONNEXION.altLogo} width={1155} height={1163} sizes="28px" className="size-7" />
       </span>
-      <span className="hidden min-w-0 sm:block xl:hidden 2xl:block">
+      <span className={cn("min-w-0", SOUS_TITRE_LOGO)}>
         <span className="block text-base font-bold leading-tight tracking-tight text-marine">{TEXTES_NAVIGATION.nomApplication}</span>
         <span className="block text-sm leading-tight text-texte-secondaire">{TEXTES_NAVIGATION.sousTitreApplication}</span>
       </span>
@@ -54,7 +54,7 @@ export function CadreTableauDeBord({ navigation, compte, children }: { navigatio
               onClick={basculerMobile}
               aria-label={TEXTES_NAVIGATION.ouvrirMenu}
               aria-expanded={estOuvertMobile}
-              className={cn(BOUTON_ICONE, "xl:hidden in-data-[taille=tres_grande]:max-2xl:flex")}
+              className={cn(BOUTON_ICONE, BOUTON_TIROIR_VISIBLE)}
             >
               <Menu className="size-5" aria-hidden="true" />
             </button>

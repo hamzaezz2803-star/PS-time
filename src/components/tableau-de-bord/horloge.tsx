@@ -6,6 +6,8 @@ import { Clock } from "lucide-react";
 import { CHEMIN_ESPACE } from "@/lib/constantes";
 import { formaterDate, formaterHeure } from "@/lib/formats";
 import { TEXTES_NAVIGATION } from "@/lib/textes/navigation";
+import { cn } from "@/lib/utils";
+import { DETAIL_GRAND_ECRAN } from "./navigation";
 
 const MILLISECONDES_PAR_MINUTE = 60_000;
 const INTERVALLE_RAFRAICHISSEMENT_MS = 10_000;
@@ -35,8 +37,8 @@ export function Horloge() {
       {maintenant ? (
         <>
           {/* La date ne s'affiche que sur un grand écran, pour laisser la place aux menus. */}
-          <span className="hidden capitalize min-[1800px]:not-in-data-[taille=tres_grande]:inline">{formaterDate(maintenant)}</span>
-          <span className="hidden h-4 w-px bg-bordure min-[1800px]:not-in-data-[taille=tres_grande]:inline-block" aria-hidden="true" />
+          <span className={cn("capitalize", DETAIL_GRAND_ECRAN)}>{formaterDate(maintenant)}</span>
+          <span className={cn("h-4 w-px bg-bordure", DETAIL_GRAND_ECRAN)} aria-hidden="true" />
           <time
             dateTime={maintenant.toISOString()}
             className="font-semibold tabular-nums text-marine"

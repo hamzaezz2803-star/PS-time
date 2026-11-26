@@ -212,6 +212,16 @@ export function cheminVersFilAriane(chemin: string): string[] {
   return [];
 }
 
-/** Menus dans la barre à partir de 1280 px (1536 px avec le texte très grand) ; tiroir en dessous. */
-export const MENUS_VISIBLES = "hidden xl:block in-data-[taille=tres_grande]:max-2xl:hidden";
-export const TIROIR_VISIBLE = "xl:hidden in-data-[taille=tres_grande]:max-2xl:block";
+/*
+ * Largeur d'écran où les menus tiennent dans la barre (mesurée, compte au nom long compris) :
+ * 1280 px avec le texte normal, 1440 px avec le texte grand, 1536 px avec le texte très grand ;
+ * tiroir en dessous. « ! » : ces règles doivent l'emporter sur « xl: ». « taille^=tres » : un
+ * « _ » serait lu comme une espace par Tailwind.
+ */
+export const MENUS_VISIBLES = "hidden xl:block in-data-[taille=grande]:max-[1440px]:hidden! in-data-[taille^=tres]:max-2xl:hidden!";
+export const TIROIR_VISIBLE = "xl:hidden in-data-[taille=grande]:max-[1440px]:block! in-data-[taille^=tres]:max-2xl:block!";
+export const BOUTON_TIROIR_VISIBLE = "xl:hidden in-data-[taille=grande]:max-[1440px]:flex! in-data-[taille^=tres]:max-2xl:flex!";
+/** Icônes des menus, date de l'horloge : seulement à partir de 1800 px avec le texte normal. */
+export const DETAIL_GRAND_ECRAN = "hidden min-[1800px]:in-data-[taille=normale]:inline-block!";
+/** Sous-titre du logo : sur mobile et tablette, puis à partir de 1536 px avec le texte normal. */
+export const SOUS_TITRE_LOGO = "hidden sm:block xl:hidden 2xl:in-data-[taille=normale]:block!";
