@@ -8,10 +8,10 @@ import { CHEMIN_ESPACE } from "@/lib/constantes";
 import { TEXTES_CONNEXION } from "@/lib/textes/connexion";
 import { TEXTES_NAVIGATION } from "@/lib/textes/navigation";
 import { cn } from "@/lib/utils";
-import { MENUS_VISIBLES } from "./barre-navigation";
 import { ContexteMenu, type EtatMenu } from "./contexte-menu";
 import { FilAriane } from "./fil-ariane";
 import { Horloge } from "./horloge";
+import { MENUS_VISIBLES } from "./navigation";
 import { Notifications } from "./notifications";
 
 const BOUTON_ICONE =

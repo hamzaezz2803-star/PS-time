@@ -211,3 +211,7 @@ export function cheminVersFilAriane(chemin: string): string[] {
   }
   return [];
 }
+
+/** Menus dans la barre à partir de 1280 px (1536 px avec le texte très grand) ; tiroir en dessous. */
+export const MENUS_VISIBLES = "hidden xl:block in-data-[taille=tres_grande]:max-2xl:hidden";
+export const TIROIR_VISIBLE = "xl:hidden in-data-[taille=tres_grande]:max-2xl:block";

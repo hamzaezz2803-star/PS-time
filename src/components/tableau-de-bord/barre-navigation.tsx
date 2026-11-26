@@ -8,7 +8,7 @@ import { useMenuDeroulant } from "@/components/ui/utiliser-menu-deroulant";
 import type { Droits } from "@/lib/metier/droits";
 import { TEXTES_NAVIGATION } from "@/lib/textes/navigation";
 import { cn } from "@/lib/utils";
-import { estLienActif, menusVisibles, type MenuNavigation } from "./navigation";
+import { MENUS_VISIBLES, estLienActif, menusVisibles, type MenuNavigation } from "./navigation";
 import { PanneauMenu } from "./panneau-menu";
 import { TiroirNavigation } from "./tiroir-navigation";
 
@@ -58,10 +58,6 @@ function MenuDeroulant({ menu, chemin, alignerAFin }: { menu: MenuNavigation; ch
     </div>
   );
 }
-
-/** Menus dans la barre à partir de 1280 px (1536 px avec le texte très grand) ; tiroir en dessous. */
-export const MENUS_VISIBLES = "hidden xl:block in-data-[taille=tres_grande]:max-2xl:hidden";
-export const TIROIR_VISIBLE = "xl:hidden in-data-[taille=tres_grande]:max-2xl:block";
 
 type Repere = { gauche: number; largeur: number };
 

@@ -6,7 +6,7 @@ import { X } from "lucide-react";
 import { TEXTES_NAVIGATION } from "@/lib/textes/navigation";
 import { cn } from "@/lib/utils";
 import { useMenu } from "./contexte-menu";
-import { estLienActif, type LienNavigation, type MenuNavigation } from "./navigation";
+import { TIROIR_VISIBLE, estLienActif, type LienNavigation, type MenuNavigation } from "./navigation";
 
 const LIGNE =
   "flex min-h-11 items-center gap-3 rounded-lg px-3 text-base text-texte transition-colors duration-150 hover:bg-canevas focus-visible:outline-2 focus-visible:outline-primaire";
@@ -38,7 +38,7 @@ export function TiroirNavigation({ menus, chemin }: { menus: MenuNavigation[]; c
   if (!estOuvertMobile) return null;
 
   return (
-    <div className=cn("fixed inset-0 z-40", TIROIR_VISIBLE) role="dialog" aria-modal="true" aria-label={TEXTES_NAVIGATION.menuPrincipal}>
+    <div className={cn("fixed inset-0 z-40", TIROIR_VISIBLE)} role="dialog" aria-modal="true" aria-label={TEXTES_NAVIGATION.menuPrincipal}>
       <div className="absolute inset-0 bg-marine/50" onClick={fermerMobile} aria-hidden="true" />
       <nav
         aria-label={TEXTES_NAVIGATION.menuPrincipal}
