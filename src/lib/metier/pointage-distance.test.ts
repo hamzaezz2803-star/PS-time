@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { adresseCarteIntegree, detecterAppareil, etatPropose, identifiantDepuisMatricule, lienCarte, photoPointageValide, positionValide } from "./pointage-distance.ts";
+import { adresseCarteIntegree, detecterAppareil, etatPropose, etatsAutorises, identifiantDepuisMatricule, lienCarte, photoPointageValide, positionValide } from "./pointage-distance.ts";
 
 describe("identifiantDepuisMatricule", () => {
   it("met le matricule en minuscules", () => {
@@ -60,6 +60,28 @@ describe("etatPropose", () => {
     assert.equal(etatPropose("fin_pause"), "sortie");
     assert.equal(etatPropose("debut_heures_sup"), "fin_heures_sup");
     assert.equal(etatPropose("sortie"), "entree");
+    assert.equal(etatPropose("debut_mission"), "fin_mission");
+    assert.equal(etatPropose("fin_mission"), "sortie");
+  });
+  it("ne propose qu'un état accordé (sortie si la suite ne l'est plus)", () => {
+    const presence = etatsAutorises([]);
+    assert.equal(etatPropose("debut_heures_sup", presence), "sortie");
+    assert.equal(etatPropose("debut_mission", presence), "sortie");
+    assert.equal(etatPropose("debut_pause", presence), "fin_pause");
+    assert.equal(etatPropose("debut_mission", etatsAutorises(["mission"])), "fin_mission");
+  });
+});
+
+describe("etatsAutorises", () => {
+  it("accorde toujours la présence (entrée, sortie, pauses), seule par défaut", () => {
+    assert.deepEqual(etatsAutorises([]), ["entree", "sortie", "debut_pause", "fin_pause"]);
+  });
+  it("ajoute la mission et les heures sup. accordées, dans l'ordre d'une journée", () => {
+    assert.deepEqual(etatsAutorises(["mission"]), ["entree", "sortie", "debut_pause", "fin_pause", "debut_mission", "fin_mission"]);
+    assert.deepEqual(etatsAutorises(["heures_sup"]), ["entree", "sortie", "debut_pause", "fin_pause", "debut_heures_sup", "fin_heures_sup"]);
+    assert.deepEqual(etatsAutorises(["heures_sup", "mission"]), [
+      "entree", "sortie", "debut_pause", "fin_pause", "debut_mission", "fin_mission", "debut_heures_sup", "fin_heures_sup",
+    ]);
   });
 });
 

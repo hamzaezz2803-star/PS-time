@@ -6,7 +6,10 @@ import {
   appareilsVersTexte,
   decrireDoigt,
   doigtsVersTexte,
+  droitsDepuisColonnes,
+  droitsVersColonnes,
   normaliserAppareils,
+  normaliserDroits,
   normaliserDoigts,
   texteVersAppareils,
   texteVersDoigts,
@@ -27,8 +30,19 @@ describe("accès au pointage", () => {
     assert.deepEqual(texteVersDoigts(""), []);
   });
 
-  it("sans autorisation, efface appareils et conditions mais garde les doigts", () => {
-    const acces = { ...ACCES_PAR_DEFAUT, appareils: ["pc" as const], exigePosition: true, exigePhoto: true, doigts: [5 as const] };
+  it("garde les droits connus (mission, heures sup.), sans doublon, dans l'ordre", () => {
+    assert.deepEqual(normaliserDroits(["heures_sup", "presence", "mission", "mission"]), ["mission", "heures_sup"]);
+    assert.deepEqual(droitsDepuisColonnes(false, true), ["heures_sup"]);
+    assert.deepEqual(droitsDepuisColonnes(false, false), []);
+    assert.deepEqual(droitsVersColonnes(["mission"]), { distanceDroitMission: true, distanceDroitHeuresSup: false });
+  });
+
+  it("par défaut, aucun droit en plus de la présence", () => {
+    assert.deepEqual(ACCES_PAR_DEFAUT.droits, []);
+  });
+
+  it("sans autorisation, efface appareils, conditions et droits mais garde les doigts", () => {
+    const acces = { ...ACCES_PAR_DEFAUT, appareils: ["pc" as const], exigePosition: true, exigePhoto: true, droits: ["mission" as const], doigts: [5 as const] };
     assert.deepEqual(accesCoherent(acces), { ...ACCES_PAR_DEFAUT, doigts: [5] });
     assert.deepEqual(accesCoherent({ ...acces, pointageDistance: true }), { ...acces, pointageDistance: true });
   });

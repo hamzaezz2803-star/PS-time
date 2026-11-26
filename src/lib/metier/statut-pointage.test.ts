@@ -92,6 +92,12 @@ describe("statutPointage : plages fixes", () => {
     assert.equal(statut("fin_pause", "14:05").code, "retour_pause_retard");
     assert.equal(statut("fin_pause", "14:05").minutes, 5);
   });
+
+  it("traite un début de mission comme une arrivée et une fin de mission comme un départ", () => {
+    assert.deepEqual(statut("debut_mission", "08:12"), { code: "retard", minutes: 12, pointValide: h(8, 12), profil: JOURNEE });
+    assert.equal(statut("fin_mission", "17:40").code, "depart_anticipe");
+    assert.equal(statut("fin_mission", "18:00").code, "conforme");
+  });
 });
 
 describe("statutPointage : autres plages et cas", () => {

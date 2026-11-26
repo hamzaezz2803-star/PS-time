@@ -36,6 +36,13 @@
       "when": 1795636801121,
       "tag": "0004_page_planning",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1795693335295,
+      "tag": "0005_pointage_distance_droits",
+      "breakpoints": true
     }
   ]
 }
