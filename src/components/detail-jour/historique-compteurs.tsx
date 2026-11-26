@@ -2,18 +2,41 @@
 
 import { History } from "lucide-react";
 import { DUREES_HISTORIQUE } from "@/lib/constantes";
-import { formaterJour } from "@/lib/formats";
+import { formaterJour, formaterJourEnDeux } from "@/lib/formats";
 import { formaterValeur } from "@/lib/metier/compteurs/format";
 import { TEXTES_DETAIL_JOUR } from "@/lib/textes/detail-jour";
 import { cn } from "@/lib/utils";
 import type { Compteur, DetailJour } from "@/types";
 import { Carte } from "./cartes-jour";
-import { EvenementJour, HoraireJour, PresenceJour } from "./elements-jour";
+import { EvenementJour, HoraireJour, PresenceJour, StatutJour } from "./elements-jour";
 import { useNavigationDetail } from "./navigation-detail";
 
 const textes = TEXTES_DETAIL_JOUR.historique;
 const colonnesJour = TEXTES_DETAIL_JOUR.jour;
-const CELLULE = "px-3 py-1.5 align-middle";
+const CELLULE = "px-3 py-2 align-middle";
+/** Trait vertical qui sépare la journée des compteurs. */
+const SEPARATEUR = "border-s border-bordure";
+
+/** Valeur d'un compteur : « - » si inconnue, atténuée à zéro, sinon en gras avec une barre proportionnelle. */
+function ValeurCompteur({ compteur, nombre, maximum }: { compteur: Compteur; nombre: number | null; maximum: number }) {
+  if (nombre === null) {
+    return (
+      <span className="text-texte-secondaire">
+        <span aria-hidden="true">-</span>
+        <span className="sr-only">{TEXTES_DETAIL_JOUR.compteurs.sansValeur}</span>
+      </span>
+    );
+  }
+  if (nombre === 0) return <span className="whitespace-nowrap text-texte-secondaire tabular-nums">{formaterValeur(0, compteur.unite)}</span>;
+  return (
+    <span className="flex flex-col gap-1">
+      <span className="whitespace-nowrap font-semibold text-marine tabular-nums">{formaterValeur(nombre, compteur.unite)}</span>
+      <span className="h-1.5 w-full max-w-28 overflow-hidden rounded-sm bg-canevas" aria-hidden="true">
+        <span className="block h-full rounded-sm bg-primaire" style={{ width: `${(Math.abs(nombre) / maximum) * 100}%` }} />
+      </span>
+    </span>
+  );
+}
 
 /** Résumé d'une colonne : somme des valeurs connues (moyenne pour un pourcentage), ou rien. */
 function resume(compteur: Compteur, valeurs: (number | null)[]): string {
@@ -59,14 +82,22 @@ export function HistoriqueCompteurs({ detail }: { detail: DetailJour }) {
       <div className="relative -mx-4 -mb-4 overflow-x-auto border-t border-bordure sm:-mx-5 sm:-mb-5">
           <table className="w-full text-left text-sm">
             <caption className="sr-only">{textes.titre}</caption>
-            <thead className="border-b border-bordure bg-fond text-texte-secondaire">
+            <thead className="border-b border-bordure bg-fond text-sm text-texte-secondaire">
+              {/* Deux groupes de colonnes : ce qui s'est passé dans la journée, puis les compteurs calculés. */}
+              {journaliers.length > 0 && (
+                <tr className="border-b border-bordure">
+                  <th scope="colgroup" colSpan={5} className="px-4 pt-3 pb-1.5 text-start font-semibold text-marine">{textes.groupeJournee}</th>
+                  <th scope="colgroup" colSpan={journaliers.length} className={cn(CELLULE, SEPARATEUR, "pt-3 pb-1.5 font-semibold text-marine")}>{textes.groupeCompteurs}</th>
+                </tr>
+              )}
               <tr>
-                <th scope="col" className="sticky start-0 z-10 bg-fond px-4 py-2.5 font-semibold">{textes.colonneJour}</th>
-                <th scope="col" className={`${CELLULE} font-semibold`}>{colonnesJour.horaire}</th>
-                <th scope="col" className={`${CELLULE} font-semibold`}>{colonnesJour.presence}</th>
-                <th scope="col" className={`${CELLULE} min-w-40 font-semibold`}>{colonnesJour.evenement}</th>
-                {journaliers.map((compteur) => (
-                  <th key={compteur.id} scope="col" className={`${CELLULE} min-w-36 font-semibold`}>{compteur.nom}</th>
+                <th scope="col" className="sticky start-0 z-10 bg-fond px-4 py-3 font-semibold">{textes.colonneJour}</th>
+                <th scope="col" className={`${CELLULE} py-3 font-semibold`}>{colonnesJour.statut}</th>
+                <th scope="col" className={`${CELLULE} py-3 font-semibold`}>{colonnesJour.horaire}</th>
+                <th scope="col" className={`${CELLULE} py-3 font-semibold`}>{colonnesJour.presence}</th>
+                <th scope="col" className={`${CELLULE} min-w-40 py-3 font-semibold`}>{colonnesJour.evenement}</th>
+                {journaliers.map((compteur, rang) => (
+                  <th key={compteur.id} scope="col" className={cn(CELLULE, "min-w-32 py-3 font-semibold", rang === 0 && SEPARATEUR)}>{compteur.nom}</th>
                 ))}
               </tr>
             </thead>
@@ -76,33 +107,41 @@ export function HistoriqueCompteurs({ detail }: { detail: DetailJour }) {
                 const estRepos = jour.profilCode === null;
                 const fondLigne = estAffiche ? "bg-ciel" : estRepos ? "bg-fond" : "bg-surface";
                 return (
-                  <tr key={jour.jour} className={cn("group transition-colors duration-150", fondLigne, estRepos && !estAffiche && "text-texte-secondaire")} aria-current={estAffiche ? "date" : undefined}>
-                    <th scope="row" className={cn("sticky start-0 z-10 px-4 py-1.5 font-normal shadow-[1px_0_0_var(--color-bordure)]", fondLigne)}>
+                  <tr
+                    key={jour.jour}
+                    className={cn("group transition-colors duration-150", fondLigne, !estAffiche && "hover:bg-canevas", estRepos && !estAffiche && "text-texte-secondaire")}
+                    aria-current={estAffiche ? "date" : undefined}
+                  >
+                    <th
+                      scope="row"
+                      className={cn(
+                        "sticky start-0 z-10 px-4 py-2 font-normal shadow-[1px_0_0_var(--color-bordure)] transition-colors duration-150",
+                        fondLigne,
+                        estAffiche && "shadow-[inset_3px_0_0_var(--color-primaire),1px_0_0_var(--color-bordure)]",
+                        !estAffiche && "group-hover:bg-canevas",
+                      )}
+                    >
                       <button
                         type="button"
                         onClick={() => naviguer({ date: jour.jour })}
                         aria-label={estAffiche ? `${formaterJour(jour.jour)}, ${textes.jourAffiche}` : textes.afficherJour(formaterJour(jour.jour))}
-                        className="min-h-11 rounded-md text-start font-medium text-texte tabular-nums hover:text-primaire focus-visible:outline-2 focus-visible:outline-primaire lg:min-h-9"
+                        className="flex min-h-11 flex-col items-start justify-center rounded-md text-start focus-visible:outline-2 focus-visible:outline-primaire lg:min-h-10"
                       >
-                        {formaterJour(jour.jour)}
+                        <span className="text-sm capitalize text-texte-secondaire">{formaterJourEnDeux(jour.jour).semaine}</span>
+                        <span className={cn("whitespace-nowrap font-semibold tabular-nums group-hover:text-primaire", estAffiche ? "text-marine" : "text-texte")}>
+                          {formaterJourEnDeux(jour.jour).date}
+                        </span>
                       </button>
                     </th>
+                    <td className={CELLULE}><StatutJour jour={jour} /></td>
                     <td className={CELLULE}><HoraireJour jour={jour} /></td>
                     <td className={CELLULE}><PresenceJour jour={jour} /></td>
                     <td className={CELLULE}><EvenementJour jour={jour} /></td>
-                    {journaliers.map((compteur) => {
+                    {journaliers.map((compteur, rang) => {
                       const valeur = jour.valeurs.find((element) => element.idCompteur === compteur.id);
-                      const nombre = valeur?.valeur ?? null;
                       return (
-                        <td key={compteur.id} className={CELLULE} title={valeur?.message ?? undefined}>
-                          <span className="flex items-center gap-2">
-                            <span className="w-20 shrink-0 whitespace-nowrap tabular-nums text-texte">{nombre === null ? <span className="text-texte-secondaire">{TEXTES_DETAIL_JOUR.compteurs.sansValeur}</span> : formaterValeur(nombre, compteur.unite)}</span>
-                            {nombre !== null && (
-                              <span className="h-2 flex-1 overflow-hidden rounded-sm bg-fond" aria-hidden="true">
-                                <span className="block h-full rounded-sm bg-primaire/60" style={{ width: `${(Math.abs(nombre) / (maximums.get(compteur.id) ?? 1)) * 100}%` }} />
-                              </span>
-                            )}
-                          </span>
+                        <td key={compteur.id} className={cn(CELLULE, rang === 0 && SEPARATEUR)} title={valeur?.message ?? undefined}>
+                          <ValeurCompteur compteur={compteur} nombre={valeur?.valeur ?? null} maximum={maximums.get(compteur.id) ?? 1} />
                         </td>
                       );
                     })}
@@ -113,9 +152,9 @@ export function HistoriqueCompteurs({ detail }: { detail: DetailJour }) {
             {journaliers.length > 0 && (
               <tfoot className="border-t-2 border-bordure bg-fond">
                 <tr>
-                  <th scope="row" colSpan={4} className="px-4 py-2.5 text-start font-semibold text-texte">{textes.total}</th>
-                  {journaliers.map((compteur) => (
-                    <td key={compteur.id} className={`${CELLULE} py-2.5 font-semibold text-marine tabular-nums`}>{resume(compteur, colonne(compteur.id))}</td>
+                  <th scope="row" colSpan={5} className="px-4 py-2.5 text-start font-semibold text-texte">{textes.total}</th>
+                  {journaliers.map((compteur, rang) => (
+                    <td key={compteur.id} className={cn(CELLULE, "py-2.5 font-semibold text-marine tabular-nums", rang === 0 && SEPARATEUR)}>{resume(compteur, colonne(compteur.id))}</td>
                   ))}
                 </tr>
               </tfoot>

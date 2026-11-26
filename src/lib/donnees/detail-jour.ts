@@ -14,7 +14,7 @@ import { obtenirBase } from "./base";
 import { aujourdhuiLocal, chargerJoursService, estJourValide } from "./compteurs-calcul";
 import { listerCompteursActifs } from "./compteurs";
 import { evaluerPointages } from "./planning";
-import { departements, employes, pointages, utilisateurs } from "./schema";
+import { departements, employes, photosPointages, pointages, utilisateurs } from "./schema";
 
 // Formules compilées gardées d'une demande à l'autre (la clé contient la version : jamais périmées).
 const cache: CacheFormules = new Map();
@@ -49,15 +49,27 @@ async function pointagesDuJour(employe: { id: string; groupeId: string | null },
       // Auteur d’une saisie manuelle : nom et identifiant de connexion (jamais de donnée sensible).
       saisiParNom: utilisateurs.nom,
       saisiParIdentifiant: utilisateurs.identifiant,
+      // Pointage à distance : appareil, position et présence d'une photo (servie à part).
+      appareil: pointages.appareil,
+      latitude: pointages.latitude,
+      longitude: pointages.longitude,
+      photoId: photosPointages.pointageId,
     })
     .from(pointages)
     .leftJoin(utilisateurs, eq(utilisateurs.id, pointages.saisiPar))
+    .leftJoin(photosPointages, eq(photosPointages.pointageId, pointages.id))
     .where(and(eq(pointages.employeId, employe.id), gte(pointages.horodatage, depuis), lt(pointages.horodatage, jusqua)))
     .orderBy(asc(pointages.horodatage))
     .limit(DETAIL_POINTAGES_MAX * 3);
   const duJour = lignes.filter((ligne) => jourDansFuseau(ligne.horodatage, FUSEAU_HORAIRE) === date).slice(0, DETAIL_POINTAGES_MAX);
   const statuts = await evaluerPointages(duJour.map((ligne) => ({ employeId: employe.id, groupeId: employe.groupeId, horodatage: ligne.horodatage, etat: ligne.etat })));
-  return duJour.map((ligne, index) => ({ ...ligne, horodatage: ligne.horodatage.toISOString(), statut: statuts[index] }));
+  return duJour.map(({ photoId, latitude, longitude, ...ligne }, index) => ({
+    ...ligne,
+    horodatage: ligne.horodatage.toISOString(),
+    position: latitude !== null && longitude !== null ? { latitude, longitude } : null,
+    aPhoto: photoId !== null,
+    statut: statuts[index],
+  }));
 }
 
 /** Marque l'événement retenu parmi ceux de la journée entière ; les autres sont « non validés ». */

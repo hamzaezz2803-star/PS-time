@@ -22,9 +22,9 @@ describe("rapport des présences", () => {
       REGLES,
     );
     assert.deepEqual(lignes, [
-      { employeId: "e1", jour: "2026-11-17", minutes: h(13), profilId: "APM" },
-      { employeId: "e2", jour: "2026-11-17", minutes: h(10), profilId: null },
-      { employeId: "e1", jour: "2026-11-16", minutes: h(7, 50), profilId: "MAT" },
+      { employeId: "e1", jour: "2026-11-17", minutes: h(13), profilId: "APM", regleId: "soir" },
+      { employeId: "e2", jour: "2026-11-17", minutes: h(10), profilId: null, regleId: null },
+      { employeId: "e1", jour: "2026-11-16", minutes: h(7, 50), profilId: "MAT", regleId: "matin" },
     ]);
   });
 

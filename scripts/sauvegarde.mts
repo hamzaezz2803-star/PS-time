@@ -5,14 +5,14 @@
  *   npm run sauvegarde:importer -- --fichier chemin.sql --confirmer IMPORTER [--externe]
  *
  * Import : une sauvegarde PS Time signée est relue et vérifiée comme dans la page.
- * --externe exécute tel quel un fichier SQL d'une autre origine (phpMyAdmin, mysqldump) :
+ * --externe exécute tel quel un fichier SQL d'une autre origine (pg_dump en texte, DBeaver) :
  * à n'utiliser qu'avec un fichier de confiance. Dans les deux cas, la base actuelle est
  * d'abord sauvegardée dans le dossier « sauvegardes ».
  */
 import { readFile } from "node:fs/promises";
 import { parseArgs } from "node:util";
 import nextEnv from "@next/env";
-import mysql from "mysql2/promise";
+import pg from "pg";
 import { MOT_CONFIRMATION_IMPORT } from "../src/lib/constantes.ts";
 import { ecrireSauvegardeSurDisque, lireSecretSauvegarde } from "../src/lib/donnees/sauvegarde-export.ts";
 import { importerSauvegarde } from "../src/lib/donnees/sauvegarde-import.ts";
@@ -27,20 +27,17 @@ function quitter(message: string): never {
   process.exit(1);
 }
 
-function creerPool(url: string, plusieursInstructions = false): mysql.Pool {
-  const pool = mysql.createPool({ uri: url, timezone: "Z", multipleStatements: plusieursInstructions, connectionLimit: 2 });
-  pool.on("connection", (connexion) => connexion.query("SET time_zone = '+00:00'"));
-  return pool;
-}
+// Session en UTC, comme l'application (src/lib/donnees/base.ts).
+const creerPool = (url: string) => new pg.Pool({ connectionString: url, options: "-c timezone=UTC", max: 2 });
 
-async function exporter(pool: mysql.Pool, secret: string, avecComptes: boolean, fichier?: string) {
+async function exporter(pool: pg.Pool, secret: string, avecComptes: boolean, fichier?: string) {
   const chemin = await ecrireSauvegardeSurDisque(pool, secret, "ps-time-sauvegarde", avecComptes, fichier);
   console.info(`Sauvegarde écrite : ${chemin}`);
 }
 
 async function importerExterne(url: string, texte: string) {
-  // Fichier non signé : exécuté tel quel, sans transaction possible (un CREATE TABLE valide tout seul).
-  const pool = creerPool(url, true);
+  // Fichier non signé : exécuté tel quel (plusieurs instructions), dans les transactions qu'il prévoit lui-même.
+  const pool = creerPool(url);
   try {
     await pool.query(texte);
   } finally {
@@ -48,7 +45,7 @@ async function importerExterne(url: string, texte: string) {
   }
 }
 
-async function importer(pool: mysql.Pool, url: string, secret: string, fichier: string, externe: boolean) {
+async function importer(pool: pg.Pool, url: string, secret: string, fichier: string, externe: boolean) {
   const texte = await readFile(fichier, "utf8");
   if (externe) {
     console.info(`Base actuelle sauvegardée : ${await ecrireSauvegardeSurDisque(pool, secret, "avant-import")}`);

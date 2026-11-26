@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
+import { FORMAT_SAUVEGARDE } from "../constantes.ts";
 import { creerSignataire, lireSauvegarde, nomFichierSauvegarde, texteEnTete } from "./sauvegarde.ts";
 import { instructionInsert, valeurSql } from "./sauvegarde-sql.ts";
 
@@ -10,16 +11,16 @@ const TABLES = {
   sansComptes: { sites: ["id", "nom"] },
 };
 
-function fichier(corps: string[], options: { avecComptes?: boolean; migration?: string; secret?: string } = {}): string {
+function fichier(corps: string[], options: { avecComptes?: boolean; migration?: string; secret?: string; format?: number } = {}): string {
   const avecComptes = options.avecComptes ?? false;
   const signataire = creerSignataire(options.secret ?? SECRET);
-  const enTete = texteEnTete({ format: 1, migration: options.migration ?? MIGRATION, avecComptes, creeLe: "2026-11-21T10:00:00.000Z", tables: Object.keys(avecComptes ? TABLES.avecComptes : TABLES.sansComptes) });
+  const enTete = texteEnTete({ format: options.format ?? FORMAT_SAUVEGARDE, migration: options.migration ?? MIGRATION, avecComptes, creeLe: "2026-11-21T10:00:00.000Z", tables: Object.keys(avecComptes ? TABLES.avecComptes : TABLES.sansComptes) });
   const contenu = enTete + corps.map((ligne) => `${ligne}\n`).join("");
   signataire.ajouter(contenu);
   return contenu + signataire.ligneFinale();
 }
 
-const SITES = ["DELETE FROM `sites`;", instructionInsert("sites", ["id", "nom"], [["'1'", valeurSql("Usine d'Aïn Sebaâ")]])];
+const SITES = ['DELETE FROM "sites";', instructionInsert("sites", ["id", "nom"], [[valeurSql("1"), valeurSql("Usine d'Aïn Sebaâ")]]), "COMMIT;"];
 
 describe("lireSauvegarde", () => {
   it("accepte un fichier signé à la même version", () => {
@@ -39,9 +40,13 @@ describe("lireSauvegarde", () => {
     const modifie = fichier(SITES).replace("Usine", "Usinе");
     assert.deepEqual(lireSauvegarde(modifie, SECRET, MIGRATION, TABLES), { ok: false, erreur: "signature" });
     assert.deepEqual(lireSauvegarde(fichier(SITES, { secret: "autre" }), SECRET, MIGRATION, TABLES), { ok: false, erreur: "signature" });
-    assert.deepEqual(lireSauvegarde("INSERT INTO `sites` (`id`) VALUES ('1');\n", SECRET, MIGRATION, TABLES), { ok: false, erreur: "signature" });
-    const ajoutApres = `${fichier(SITES)}DROP TABLE \`sites\`;\n`;
+    assert.deepEqual(lireSauvegarde(`INSERT INTO "sites" ("id") VALUES (E'1');\n`, SECRET, MIGRATION, TABLES), { ok: false, erreur: "signature" });
+    const ajoutApres = `${fichier(SITES)}DROP TABLE "sites";\n`;
     assert.deepEqual(lireSauvegarde(ajoutApres, SECRET, MIGRATION, TABLES), { ok: false, erreur: "signature" });
+  });
+
+  it("refuse un fichier de l'ancienne base MySQL (format 1)", () => {
+    assert.deepEqual(lireSauvegarde(fichier(SITES, { format: 1 }), SECRET, MIGRATION, TABLES), { ok: false, erreur: "format" });
   });
 
   it("refuse une autre version de la base", () => {
@@ -49,11 +54,11 @@ describe("lireSauvegarde", () => {
   });
 
   it("refuse une instruction inconnue même signée (défense en profondeur)", () => {
-    const piege = fichier([...SITES, "DROP TABLE `sites`;"]);
+    const piege = fichier([...SITES, 'DROP TABLE "sites";']);
     assert.deepEqual(lireSauvegarde(piege, SECRET, MIGRATION, TABLES), { ok: false, erreur: "contenu" });
-    const autreTable = fichier([instructionInsert("utilisateurs", ["id", "nom"], [["'1'", "'x'"]])]);
+    const autreTable = fichier([instructionInsert("utilisateurs", ["id", "nom"], [[valeurSql("1"), valeurSql("x")]])]);
     assert.deepEqual(lireSauvegarde(autreTable, SECRET, MIGRATION, TABLES), { ok: false, erreur: "contenu" });
-    const colonneInconnue = fichier([instructionInsert("sites", ["id", "est_super_admin"], [["'1'", "1"]])]);
+    const colonneInconnue = fichier([instructionInsert("sites", ["id", "est_super_admin"], [[valeurSql("1"), valeurSql("true")]])]);
     assert.deepEqual(lireSauvegarde(colonneInconnue, SECRET, MIGRATION, TABLES), { ok: false, erreur: "contenu" });
   });
 

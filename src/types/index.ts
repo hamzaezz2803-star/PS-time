@@ -67,7 +67,7 @@ export type EntreeHistorique = {
 export type Notification = {
   id: string;
   action: "creation" | "modification" | "suppression";
-  objet: "site" | "departement" | "poste" | "employe" | "profil_horaire" | "rotation" | "groupe" | "affectation" | "regle_horaire" | "horaire_dynamique" | "pointage" | "evenement" | "absence" | "droit_conge" | "compteur" | "utilisateur" | "mot_de_passe" | "apparence";
+  objet: "site" | "departement" | "poste" | "employe" | "profil_horaire" | "rotation" | "groupe" | "affectation" | "regle_horaire" | "horaire_dynamique" | "pointage" | "pointage_distance" | "evenement" | "absence" | "droit_conge" | "compteur" | "utilisateur" | "mot_de_passe" | "apparence";
   libelle: string | null;
   lien: string | null;
   auteurId: string | null;
@@ -171,6 +171,10 @@ export type EmployeDetail = {
   dateFinEmploi: string | null;
   /** Date de la photo de profil, null sans photo. */
   photoModifieeLe: Date | null;
+  /** Pointage à distance et doigts prévus pour l'enrôlement (aucune donnée biométrique). */
+  acces: import("@/lib/metier/acces-pointage").AccesPointage;
+  /** Compte de connexion actif (pointage à distance), ou null. Jamais le mot de passe. */
+  compte: { identifiant: string; motDePasseProvisoire: boolean } | null;
   informations: { libelle: string; valeur: string }[];
 };
 
@@ -284,6 +288,7 @@ export type RegleHoraireListe = {
   profilNom: string;
   profilCode: string;
   estActif: boolean;
+  couleur: import("@/lib/constantes").CouleurRegle;
 };
 
 /** Compteur tel qu'affiché dans la liste et le formulaire. */
@@ -334,12 +339,16 @@ export type DetailJour = {
     id: string;
     horodatage: string;
     etat: string;
-    /** « badgeuse » ou « manuel ». */
+    /** « badgeuse », « manuel » ou « distance ». */
     source: string;
     remarque: string | null;
     /** Compte qui a saisi un pointage manuel (vide pour la badgeuse ou un compte supprimé). */
     saisiParNom: string | null;
     saisiParIdentifiant: string | null;
+    /** Pointage à distance : appareil, position (si exigée) et photo (gardée 90 jours). */
+    appareil: string | null;
+    position: { latitude: number; longitude: number } | null;
+    aPhoto: boolean;
     statut: import("@/lib/metier/statut-pointage").StatutPointage;
   }[];
   /** Absences et événements de l'employé ce jour-là. */
@@ -364,7 +373,8 @@ export type LigneRapportPresence = {
   jour: string;
   /** Premier pointage, en minutes depuis minuit (heure de Casablanca). */
   minutes: number;
-  profil: { code: string; nom: string } | null;
+  /** Profil reconnu et couleur de la règle qui l'a reconnu, ou null. */
+  profil: { code: string; nom: string; couleur: import("@/lib/constantes").CouleurRegle } | null;
 };
 
 /** Événement : motif d'absence ou de présence (congé, maladie, formation, mission...). */

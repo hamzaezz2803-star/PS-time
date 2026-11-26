@@ -1,7 +1,7 @@
 import "server-only";
 
 import { hashPassword } from "better-auth/crypto";
-import { and, asc, desc, eq } from "drizzle-orm";
+import { and, asc, desc, eq, isNull } from "drizzle-orm";
 import { DOMAINE_EMAIL_INTERNE, LIMITE_UTILISATEURS } from "@/lib/constantes";
 import { nettoyerPages, type Page } from "@/lib/metier/droits";
 import type { UtilisateurListe } from "@/types";
@@ -9,10 +9,10 @@ import { obtenirBase } from "./base";
 import { autorisationsPages, comptes, sessions, utilisateurs } from "./schema";
 
 /** Nom imposé par Better Auth pour une connexion par mot de passe. */
-const FOURNISSEUR_MOT_DE_PASSE = "credential";
+export const FOURNISSEUR_MOT_DE_PASSE = "credential";
 
 type Base = ReturnType<typeof obtenirBase>;
-type Transaction = Parameters<Parameters<Base["transaction"]>[0]>[0];
+export type Transaction = Parameters<Parameters<Base["transaction"]>[0]>[0];
 
 export async function estUtilisateurActif(utilisateurId: string): Promise<boolean> {
   const [utilisateur] = await obtenirBase()
@@ -50,7 +50,10 @@ export async function listerPagesAccordees(utilisateurId: string): Promise<Page[
   return nettoyerPages(lignes.map((ligne) => ligne.page));
 }
 
-/** Comptes triés (super administrateurs d'abord, puis par identifiant), avec leurs pages accordées. */
+/**
+ * Comptes triés (super administrateurs d'abord, puis par identifiant), avec leurs pages accordées.
+ * Les comptes des employés (pointage à distance) se gèrent depuis leur fiche, pas ici.
+ */
 export async function listerUtilisateurs(): Promise<UtilisateurListe[]> {
   const base = obtenirBase();
   const [lignes, autorisations] = await Promise.all([
@@ -65,6 +68,7 @@ export async function listerUtilisateurs(): Promise<UtilisateurListe[]> {
         modifieLe: utilisateurs.modifieLe,
       })
       .from(utilisateurs)
+      .where(isNull(utilisateurs.employeId))
       .orderBy(desc(utilisateurs.estSuperAdmin), asc(utilisateurs.identifiant))
       .limit(LIMITE_UTILISATEURS),
     base.select({ utilisateurId: autorisationsPages.utilisateurId, page: autorisationsPages.page }).from(autorisationsPages),
@@ -94,6 +98,8 @@ export type NouvelUtilisateur = {
   /** Vrai : le mot de passe est provisoire et devra être changé à la première connexion. */
   doitChangerMotDePasse: boolean;
   pages: Page[];
+  /** Compte d'un employé (pointage à distance) : aucune page. */
+  employeId?: string;
 };
 
 /** Crée un compte et son mot de passe (empreinte scrypt) dans la transaction donnée. */
@@ -107,6 +113,7 @@ export async function insererUtilisateur(transaction: Transaction, nouveau: Nouv
     nom: nouveau.nom,
     estSuperAdmin: nouveau.estSuperAdmin,
     doitChangerMotDePasse: nouveau.doitChangerMotDePasse,
+    employeId: nouveau.employeId ?? null,
   });
   await transaction.insert(comptes).values({
     id: crypto.randomUUID(),
@@ -144,7 +151,8 @@ export async function modifierUtilisateur(id: string, modification: Modification
     const [existant] = await transaction
       .select({ estSuperAdmin: utilisateurs.estSuperAdmin })
       .from(utilisateurs)
-      .where(eq(utilisateurs.id, id))
+      // Jamais un compte d'employé : il ne doit recevoir aucune page.
+      .where(and(eq(utilisateurs.id, id), isNull(utilisateurs.employeId)))
       .limit(1)
       .for("update");
     if (!existant) return false;
@@ -170,5 +178,5 @@ export async function modifierUtilisateur(id: string, modification: Modification
 export async function supprimerAdministrateur(id: string): Promise<void> {
   await obtenirBase()
     .delete(utilisateurs)
-    .where(and(eq(utilisateurs.id, id), eq(utilisateurs.estSuperAdmin, false)));
+    .where(and(eq(utilisateurs.id, id), eq(utilisateurs.estSuperAdmin, false), isNull(utilisateurs.employeId)));
 }

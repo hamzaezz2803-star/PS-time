@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, asc, count, desc, eq, gte, inArray, like, lte, ne, or, type SQL } from "drizzle-orm";
+import { and, asc, count, desc, eq, gte, inArray, ilike, lte, ne, or, type SQL } from "drizzle-orm";
 import { PIECES_JOINTES_PAR_DROIT_MAX } from "@/lib/constantes";
 import { periodesSeChevauchent } from "@/lib/metier/programme";
 import { motifContient } from "@/lib/metier/recherche";
@@ -18,7 +18,7 @@ function conditionRecherche(recherche: RechercheAbsences): SQL | undefined {
   const conditions: (SQL | undefined)[] = [];
   if (recherche.employe) {
     const motif = motifContient(recherche.employe);
-    conditions.push(or(like(employes.nom, motif), like(employes.prenom, motif), like(employes.matricule, motif)));
+    conditions.push(or(ilike(employes.nom, motif), ilike(employes.prenom, motif), ilike(employes.matricule, motif)));
   }
   if (recherche.jour) conditions.push(lte(droitsConges.dateDebut, recherche.jour), gte(droitsConges.dateFin, recherche.jour));
   return and(...conditions);
@@ -171,8 +171,8 @@ export async function modifierDroit(id: string, donnees: DonneesDroit, pieces: P
 /** Supprime un droit (les absences restent) et ses pièces devenues inutiles. Renvoie false s'il n'existe plus. */
 export async function supprimerDroit(id: string): Promise<boolean> {
   return obtenirBase().transaction(async (transaction) => {
-    const [resultat] = await transaction.delete(droitsConges).where(eq(droitsConges.id, id));
-    if (resultat.affectedRows === 0) return false;
+    const resultat = await transaction.delete(droitsConges).where(eq(droitsConges.id, id));
+    if (!resultat.rowCount) return false;
     await supprimerPiecesOrphelines(transaction);
     return true;
   });

@@ -12,6 +12,8 @@ describe("objetsNotifications", () => {
   it("limite un administrateur aux objets de ses pages, sans l'administration", () => {
     assert.deepEqual(objetsNotifications({ estSuperAdmin: false, pages: ["pointages_manuels"] }), ["pointage"]);
     assert.deepEqual(objetsNotifications({ estSuperAdmin: false, pages: ["horaire_dynamique"] }), ["regle_horaire", "horaire_dynamique"]);
+    // Pointages faits à distance par les employés : vus avec la page Détail jour, où ils s'affichent.
+    assert.deepEqual(objetsNotifications({ estSuperAdmin: false, pages: ["detail_jour"] }), ["pointage_distance"]);
   });
 });
 

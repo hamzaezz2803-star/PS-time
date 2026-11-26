@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, asc, count, eq, inArray, isNotNull, like, or, type SQL } from "drizzle-orm";
+import { and, asc, count, eq, inArray, isNotNull, ilike, or, type SQL } from "drizzle-orm";
 import { idsDescendants } from "@/lib/metier/arbre";
 import { motifContient } from "@/lib/metier/recherche";
 import type { RechercheEmployes } from "@/lib/validation/recherche-employes";
@@ -8,8 +8,10 @@ import type { DonneesEmploye } from "@/lib/validation/employe";
 import type { EmployeDetail, EmployeListe } from "@/types";
 import { obtenirBase } from "./base";
 import type { Information } from "@/lib/metier/employes";
+import { appareilsVersTexte, doigtsVersTexte, texteVersAppareils, texteVersDoigts, type AccesPointage } from "@/lib/metier/acces-pointage";
+import { synchroniserCompteEmploye } from "./comptes-employes";
 import { appliquerChangementPhoto, type ChangementPhoto } from "./photos-employes";
-import { affectations, departements, employes, informationsEmployes, photosEmployes, postes, sites } from "./schema";
+import { affectations, departements, employes, informationsEmployes, photosEmployes, postes, sites, utilisateurs } from "./schema";
 
 /** Aucun critère : toute la liste. */
 const SANS_RECHERCHE: RechercheEmployes = { nom: "", matricule: "", departementId: null };
@@ -22,11 +24,11 @@ async function conditionRecherche(recherche: RechercheEmployes): Promise<SQL | u
   const conditions: (SQL | undefined)[] = [];
   if (recherche.nom) {
     const motif = motifContient(recherche.nom);
-    conditions.push(or(like(employes.nom, motif), like(employes.prenom, motif)));
+    conditions.push(or(ilike(employes.nom, motif), ilike(employes.prenom, motif)));
   }
   if (recherche.matricule) {
     const motif = motifContient(recherche.matricule);
-    conditions.push(or(like(employes.matricule, motif), like(employes.numeroBadge, motif)));
+    conditions.push(or(ilike(employes.matricule, motif), ilike(employes.numeroBadge, motif)));
   }
   if (recherche.departementId) {
     const tous = await obtenirBase().select({ id: departements.id, nom: departements.nom, parentId: departements.parentId }).from(departements);
@@ -77,21 +79,37 @@ export async function compterEmployes(recherche = SANS_RECHERCHE): Promise<numbe
   return resultat?.total ?? 0;
 }
 
-/** Crée l'employé, ses informations supplémentaires et sa photo dans une seule transaction. */
+/** Colonnes de l'accès au pointage (pointage à distance, doigts à enrôler). */
+function colonnesAcces(acces: AccesPointage) {
+  return {
+    pointageDistance: acces.pointageDistance,
+    appareilsDistance: appareilsVersTexte(acces.appareils),
+    distanceExigePosition: acces.exigePosition,
+    distanceExigePhoto: acces.exigePhoto,
+    doigtsAEnroler: doigtsVersTexte(acces.doigts),
+  };
+}
+
+/**
+ * Crée l'employé, ses informations supplémentaires, sa photo et, avec le pointage à distance,
+ * son compte de connexion (matricule comme mot de passe provisoire), dans une seule transaction.
+ */
 export async function insererEmploye(
   donnees: DonneesEmploye,
+  acces: AccesPointage,
   informations: Information[],
   photo: ChangementPhoto = { action: "garder" },
 ): Promise<string> {
   const id = crypto.randomUUID();
   await obtenirBase().transaction(async (transaction) => {
-    await transaction.insert(employes).values({ id, ...donnees });
+    await transaction.insert(employes).values({ id, ...donnees, ...colonnesAcces(acces) });
     if (informations.length > 0) {
       await transaction
         .insert(informationsEmployes)
         .values(informations.map((information) => ({ employeId: id, ...information })));
     }
     await appliquerChangementPhoto(transaction, id, photo);
+    await synchroniserCompteEmploye(transaction, { id, ...donnees }, acces.pointageDistance, false);
   });
   return id;
 }
@@ -123,34 +141,49 @@ export async function obtenirEmploye(id: string): Promise<EmployeDetail | null> 
       dateDebutEmploi: employes.dateDebutEmploi,
       dateFinEmploi: employes.dateFinEmploi,
       photoModifieeLe: photosEmployes.modifieLe,
+      pointageDistance: employes.pointageDistance,
+      appareilsDistance: employes.appareilsDistance,
+      exigePosition: employes.distanceExigePosition,
+      exigePhoto: employes.distanceExigePhoto,
+      doigtsAEnroler: employes.doigtsAEnroler,
+      compteIdentifiant: utilisateurs.identifiant,
+      compteActif: utilisateurs.estActif,
+      compteMotDePasseProvisoire: utilisateurs.doitChangerMotDePasse,
     })
     .from(employes)
     .innerJoin(departements, eq(departements.id, employes.departementId))
     .leftJoin(postes, eq(postes.id, employes.posteId))
     .leftJoin(sites, eq(sites.id, employes.siteId))
     .leftJoin(photosEmployes, eq(photosEmployes.employeId, employes.id))
+    .leftJoin(utilisateurs, eq(utilisateurs.employeId, employes.id))
     .where(eq(employes.id, id))
     .limit(1);
   if (!employe) return null;
+  const { pointageDistance, appareilsDistance, exigePosition, exigePhoto, doigtsAEnroler, compteIdentifiant, compteActif, compteMotDePasseProvisoire, ...fiche } = employe;
+  const compte = compteIdentifiant && compteActif ? { identifiant: compteIdentifiant, motDePasseProvisoire: compteMotDePasseProvisoire === true } : null;
+  const acces = { pointageDistance, appareils: texteVersAppareils(appareilsDistance), exigePosition, exigePhoto, doigts: texteVersDoigts(doigtsAEnroler) };
 
   const informations = await base
     .select({ libelle: informationsEmployes.libelle, valeur: informationsEmployes.valeur })
     .from(informationsEmployes)
     .where(eq(informationsEmployes.employeId, id))
     .orderBy(asc(informationsEmployes.creeLe), asc(informationsEmployes.libelle));
-  return { ...employe, informations };
+  return { ...fiche, acces, compte, informations };
 }
 
 /**
- * Met à jour l'employé, remplace ses informations supplémentaires et applique le changement
- * de photo, dans une seule transaction.
+ * Met à jour l'employé, remplace ses informations supplémentaires, applique le changement
+ * de photo et tient à jour son compte de connexion, dans une seule transaction.
+ * `reinitialiserMotDePasse` remet son matricule comme mot de passe provisoire.
  * Renvoie false si l'employé n'existe plus.
  */
 export async function mettreAJourEmploye(
   id: string,
   donnees: DonneesEmploye,
+  acces: AccesPointage,
   informations: Information[],
   photo: ChangementPhoto = { action: "garder" },
+  reinitialiserMotDePasse = false,
 ): Promise<boolean> {
   return obtenirBase().transaction(async (transaction) => {
     const [existant] = await transaction
@@ -161,7 +194,7 @@ export async function mettreAJourEmploye(
       .for("update");
     if (!existant) return false;
 
-    await transaction.update(employes).set(donnees).where(eq(employes.id, id));
+    await transaction.update(employes).set({ ...donnees, ...colonnesAcces(acces) }).where(eq(employes.id, id));
     await transaction.delete(informationsEmployes).where(eq(informationsEmployes.employeId, id));
     if (informations.length > 0) {
       await transaction
@@ -169,6 +202,7 @@ export async function mettreAJourEmploye(
         .values(informations.map((information) => ({ employeId: id, ...information })));
     }
     await appliquerChangementPhoto(transaction, id, photo);
+    await synchroniserCompteEmploye(transaction, { id, ...donnees }, acces.pointageDistance, reinitialiserMotDePasse);
     return true;
   });
 }

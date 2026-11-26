@@ -25,7 +25,7 @@ export const TEXTES_SAUVEGARDE = {
     description:
       "Remplace toutes les données actuelles par celles du fichier. Seuls les fichiers exportés par PS Time sur cette installation (même clé secrète) et à la même version de la base sont acceptés.",
     avantImport: "Une sauvegarde complète de la base actuelle est d'abord enregistrée sur le serveur, dans le dossier « sauvegardes ».",
-    externe: "Pour un fichier SQL d'une autre origine (phpMyAdmin, ancien serveur), passez par la commande npm run sauvegarde:importer sur le serveur.",
+    externe: "Pour un fichier SQL d'une autre origine (pg_dump, DBeaver, ancien serveur), passez par la commande npm run sauvegarde:importer sur le serveur.",
     fichier: "Fichier de sauvegarde (.sql)",
     aideFichier: `${TAILLE_MAX_MO} Mo au plus.`,
     confirmation: `Pour confirmer, tapez ${MOT_CONFIRMATION_IMPORT}`,

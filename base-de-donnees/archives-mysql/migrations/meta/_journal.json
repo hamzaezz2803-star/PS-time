@@ -1,0 +1,251 @@
+{
+  "version": "7",
+  "dialect": "mysql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1794580235914,
+      "tag": "0000_creer_utilisateurs",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1794580582941,
+      "tag": "0001_retirer_mot_de_passe_utilisateurs",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1794580589604,
+      "tag": "0002_authentification",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1794580890439,
+      "tag": "0003_colonnes_better_auth",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1794583228365,
+      "tag": "0004_creer_departements",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "5",
+      "when": 1794587313722,
+      "tag": "0005_creer_postes",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1794590578871,
+      "tag": "0006_creer_employes",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "5",
+      "when": 1794661775226,
+      "tag": "0007_supprimer_champs_personnalises",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "5",
+      "when": 1794661825479,
+      "tag": "0008_champs_employe_badge_identite",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "5",
+      "when": 1794663537307,
+      "tag": "0009_module_programme",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "5",
+      "when": 1794668194563,
+      "tag": "0010_suppression_pause_minutes",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "5",
+      "when": 1794668206184,
+      "tag": "0011_pause_debut_fin",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "5",
+      "when": 1794736399157,
+      "tag": "0012_photos_employes",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "5",
+      "when": 1794736790689,
+      "tag": "0013_pointages",
+      "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "5",
+      "when": 1794835767610,
+      "tag": "0014_sites",
+      "breakpoints": true
+    },
+    {
+      "idx": 15,
+      "version": "5",
+      "when": 1794837098282,
+      "tag": "0015_autorisations_utilisateurs",
+      "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "5",
+      "when": 1794838622415,
+      "tag": "0016_profils_horaires",
+      "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "5",
+      "when": 1794838645165,
+      "tag": "0017_retirer_calendriers",
+      "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "5",
+      "when": 1794840978822,
+      "tag": "0018_notifications",
+      "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "5",
+      "when": 1794913540949,
+      "tag": "0019_horaire_dynamique",
+      "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "5",
+      "when": 1794915750165,
+      "tag": "0020_compteurs",
+      "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "5",
+      "when": 1795008059334,
+      "tag": "0021_autorisations_pages_et_parametres",
+      "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "5",
+      "when": 1795008074938,
+      "tag": "0022_retirer_autorisations_modules",
+      "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "5",
+      "when": 1795009402092,
+      "tag": "0023_apparence_couleurs_taille",
+      "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "5",
+      "when": 1795010180410,
+      "tag": "0024_historique",
+      "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "5",
+      "when": 1795087896868,
+      "tag": "0025_evenements",
+      "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "5",
+      "when": 1795089640287,
+      "tag": "0026_absences_employes",
+      "breakpoints": true
+    },
+    {
+      "idx": 27,
+      "version": "5",
+      "when": 1795267094926,
+      "tag": "0027_droits_conges",
+      "breakpoints": true
+    },
+    {
+      "idx": 28,
+      "version": "5",
+      "when": 1795450875390,
+      "tag": "0028_evenements_unite_saisie",
+      "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "5",
+      "when": 1795450890835,
+      "tag": "0029_evenements_sans_saisi_en_heures",
+      "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "5",
+      "when": 1795451797832,
+      "tag": "0030_pieces_jointes_et_droits_evenements",
+      "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "5",
+      "when": 1795453024013,
+      "tag": "0031_droits_conges_fiche_complete",
+      "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "5",
+      "when": 1795537041805,
+      "tag": "0032_etats_pages",
+      "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "5",
+      "when": 1795539469208,
+      "tag": "0033_regles_horaires_couleur",
+      "breakpoints": true
+    },
+    {
+      "idx": 34,
+      "version": "5",
+      "when": 1795540104699,
+      "tag": "0034_employes_pointage_distance_doigts",
+      "breakpoints": true
+    }
+  ]
+}

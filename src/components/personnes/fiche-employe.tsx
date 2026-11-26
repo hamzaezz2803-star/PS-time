@@ -5,8 +5,16 @@ import { TEXTES_PERSONNES } from "@/lib/textes/personnes";
 import { TEXTES_SITES } from "@/lib/textes/sites";
 import type { EmployeDetail } from "@/types";
 import { AvatarEmploye } from "./avatar-employe";
+import { nomDoigt } from "./nom-doigt";
 
-const { formulaire: textes, details, liste } = TEXTES_PERSONNES;
+const { formulaire: textes, details, liste, acces } = TEXTES_PERSONNES;
+
+/** « Autorisé : Ordinateur (PC), Tablette · position exigée », ou « Non autorisé... ». */
+function resumeDistance({ acces: valeur }: EmployeDetail): string {
+  if (!valeur.pointageDistance) return acces.nonAutorise;
+  const appareils = valeur.appareils.map((appareil) => acces.nomsAppareils[appareil]).join(", ");
+  return [acces.resumeDistance(appareils), valeur.exigePosition && acces.resumePosition, valeur.exigePhoto && acces.resumePhoto].filter(Boolean).join(" · ");
+}
 
 /** Libellé lisible d'une valeur codée (« cdi » donne « CDI »), ou la valeur telle quelle. */
 function libelleDe(libelles: Record<string, string>, valeur: string | null): string | null {
@@ -66,6 +74,13 @@ export function FicheEmploye({ employe }: { employe: EmployeDetail }) {
         <Element libelle={textes.dateEmbauche} valeur={employe.dateEmbauche && formaterJour(employe.dateEmbauche)} />
         <Element libelle={textes.dateDebutEmploi} valeur={employe.dateDebutEmploi && formaterJour(employe.dateDebutEmploi)} />
         <Element libelle={textes.dateFinEmploi} valeur={employe.dateFinEmploi && formaterJour(employe.dateFinEmploi)} />
+      </Section>
+      <Section titre={textes.ongletDistance}>
+        <Element libelle={textes.ongletDistance} valeur={resumeDistance(employe)} />
+        <Element libelle={acces.compte} valeur={employe.compte && [acces.compteActif(employe.compte.identifiant), employe.compte.motDePasseProvisoire && acces.compteProvisoire].filter(Boolean).join(" · ")} />
+      </Section>
+      <Section titre={textes.ongletBiometrie}>
+        <Element libelle={acces.empreintes} valeur={employe.acces.doigts.length > 0 ? employe.acces.doigts.map(nomDoigt).join(", ") : null} />
       </Section>
       <section className="flex flex-col gap-3">
         <h3 className="text-base font-semibold text-marine">{textes.ongletInformations}</h3>

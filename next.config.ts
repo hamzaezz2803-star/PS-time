@@ -1,10 +1,25 @@
 import type { NextConfig } from "next";
+import { adressesReseauLocal } from "./src/lib/reseau-developpement";
+
+/**
+ * Test depuis un téléphone du réseau local (npm run dev:telephone) : l'adresse du PC est
+ * détectée à chaque démarrage, plus celles de BETTER_AUTH_TRUSTED_ORIGINS (tunnel, autre nom).
+ * Ne concerne que le serveur de développement.
+ */
+const originesDeDeveloppement = [
+  ...adressesReseauLocal(),
+  ...(process.env.BETTER_AUTH_TRUSTED_ORIGINS ?? "")
+    .split(",")
+    .map((origine) => URL.parse(origine.trim())?.hostname)
+    .filter((nom): nom is string => Boolean(nom)),
+];
 
 const nextConfig: NextConfig = {
   /* config options here */
   cacheComponents: true,
   // Bouton « N » des outils de Next.js masqué (développement seulement) : les erreurs restent affichées.
   devIndicators: false,
+  allowedDevOrigins: originesDeDeveloppement,
   // Pas encore de page d'accueil : la racine mène à la connexion (307, non mis en cache).
   redirects: async () => [
     { source: "/", destination: "/connexion", permanent: false },

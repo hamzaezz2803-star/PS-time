@@ -1,0 +1,2 @@
+ALTER TABLE `autorisations_pages` DROP CONSTRAINT `autorisations_pages_page_valide`;--> statement-breakpoint
+ALTER TABLE `autorisations_pages` ADD CONSTRAINT `autorisations_pages_page_valide` CHECK (`autorisations_pages`.`page` IN ('sites', 'departements', 'postes', 'personnes', 'profils_horaires', 'rotations', 'groupes', 'affectations', 'horaire_dynamique', 'rapport_presences', 'pointages_manuels', 'evenements', 'absences', 'droits_conges', 'compteurs', 'detail_jour', 'etat_presences', 'etat_evenements', 'etat_conges', 'etat_pointages'));

@@ -44,10 +44,10 @@ export async function creerJetonInstallation(): Promise<string> {
  */
 export async function creerPremierAdministrateur(jeton: string, identifiant: string, motDePasse: string): Promise<boolean> {
   return obtenirBase().transaction(async (transaction) => {
-    const [suppression] = await transaction
+    const suppression = await transaction
       .delete(verifications)
       .where(and(eq(verifications.identifiant, TYPE_JETON), eq(verifications.valeur, empreinte(jeton)), gt(verifications.expireLe, new Date())));
-    if (suppression.affectedRows !== 1) return false;
+    if (suppression.rowCount !== 1) return false;
 
     // Verrou sur la table : deux créations simultanées ne peuvent pas passer toutes les deux.
     const existants = await transaction.select({ id: utilisateurs.id }).from(utilisateurs).limit(1).for("update");

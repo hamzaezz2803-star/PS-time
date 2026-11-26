@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { COULEUR_REGLE_DEFAUT, COULEURS_REGLE, type CouleurRegle } from "@/lib/constantes";
 import { normaliserJours } from "@/lib/metier/horaire-dynamique";
 import { TEXTES_HORAIRE_DYNAMIQUE } from "@/lib/textes/horaire-dynamique";
 import type { Resultat } from "@/types";
@@ -24,10 +25,11 @@ const schemaRegle = z
     profilId: z.uuid({ error: erreurs.profilVide }),
     jours: z.array(z.string()),
     estActif: z.boolean(),
+    couleur: z.enum(COULEURS_REGLE, { error: erreurs.couleurInvalide }),
   })
   .refine((regle) => regle.fin > regle.debut, { error: erreurs.fenetreInvalide, path: ["fin"] });
 
-export type DonneesRegleHoraire = { debut: number; fin: number; profilId: string; jours: number[]; estActif: boolean };
+export type DonneesRegleHoraire = { debut: number; fin: number; profilId: string; jours: number[]; estActif: boolean; couleur: CouleurRegle };
 
 /** Valide le formulaire d'une règle : fenêtre du même jour, profil, jours (aucun = tous), active ou non. */
 export function validerRegleHoraire(formulaire: FormData): Resultat<DonneesRegleHoraire> & { erreursChamps?: Record<string, string> } {
@@ -37,6 +39,7 @@ export function validerRegleHoraire(formulaire: FormData): Resultat<DonneesRegle
     profilId: lireTexte(formulaire.get("profilId")),
     jours: formulaire.getAll("jours").map(lireTexte),
     estActif: formulaire.get("estActif") === "oui",
+    couleur: lireTexte(formulaire.get("couleur")) || COULEUR_REGLE_DEFAUT,
   });
   if (!analyse.success) return { ok: false, erreur: "validation", erreursChamps: premieresErreurs(analyse.error) };
   const { jours, ...reste } = analyse.data;

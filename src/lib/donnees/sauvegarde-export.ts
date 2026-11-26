@@ -6,8 +6,8 @@ import { join } from "node:path";
 import { Readable } from "node:stream";
 import { pipeline } from "node:stream/promises";
 import { is } from "drizzle-orm";
-import { MySqlTable, getTableConfig } from "drizzle-orm/mysql-core";
-import type { Pool, PoolConnection, RowDataPacket } from "mysql2/promise";
+import { PgTable, getTableConfig } from "drizzle-orm/pg-core";
+import { escapeIdentifier, type Pool, type PoolClient } from "pg";
 import {
   FORMAT_SAUVEGARDE,
   LIGNES_PAR_LECTURE_SAUVEGARDE,
@@ -15,7 +15,7 @@ import {
   TABLES_JAMAIS_SAUVEGARDEES,
   TAILLE_MAX_INSTRUCTION_SAUVEGARDE,
 } from "../constantes.ts";
-import { creerSignataire, nomFichierSauvegarde, texteEnTete } from "../metier/sauvegarde.ts";
+import { FIN_TRANSACTION, creerSignataire, nomFichierSauvegarde, texteEnTete } from "../metier/sauvegarde.ts";
 import { instructionInsert, valeurSql } from "../metier/sauvegarde-sql.ts";
 import * as schema from "./schema.ts";
 
@@ -25,12 +25,13 @@ import * as schema from "./schema.ts";
  */
 
 type DescriptionTable = { nom: string; colonnes: string[]; cle: string[] };
+type Requetable = Pick<Pool, "query"> | PoolClient;
 
 const estDans = (liste: readonly string[], nom: string) => liste.includes(nom);
 
 /** Tables du schéma Drizzle (une nouvelle table est sauvegardée sans rien changer ici), sauf sessions et jetons. */
 const TABLES: DescriptionTable[] = (Object.values(schema) as unknown[])
-  .filter((valeur): valeur is MySqlTable => is(valeur, MySqlTable))
+  .filter((valeur): valeur is PgTable => is(valeur, PgTable))
   .map((table) => {
     const config = getTableConfig(table);
     const cle = [...config.columns.filter((colonne) => colonne.primary), ...config.primaryKeys.flatMap((cle) => cle.columns)].map((colonne) => colonne.name);
@@ -48,9 +49,11 @@ export function colonnesParTable(avecComptes: boolean): Record<string, string[]>
 }
 
 /** Version de la base : nombre de migrations appliquées et date de la dernière (table de drizzle-kit). */
-export async function lireVersionMigrations(connexion: Pool | PoolConnection): Promise<string> {
-  const [lignes] = await connexion.query<RowDataPacket[]>("SELECT COUNT(*) AS nombre, MAX(created_at) AS derniere FROM `__drizzle_migrations`");
-  return `${lignes[0].nombre}-${lignes[0].derniere ?? 0}`;
+export async function lireVersionMigrations(connexion: Requetable): Promise<string> {
+  const { rows } = await connexion.query<{ nombre: number; derniere: string | null }>(
+    "SELECT count(*)::int AS nombre, max(created_at)::text AS derniere FROM drizzle.__drizzle_migrations",
+  );
+  return `${rows[0].nombre}-${rows[0].derniere ?? 0}`;
 }
 
 /** Secret de signature : celui des sessions, propre à chaque installation. */
@@ -60,18 +63,23 @@ export function lireSecretSauvegarde(): string {
   return secret;
 }
 
+/**
+ * Lecture d'une page de lignes, chaque valeur en texte : dates en UTC telles qu'en base, booléens
+ * `true`/`false`, octets en `\x...`. Noms tirés du schéma, protégés par escapeIdentifier.
+ */
+function requetePage(table: DescriptionTable): string {
+  const colonnes = table.colonnes.map((colonne) => `${escapeIdentifier(colonne)}::text AS ${escapeIdentifier(colonne)}`).join(", ");
+  return `SELECT ${colonnes} FROM ${escapeIdentifier(table.nom)} ORDER BY ${table.cle.map(escapeIdentifier).join(", ")} LIMIT $1 OFFSET $2`;
+}
+
 /** Instructions INSERT d'une table, par paquets d'au plus TAILLE_MAX_INSTRUCTION_SAUVEGARDE caractères. */
-async function* instructionsTable(connexion: PoolConnection, table: DescriptionTable): AsyncGenerator<string> {
+async function* instructionsTable(connexion: PoolClient, table: DescriptionTable): AsyncGenerator<string> {
+  const requete = requetePage(table);
   for (let decalage = 0; ; decalage += LIGNES_PAR_LECTURE_SAUVEGARDE) {
-    const [lignes] = await connexion.query<RowDataPacket[]>({
-      sql: "SELECT ?? FROM ?? ORDER BY ?? LIMIT ? OFFSET ?",
-      values: [table.colonnes, table.nom, table.cle, LIGNES_PAR_LECTURE_SAUVEGARDE, decalage],
-      // Dates gardées telles qu'en base (UTC), sans conversion par le pilote.
-      dateStrings: true,
-    });
+    const { rows } = await connexion.query<Record<string, string | null>>(requete, [LIGNES_PAR_LECTURE_SAUVEGARDE, decalage]);
     let paquet: string[][] = [];
     let taille = 0;
-    for (const ligne of lignes) {
+    for (const ligne of rows) {
       const valeurs = table.colonnes.map((colonne) => valeurSql(ligne[colonne]));
       const tailleLigne = valeurs.reduce((total, valeur) => total + valeur.length + 1, 3);
       if (paquet.length > 0 && taille + tailleLigne > TAILLE_MAX_INSTRUCTION_SAUVEGARDE) {
@@ -83,7 +91,7 @@ async function* instructionsTable(connexion: PoolConnection, table: DescriptionT
       taille += tailleLigne;
     }
     if (paquet.length > 0) yield instructionInsert(table.nom, table.colonnes, paquet);
-    if (lignes.length < LIGNES_PAR_LECTURE_SAUVEGARDE) return;
+    if (rows.length < LIGNES_PAR_LECTURE_SAUVEGARDE) return;
   }
 }
 
@@ -94,19 +102,23 @@ export async function* genererSauvegarde(pool: Pool, secret: string, avecComptes
     signataire.ajouter(texte);
     return texte;
   };
-  const connexion = await pool.getConnection();
+  const connexion = await pool.connect();
   try {
-    await connexion.query("START TRANSACTION WITH CONSISTENT SNAPSHOT, READ ONLY");
+    // REPEATABLE READ : toutes les tables sont lues au même instant.
+    await connexion.query("BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY");
     const tables = tablesSauvegardees(avecComptes);
     const migration = await lireVersionMigrations(connexion);
     yield emettre(texteEnTete({ format: FORMAT_SAUVEGARDE, migration, avecComptes, creeLe: new Date().toISOString(), tables: tables.map((table) => table.nom) }));
     for (const table of tables) {
-      yield emettre(`DELETE FROM \`${table.nom}\`;\n`);
+      yield emettre(`DELETE FROM "${table.nom}";\n`);
       for await (const instruction of instructionsTable(connexion, table)) yield emettre(`${instruction}\n`);
     }
-    yield emettre("SET FOREIGN_KEY_CHECKS = 1;\n");
+    yield emettre(`${FIN_TRANSACTION}\n`);
     yield signataire.ligneFinale();
     await connexion.query("COMMIT");
+  } catch (erreur) {
+    await connexion.query("ROLLBACK").catch(() => undefined);
+    throw erreur;
   } finally {
     connexion.release();
   }

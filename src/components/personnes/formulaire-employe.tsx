@@ -11,10 +11,14 @@ import { MessageErreur } from "@/components/ui/message-erreur";
 import { ListeOnglets, PanneauOnglet } from "@/components/ui/onglets";
 import { LONGUEUR_MAX_MATRICULE, LONGUEUR_MAX_NOM_EMPLOYE, LONGUEUR_MAX_NUMERO_BADGE } from "@/lib/constantes";
 import { TEXTES_PERSONNES } from "@/lib/textes/personnes";
+import { accesVersValeurs, CHAMPS_ACCES } from "@/lib/validation/acces-pointage";
 import type { EmployeDetail, EtatFormulaireEmploye } from "@/types";
+import { CadreVisage } from "./cadre-visage";
 import { ChampPhoto } from "./champ-photo";
 import { ChampsEmploi } from "./champs-emploi";
 import { ChampsIdentiteContact } from "./champs-identite-contact";
+import { ChampsPointageDistance } from "./champs-pointage-distance";
+import { ChoixDoigts } from "./choix-doigts";
 import { InformationsEmploye } from "./informations-employe";
 
 const { formulaire: textes, modification } = TEXTES_PERSONNES;
@@ -25,19 +29,21 @@ const ETAT_CREATION: EtatFormulaire = { numeroReponse: 0 };
 
 /** Valeurs initiales du formulaire en modification (les champs vides deviennent « »). */
 function etatModification(employe: EmployeDetail): EtatFormulaire {
-  const { id, departement, poste, site, informations, ...champs } = employe;
+  const { id, departement, poste, site, informations, acces, compte, ...champs } = employe;
   void id;
+  void compte;
   void departement;
   void poste;
   void site;
-  const valeurs = Object.fromEntries(
-    Object.entries(champs).map(([nom, valeur]) => [nom, typeof valeur === "string" ? valeur : ""]),
-  );
+  const valeurs = {
+    ...Object.fromEntries(Object.entries(champs).map(([nom, valeur]) => [nom, typeof valeur === "string" ? valeur : ""])),
+    ...accesVersValeurs(acces),
+  };
   return { numeroReponse: 0, valeurs, informations };
 }
 const obligatoire = (libelle: string) => `${libelle} *`;
 
-const ONGLETS = ["identite-contact", "emploi", "informations"] as const;
+const ONGLETS = ["identite-contact", "emploi", "informations", "distance", "biometrie"] as const;
 type IdOnglet = (typeof ONGLETS)[number];
 
 /** Onglet de chaque champ facultatif, pour y signaler les erreurs et l'ouvrir. */
@@ -45,11 +51,12 @@ function ongletDuChamp(cle: string): IdOnglet | null {
   if (["genre", "typePieceIdentite", "numeroPieceIdentite", "telephone", "email"].includes(cle)) return "identite-contact";
   if (["typeEmploi", "dateEmbauche", "dateDebutEmploi", "dateFinEmploi"].includes(cle)) return "emploi";
   if (cle.startsWith("information_")) return "informations";
+  if (cle === CHAMPS_ACCES.appareils || cle === CHAMPS_ACCES.pointageDistance) return "distance";
   return null;
 }
 
 function compterErreurs(erreurs: EtatFormulaireEmploye["erreursChamps"]): Record<IdOnglet, number> {
-  const nombres: Record<IdOnglet, number> = { "identite-contact": 0, emploi: 0, informations: 0 };
+  const nombres: Record<IdOnglet, number> = { "identite-contact": 0, emploi: 0, informations: 0, distance: 0, biometrie: 0 };
   for (const [cle, message] of Object.entries(erreurs ?? {})) {
     const onglet = ongletDuChamp(cle);
     if (message && onglet) nombres[onglet] += 1;
@@ -103,6 +110,8 @@ export function FormulaireEmploye({
     { id: "identite-contact", libelle: textes.ongletIdentiteContact },
     { id: "emploi", libelle: textes.ongletEmploi },
     { id: "informations", libelle: textes.ongletInformations },
+    { id: "distance", libelle: textes.ongletDistance },
+    { id: "biometrie", libelle: textes.ongletBiometrie },
   ].map((definition) => ({
     ...definition,
     nombreErreurs: nombresErreurs[definition.id as IdOnglet],
@@ -140,6 +149,16 @@ export function FormulaireEmploye({
           </PanneauOnglet>
           <PanneauOnglet base="employe" id="informations" actif={onglet}>
             <InformationsEmploye initiales={etat.informations ?? []} erreurs={erreurs} />
+          </PanneauOnglet>
+          <PanneauOnglet base="employe" id="distance" actif={onglet}>
+            <ChampsPointageDistance valeurs={valeurs} erreurs={erreurs} estModification={Boolean(employe)} compte={employe?.compte ?? null} />
+          </PanneauOnglet>
+          <PanneauOnglet base="employe" id="biometrie" actif={onglet}>
+            <div className="flex flex-col gap-8">
+              {/* Caméra montée seulement onglet ouvert : la quitter coupe la caméra. */}
+              {onglet === "biometrie" && <CadreVisage />}
+              <ChoixDoigts valeurInitiale={valeurs[CHAMPS_ACCES.doigts] ?? ""} />
+            </div>
           </PanneauOnglet>
         </div>
         </div>

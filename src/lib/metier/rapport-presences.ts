@@ -13,13 +13,16 @@ export type LigneRapport = {
   minutes: number;
   /** Profil reconnu, ou null si aucune règle (ou plusieurs) ne correspond. */
   profilId: string | null;
+  /** Règle qui a reconnu le profil (pour sa couleur), ou null. */
+  regleId: string | null;
 };
 
 /** Une ligne par employé et par jour : le premier pointage et le profil reconnu. Plus récent d'abord. */
 export function lignesRapport(pointages: readonly { employeId: string; jour: string; minutes: number }[], regles: readonly RegleHoraire[]): LigneRapport[] {
   const lignes = [...premiersPointages(pointages)].map(([cle, minutes]) => {
     const [employeId, jour] = cle.split("|");
-    return { employeId, jour, minutes, profilId: regleReconnue(regles, jour, minutes)?.profilId ?? null };
+    const regle = regleReconnue(regles, jour, minutes);
+    return { employeId, jour, minutes, profilId: regle?.profilId ?? null, regleId: regle?.id ?? null };
   });
   return lignes.sort((a, b) => b.jour.localeCompare(a.jour) || b.minutes - a.minutes);
 }

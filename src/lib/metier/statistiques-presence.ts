@@ -10,7 +10,7 @@ import { evenementRetenu, type EvenementCandidat } from "./evenements.ts";
 export type StatutJour = "a_l_heure" | "en_retard" | "absent" | "justifie" | "attendu" | "sans_horaire";
 
 /** Événement en journées entières attribué à l'employé (Absences et événements), bornes comprises. */
-export type EvenementEnJournees = EvenementCandidat & { debut: string; fin: string; type: "absence" | "presence"; code?: string; nom?: string };
+export type EvenementEnJournees = EvenementCandidat & { debut: string; fin: string; type: "absence" | "presence"; id?: string; code?: string; nom?: string };
 
 export type EmployeStatistiques = {
   id: string;
@@ -29,7 +29,7 @@ export const estEnPoste = (employe: Pick<EmployeStatistiques, "debutEmploi" | "f
   (employe.debutEmploi === null || employe.debutEmploi <= jour) && (employe.finEmploi === null || jour <= employe.finEmploi);
 
 /** Événement retenu ce jour-là parmi ceux qui couvrent la journée entière, ou null. */
-function evenementRetenuDuJour(employe: Pick<EmployeStatistiques, "evenements">, jour: string, aPointe: boolean): EvenementEnJournees | null {
+export function evenementRetenuDuJour(employe: Pick<EmployeStatistiques, "evenements">, jour: string, aPointe: boolean): EvenementEnJournees | null {
   const candidats = (employe.evenements ?? []).filter((evenement) => evenement.debut <= jour && jour <= evenement.fin);
   return evenementRetenu(candidats, aPointe);
 }

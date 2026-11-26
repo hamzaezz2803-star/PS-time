@@ -32,17 +32,18 @@ export const TENTATIVES_INSTALLATION_MAX_PAR_JOUR = 30;
 export const UN_JOUR_MILLISECONDES = 24 * 60 * 60 * 1000;
 
 /** Grandes parties de l'application (menu, tableau de bord, notifications). */
-export const MODULES = ["personnel", "planning", "presence"] as const;
+export const MODULES = ["personnel", "planning", "presence", "etats"] as const;
 /**
  * Pages qu'un super administrateur peut accorder une par une à un administrateur, rangées
  * par module dans l'ordre du menu. Même liste que la contrainte de la base (`autorisations_pages`).
  */
 export const PAGES_PAR_MODULE = {
   personnel: ["sites", "departements", "postes", "personnes"],
-  planning: ["profils_horaires", "rotations", "groupes", "affectations", "horaire_dynamique", "rapport_presences"],
+  planning: ["planning", "profils_horaires", "rotations", "groupes", "affectations", "horaire_dynamique", "rapport_presences"],
   presence: ["pointages_manuels", "evenements", "absences", "droits_conges", "compteurs", "detail_jour"],
+  etats: ["etat_presences", "etat_evenements", "etat_conges", "etat_pointages"],
 } as const;
-export const PAGES = [...PAGES_PAR_MODULE.personnel, ...PAGES_PAR_MODULE.planning, ...PAGES_PAR_MODULE.presence] as const;
+export const PAGES = [...PAGES_PAR_MODULE.personnel, ...PAGES_PAR_MODULE.planning, ...PAGES_PAR_MODULE.presence, ...PAGES_PAR_MODULE.etats] as const;
 /**
  * Pages retirées du menu et des droits proposés aux administrateurs (23/11/2026 : Absences et
  * événements). La page, ses données et leurs effets (soldes, détail jour) restent : réactivable
@@ -158,7 +159,7 @@ export const JOURS_PAR_SEMAINE = 7;
 export const CHEMIN_POINTAGES_MANUELS = "/exceptions/pointages-manuels";
 /** États d'un pointage, dans l'ordre d'une journée. */
 export const ETATS_POINTAGE = ["entree", "sortie", "debut_pause", "fin_pause", "debut_heures_sup", "fin_heures_sup"] as const;
-export const SOURCES_POINTAGE = ["manuel", "badgeuse"] as const;
+export const SOURCES_POINTAGE = ["manuel", "badgeuse", "distance"] as const;
 export const POINTAGES_PAR_PAGE = 50;
 /**
  * Événements : motifs d'absence ou de présence (congé, maladie, formation, mission...).
@@ -172,6 +173,44 @@ export const LONGUEUR_MAX_NOM_EVENEMENT = 60;
 export const LONGUEUR_MAX_CODE_PAIE = 20;
 export const PRIORITE_EVENEMENT_MAX = 255;
 export const UNITES_SAISIE_EVENEMENT = ["journee", "demi_journee", "heures"] as const;
+
+/** Appareils hors badgeuse depuis lesquels un employé peut être autorisé à pointer. */
+export const APPAREILS_POINTAGE = ["pc", "tablette", "telephone"] as const;
+export type AppareilPointage = (typeof APPAREILS_POINTAGE)[number];
+
+/**
+ * Espace de pointage de l'employé (compte créé avec le pointage à distance : identifiant et
+ * mot de passe provisoire = son matricule). Photo réduite dans le navigateur, gardée 90 jours.
+ */
+export const CHEMIN_POINTAGE_EMPLOYE = "/pointage";
+export const CHEMIN_PHOTO_POINTAGE = (id: string) => `/presence/detail-jour/photo-pointage/${id}`;
+export const PHOTO_POINTAGE_COTE_MAX_PIXELS = 640;
+export const PHOTO_POINTAGE_QUALITE_JPEG = 0.8;
+export const PHOTO_POINTAGE_TAILLE_MAX_OCTETS = 204_800;
+export const CONSERVATION_PHOTOS_POINTAGE_JOURS = 90;
+/** Précision GPS acceptée au plus (mètres) : au-delà, la position est trop vague pour être utile. */
+export const PRECISION_POSITION_MAX_METRES = 100_000;
+/** Délai d'attente de la géolocalisation du navigateur. */
+export const DELAI_POSITION_MILLISECONDES = 20_000;
+/** Pointages à distance par employé et par minute au plus (double clic, envoi répété). */
+export const POINTAGES_DISTANCE_PAR_MINUTE = 3;
+/** Zoom de la carte OpenStreetMap : demi-largeur du cadre autour de la position, en degrés. */
+export const CARTE_DEMI_CADRE_DEGRES = 0.004;
+
+/**
+ * Doigts à enrôler sur la badgeuse, numérotés comme les badgeuses ZKTeco : 0 = auriculaire
+ * gauche ... 4 = pouce gauche, 5 = pouce droit ... 9 = auriculaire droit. Aucune empreinte n'est
+ * stockée par l'application : seulement la liste des doigts prévus.
+ */
+export const DOIGTS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9] as const;
+export type Doigt = (typeof DOIGTS)[number];
+/** Nombre de doigts conseillé (un de secours si le premier est blessé ou mal lu). */
+export const DOIGTS_CONSEILLES = 2;
+
+/** Couleurs proposées pour une règle d'horaire dynamique (palette fixe, contrastes vérifiés dans globals.css). */
+export const COULEURS_REGLE = ["bleu", "vert", "orange", "rouge", "turquoise", "rose", "jaune", "ardoise"] as const;
+export type CouleurRegle = (typeof COULEURS_REGLE)[number];
+export const COULEUR_REGLE_DEFAUT: CouleurRegle = "bleu";
 export const DUREE_EVENEMENT_MAX_MINUTES = 1440;
 export const PAS_DUREE_EVENEMENT_MINUTES = 30;
 export const LIMITE_EVENEMENTS = 500;
@@ -248,18 +287,35 @@ export const DETAIL_POINTAGES_MAX = 200;
 export const DUREES_HISTORIQUE = [7, 14, 30] as const;
 /** Rapport des présences (horaire dynamique) : chemins, période par défaut et maximale, lignes au plus. */
 export const CHEMIN_RAPPORT_PRESENCES = "/programme/rapport-presences";
+/**
+ * Consultation > Planning (sur le modèle de Gestor) : planning mensuel ou annuel d'un employé,
+ * calculé à l'affichage (horaire prévu, événements, pointages). Une année = 366 jours au plus.
+ */
+export const CHEMIN_PLANNING = "/consultation/planning";
+export const VUES_PLANNING = ["mensuel", "annuel"] as const;
+export const CHEMIN_PLANNING_VUE = (vue: (typeof VUES_PLANNING)[number]) => `${CHEMIN_PLANNING}/${vue}`;
+export const PLANNING_JOURS_MAX = 366;
 export const CHEMIN_EXPORT_RAPPORT_PRESENCES = "/programme/rapport-presences/export-excel";
 export const CHEMIN_IMPRESSION_RAPPORT_PRESENCES = "/impression/rapport-presences";
 export const RAPPORT_JOURS_DEFAUT = 30;
 export const RAPPORT_JOURS_MAX = 93;
 export const RAPPORT_LIGNES_MAX = 5000;
+/** Menu État : une page par rapport (/etats/presences...), son export Excel et sa version imprimable. */
+export const CHEMIN_ETATS = "/etats";
+export const CHEMIN_IMPRESSION_ETATS = "/impression/etats";
+export const CHEMIN_ETAT = (etat: string) => `${CHEMIN_ETATS}/${etat}`;
+export const CHEMIN_EXPORT_ETAT = (etat: string) => `${CHEMIN_ETATS}/${etat}/export-excel`;
+export const CHEMIN_IMPRESSION_ETAT = (etat: string) => `${CHEMIN_IMPRESSION_ETATS}/${etat}`;
+/** Lignes affichées à l'écran (l'export Excel ou PDF en contient jusqu'à RAPPORT_LIGNES_MAX). */
+export const ETAT_LIGNES_ECRAN_MAX = 500;
 /** Appareils (badgeuses) : page d'attente, la gestion des badgeuses viendra ensuite. */
 export const CHEMIN_APPAREILS = "/appareils";
 /** Sauvegarde (Administration > Sauvegarde) : fichier SQL signé, produit et relu par l'application. */
 export const CHEMIN_SAUVEGARDE = "/administration/sauvegarde";
 export const CHEMIN_EXPORT_SAUVEGARDE = "/administration/sauvegarde/export";
 export const CHEMIN_IMPORT_SAUVEGARDE = "/administration/sauvegarde/import";
-export const FORMAT_SAUVEGARDE = 1;
+/** Format 2 : PostgreSQL. Un fichier au format 1 (ancienne base MySQL) est refusé. */
+export const FORMAT_SAUVEGARDE = 2;
 /** Jamais sauvegardées : sessions ouvertes et jetons temporaires (on pourrait s'en servir pour se connecter). */
 export const TABLES_JAMAIS_SAUVEGARDEES = ["sessions", "verifications"] as const;
 /** Comptes de connexion : sauvegardés seulement si la case « comptes » est cochée. */
@@ -267,5 +323,7 @@ export const TABLES_COMPTES = ["utilisateurs", "comptes", "autorisations_pages"]
 export const TAILLE_MAX_IMPORT_OCTETS = 100 * 1024 * 1024;
 export const MOT_CONFIRMATION_IMPORT = "IMPORTER";
 export const LIGNES_PAR_LECTURE_SAUVEGARDE = 500;
-/** Taille d'une instruction INSERT du fichier (reste sous max_allowed_packet, 16 Mo par défaut). */
+/** Taille d'une instruction INSERT du fichier (lignes courtes, faciles à relire). */
 export const TAILLE_MAX_INSTRUCTION_SAUVEGARDE = 1_000_000;
+/** Valeurs par requête d'import (PostgreSQL en accepte 65 535 au plus). */
+export const PARAMETRES_MAX_PAR_REQUETE = 60_000;

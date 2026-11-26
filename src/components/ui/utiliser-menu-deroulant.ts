@@ -23,5 +23,11 @@ export function useMenuDeroulant() {
     };
   }, [estOuvert]);
 
-  return { estOuvert, basculer: () => setEstOuvert((ouvert) => !ouvert), fermer: () => setEstOuvert(false), conteneur };
+  return {
+    estOuvert,
+    ouvrir: () => setEstOuvert(true),
+    basculer: () => setEstOuvert((ouvert) => !ouvert),
+    fermer: () => setEstOuvert(false),
+    conteneur,
+  };
 }

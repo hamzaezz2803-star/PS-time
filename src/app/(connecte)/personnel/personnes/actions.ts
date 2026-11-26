@@ -36,7 +36,7 @@ export async function creerEmploye(
   if (!preparation.ok) return preparation.etat;
 
   try {
-    await insererEmploye(preparation.donnees, preparation.informations, preparation.photo);
+    await insererEmploye(preparation.donnees, preparation.acces, preparation.informations, preparation.photo);
   } catch (erreur) {
     return etatApresEchec(erreur, preparation.retour);
   }
@@ -61,7 +61,14 @@ export async function modifierEmploye(
   if (!preparation.ok) return preparation.etat;
 
   try {
-    const existe = await mettreAJourEmploye(id.data, preparation.donnees, preparation.informations, preparation.photo);
+    const existe = await mettreAJourEmploye(
+      id.data,
+      preparation.donnees,
+      preparation.acces,
+      preparation.informations,
+      preparation.photo,
+      preparation.reinitialiserMotDePasse,
+    );
     if (!existe) {
       refresh();
       return { ...preparation.retour, message: erreurs.introuvable };

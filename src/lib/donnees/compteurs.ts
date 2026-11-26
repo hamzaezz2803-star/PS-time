@@ -110,8 +110,8 @@ export async function enregistrerCompteur(id: string | null, donnees: DonneesCom
 
 /** Active ou désactive un compteur ; faux s'il n'existe plus. */
 export async function changerEtatCompteur(id: string, estActif: boolean, auteurId: string): Promise<boolean> {
-  const [resultat] = await obtenirBase().update(compteurs).set({ estActif, modifiePar: auteurId }).where(eq(compteurs.id, id));
-  return resultat.affectedRows > 0;
+  const resultat = await obtenirBase().update(compteurs).set({ estActif, modifiePar: auteurId }).where(eq(compteurs.id, id));
+  return (resultat.rowCount ?? 0) > 0;
 }
 
 /**

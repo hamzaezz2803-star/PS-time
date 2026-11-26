@@ -10,7 +10,11 @@ import { listerOptionsSites } from "@/lib/donnees/sites";
 import { TEXTES_SITES } from "@/lib/textes/sites";
 import { validerInformations, type Information } from "@/lib/metier/employes";
 import { TEXTES_PERSONNES } from "@/lib/textes/personnes";
+import type { AccesPointage } from "@/lib/metier/acces-pointage";
+import { accesVersValeurs, lireAccesPointage, validerAccesPointage } from "@/lib/validation/acces-pointage";
 import { CHAMPS_EMPLOYE, lireTexte, validerEmploye, type DonneesEmploye } from "@/lib/validation/employe";
+import { CHAMPS_ACCES } from "@/lib/validation/acces-pointage";
+import { identifiantDepuisMatricule } from "@/lib/metier/pointage-distance";
 import type { EtatFormulaireEmploye } from "@/types";
 
 const { erreurs } = TEXTES_PERSONNES;
@@ -21,6 +25,9 @@ const CHAMP_PAR_INDEX: Record<string, { champ: string; message: string }> = {
   employes_numero_badge_idx: { champ: "numeroBadge", message: erreurs.badgeDejaPris },
   employes_email_idx: { champ: "email", message: erreurs.emailDejaPris },
   employes_piece_identite_idx: { champ: "numeroPieceIdentite", message: erreurs.pieceDejaPrise },
+  // Compte de connexion de l'employé : identifiant = matricule.
+  utilisateurs_identifiant_idx: { champ: "matricule", message: erreurs.identifiantDejaPris },
+  utilisateurs_email_idx: { champ: "matricule", message: erreurs.identifiantDejaPris },
 };
 
 /** Lignes « libellé + valeur » saisies, dans l'ordre du formulaire. */
@@ -46,7 +53,16 @@ async function lirePhoto(formulaire: FormData): Promise<{ ok: true; changement: 
 }
 
 type Preparation =
-  | { ok: true; donnees: DonneesEmploye; informations: Information[]; photo: ChangementPhoto; retour: EtatFormulaireEmploye }
+  | {
+      ok: true;
+      donnees: DonneesEmploye;
+      acces: AccesPointage;
+      informations: Information[];
+      photo: ChangementPhoto;
+      /** Remettre le matricule comme mot de passe provisoire du compte de l'employé. */
+      reinitialiserMotDePasse: boolean;
+      retour: EtatFormulaireEmploye;
+    }
   | { ok: false; etat: EtatFormulaireEmploye };
 
 /**
@@ -55,14 +71,19 @@ type Preparation =
  */
 export async function preparerEmploye(formulaire: FormData): Promise<Preparation> {
   const [departements, postes, sites] = await Promise.all([listerDepartements(), listerPostes(), listerOptionsSites()]);
-  const valeurs = Object.fromEntries(CHAMPS_EMPLOYE.map((nom) => [nom, lireTexte(formulaire.get(nom))]));
+  const valeurs = {
+    ...Object.fromEntries(CHAMPS_EMPLOYE.map((nom) => [nom, lireTexte(formulaire.get(nom))])),
+    ...accesVersValeurs(lireAccesPointage(formulaire)),
+  };
   const saisieInformations = lireInformations(formulaire);
   const retour = { valeurs, informations: saisieInformations };
 
   const validation = validerEmploye(formulaire);
+  const acces = validerAccesPointage(formulaire);
   const informations = validerInformations(saisieInformations);
   const photo = await lirePhoto(formulaire);
   const erreursChamps: Record<string, string | undefined> = validation.ok ? {} : { ...validation.erreursChamps };
+  if (!acces.ok) Object.assign(erreursChamps, acces.erreursChamps);
   if (!photo.ok) erreursChamps.photo = photo.erreur;
   for (const [index, erreur] of Object.entries(informations.erreurs)) {
     if (erreur.libelle) erreursChamps[`information_${index}_libelle`] = erreurs.informations[erreur.libelle];
@@ -79,6 +100,11 @@ export async function preparerEmploye(formulaire: FormData): Promise<Preparation
     if (posteId && !postes.some((poste) => poste.id === posteId)) {
       erreursChamps.posteId = erreurs.posteIntrouvable;
     }
+    // Le matricule devient l'identifiant de connexion de l'employé autorisé à pointer à distance.
+    if (acces.ok && acces.donnees.pointageDistance && !identifiantDepuisMatricule(validation.donnees.matricule)) {
+      erreursChamps.matricule = erreurs.matriculeNonIdentifiant;
+      erreursChamps[CHAMPS_ACCES.pointageDistance] = erreurs.matriculeNonIdentifiant;
+    }
   }
 
   if (informations.estTropNombreuses) {
@@ -87,10 +113,18 @@ export async function preparerEmploye(formulaire: FormData): Promise<Preparation
       etat: { ...retour, erreursChamps, message: erreurs.tropDInformations(LIMITE_INFORMATIONS_EMPLOYE) },
     };
   }
-  if (!validation.ok || !photo.ok || Object.values(erreursChamps).some(Boolean)) {
+  if (!validation.ok || !acces.ok || !photo.ok || Object.values(erreursChamps).some(Boolean)) {
     return { ok: false, etat: { ...retour, erreursChamps } };
   }
-  return { ok: true, donnees: validation.donnees, informations: informations.informations, photo: photo.changement, retour };
+  return {
+    ok: true,
+    donnees: validation.donnees,
+    acces: acces.donnees,
+    informations: informations.informations,
+    photo: photo.changement,
+    reinitialiserMotDePasse: formulaire.get(CHAMPS_ACCES.reinitialiserMotDePasse) === "oui",
+    retour,
+  };
 }
 
 /** Traduit une erreur d'enregistrement en état du formulaire (doublon ou échec général). */

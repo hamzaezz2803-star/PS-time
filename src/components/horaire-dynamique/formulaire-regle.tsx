@@ -10,12 +10,14 @@ import { ChampFormulaire } from "@/components/ui/champ-formulaire";
 import { ChampSelection, type OptionSelection } from "@/components/ui/champ-selection";
 import { MessageErreur } from "@/components/ui/message-erreur";
 import { PiedFormulaire } from "@/components/ui/pied-formulaire";
+import { COULEUR_REGLE_DEFAUT, COULEURS_REGLE, type CouleurRegle } from "@/lib/constantes";
 import { JOURS_ISO, normaliserJours, regleEnConflit } from "@/lib/metier/horaire-dynamique";
 import { minutesVersHeure } from "@/lib/metier/programme";
 import { TEXTES_HORAIRE_DYNAMIQUE as textes } from "@/lib/textes/horaire-dynamique";
 import { heureDePlage } from "@/lib/validation/profil-horaire";
 import { cn } from "@/lib/utils";
 import type { RegleHoraireListe } from "@/types";
+import { ChoixCouleurRegle } from "./couleur-regle";
 
 const JOURS_OUVRES = [1, 2, 3, 4, 5];
 
@@ -65,7 +67,14 @@ function ContenuRegle({
   const [fin, setFin] = useState(valeurSaisie(etat, "fin", regle ? minutesVersHeure(regle.fin) : ""));
   const [jours, setJours] = useState(() => joursInitiaux(etat, regle));
   const [estActif, setEstActif] = useState(caseSaisie(etat, "estActif", regle?.estActif ?? true));
+  const [profilId, setProfilId] = useState(valeurSaisie(etat, "profilId", regle?.profilId ?? ""));
+  const [couleur, setCouleur] = useState<CouleurRegle>(() => {
+    const saisie = valeurSaisie(etat, "couleur", regle?.couleur ?? COULEUR_REGLE_DEFAUT);
+    return COULEURS_REGLE.find((element) => element === saisie) ?? COULEUR_REGLE_DEFAUT;
+  });
   const erreurs = etat.erreursChamps;
+  // Libellé d'option « CODE · Nom » : sert seulement à l'aperçu de la pastille.
+  const [codeApercu, ...nomApercu] = (profils.find((profil) => profil.valeur === profilId)?.libelle ?? textes.profil).split(" · ");
 
   // Confort seulement : la vérification qui compte est refaite par le serveur.
   const minutesDebut = heureDePlage(debut);
@@ -87,7 +96,10 @@ function ContenuRegle({
         <p className="text-sm text-texte-secondaire">{textes.aideFenetre}</p>
       </div>
 
-      <ChampSelection nom="profilId" libelle={textes.profil} options={profils} optionVide={textes.choisirProfil} defaultValue={valeurSaisie(etat, "profilId", regle?.profilId ?? "")} erreur={erreurs?.profilId} />
+      <ChampSelection nom="profilId" libelle={textes.profil} options={profils} optionVide={textes.choisirProfil} value={profilId} onChange={(e) => setProfilId(e.target.value)} erreur={erreurs?.profilId} />
+
+      <ChoixCouleurRegle valeur={couleur} onChange={setCouleur} apercu={{ code: nomApercu.length > 0 ? codeApercu : "", nom: nomApercu.length > 0 ? nomApercu.join(" · ") : codeApercu }} />
+      <MessageErreur message={erreurs?.couleur} />
 
       <fieldset className="flex flex-col gap-2">
         <legend className="mb-2 text-sm font-medium text-texte">{textes.jours}</legend>

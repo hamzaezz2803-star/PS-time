@@ -12,6 +12,7 @@ export type ModuleHistorique = (typeof MODULES_HISTORIQUE)[number];
 export const MODULE_DE_L_OBJET_HISTORIQUE = {
   ...MODULE_DE_L_OBJET,
   rapport_presences: "planning",
+  etat: "presence",
   session: "administration",
   sauvegarde: "administration",
 } as const satisfies Record<string, ModuleHistorique>;

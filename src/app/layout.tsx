@@ -1,5 +1,7 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import type { CSSProperties } from "react";
+import { COULEURS_PERSONNALISEES_PAR_DEFAUT } from "@/lib/constantes";
+import { TEXTES_APPLICATION } from "@/lib/textes/application";
 import { Atkinson_Hyperlegible_Next, Hanken_Grotesk, Inter, Source_Sans_3 } from "next/font/google";
 import { lireApparence } from "@/lib/donnees/apparence";
 import { variablesCouleurs } from "@/lib/metier/couleurs";
@@ -15,9 +17,14 @@ const atkinson = Atkinson_Hyperlegible_Next({ variable: "--font-atkinson", subse
 const VARIABLES_POLICES = [hanken, inter, sourceSans, atkinson].map((police) => police.variable).join(" ");
 
 export const metadata: Metadata = {
-  title: { default: "PS Time", template: "%s | PS Time" },
-  description: "Application de pointage des équipes : arrivées, pauses et heures travaillées.",
+  title: { default: TEXTES_APPLICATION.nom, template: `%s | ${TEXTES_APPLICATION.nom}` },
+  description: TEXTES_APPLICATION.description,
+  // iPhone : « Ajouter à l'écran d'accueil » ouvre l'application en plein écran (le manifeste sert les autres appareils).
+  appleWebApp: { capable: true, title: TEXTES_APPLICATION.nomCourt, statusBarStyle: "default" },
 };
+
+/** Couleur de la barre du navigateur et de l'application installée. */
+export const viewport: Viewport = { themeColor: COULEURS_PERSONNALISEES_PAR_DEFAUT.primaire };
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {
   // Apparence de l'installation, lue par globals.css (data-theme, data-police, data-taille).

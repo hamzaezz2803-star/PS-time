@@ -7,8 +7,8 @@
  * il devra être changé à la première connexion.
  */
 import nextEnv from "@next/env";
-import { drizzle } from "drizzle-orm/mysql2";
-import mysql from "mysql2/promise";
+import { drizzle } from "drizzle-orm/node-postgres";
+import pg from "pg";
 import { comptes, utilisateurs } from "../src/lib/donnees/schema.ts";
 import {
   FOURNISSEUR_MOT_DE_PASSE,
@@ -27,9 +27,8 @@ async function creerAdministrateur() {
   const { identifiant, email, nom } = lireArgumentsUtilisateur(USAGE);
   const { id, idCompte, motDePasseTemporaire, empreinte } = await preparerNouvelUtilisateur();
 
-  const pool = mysql.createPool({ uri: url, timezone: "Z" });
-  pool.on("connection", (connexion) => connexion.query("SET time_zone = '+00:00'"));
-  const base = drizzle(pool, { mode: "default" });
+  const pool = new pg.Pool({ connectionString: url, options: "-c timezone=UTC", max: 1 });
+  const base = drizzle(pool);
 
   try {
     await base.transaction(async (transaction) => {
@@ -52,7 +51,7 @@ async function creerAdministrateur() {
   } catch (erreur) {
     const code = (erreur as { cause?: { code?: string } }).cause?.code;
     console.error(
-      code === "ER_DUP_ENTRY"
+      code === "23505" // doublon (index unique)
         ? "Un utilisateur avec cet identifiant ou cet e-mail existe déjà."
         : "La création a échoué. Vérifiez que la base est joignable et migrée (npm run db:migrer).",
     );

@@ -30,12 +30,13 @@ async function pointagesLocaux(employeId: string, debut: string, fin: string) {
 
 /**
  * Journées de service d'un employé, une par jour de `debut` à `fin` (même sans pointage) :
- * horaire prévu (horaire dynamique, sinon rotation) et pointages du jour. 62 jours au plus.
+ * horaire prévu (horaire dynamique, sinon rotation) et pointages du jour. `maximumJours` au plus
+ * (62 pour les compteurs, une année pour le planning).
  */
-export async function chargerJoursService(employeId: string, debut: string, fin: string): Promise<ResultatJours> {
+export async function chargerJoursService(employeId: string, debut: string, fin: string, maximumJours = COMPTEURS_JOURS_MAX): Promise<ResultatJours> {
   if (!estJourValide(debut) || !estJourValide(fin) || fin < debut) return { ok: false, erreur: "dates" };
   const jours = joursEntre(debut, fin);
-  if (jours.length > COMPTEURS_JOURS_MAX) return { ok: false, erreur: "dates" };
+  if (jours.length > maximumJours) return { ok: false, erreur: "dates" };
 
   const [employe] = await groupesDesEmployes([employeId]);
   if (!employe) return { ok: false, erreur: "employe" };

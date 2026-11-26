@@ -45,6 +45,20 @@ export const TEXTES_HORAIRE_DYNAMIQUE = {
   joursOuvres: "Lun. à ven.",
   estActif: "Règle active",
   aideActif: "Une règle inactive est gardée mais n'est plus appliquée.",
+  couleur: "Couleur dans le rapport des présences",
+  aideCouleur: "Choisissez une couleur différente par règle : l'horaire reconnu se repère d'un coup d'œil.",
+  apercu: "Aperçu",
+  couleurChoisie: (nom: string) => `Couleur choisie : ${nom}`,
+  nomsCouleurs: {
+    bleu: "Bleu",
+    vert: "Vert",
+    orange: "Orange",
+    rouge: "Rouge",
+    turquoise: "Turquoise",
+    rose: "Rose",
+    jaune: "Jaune",
+    ardoise: "Ardoise",
+  },
   conflitClient: (nom: string) => `Chevauche la règle « ${nom} » (mêmes heures un même jour).`,
   cree: "Règle créée.",
   modifie: "Modifications enregistrées.",
@@ -70,6 +84,7 @@ export const TEXTES_HORAIRE_DYNAMIQUE = {
 
   erreurs: {
     heureInvalide: "Saisissez une heure valide (HH:MM).",
+    couleurInvalide: "Choisissez une couleur dans la liste.",
     fenetreInvalide: "L'heure de fin doit être après l'heure de début, le même jour.",
     profilVide: "Choisissez un profil horaire.",
     profilIntrouvable: "Ce profil n'existe plus ou n'est pas un profil de travail. Rechargez la page.",

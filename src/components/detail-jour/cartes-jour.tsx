@@ -1,9 +1,11 @@
 import type { ReactNode } from "react";
-import { CalendarClock, ClipboardList, Hand, ScanLine, Sparkles } from "lucide-react";
+import { CalendarClock, Camera, ClipboardList, Hand, MapPin, ScanLine, Smartphone, Sparkles } from "lucide-react";
 import { PastilleEtat } from "@/components/exceptions/pastille-etat";
 import { ResultatPointage } from "@/components/exceptions/resultat-pointage";
 import { Pastille } from "@/components/ui/pastille";
+import { CHEMIN_PHOTO_POINTAGE } from "@/lib/constantes";
 import { formaterHeure, formaterJour, initiales } from "@/lib/formats";
+import { lienCarte } from "@/lib/metier/pointage-distance";
 import { formaterMinutes } from "@/lib/metier/compteurs/format";
 import { minutesVersHeure } from "@/lib/metier/programme";
 import { TEXTES_DETAIL_JOUR } from "@/lib/textes/detail-jour";
@@ -87,9 +89,37 @@ export function CarteHoraire({ horaire }: { horaire: DetailJour["horaire"] }) {
 
 type PointageJour = DetailJour["pointages"][number];
 
-/** D'où vient le pointage : la badgeuse, ou une saisie manuelle avec le nom et l'identifiant de son auteur. */
+const LIEN_ORIGINE = "inline-flex min-h-8 items-center gap-1 rounded-md px-1.5 font-medium text-primaire underline-offset-2 hover:bg-ciel hover:underline focus-visible:outline-2 focus-visible:outline-primaire";
+
+/** Pointage fait par l'employé depuis son appareil, avec liens vers sa position et sa photo. */
+function OrigineDistance({ pointage }: { pointage: PointageJour }) {
+  const t = textes.pointages;
+  const appareil = pointage.appareil ? t.appareils[pointage.appareil] : null;
+  return (
+    <span className="inline-flex flex-wrap items-center gap-1 text-sm text-texte-secondaire">
+      <Smartphone className="size-3.5" aria-hidden="true" />
+      <span className="font-medium text-texte">{t.distance}</span>
+      {appareil && <span>({appareil})</span>}
+      {pointage.position && (
+        <a href={lienCarte(pointage.position.latitude, pointage.position.longitude)} target="_blank" rel="noopener noreferrer" className={LIEN_ORIGINE} title={t.voirPositionAide} aria-label={t.voirPositionAide}>
+          <MapPin className="size-3.5" aria-hidden="true" />
+          {t.voirPosition}
+        </a>
+      )}
+      {pointage.aPhoto && (
+        <a href={CHEMIN_PHOTO_POINTAGE(pointage.id)} target="_blank" rel="noopener" className={LIEN_ORIGINE} title={t.voirPhotoAide} aria-label={t.voirPhotoAide}>
+          <Camera className="size-3.5" aria-hidden="true" />
+          {t.voirPhoto}
+        </a>
+      )}
+    </span>
+  );
+}
+
+/** D'où vient le pointage : la badgeuse, à distance, ou une saisie manuelle avec le nom et l'identifiant de son auteur. */
 function OriginePointage({ pointage }: { pointage: PointageJour }) {
   const t = textes.pointages;
+  if (pointage.source === "distance") return <OrigineDistance pointage={pointage} />;
   if (pointage.source !== "manuel") {
     return (
       <span className="inline-flex items-center gap-1 text-sm text-texte-secondaire">
