@@ -197,9 +197,10 @@ UPDATE employes e SET site_id = d.site_id
   WHERE d.id = e.departement_id AND e.id::text LIKE '00000000-0000-4000-8000-%';
 
 -- 9 bis. Pointage à distance et doigts à enrôler (jamais d'empreinte) : Hamid Bouzid (T011), souvent en
--- mission, peut pointer depuis son téléphone ou une tablette, position et photo exigées ; Karim Benali
--- (T001) depuis son PC. Doigts prévus : index droit et index gauche pour T001, pouces pour T011.
-UPDATE employes SET pointage_distance = true, appareils_distance = 'tablette,telephone', distance_exige_position = true, distance_exige_photo = true, doigts_a_enroler = '45'
+-- mission, peut pointer depuis son téléphone ou une tablette, position et photo exigées, avec le droit
+-- « P. Mission » en plus de la présence ; Karim Benali (T001) depuis son PC, présence seule. Doigts
+-- prévus : index droit et index gauche pour T001, pouces pour T011.
+UPDATE employes SET pointage_distance = true, appareils_distance = 'tablette,telephone', distance_exige_position = true, distance_exige_photo = true, distance_droit_mission = true, doigts_a_enroler = '45'
   WHERE id = '00000000-0000-4000-8000-000000000311';
 UPDATE employes SET pointage_distance = true, appareils_distance = 'pc', doigts_a_enroler = '36'
   WHERE id = '00000000-0000-4000-8000-000000000301';
