@@ -1,4 +1,4 @@
-# Serveur local toujours disponible (test sur téléphone avec Tailscale) : voir docs/telephone-tailscale.md.
+﻿# Serveur local toujours disponible (test sur téléphone avec Tailscale) : voir docs/telephone-tailscale.md.
 #   .\scripts\serveur-local.ps1 -Installer     démarrage automatique à l'ouverture de session Windows, puis lancement
 #   .\scripts\serveur-local.ps1 -Desinstaller  retire le démarrage automatique et arrête le serveur
 #   .\scripts\serveur-local.ps1 -MettreAJour   reconstruit l'application et relance le serveur (après une modification du code)
@@ -15,15 +15,16 @@ $Tailscale = "C:\Program Files\Tailscale\tailscale.exe"
 function Lancer-Serveur {
   New-Item -ItemType Directory -Force $DossierJournal | Out-Null
   Set-Location $Projet
-  # HTTPS public du PC sur Tailscale -> http://127.0.0.1:3000 (réglage gardé après un redémarrage).
-  if (Test-Path $Tailscale) { & $Tailscale serve --bg 3000 *>> $Journal }
+  # HTTPS public du PC sur Tailscale -> http://127.0.0.1:3100 (réglage gardé après un redémarrage).
+  # Lancé à part : tant que Serve n'est pas activé sur le compte Tailscale, la commande attend.
+  if (Test-Path $Tailscale) { Start-Process $Tailscale -ArgumentList "serve", "--bg", "3100" -WindowStyle Hidden }
   & npm.cmd run serveur:local *>> $Journal
 }
 
-# Arrêter la tâche ne suffit pas : le processus node qu'elle a lancé garderait le port 3000.
+# Arrêter la tâche ne suffit pas : le processus node qu'elle a lancé garderait le port 3100.
 function Arreter-Serveur {
   Stop-ScheduledTask -TaskName $NomTache -ErrorAction SilentlyContinue
-  Get-NetTCPConnection -LocalPort 3000 -State Listen -ErrorAction SilentlyContinue |
+  Get-NetTCPConnection -LocalPort 3100 -State Listen -ErrorAction SilentlyContinue |
     ForEach-Object { Stop-Process -Id $_.OwningProcess -Force -ErrorAction SilentlyContinue }
 }
 
