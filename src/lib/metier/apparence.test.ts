@@ -42,8 +42,27 @@ describe("apparenceDepuisReglages", () => {
     assert.equal(apparenceDepuisReglages(reglages).theme, APPARENCE_PAR_DEFAUT.theme);
   });
 
+  it("reprend les menus, la densité et les couleurs d'impression, et ignore une valeur inconnue", () => {
+    const apparence = apparenceDepuisReglages([
+      { cle: "menu", valeur: "texte" },
+      { cle: "densite", valeur: "compacte" },
+      { cle: "impression", valeur: "noir_blanc" },
+    ]);
+    assert.equal(apparence.menu, "texte");
+    assert.equal(apparence.densite, "compacte");
+    assert.equal(apparence.impression, "noir_blanc");
+    const inconnue = apparenceDepuisReglages([
+      { cle: "menu", valeur: "images" },
+      { cle: "densite", valeur: "serree" },
+      { cle: "impression", valeur: "sepia" },
+    ]);
+    assert.equal(inconnue.menu, APPARENCE_PAR_DEFAUT.menu);
+    assert.equal(inconnue.densite, APPARENCE_PAR_DEFAUT.densite);
+    assert.equal(inconnue.impression, APPARENCE_PAR_DEFAUT.impression);
+  });
+
   it("relit exactement ce qui a été enregistré", () => {
-    const apparence = { ...APPARENCE_PAR_DEFAUT, theme: "ocean" as const, taille: "tres_grande" as const };
+    const apparence = { ...APPARENCE_PAR_DEFAUT, theme: "ocean" as const, taille: "tres_grande" as const, menu: "texte" as const, densite: "compacte" as const, impression: "gris" as const };
     assert.deepEqual(apparenceDepuisReglages(reglagesDepuisApparence(apparence)), apparence);
   });
 });

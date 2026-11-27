@@ -60,6 +60,15 @@ export const TAILLES_TEXTE = ["normale", "grande", "tres_grande"] as const;
 export const THEME_PAR_DEFAUT = "bleu";
 export const POLICE_PAR_DEFAUT = "hanken";
 export const TAILLE_TEXTE_PAR_DEFAUT = "normale";
+/** Menus de la barre de navigation : icônes et texte (quand la place le permet), ou texte seul. */
+export const MODES_MENU = ["icones", "texte"] as const;
+/** Hauteur des lignes des tableaux et des cases du planning (sur tablette et ordinateur). */
+export const DENSITES = ["confortable", "compacte"] as const;
+/** Couleurs des pages imprimées ou enregistrées en PDF. */
+export const MODES_IMPRESSION = ["couleurs", "gris", "noir_blanc"] as const;
+export const MODE_MENU_PAR_DEFAUT = "icones";
+export const DENSITE_PAR_DEFAUT = "confortable";
+export const MODE_IMPRESSION_PAR_DEFAUT = "couleurs";
 /** Couleurs que le thème « Personnalisé » laisse choisir ; les autres nuances en sont déduites. */
 export const COULEURS_PERSONNALISABLES = ["primaire", "marine", "accent", "fond"] as const;
 /** Point de départ du thème personnalisé : les couleurs du thème Bleu PS Time (mêmes valeurs que globals.css). */

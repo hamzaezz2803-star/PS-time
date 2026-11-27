@@ -17,7 +17,7 @@ import {
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
-import { ACTIONS_HISTORIQUE, COULEUR_REGLE_DEFAUT, COULEURS_REGLE, COULEURS_PERSONNALISABLES,MODULES_HISTORIQUE, PAGES, POLICES, TAILLES_TEXTE, THEMES, TYPES_EVENEMENT, TYPES_PIECE_JOINTE, UNITES_SAISIE_EVENEMENT, DUREE_EVENEMENT_MAX_MINUTES, PIECE_JOINTE_TAILLE_MAX_OCTETS } from "../constantes.ts";
+import { ACTIONS_HISTORIQUE, COULEUR_REGLE_DEFAUT, COULEURS_REGLE, COULEURS_PERSONNALISABLES, DENSITES, MODES_IMPRESSION, MODES_MENU, MODULES_HISTORIQUE, PAGES, POLICES, TAILLES_TEXTE, THEMES, TYPES_EVENEMENT, TYPES_PIECE_JOINTE, UNITES_SAISIE_EVENEMENT, DUREE_EVENEMENT_MAX_MINUTES, PIECE_JOINTE_TAILLE_MAX_OCTETS } from "../constantes.ts";
 
 /**
  * Schéma de la base. Toute modification passe par une migration :
@@ -160,7 +160,8 @@ export const autorisationsPages = pgTable(
 
 /**
  * Réglages de l'installation (une ligne par réglage), modifiés par le super administrateur :
- * thème, police, taille du texte et couleurs personnalisées (`#rrggbb`). La base n'accepte
+ * thème, police, taille du texte, couleurs personnalisées (`#rrggbb`), menus, densité des
+ * tableaux et couleurs d'impression. La base n'accepte
  * que les valeurs connues de l'application.
  */
 export const parametres = pgTable(
@@ -178,7 +179,7 @@ export const parametres = pgTable(
     index("parametres_modifie_par_idx").on(table.modifiePar),
     check(
       "parametres_valeur_valide",
-      sql`(${table.cle} = 'theme' AND ${table.valeur} IN (${listeSql(THEMES)})) OR (${table.cle} = 'police' AND ${table.valeur} IN (${listeSql(POLICES)})) OR (${table.cle} = 'taille_texte' AND ${table.valeur} IN (${listeSql(TAILLES_TEXTE)})) OR (${table.cle} IN (${listeSql(COULEURS_PERSONNALISABLES.map((couleur) => `couleur_${couleur}`))}) AND ${table.valeur} ~ '^#[0-9a-f]{6}$')`,
+      sql`(${table.cle} = 'theme' AND ${table.valeur} IN (${listeSql(THEMES)})) OR (${table.cle} = 'police' AND ${table.valeur} IN (${listeSql(POLICES)})) OR (${table.cle} = 'taille_texte' AND ${table.valeur} IN (${listeSql(TAILLES_TEXTE)})) OR (${table.cle} = 'menu' AND ${table.valeur} IN (${listeSql(MODES_MENU)})) OR (${table.cle} = 'densite' AND ${table.valeur} IN (${listeSql(DENSITES)})) OR (${table.cle} = 'impression' AND ${table.valeur} IN (${listeSql(MODES_IMPRESSION)})) OR (${table.cle} IN (${listeSql(COULEURS_PERSONNALISABLES.map((couleur) => `couleur_${couleur}`))}) AND ${table.valeur} ~ '^#[0-9a-f]{6}$')`,
     ),
   ],
 );
@@ -583,6 +584,8 @@ export const profilsHoraires = pgTable(
     // Durée de la pause repas : minimum et maximum (vides = non contrôlée).
     repasMinimumMinutes: int("repas_minimum_minutes"),
     repasMaximumMinutes: int("repas_maximum_minutes"),
+    // Couleur dans le planning (palette fixe, Administration > Apparence) ; vide = couleur selon le type.
+    couleur: varchar("couleur", { length: 15 }),
     creeLe: dateCreation(),
     modifieLe: dateModification(),
   },
@@ -592,6 +595,7 @@ export const profilsHoraires = pgTable(
     check("profils_horaires_code_valide", sql`${table.code} ~ '^[A-Z0-9]{1,3}$'`),
     check("profils_horaires_nom_non_vide", sql`char_length(trim(${table.nom})) > 0`),
     check("profils_horaires_type_valide", sql`${table.type} IN ('travail', 'repos')`),
+    check("profils_horaires_couleur_valide", sql`${table.couleur} IS NULL OR ${table.couleur} IN (${listeSql(COULEURS_REGLE)})`),
     check(
       "profils_horaires_repas_borne",
       sql`(${table.repasMinimumMinutes} IS NULL OR ${table.repasMinimumMinutes} BETWEEN 0 AND 720) AND (${table.repasMaximumMinutes} IS NULL OR ${table.repasMaximumMinutes} BETWEEN 0 AND 720)`,
@@ -840,6 +844,8 @@ export const evenements = pgTable(
     estVisiblePlanning: boolean("est_visible_planning").notNull().default(true),
     priorite: int("priorite").notNull().default(0),
     codePaie: varchar("code_paie", { length: 20 }),
+    // Couleur dans le planning (palette fixe, Administration > Apparence) ; vide = couleur selon le type.
+    couleur: varchar("couleur", { length: 15 }),
     creeLe: dateCreation(),
     modifieLe: dateModification(),
   },
@@ -849,6 +855,7 @@ export const evenements = pgTable(
     check("evenements_code_valide", sql`${table.code} ~ '^[A-Z0-9]{1,3}$'`),
     check("evenements_nom_non_vide", sql`char_length(trim(${table.nom})) > 0`),
     check("evenements_type_valide", sql`${table.type} IN (${listeSql(TYPES_EVENEMENT)})`),
+    check("evenements_couleur_valide", sql`${table.couleur} IS NULL OR ${table.couleur} IN (${listeSql(COULEURS_REGLE)})`),
     check("evenements_priorite_bornee", sql`${table.priorite} BETWEEN 0 AND 255`),
     check("evenements_unite_valide", sql`${table.uniteSaisie} IN (${listeSql(UNITES_SAISIE_EVENEMENT)})`),
     // Une durée seulement pour un événement en heures, et toujours dans ce cas.
