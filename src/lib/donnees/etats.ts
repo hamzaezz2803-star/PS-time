@@ -50,7 +50,7 @@ async function etatPresences(recherche: RechercheEtat, maintenant: { jour: strin
     employe.nomComplet,
     employe.departement,
     formaterJour(resume.jour),
-    resume.profilCode ?? valeurs.repos,
+    resume.profilCode ?? (resume.estSansPlanning ? valeurs.aucunHoraire : valeurs.repos),
     heure(resume.entree),
     heure(resume.sortie),
     duree(resume.travailleMinutes),
@@ -133,7 +133,8 @@ async function etatConges(recherche: RechercheEtat, aujourdhui: string): Promise
       nombre(bilan.total),
       nombre(bilan.pris),
       nombre(bilan.prevus),
-      nombre(bilan.soldePrevisionnel),
+      // Droit provisoire : rien n'est encore utilisable, pas de solde (comme dans Droits aux congés).
+      droit.estConfirme ? nombre(bilan.soldePrevisionnel) : "",
       droit.estConfirme ? TEXTES_DROITS_CONGES.etats[etatSolde(bilan.soldePrevisionnel)] : valeurs.aConfirmer,
     ];
   });

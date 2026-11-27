@@ -1,5 +1,5 @@
 /** Textes du menu État (rapports sur les présences, événements, congés et pointages manuels). */
-import type { Etat } from "@/lib/metier/etats";
+import type { Etat, StatutEtat } from "@/lib/metier/etats";
 
 export const TEXTES_ETATS = {
   chargement: "Chargement de l'état...",
@@ -14,7 +14,8 @@ export const TEXTES_ETATS = {
     },
     evenements: {
       titre: "Absences et événements",
-      sousTitre: "Congés, maladies, formations... saisis pour les employés, avec les jours où ils sont validés (retenus) ou non.",
+      sousTitre:
+        "Congés, maladies, formations... saisis pour les employés. Jours comptés sur la période choisie : hors repos du planning, puis ceux où l'événement est validé (retenu, donc décompté des droits aux congés).",
       vide: "Aucun événement saisi sur cette période.",
     },
     conges: {
@@ -59,8 +60,8 @@ export const TEXTES_ETATS = {
     code: "Code",
     type: "Type",
     periode: "Période",
-    joursPrevus: "Jours prévus",
-    joursValides: "Jours validés",
+    joursPrevus: "Jours hors repos (période)",
+    joursValides: "Jours validés (période)",
     unite: "Unité",
     total: "Total",
     pris: "Pris",
@@ -74,7 +75,18 @@ export const TEXTES_ETATS = {
 
   valeurs: {
     repos: "Repos",
-    statuts: { a_l_heure: "À l'heure", en_retard: "En retard", absent: "Absent", justifie: "Absence justifiée", attendu: "Pas encore arrivé", sans_horaire: "Sans horaire" },
+    aucunHoraire: "Aucun horaire",
+    statuts: {
+      a_l_heure: "À l'heure",
+      en_retard: "En retard",
+      absent: "Absent",
+      justifie: "Absence justifiée",
+      evenement_presence: "Présent (événement)",
+      attendu: "Pas encore arrivé",
+      repos: "Repos",
+      repos_travaille: "Travail un jour de repos",
+      aucun_horaire: "Aucun horaire (pas d'affectation)",
+    } satisfies Record<StatutEtat, string>,
     types: { absence: "Absence", presence: "Présence" },
     duAu: (du: string, au: string) => (du === au ? du : `Du ${du} au ${au}`),
     heures: (jour: string, debut: string, fin: string) => `${jour}, de ${debut} à ${fin}`,
