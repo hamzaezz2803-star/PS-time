@@ -57,6 +57,11 @@ export function codesColoresAffiches(jours: readonly JourColorable[], couleurs: 
 const FORMAT_IDENTIFIANT = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const FORMAT_CLE = /^(evenement|profil):(.+)$/;
 
+/** Un événement ou un profil horaire, avec sa couleur dans le planning (null = selon le type). */
+export type CodeAColorer = { id: string; code: string; nom: string; type: string; couleur: CouleurRegle | null };
+
+export type CodesAColorer = { evenements: CodeAColorer[]; profils: CodeAColorer[] };
+
 export type ChoixCouleur = { genre: "evenement" | "profil"; id: string; couleur: CouleurRegle | null };
 
 /** Nom du champ de formulaire qui porte la couleur d'un événement ou d'un profil. */

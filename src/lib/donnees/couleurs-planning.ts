@@ -2,14 +2,9 @@ import "server-only";
 
 import { and, asc, eq, isNotNull, sql } from "drizzle-orm";
 import type { CouleurRegle } from "@/lib/constantes";
-import { estCouleurRegle, type ChoixCouleur, type CouleurChoisie, type CouleursPlanning } from "@/lib/metier/couleurs-planning";
+import { estCouleurRegle, type ChoixCouleur, type CodeAColorer, type CodesAColorer, type CouleurChoisie, type CouleursPlanning } from "@/lib/metier/couleurs-planning";
 import { obtenirBase } from "./base";
 import { evenements, profilsHoraires } from "./schema";
-
-/** Un événement ou un profil horaire, avec sa couleur dans le planning (null = selon le type). */
-export type CodeAColorer = { id: string; code: string; nom: string; type: string; couleur: CouleurRegle | null };
-
-export type CodesAColorer = { evenements: CodeAColorer[]; profils: CodeAColorer[] };
 
 const couleurLue = (valeur: string | null): CouleurRegle | null => (valeur !== null && estCouleurRegle(valeur) ? valeur : null);
 
