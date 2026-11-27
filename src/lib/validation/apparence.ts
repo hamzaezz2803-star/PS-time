@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { COULEURS_PERSONNALISABLES, CONTRASTE_MIN_TEXTE, POLICES, TAILLES_TEXTE, THEMES } from "@/lib/constantes";
+import { COULEURS_PERSONNALISABLES, CONTRASTE_MIN_TEXTE, DENSITES, MODES_IMPRESSION, MODES_MENU, POLICES, TAILLES_TEXTE, THEMES } from "@/lib/constantes";
 import { cleCouleur, type Apparence } from "@/lib/metier/apparence";
 import { FORMAT_COULEUR, controlerContrastes } from "@/lib/metier/couleurs";
 import { TEXTES_APPARENCE } from "@/lib/textes/apparence";
@@ -15,6 +15,9 @@ const schemaApparence = z
     police: z.enum(POLICES, { error: erreurs.police }),
     taille: z.enum(TAILLES_TEXTE, { error: erreurs.taille }),
     couleurs: z.object({ primaire: couleur, marine: couleur, accent: couleur, fond: couleur }),
+    menu: z.enum(MODES_MENU, { error: erreurs.menu }),
+    densite: z.enum(DENSITES, { error: erreurs.densite }),
+    impression: z.enum(MODES_IMPRESSION, { error: erreurs.impression }),
   })
   .superRefine((apparence, contexte) => {
     // Seul le thème personnalisé utilise ces couleurs : elles doivent alors rester lisibles.
@@ -38,6 +41,9 @@ export function validerApparence(formulaire: FormData): Resultat<Apparence> & { 
     police: lireTexte(formulaire.get("police")),
     taille: lireTexte(formulaire.get("taille")),
     couleurs,
+    menu: lireTexte(formulaire.get("menu")),
+    densite: lireTexte(formulaire.get("densite")),
+    impression: lireTexte(formulaire.get("impression")),
   });
   if (analyse.success) return { ok: true, donnees: analyse.data };
   return { ok: false, erreur: "validation", erreursChamps: premieresErreurs(analyse.error) };

@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState, type ReactNode } from "react";
+import { useActionState, useState } from "react";
 import { LoaderCircle } from "lucide-react";
 import { modifierApparence } from "@/app/(connecte)/administration/apparence/actions";
 import { Bouton } from "@/components/ui/bouton";
@@ -13,24 +13,15 @@ import { cn } from "@/lib/utils";
 import type { EtatFormulaire } from "@/types";
 import { ApercuApparence, Nuancier } from "./apercu-apparence";
 import { CarteChoix } from "./carte-choix";
+import { ChoixAffichage } from "./choix-affichage";
 import { ChoixCouleurs } from "./choix-couleurs";
+import { Section } from "./section-apparence";
 
 const ETAT_INITIAL: EtatFormulaire = {};
 /** Taille de l'exemple « Aa » de chaque carte de taille du texte. */
 const TAILLE_EXEMPLE = { normale: "text-2xl", grande: "text-3xl", tres_grande: "text-4xl" } as const;
 
-function Section({ id, titre, aide, erreur, children }: { id: string; titre: string; aide: string; erreur?: string; children: ReactNode }) {
-  return (
-    <fieldset className="flex flex-col gap-3" aria-describedby={`aide-${id}`}>
-      <legend className="text-lg font-semibold text-marine">{titre}</legend>
-      <p id={`aide-${id}`} className="-mt-1 text-sm text-texte-secondaire">{aide}</p>
-      {children}
-      <MessageErreur message={erreur} />
-    </fieldset>
-  );
-}
-
-/** Choix du thème (ou de couleurs libres), de la police et de la taille du texte, avec aperçu en direct. */
+/** Choix du thème (ou de couleurs libres), de la police, de la taille du texte et de l'affichage, avec aperçu en direct. */
 export function FormulaireApparence({ actuelle }: { actuelle: Apparence }) {
   const [etat, action, enCours] = useActionState(modifierApparence, ETAT_INITIAL);
   const [choix, setChoix] = useState<Apparence>(actuelle);
@@ -114,6 +105,8 @@ export function FormulaireApparence({ actuelle }: { actuelle: Apparence }) {
             ))}
           </div>
         </Section>
+
+        <ChoixAffichage choix={choix} actuelle={actuelle} erreurs={erreurs} onChange={changer} />
       </div>
 
       <div className="flex flex-col gap-4 lg:sticky lg:top-24 lg:self-start">
