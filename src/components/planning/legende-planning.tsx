@@ -23,6 +23,7 @@ export function LegendePlanning() {
         <Element apercu="bg-regle-orange-fond border border-regle-orange/40" libelle={textes.absence} />
         <Element apercu="bg-regle-turquoise-fond border border-regle-turquoise/40" libelle={textes.presence} />
         <Element apercu="bg-regle-vert-fond border border-regle-vert/40" libelle={textes.repos} />
+        <Element apercu="bg-canevas border border-bordure" libelle={textes.aucunHoraire} />
         <Element apercu="border-2 border-dashed border-texte-secondaire" libelle={textes.enHeures} />
         <Element apercu="ring-2 ring-primaire" libelle={textes.aujourdhui} />
         <li className="flex items-center gap-2">

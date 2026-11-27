@@ -3,7 +3,7 @@ import { codeDuJour, semainesDuMois, totaliser, type JourPlanning } from "@/lib/
 import { formaterDuree } from "@/lib/metier/programme";
 import { TEXTES_PLANNING } from "@/lib/textes/planning";
 import { cn } from "@/lib/utils";
-import { couleursDuJour, LienJour, MarqueAnomalie } from "./elements-planning";
+import { couleursDuJour, libelleSansCode, LienJour, MarqueAnomalie } from "./elements-planning";
 
 const textes = TEXTES_PLANNING;
 
@@ -14,7 +14,7 @@ function ContenuCase({ jour }: { jour: JourPlanning }) {
   const code = codeDuJour(jour);
   return (
     <>
-      <span className="truncate text-sm font-bold">{code ?? textes.repos}</span>
+      <span className="truncate text-sm font-bold">{code ?? libelleSansCode(jour)}</span>
       {jour.theoriqueMinutes !== null && <span className="text-xs tabular-nums opacity-80">{`${textes.theoriqueCourt} ${formaterDuree(jour.theoriqueMinutes)}`}</span>}
       {jour.travailleMinutes !== null && <span className="text-xs font-medium tabular-nums text-texte">{`${textes.realiseCourt} ${formaterDuree(jour.travailleMinutes)}`}</span>}
     </>

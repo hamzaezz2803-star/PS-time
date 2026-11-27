@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import type { JourService } from "./compteurs/variables.ts";
-import { estEtat, joursDeLaSaisie, lignesPresences } from "./etats.ts";
+import { estEtat, joursDeLaSaisie, lignesPresences, statutEtat } from "./etats.ts";
 import type { EmployeStatistiques } from "./statistiques-presence.ts";
 
 const HORAIRE = { debutPrevu: 480, finPrevue: 1020, dureePrevue: 480, estBadge: true };
@@ -44,5 +44,25 @@ describe("menu État", () => {
     // Congé du 17 au 19 : le 18 la maladie l'emporte, le 19 un pointage l'emporte.
     assert.deepEqual(joursDeLaSaisie(employe, { id: "cp", debut: "2026-11-17", fin: "2026-11-19" }), { prevus: 3, valides: 1 });
     assert.deepEqual(joursDeLaSaisie(employe, { id: "mal", debut: "2026-11-18", fin: "2026-11-18" }), { prevus: 1, valides: 1 });
+  });
+
+  // Bug : sans aucune affectation, l'état donnait 0 jour validé alors que les droits aux congés en décomptaient 2.
+  it("compte chaque jour d'un employé sans affectation, comme les droits aux congés, mais jamais un repos", () => {
+    const sansPlanning: EmployeStatistiques = {
+      ...employe,
+      jours: [{ jour: "2026-11-06", horaire: null, pointages: [], estSansPlanning: true }, { jour: "2026-11-07", horaire: null, pointages: [], estSansPlanning: true }, journee("2026-11-08", [], null)],
+      evenements: [{ ...regles, id: "cpr", code: "CPR", nom: "Congés reportés", debut: "2026-11-06", fin: "2026-11-08" }],
+    };
+    assert.deepEqual(joursDeLaSaisie(sansPlanning, { id: "cpr", debut: "2026-11-06", fin: "2026-11-08" }), { prevus: 2, valides: 2 });
+  });
+
+  // Bug : un repos, un jour sans affectation et une mission étaient tous écrits « Sans horaire » ou « À l'heure ».
+  it("précise le statut écrit : repos, travail un jour de repos, aucun horaire, présent par un événement", () => {
+    const resume = { estSansPlanning: false, entree: null, evenement: null };
+    assert.equal(statutEtat(resume, "sans_horaire"), "repos");
+    assert.equal(statutEtat({ ...resume, entree: 480 }, "sans_horaire"), "repos_travaille");
+    assert.equal(statutEtat({ ...resume, estSansPlanning: true, entree: 480 }, "sans_horaire"), "aucun_horaire");
+    assert.equal(statutEtat({ ...resume, evenement: { code: "MIS", nom: "Mission", type: "presence" } }, "a_l_heure"), "evenement_presence");
+    assert.equal(statutEtat(resume, "absent"), "absent");
   });
 });

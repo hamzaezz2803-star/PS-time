@@ -19,6 +19,7 @@ const STATUTS: Record<StatutJourDetail, { Icone: LucideIcon; teinte: string }> =
   evenement_presence: { Icone: Plane, teinte: "bg-ciel text-primaire" },
   repos: { Icone: Moon, teinte: "bg-canevas text-texte-secondaire" },
   repos_travaille: { Icone: Briefcase, teinte: "bg-ciel text-primaire" },
+  aucun_horaire: { Icone: CalendarX2, teinte: "bg-canevas text-texte-secondaire" },
   en_cours: { Icone: Briefcase, teinte: "bg-succes/10 text-succes" },
   pas_encore_pointe: { Icone: Hourglass, teinte: "bg-canevas text-texte-secondaire" },
 };
@@ -38,12 +39,13 @@ export function StatutJour({ jour }: { jour: JourDetail }) {
 
 const HEURE ="rounded-md bg-surface px-1.5 py-0.5 font-medium text-texte tabular-nums ring-1 ring-bordure";
 
-/** Profil du jour (code), ou « Repos » avec une icône. */
+/** Profil du jour (code), ou « Repos » (« Aucun horaire » sans affectation) avec une icône. */
 export function HoraireJour({ jour }: { jour: JourDetail }) {
+  const Icone = jour.estSansPlanning ? CalendarX2 : Moon;
   return jour.profilCode === null ? (
     <span className="inline-flex items-center gap-1.5 text-texte-secondaire">
-      <Moon className="size-4 shrink-0" aria-hidden="true" />
-      {textes.repos}
+      <Icone className="size-4 shrink-0" aria-hidden="true" />
+      {jour.estSansPlanning ? textes.aucunHoraire : textes.repos}
     </span>
   ) : (
     <span className="rounded-md bg-ciel px-2 py-0.5 font-mono text-sm font-semibold text-marine ring-1 ring-primaire/15">{jour.profilCode}</span>

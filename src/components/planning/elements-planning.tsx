@@ -13,13 +13,17 @@ const textes = TEXTES_PLANNING;
 export function couleursDuJour(jour: JourPlanning): string {
   if (jour.evenement?.type === "absence") return "bg-regle-orange-fond text-regle-orange";
   if (jour.evenement?.type === "presence") return "bg-regle-turquoise-fond text-regle-turquoise";
+  if (!jour.profilCode && jour.estSansPlanning) return "bg-canevas text-texte-secondaire";
   if (!jour.profilCode) return "bg-regle-vert-fond text-regle-vert";
   return "bg-surface text-marine";
 }
 
+/** Ce qu'affiche une case sans code : « Repos », ou « Aucun horaire » sans affectation. */
+export const libelleSansCode = (jour: JourPlanning): string => (jour.estSansPlanning ? textes.aucunHoraire : textes.repos);
+
 /** Info-bulle d'une case : date, code et libellé, anomalies et événements non validés. */
 export function infoBulleDuJour(jour: JourPlanning): string {
-  const quoi = jour.evenement ? `${jour.evenement.code} : ${jour.evenement.nom}` : (jour.profilCode ?? textes.repos);
+  const quoi = jour.evenement ? `${jour.evenement.code} : ${jour.evenement.nom}` : (jour.profilCode ?? libelleSansCode(jour));
   return [
     `${formaterJour(jour.jour)} · ${quoi}`,
     ...jour.anomalies.map((anomalie) => textes.anomalies[anomalie]),

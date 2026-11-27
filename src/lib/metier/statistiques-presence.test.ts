@@ -81,6 +81,18 @@ describe("bilanDuJour et tauxPresence", () => {
     assert.equal(cumul.minutesRetard, 40);
   });
 
+  // Bug : un profil non badgé un jour de congé ajoutait ses heures prévues aux heures travaillées.
+  it("ne compte pas d'heures travaillées pour un profil non badgé en absence justifiée", () => {
+    const nonBadge = { ...HORAIRE, estBadge: false };
+    const enConge = {
+      ...employe("f", "Bureau", [journee([], nonBadge)]),
+      evenements: [{ debut: JOUR, fin: JOUR, type: "absence" as const, priorite: 10, neutralisePointage: false }],
+    };
+    const bilan = bilanDuJour([enConge], JOUR, MIDI);
+    assert.equal(bilan.justifies, 1);
+    assert.equal(bilan.minutesTravaillees, 0);
+  });
+
   it("respecte la période d'emploi", () => {
     assert.equal(estEnPoste({ debutEmploi: "2026-11-19", finEmploi: null }, JOUR), false);
     assert.equal(estEnPoste({ debutEmploi: JOUR, finEmploi: JOUR }, JOUR), true);

@@ -27,6 +27,11 @@ describe("statutJourDetail", () => {
     assert.equal(statutJourDetail({ ...jour, profilCode: null }), "repos_travaille");
   });
 
+  // Bug : un employé sans aucune affectation était affiché « Repos » tous les jours.
+  it("un jour sans aucune affectation n'est pas un repos", () => {
+    assert.equal(statutJourDetail({ ...jour, profilCode: null, estSansPlanning: true }), "aucun_horaire");
+  });
+
   it("l'événement retenu passe avant les pointages", () => {
     assert.equal(statutJourDetail({ ...jour, entree: null, evenement: { code: "CP", nom: "Congé payé", type: "absence" } }), "absence_justifiee");
     assert.equal(statutJourDetail({ ...jour, evenement: { code: "MIS", nom: "Mission", type: "presence" } }), "evenement_presence");

@@ -36,4 +36,18 @@ describe("resumerJour", () => {
     assert.equal(pointe.nonValides.length, 1);
     assert.equal(resumerJour({ jour: JOUR, horaire: null, pointages: [] }, []).profilCode, null);
   });
+
+  it("distingue un jour sans aucune affectation d'un repos", () => {
+    assert.equal(resumerJour({ jour: JOUR, horaire: null, pointages: [], estSansPlanning: true }, []).estSansPlanning, true);
+    assert.equal(resumerJour({ jour: JOUR, horaire: null, pointages: [] }, []).estSansPlanning, false);
+  });
+
+  // Bug : un samedi matin non badgé pendant un congé de paternité donnait « 08:00 à 12:00, 4 h » et « Absence justifiée ».
+  it("ne présume pas la présence d'un profil non badgé un jour d'absence retenue", () => {
+    const nonBadge = { ...HORAIRE, debutPrevu: 480, finPrevue: 720, dureePrevue: 240, estBadge: false };
+    const absent = resumerJour({ jour: JOUR, horaire: nonBadge, pointages: [] }, [evenement("PAT", 40)]);
+    assert.deepEqual([absent.entree, absent.sortie, absent.travailleMinutes, absent.retardMinutes], [null, null, null, null]);
+    const present = resumerJour({ jour: JOUR, horaire: nonBadge, pointages: [] }, []);
+    assert.deepEqual([present.entree, present.sortie, present.travailleMinutes], [480, 720, 240]);
+  });
 });
