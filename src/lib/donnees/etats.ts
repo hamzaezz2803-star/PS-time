@@ -8,6 +8,7 @@ import { idsDescendants } from "@/lib/metier/arbre";
 import { jourEtMinuteLocaux } from "@/lib/metier/dates";
 import { etatSolde } from "@/lib/metier/droits-conges";
 import { joursDeLaSaisie, lignesPresences, type Etat } from "@/lib/metier/etats";
+import type { ResumeJour } from "@/lib/metier/resume-jour";
 import { formaterDuree, minutesVersHeure } from "@/lib/metier/programme";
 import { motifContient } from "@/lib/metier/recherche";
 import { TEXTES_DROITS_CONGES } from "@/lib/textes/droits-conges";
@@ -42,6 +43,19 @@ async function conditionEmployes(recherche: RechercheEtat): Promise<SQL | undefi
   return and(...conditions);
 }
 
+/**
+ * Colonne Événement : l'événement retenu, puis ceux qui ne le sont pas (« non validé » ; un jour
+ * de repos du planning, « non décompté : repos », car le repos l'emporte).
+ */
+function texteEvenements(resume: ResumeJour): string {
+  const estRepos = resume.profilCode === null && !resume.estSansPlanning;
+  const nonValides = resume.nonValides.map((evenement) => {
+    const texte = valeurs.evenement(evenement.code, evenement.nom);
+    return estRepos ? valeurs.nonDecompteRepos(texte) : valeurs.nonValide(texte);
+  });
+  return [resume.evenement ? valeurs.evenement(resume.evenement.code, resume.evenement.nom) : null, ...nonValides].filter(Boolean).join(" ; ");
+}
+
 /** Présences et retards : une ligne par employé et par jour attendu, pointé ou avec un événement. */
 async function etatPresences(recherche: RechercheEtat, maintenant: { jour: string; minute: number }): Promise<TableauEtat> {
   const { employes: equipe, estTronque } = await chargerJourneesEquipe(recherche.du, recherche.au, await conditionEmployes(recherche));
@@ -56,7 +70,7 @@ async function etatPresences(recherche: RechercheEtat, maintenant: { jour: strin
     duree(resume.travailleMinutes),
     duree(resume.retardMinutes),
     valeurs.statuts[statut],
-    resume.evenement ? `${resume.evenement.code} · ${resume.evenement.nom}` : "",
+    texteEvenements(resume),
   ]);
   const tableau = limiter(lignes);
   return { ...tableau, estTronque: tableau.estTronque || estTronque };

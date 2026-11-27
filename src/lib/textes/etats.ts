@@ -76,6 +76,9 @@ export const TEXTES_ETATS = {
   valeurs: {
     repos: "Repos",
     aucunHoraire: "Aucun horaire",
+    evenement: (code: string, nom: string) => `${code} · ${nom}`,
+    nonValide: (evenement: string) => `${evenement} (non validé)`,
+    nonDecompteRepos: (evenement: string) => `${evenement} (non décompté : repos)`,
     statuts: {
       a_l_heure: "À l'heure",
       en_retard: "En retard",

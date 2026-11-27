@@ -42,6 +42,24 @@ describe("resumerJour", () => {
     assert.equal(resumerJour({ jour: JOUR, horaire: null, pointages: [] }, []).estSansPlanning, false);
   });
 
+  // Bug (T006, CP du 22 au 26/11) : un congé sur un jour de repos était affiché comme retenu, alors que les droits ne le décomptent pas.
+  it("un jour de repos du planning l'emporte sur un congé, qui reste non validé", () => {
+    const repos = resumerJour({ jour: JOUR, horaire: null, pointages: [] }, [evenement("CP", 10)]);
+    assert.equal(repos.evenement, null);
+    assert.deepEqual(repos.nonValides.map((element) => element.code), ["CP"]);
+    const sansPlanning = resumerJour({ jour: JOUR, horaire: null, pointages: [], estSansPlanning: true }, [evenement("CP", 10)]);
+    assert.equal(sansPlanning.evenement?.code, "CP");
+  });
+
+  // Bug (T011, mission le 17/11) : 3 minutes de retard comptées un jour de mission retenue.
+  it("ne compte pas de retard un jour d'événement de présence retenu", () => {
+    const mission = { ...evenement("MIS", 30, true), type: "presence" as const };
+    const resume = resumerJour({ jour: JOUR, horaire: HORAIRE, pointages: [483, 1020] }, [mission]);
+    assert.equal(resume.evenement?.code, "MIS");
+    assert.equal(resume.retardMinutes, null);
+    assert.equal(resume.travailleMinutes, 537);
+  });
+
   // Bug : un samedi matin non badgé pendant un congé de paternité donnait « 08:00 à 12:00, 4 h » et « Absence justifiée ».
   it("ne présume pas la présence d'un profil non badgé un jour d'absence retenue", () => {
     const nonBadge = { ...HORAIRE, debutPrevu: 480, finPrevue: 720, dureePrevue: 240, estBadge: false };

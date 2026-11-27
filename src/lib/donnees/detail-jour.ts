@@ -4,6 +4,7 @@ import { and, asc, eq, gte, lt } from "drizzle-orm";
 import { DETAIL_POINTAGES_MAX, FUSEAU_HORAIRE, UN_JOUR_MILLISECONDES } from "@/lib/constantes";
 import { calculerCompteurs, historiqueJournalier, type CacheFormules, type ValeurCompteur } from "@/lib/metier/compteurs/calcul";
 import { ajouterJours, periodesDeLaDate, type Periodicite } from "@/lib/metier/compteurs/periodes";
+import { estJourDeRepos } from "@/lib/metier/compteurs/variables";
 import { jourDansFuseau } from "@/lib/metier/dates";
 import { messageErreurFormule } from "@/lib/textes/formules";
 import { evenementRetenu } from "@/lib/metier/evenements";
@@ -73,8 +74,8 @@ async function pointagesDuJour(employe: { id: string; groupeId: string | null },
 }
 
 /** Marque l'événement retenu parmi ceux de la journée entière ; les autres sont « non validés ». */
-function validerEvenements(evenementsJour: Omit<EvenementDuJour, "estValide">[], aPointe: boolean): EvenementDuJour[] {
-  const retenu = evenementRetenu(evenementsJour.filter((evenement) => evenement.debutMinutes === null), aPointe);
+function validerEvenements(evenementsJour: Omit<EvenementDuJour, "estValide">[], aPointe: boolean, estRepos: boolean): EvenementDuJour[] {
+  const retenu = evenementRetenu(evenementsJour.filter((evenement) => evenement.debutMinutes === null), aPointe, estRepos);
   return evenementsJour.map((evenement) => ({ ...evenement, estValide: evenement.debutMinutes === null ? evenement === retenu : null }));
 }
 
@@ -131,7 +132,7 @@ export async function chargerDetailJour(employeId: string, date: string, nombreJ
             }
           : null,
       pointages: pointagesJour,
-      evenements: validerEvenements(evenementsJour, tries.length > 0),
+      evenements: validerEvenements(evenementsJour, tries.length > 0, jourDetail ? estJourDeRepos(jourDetail) : false),
       compteurs,
       valeurs: { JOUR: parPeriodicite("JOUR"), SEMAINE: parPeriodicite("SEMAINE"), MOIS: parPeriodicite("MOIS") },
       periodes: { JOUR: jour, SEMAINE: semaine, MOIS: mois },

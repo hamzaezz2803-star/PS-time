@@ -54,6 +54,9 @@ export type JourService = {
   estSansPlanning?: boolean;
 };
 
+/** Jour de repos du planning (rotation ou profil Repos), à ne pas confondre avec un jour sans aucune affectation. */
+export const estJourDeRepos = (journee: Pick<JourService, "horaire" | "estSansPlanning">): boolean => !journee.horaire && journee.estSansPlanning !== true;
+
 /** Horaire prévu d'un profil de travail : de la première à la dernière plage fixe ; durée = somme des plages fixes. */
 export function horaireDuProfil(profil: ProfilHoraire): HorairePrevu | null {
   const fixes = profil.plages.filter((plage) => plage.type === "fixe");

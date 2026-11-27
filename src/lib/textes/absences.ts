@@ -87,7 +87,7 @@ export const TEXTES_ABSENCES = {
   carteVide: "Aucune absence ni événement ce jour-là.",
   valide: "Validé",
   nonValide: "Non validé",
-  aideNonValide: "Un pointage ou un événement plus prioritaire l'emporte ce jour-là.",
+  aideNonValide: "Un pointage, un événement plus prioritaire ou un jour de repos du planning l'emporte ce jour-là : rien n'est décompté.",
   erreurs: {
     employesVides: pointages.erreurs.employesVides,
     tropDEmployes: pointages.erreurs.tropDEmployes,

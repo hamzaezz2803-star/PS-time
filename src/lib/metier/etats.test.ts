@@ -56,6 +56,19 @@ describe("menu État", () => {
     assert.deepEqual(joursDeLaSaisie(sansPlanning, { id: "cpr", debut: "2026-11-06", fin: "2026-11-08" }), { prevus: 2, valides: 2 });
   });
 
+  it("garde la ligne d'un congé posé sur un repos, en repos et sans événement retenu", () => {
+    const enRepos: EmployeStatistiques = {
+      ...employe,
+      jours: [journee("2026-11-21", [], null)],
+      evenements: [{ ...regles, id: "cp", code: "CP", nom: "Congé payé", debut: "2026-11-21", fin: "2026-11-21" }],
+    };
+    const [ligne] = lignesPresences([enRepos], MAINTENANT);
+    assert.equal(ligne.statut, "repos");
+    assert.equal(ligne.resume.evenement, null);
+    assert.deepEqual(ligne.resume.nonValides.map((evenement) => evenement.code), ["CP"]);
+    assert.deepEqual(joursDeLaSaisie(enRepos, { id: "cp", debut: "2026-11-21", fin: "2026-11-21" }), { prevus: 0, valides: 0 });
+  });
+
   // Bug : un repos, un jour sans affectation et une mission étaient tous écrits « Sans horaire » ou « À l'heure ».
   it("précise le statut écrit : repos, travail un jour de repos, aucun horaire, présent par un événement", () => {
     const resume = { estSansPlanning: false, entree: null, evenement: null };

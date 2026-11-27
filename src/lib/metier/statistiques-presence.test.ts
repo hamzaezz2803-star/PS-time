@@ -93,6 +93,16 @@ describe("bilanDuJour et tauxPresence", () => {
     assert.equal(bilan.minutesTravaillees, 0);
   });
 
+  it("ne compte pas de retard un jour de mission retenue", () => {
+    const enMission = {
+      ...employe("g", "Atelier", [journee([495, 1020])]),
+      evenements: [{ debut: JOUR, fin: JOUR, type: "presence" as const, priorite: 30, neutralisePointage: true }],
+    };
+    const bilan = bilanDuJour([enMission], JOUR, MIDI);
+    assert.equal(bilan.aLHeure, 1);
+    assert.equal(bilan.minutesRetard, 0);
+  });
+
   it("respecte la période d'emploi", () => {
     assert.equal(estEnPoste({ debutEmploi: "2026-11-19", finEmploi: null }, JOUR), false);
     assert.equal(estEnPoste({ debutEmploi: JOUR, finEmploi: JOUR }, JOUR), true);

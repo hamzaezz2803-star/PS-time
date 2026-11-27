@@ -3,7 +3,7 @@
  * du mois) : horaire, entrée, sortie, temps travaillé, retard et événement retenu. Fonction pure,
  * testée dans resume-jour.test.ts ; mêmes règles que les compteurs et les statistiques.
  */
-import { entreeSortie, variablesDuJour, type JourService } from "./compteurs/variables.ts";
+import { entreeSortie, estJourDeRepos, variablesDuJour, type JourService, type ValeursVariables } from "./compteurs/variables.ts";
 import { evenementRetenu, type EvenementCandidat } from "./evenements.ts";
 
 /** Événement en journées entières de l'employé, avec ce qui le départage des autres. */
@@ -39,12 +39,21 @@ export function journeeSelonEvenement(journee: JourService, typeRetenu: Evenemen
   return { ...journee, horaire: { ...journee.horaire, estBadge: true } };
 }
 
+/**
+ * Variables d'une journée selon l'événement retenu : pas de présence présumée un jour d'absence
+ * retenue, et pas de retard un jour d'événement de présence retenu (mission, formation : la
+ * journée est justifiée ; décision du responsable du 27/11/2026).
+ */
+export function variablesSelonEvenement(journee: JourService, typeRetenu: EvenementPeriode["type"] | null): ValeursVariables {
+  const valeurs = variablesDuJour(journeeSelonEvenement(journee, typeRetenu));
+  return typeRetenu === "presence" ? { ...valeurs, RETARD_MIN: null } : valeurs;
+}
+
 export function resumerJour(journee: JourService, evenements: readonly EvenementPeriode[]): ResumeJour {
   const duJour = evenements.filter((evenement) => evenement.debut <= journee.jour && journee.jour <= evenement.fin);
-  const retenu = evenementRetenu(duJour, journee.pointages.length > 0);
-  const effective = journeeSelonEvenement(journee, retenu?.type ?? null);
-  const valeurs = variablesDuJour(effective);
-  const { entree, sortie } = entreeSortie(effective);
+  const retenu = evenementRetenu(duJour, journee.pointages.length > 0, estJourDeRepos(journee));
+  const valeurs = variablesSelonEvenement(journee, retenu?.type ?? null);
+  const { entree, sortie } = entreeSortie(journeeSelonEvenement(journee, retenu?.type ?? null));
   return {
     jour: journee.jour,
     profilCode: journee.horaire ? (journee.profil?.code ?? null) : null,

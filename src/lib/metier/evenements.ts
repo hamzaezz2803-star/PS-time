@@ -56,9 +56,11 @@ export type EvenementCandidat = { priorite: number; neutralisePointage: boolean 
  * pointage l'emporte sur tout événement qui ne neutralise pas le pointage ; entre événements, la
  * plus grande priorité l'emporte (à égalité, le premier de la liste). Les autres restent « non
  * validés » : ils ne changent pas le statut du jour et ne consomment pas de droit aux congés.
+ * Un jour de repos du planning, aucun n'est retenu : le repos l'emporte (rien n'est décompté).
  * Null si aucun n'est retenu.
  */
-export function evenementRetenu<T extends EvenementCandidat>(candidats: readonly T[], aPointe: boolean): T | null {
+export function evenementRetenu<T extends EvenementCandidat>(candidats: readonly T[], aPointe: boolean, estRepos = false): T | null {
+  if (estRepos) return null;
   let retenu: T | null = null;
   for (const candidat of candidats) {
     if (aPointe && !candidat.neutralisePointage) continue;

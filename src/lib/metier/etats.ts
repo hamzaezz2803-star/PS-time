@@ -4,7 +4,8 @@
  */
 import type { Page } from "./droits.ts";
 import { resumerJour, type ResumeJour } from "./resume-jour.ts";
-import { estEnPoste, evenementDuJour, evenementRetenuDuJour, statutDuJour, type EmployeStatistiques, type Maintenant, type StatutJour } from "./statistiques-presence.ts";
+import { estJourDeRepos } from "./compteurs/variables.ts";
+import { estEnPoste, evenementRetenuDeLaJournee, statutDuJour, type EmployeStatistiques, type Maintenant, type StatutJour } from "./statistiques-presence.ts";
 
 /** Rapports du menu État, dans l'ordre du menu (segment de l'adresse : /etats/<etat>). */
 export const ETATS = ["presences", "evenements", "conges", "pointages-manuels"] as const;
@@ -38,9 +39,10 @@ export function statutEtat(resume: Pick<ResumeJour, "estSansPlanning" | "entree"
 
 export type LignePresence<E extends EmployeStatistiques> = { employe: E; resume: ResumeJour; statut: StatutEtat };
 
+
 /**
  * État des présences : une ligne par employé et par jour où il était attendu, a pointé ou avait
- * un événement (période d'emploi seulement), du plus récent au plus ancien.
+ * un événement, même non validé (période d'emploi seulement), du plus récent au plus ancien.
  */
 export function lignesPresences<E extends EmployeStatistiques>(employes: readonly E[], maintenant: Maintenant): LignePresence<E>[] {
   const lignes: LignePresence<E>[] = [];
@@ -49,8 +51,8 @@ export function lignesPresences<E extends EmployeStatistiques>(employes: readonl
     for (const journee of employe.jours) {
       if (!estEnPoste(employe, journee.jour)) continue;
       const resume = resumerJour(journee, evenements);
-      if (!journee.horaire && journee.pointages.length === 0 && !resume.evenement) continue;
-      const statut = statutDuJour(journee, maintenant, evenementDuJour(employe, journee.jour, journee.pointages.length > 0));
+      if (!journee.horaire && journee.pointages.length === 0 && !resume.evenement && resume.nonValides.length === 0) continue;
+      const statut = statutDuJour(journee, maintenant, evenementRetenuDeLaJournee(employe, journee)?.type ?? null);
       lignes.push({ employe, resume, statut: statutEtat(resume, statut) });
     }
   }
@@ -67,10 +69,9 @@ export function joursDeLaSaisie(employe: EmployeStatistiques, saisie: { id: stri
   let prevus = 0;
   let valides = 0;
   for (const journee of employe.jours) {
-    const estRepos = !journee.horaire && !journee.estSansPlanning;
-    if (estRepos || journee.jour < saisie.debut || journee.jour > saisie.fin) continue;
+    if (estJourDeRepos(journee) || journee.jour < saisie.debut || journee.jour > saisie.fin) continue;
     prevus += 1;
-    if (evenementRetenuDuJour(employe, journee.jour, journee.pointages.length > 0)?.id === saisie.id) valides += 1;
+    if (evenementRetenuDeLaJournee(employe, journee)?.id === saisie.id) valides += 1;
   }
   return { prevus, valides };
 }
