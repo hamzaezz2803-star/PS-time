@@ -61,7 +61,7 @@ function ExempleImpression({ mode }: { mode: ModeImpression }) {
 export function ChoixAffichage({ choix, actuelle, erreurs, onChange }: {
   choix: Apparence;
   actuelle: Apparence;
-  erreurs?: Record<string, string>;
+  erreurs?: Partial<Record<string, string>>;
   onChange: (partiel: Partial<Apparence>) => void;
 }) {
   return (
