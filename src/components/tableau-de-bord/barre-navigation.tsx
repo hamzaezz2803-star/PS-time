@@ -46,7 +46,7 @@ function MenuDeroulant({ menu, chemin, alignerAFin }: { menu: MenuNavigation; ch
         aria-controls={idPanneau}
         className={cn(ENTREE, contientPageActive && ENTREE_ACTIVE, estOuvert && "text-texte")}
       >
-        <Icone className={ICONE_ENTREE} aria-hidden="true" />
+        <Icone className={ICONE_ENTREE} aria-hidden="true" data-icone-menu="" />
         {menu.libelle}
         <ChevronDown
           className={cn("size-4 shrink-0 transition-transform duration-200 motion-reduce:transition-none", estOuvert && "rotate-180")}
@@ -103,7 +103,7 @@ export function BarreNavigation({ droits }: { droits: Droits }) {
             return (
               <li key={menu.libelle} onPointerEnter={survoler}>
                 <Link href={menu.href} aria-current={estActif ? "page" : undefined} className={cn(ENTREE, estActif && ENTREE_ACTIVE)}>
-                  <Icone className={ICONE_ENTREE} aria-hidden="true" />
+                  <Icone className={ICONE_ENTREE} aria-hidden="true" data-icone-menu="" />
                   {menu.libelle}
                 </Link>
               </li>

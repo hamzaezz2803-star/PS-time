@@ -34,12 +34,13 @@ export const metadata: Metadata = {
 export const viewport: Viewport = { themeColor: COULEURS_PERSONNALISEES_PAR_DEFAUT.primaire };
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {
-  // Apparence de l'installation, lue par globals.css (data-theme, data-police, data-taille).
+  // Apparence de l'installation, lue par globals.css (data-theme, data-police, data-taille,
+  // data-menu, data-densite, data-impression).
   // Thème personnalisé : ses couleurs (#rrggbb vérifiées) remplacent celles de globals.css.
-  const { theme, police, taille, couleurs } = await lireApparence();
+  const { theme, police, taille, couleurs, menu, densite, impression } = await lireApparence();
   const style = theme === "personnalise" ? (variablesCouleurs(couleurs) as CSSProperties) : undefined;
   return (
-    <html lang="fr" data-theme={theme} data-police={police} data-taille={taille} style={style} className={`${VARIABLES_POLICES} h-full antialiased`}>
+    <html lang="fr" data-theme={theme} data-police={police} data-taille={taille} data-menu={menu} data-densite={densite} data-impression={impression} style={style} className={`${VARIABLES_POLICES} h-full antialiased`}>
       <body className="min-h-full flex flex-col font-sans">{children}</body>
     </html>
   );

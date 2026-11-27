@@ -16,7 +16,7 @@ function LienTiroir({ lien, estActif }: { lien: Pick<LienNavigation, "libelle" |
   const Icone = lien.icone;
   return (
     <Link href={lien.href} onClick={fermerMobile} aria-current={estActif ? "page" : undefined} className={cn(LIGNE, estActif && "bg-ciel font-semibold text-marine")}>
-      <Icone className={cn("size-[18px] shrink-0", estActif ? "text-primaire" : "text-texte-secondaire")} aria-hidden="true" />
+      <Icone className={cn("size-[18px] shrink-0", estActif ? "text-primaire" : "text-texte-secondaire")} aria-hidden="true" data-icone-menu="" />
       {lien.libelle}
     </Link>
   );

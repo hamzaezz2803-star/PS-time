@@ -18,6 +18,7 @@ function LienPanneau({ lien, chemin, onChoisir }: { lien: LienNavigation; chemin
       )}
     >
       <span
+        data-icone-menu=""
         className={cn(
           "flex size-9 shrink-0 items-center justify-center rounded-md border transition-colors duration-150",
           estActif

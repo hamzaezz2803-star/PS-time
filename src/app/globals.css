@@ -277,14 +277,67 @@ body {
   border-radius: 6px;
 }
 
-/* Documents imprimés ou enregistrés en PDF (liste des employés). */
+/*
+ * Réglages d'Administration > Apparence posés sur <html>. Hors des couches de Tailwind : ces
+ * règles l'emportent sur les classes utilitaires des composants.
+ */
+/* Menus en texte seul (data-menu) : les icônes des menus, des panneaux et du tiroir sont masquées. */
+[data-menu="texte"] [data-icone-menu] {
+  display: none !important;
+}
+
+/*
+ * Densité compacte (data-densite) : lignes des tableaux et cases du planning moins hautes, sur
+ * tablette et ordinateur seulement (au doigt, les zones restent assez grandes).
+ */
+@media (min-width: 48rem) {
+  [data-densite="compacte"] :is(td, th):is(.py-3, .py-2.5) {
+    padding-top: 0.375rem;
+    padding-bottom: 0.375rem;
+  }
+
+  [data-densite="compacte"] :is(td, th):is(.py-2, .py-1.5) {
+    padding-top: 0.25rem;
+    padding-bottom: 0.25rem;
+  }
+
+  [data-densite="compacte"] .min-h-26 {
+    min-height: 4.5rem;
+  }
+}
+
+/* Documents imprimés ou enregistrés en PDF (listes, états, planning). */
 @media print {
   @page {
     size: A4 landscape;
     margin: 12mm;
   }
 
+  /* Couleurs d'origine : les fonds colorés (planning, pastilles) sont imprimés tels quels. */
+  html {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
   body {
     background: var(--couleur-surface);
+  }
+
+  /* Niveaux de gris (data-impression) : mêmes nuances, sans couleur. */
+  [data-impression="gris"] body {
+    filter: grayscale(1);
+  }
+
+  /* Noir et blanc : texte et bordures noirs, aucun fond ; les codes et libellés restent écrits. */
+  [data-impression="noir_blanc"] body {
+    background: #fff;
+    filter: grayscale(1);
+  }
+
+  [data-impression="noir_blanc"] body * {
+    color: #000 !important;
+    background: transparent !important;
+    border-color: #000 !important;
+    box-shadow: none !important;
   }
 }
