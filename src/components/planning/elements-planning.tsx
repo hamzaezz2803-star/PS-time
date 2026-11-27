@@ -6,16 +6,15 @@ import { formaterJour } from "@/lib/formats";
 import type { JourPlanning } from "@/lib/metier/planning-consultation";
 import { TEXTES_PLANNING } from "@/lib/textes/planning";
 import { cn } from "@/lib/utils";
+import { CLASSES_PALETTE } from "@/components/ui/palette";
 
 const textes = TEXTES_PLANNING;
 
-/** Couleurs d'une case selon ce qui est retenu ce jour-là (palette fixe, contrastes vérifiés). */
+/** Couleurs d'une case : la teinte du jour (couleur choisie pour le code, sinon selon le type ; palette fixe, contrastes vérifiés). */
 export function couleursDuJour(jour: JourPlanning): string {
-  if (jour.evenement?.type === "absence") return "bg-regle-orange-fond text-regle-orange";
-  if (jour.evenement?.type === "presence") return "bg-regle-turquoise-fond text-regle-turquoise";
-  if (!jour.profilCode && jour.estSansPlanning) return "bg-canevas text-texte-secondaire";
-  if (!jour.profilCode) return "bg-regle-vert-fond text-regle-vert";
-  return "bg-surface text-marine";
+  if (jour.teinte === "travail") return "bg-surface text-marine";
+  if (jour.teinte === "sans_planning") return "bg-canevas text-texte-secondaire";
+  return CLASSES_PALETTE[jour.teinte].teinte;
 }
 
 /** Ce qu'affiche une case sans code : « Repos », ou « Aucun horaire » sans affectation. */

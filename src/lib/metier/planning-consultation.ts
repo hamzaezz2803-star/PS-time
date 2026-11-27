@@ -6,6 +6,7 @@
 import { bornesDuMois, moisVoisin } from "./calendrier.ts";
 import { ajouterJours } from "./compteurs/periodes.ts";
 import type { JourService } from "./compteurs/variables.ts";
+import { AUCUNE_COULEUR_CHOISIE, teinteDuJour, type CouleursPlanning, type TeinteCase } from "./couleurs-planning.ts";
 import { resumerJour, type EvenementPeriode, type ResumeJour } from "./resume-jour.ts";
 import { estEnPoste } from "./statistiques-presence.ts";
 
@@ -22,6 +23,8 @@ export type JourPlanning = ResumeJour & {
   aEvenementEnHeures: boolean;
   estFutur: boolean;
   anomalies: Anomalie[];
+  /** Couleur de la case : celle choisie pour le code (Administration > Apparence), sinon selon le type. */
+  teinte: TeinteCase;
 };
 
 /** Anomalies d'une journée : seulement pour un jour passé (aujourd'hui n'est pas terminé), sauf le retard. */
@@ -42,6 +45,7 @@ export function jourDePlanning(
   joursEnHeures: ReadonlySet<string>,
   aujourdhui: string,
   emploi: PeriodeEmploi = { debutEmploi: null, finEmploi: null },
+  couleurs: CouleursPlanning = AUCUNE_COULEUR_CHOISIE,
 ): JourPlanning {
   const resume = resumerJour(journee, evenements);
   return {
@@ -50,6 +54,7 @@ export function jourDePlanning(
     aEvenementEnHeures: joursEnHeures.has(journee.jour),
     estFutur: journee.jour > aujourdhui,
     anomalies: estEnPoste(emploi, journee.jour) ? anomaliesDuJour(journee, resume, aujourdhui) : [],
+    teinte: teinteDuJour(resume, couleurs),
   };
 }
 

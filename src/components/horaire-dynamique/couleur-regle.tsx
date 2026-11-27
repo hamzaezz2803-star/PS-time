@@ -1,19 +1,10 @@
 import { CalendarClock, Check } from "lucide-react";
+import { CLASSES_PALETTE } from "@/components/ui/palette";
 import { COULEURS_REGLE, type CouleurRegle } from "@/lib/constantes";
 import { TEXTES_HORAIRE_DYNAMIQUE as textes } from "@/lib/textes/horaire-dynamique";
 import { cn } from "@/lib/utils";
 
-// Classes écrites en entier : Tailwind ne repère que les noms de classes complets.
-const CLASSES: Record<CouleurRegle, { pastille: string; echantillon: string }> = {
-  bleu: { pastille: "bg-regle-bleu-fond text-regle-bleu ring-regle-bleu/30", echantillon: "bg-regle-bleu" },
-  vert: { pastille: "bg-regle-vert-fond text-regle-vert ring-regle-vert/30", echantillon: "bg-regle-vert" },
-  orange: { pastille: "bg-regle-orange-fond text-regle-orange ring-regle-orange/30", echantillon: "bg-regle-orange" },
-  rouge: { pastille: "bg-regle-rouge-fond text-regle-rouge ring-regle-rouge/30", echantillon: "bg-regle-rouge" },
-  turquoise: { pastille: "bg-regle-turquoise-fond text-regle-turquoise ring-regle-turquoise/30", echantillon: "bg-regle-turquoise" },
-  rose: { pastille: "bg-regle-rose-fond text-regle-rose ring-regle-rose/30", echantillon: "bg-regle-rose" },
-  jaune: { pastille: "bg-regle-jaune-fond text-regle-jaune ring-regle-jaune/30", echantillon: "bg-regle-jaune" },
-  ardoise: { pastille: "bg-regle-ardoise-fond text-regle-ardoise ring-regle-ardoise/30", echantillon: "bg-regle-ardoise" },
-};
+const CLASSES = CLASSES_PALETTE;
 
 /** Pastille d'un profil reconnu, à la couleur de sa règle ; le code et le nom restent écrits (jamais la couleur seule). */
 export function PastilleRegle({ couleur, code, nom }: { couleur: CouleurRegle; code: string; nom: string }) {

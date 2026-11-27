@@ -3,15 +3,18 @@ import "server-only";
 import { and, eq, gte, isNotNull, lte } from "drizzle-orm";
 import { PLANNING_JOURS_MAX } from "@/lib/constantes";
 import { joursEntre } from "@/lib/metier/compteurs/periodes";
+import { codesColoresAffiches, type CodeColore } from "@/lib/metier/couleurs-planning";
 import { jourDePlanning, type JourPlanning, type PeriodeEmploi } from "@/lib/metier/planning-consultation";
 import { evenementsEnJourneesDeLEmploye } from "./absences";
 import { obtenirBase } from "./base";
 import { aujourdhuiLocal, chargerJoursService } from "./compteurs-calcul";
+import { lireCouleursPlanning } from "./couleurs-planning";
 import { departements, employes, evenementsEmployes } from "./schema";
 
 export type EmployePlanning = { id: string; nomComplet: string; matricule: string; departement: string };
 
-export type ResultatPlanning = { ok: true; employe: EmployePlanning; jours: JourPlanning[] } | { ok: false; erreur: "employe" | "dates" };
+/** `codesColores` : codes à couleur choisie affichés sur la période, repris dans la légende. */
+export type ResultatPlanning = { ok: true; employe: EmployePlanning; jours: JourPlanning[]; codesColores: CodeColore[] } | { ok: false; erreur: "employe" | "dates" };
 
 async function lireEmploye(employeId: string): Promise<(EmployePlanning & PeriodeEmploi) | null> {
   const [ligne] = await obtenirBase()
@@ -58,15 +61,16 @@ export async function chargerPlanningEmploye(employeId: string, debut: string, f
   const employe = await lireEmploye(employeId);
   if (!employe) return { ok: false, erreur: "employe" };
 
-  const [chargement, evenements, enHeures] = await Promise.all([
+  const [chargement, evenements, enHeures, couleurs] = await Promise.all([
     chargerJoursService(employeId, debut, fin, PLANNING_JOURS_MAX),
     evenementsEnJourneesDeLEmploye(employeId, debut, fin),
     joursAvecEvenementEnHeures(employeId, debut, fin),
+    lireCouleursPlanning(),
   ]);
   if (!chargement.ok) return { ok: false, erreur: chargement.erreur };
 
   const aujourdhui = aujourdhuiLocal();
   const { debutEmploi, finEmploi, ...identite } = employe;
-  const jours = chargement.jours.map((journee) => jourDePlanning(journee, evenements, enHeures, aujourdhui, { debutEmploi, finEmploi }));
-  return { ok: true, employe: identite, jours };
+  const jours = chargement.jours.map((journee) => jourDePlanning(journee, evenements, enHeures, aujourdhui, { debutEmploi, finEmploi }, couleurs));
+  return { ok: true, employe: identite, jours, codesColores: codesColoresAffiches(jours, couleurs) };
 }

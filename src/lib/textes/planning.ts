@@ -67,5 +67,7 @@ export const TEXTES_PLANNING = {
     enHeures: "Événement saisi en heures",
     anomalie: "Anomalie (absence non justifiée, retard, sortie manquante)",
     aujourdhui: "Aujourd'hui",
+    couleursChoisies: "Couleurs choisies dans Apparence",
+    codeColore: (code: string, nom: string) => `${code} : ${nom}`,
   },
 } as const;

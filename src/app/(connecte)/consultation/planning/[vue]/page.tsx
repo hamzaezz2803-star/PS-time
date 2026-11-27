@@ -95,7 +95,7 @@ async function Planning({ selection, aujourdhui, peutOuvrir }: { selection: Sele
     <>
       <ResumePlanning employe={resultat.employe} totaux={totaliser(resultat.jours)} />
       {selection.vue === "mensuel" ? <CalendrierMensuel mois={selection.mois} {...commun} /> : <PlanningAnnuel annee={selection.annee} {...commun} />}
-      <LegendePlanning />
+      <LegendePlanning codesColores={resultat.codesColores} />
     </>
   );
 }

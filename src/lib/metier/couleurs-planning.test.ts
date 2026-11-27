@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { AUCUNE_COULEURS_TEST, codesColoresAffiches, estCouleurRegle, teinteDuJour, type CouleursPlanning } from "./couleurs-planning-test-aide.ts";
+import { AUCUNE_COULEUR_CHOISIE, codesColoresAffiches, estCouleurRegle, teinteDuJour, type CouleursPlanning } from "./couleurs-planning.ts";
 
 const COULEURS: CouleursPlanning = {
   evenements: new Map([["MAL", { couleur: "rouge", nom: "Maladie" }]]),
@@ -20,7 +20,7 @@ describe("teinteDuJour", () => {
     assert.equal(teinteDuJour({ evenement: conge, profilCode: "J8", estSansPlanning: false }, COULEURS), "orange");
     assert.equal(teinteDuJour({ evenement: mission, profilCode: null, estSansPlanning: false }, COULEURS), "turquoise");
     assert.equal(teinteDuJour({ evenement: null, profilCode: "M7", estSansPlanning: false }, COULEURS), "travail");
-    assert.equal(teinteDuJour({ evenement: null, profilCode: null, estSansPlanning: false }, AUCUNE_COULEURS_TEST), "vert");
+    assert.equal(teinteDuJour({ evenement: null, profilCode: null, estSansPlanning: false }, AUCUNE_COULEUR_CHOISIE), "vert");
   });
 
   it("ne confond jamais un jour sans affectation avec un repos", () => {

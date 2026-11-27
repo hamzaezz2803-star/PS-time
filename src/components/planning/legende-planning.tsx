@@ -1,4 +1,6 @@
 import { Asterisk } from "lucide-react";
+import { CLASSES_PALETTE } from "@/components/ui/palette";
+import type { CodeColore } from "@/lib/metier/couleurs-planning";
 import { TEXTES_PLANNING } from "@/lib/textes/planning";
 import { cn } from "@/lib/utils";
 
@@ -13,8 +15,8 @@ function Element({ apercu, libelle }: { apercu: string; libelle: string }) {
   );
 }
 
-/** Légende des couleurs et des marques : jamais la couleur seule (codes écrits, étoile, pointillé). */
-export function LegendePlanning() {
+/** Légende des couleurs et des marques : jamais la couleur seule (codes écrits, étoile, pointillé). Puis les codes à couleur choisie affichés. */
+export function LegendePlanning({ codesColores }: { codesColores: readonly CodeColore[] }) {
   return (
     <section className="rounded-xl border border-bordure bg-surface px-4 py-3 shadow-carte sm:px-5">
       <h2 className="mb-2 text-sm font-semibold text-marine">{textes.titre}</h2>
@@ -33,6 +35,16 @@ export function LegendePlanning() {
           <span>{textes.anomalie}</span>
         </li>
       </ul>
+      {codesColores.length > 0 && (
+        <>
+          <h3 className="mb-2 mt-3 text-sm font-semibold text-marine">{textes.couleursChoisies}</h3>
+          <ul className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-texte-secondaire">
+            {codesColores.map((code) => (
+              <Element key={`${code.genre}-${code.code}`} apercu={cn("border", CLASSES_PALETTE[code.couleur].teinte, CLASSES_PALETTE[code.couleur].bordure)} libelle={textes.codeColore(code.code, code.nom)} />
+            ))}
+          </ul>
+        </>
+      )}
     </section>
   );
 }
