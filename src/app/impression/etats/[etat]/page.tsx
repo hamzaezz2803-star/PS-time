@@ -10,7 +10,7 @@ import { MessageErreur } from "@/components/ui/message-erreur";
 import { CHEMIN_ETAT, RAPPORT_LIGNES_MAX } from "@/lib/constantes";
 import { aujourdhuiLocal } from "@/lib/donnees/compteurs-calcul";
 import { preparerExportEtat } from "@/lib/export/etats";
-import { ETATS, estEtat, type Etat } from "@/lib/metier/etats";
+import { ETATS, estEtat } from "@/lib/metier/etats";
 import { TEXTES_CONNEXION } from "@/lib/textes/connexion";
 import { TEXTES_ETATS } from "@/lib/textes/etats";
 import { TEXTES_NAVIGATION } from "@/lib/textes/navigation";
@@ -26,19 +26,20 @@ export const generateStaticParams = () => ETATS.map((etat) => ({ etat }));
 type ParametresRecherche = Promise<Record<string, string | string[] | undefined>>;
 
 /** Version imprimable d'un état : la fenêtre d'impression permet d'enregistrer en PDF. */
-export default async function PageImpressionEtat({ params, searchParams }: { params: Promise<{ etat: string }>; searchParams: ParametresRecherche }) {
-  const { etat } = await params;
-  if (!estEtat(etat)) notFound();
+export default function PageImpressionEtat({ params, searchParams }: { params: Promise<{ etat: string }>; searchParams: ParametresRecherche }) {
   return (
     <div className="min-h-dvh bg-canevas px-4 py-6 print:bg-surface print:p-0">
       <Suspense fallback={<Chargement message={TEXTES_ETATS.chargement} />}>
-        <DocumentEtat etat={etat} searchParams={searchParams} />
+        <DocumentEtat params={params} searchParams={searchParams} />
       </Suspense>
     </div>
   );
 }
 
-async function DocumentEtat({ etat, searchParams }: { etat: Etat; searchParams: ParametresRecherche }) {
+// L'adresse (état choisi) n'est lue que sous `<Suspense>` : le cadre s'affiche tout de suite.
+async function DocumentEtat({ params, searchParams }: { params: Promise<{ etat: string }>; searchParams: ParametresRecherche }) {
+  const { etat } = await params;
+  if (!estEtat(etat)) notFound();
   const recherche = lireRechercheEtat(await searchParams, aujourdhuiLocal());
   const donnees = await preparerExportEtat(etat, "pdf", recherche);
   if (!donnees) return <MessageErreur message={TEXTES_ETATS.droits} className="text-base" />;

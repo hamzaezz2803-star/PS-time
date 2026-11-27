@@ -12,8 +12,15 @@ import "./globals.css";
 const hanken = Hanken_Grotesk({ variable: "--font-hanken", subsets: ["latin", "latin-ext"] });
 const inter = Inter({ variable: "--font-inter", subsets: ["latin", "latin-ext"], preload: false });
 const sourceSans = Source_Sans_3({ variable: "--font-source-sans", subsets: ["latin", "latin-ext"], preload: false });
-// Pas de valeurs d'ajustement connues pour Atkinson : repli simple sur la police du système.
-const atkinson = Atkinson_Hyperlegible_Next({ variable: "--font-atkinson", subsets: ["latin", "latin-ext"], preload: false, adjustFontFallback: false });
+// Pas de valeurs d'ajustement connues pour Atkinson : repli explicite sur la police du système
+// (sans `fallback`, Turbopack les cherche quand même et affiche un avertissement à chaque compilation).
+const atkinson = Atkinson_Hyperlegible_Next({
+  variable: "--font-atkinson",
+  subsets: ["latin", "latin-ext"],
+  preload: false,
+  adjustFontFallback: false,
+  fallback: ["system-ui", "sans-serif"],
+});
 const VARIABLES_POLICES = [hanken, inter, sourceSans, atkinson].map((police) => police.variable).join(" ");
 
 export const metadata: Metadata = {

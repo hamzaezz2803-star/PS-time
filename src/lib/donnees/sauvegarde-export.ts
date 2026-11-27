@@ -129,7 +129,8 @@ export const dossierSauvegardes = () => process.env.DOSSIER_SAUVEGARDES || join(
 
 /** Écrit une sauvegarde complète (comptes compris) sur le disque du serveur et renvoie son chemin. */
 export async function ecrireSauvegardeSurDisque(pool: Pool, secret: string, prefixe: string, avecComptes = true, chemin?: string): Promise<string> {
-  const cheminFinal = chemin ?? join(dossierSauvegardes(), nomFichierSauvegarde(prefixe, new Date()));
+  // Dossier choisi à l'exécution, où l'on ne fait qu'écrire : rien à embarquer dans la construction.
+  const cheminFinal = chemin ?? join(/*turbopackIgnore: true*/ dossierSauvegardes(), nomFichierSauvegarde(prefixe, new Date()));
   if (!chemin) await mkdir(dossierSauvegardes(), { recursive: true });
   // « wx » : jamais d'écrasement d'une sauvegarde existante ; lisible par le seul compte du serveur.
   await pipeline(Readable.from(genererSauvegarde(pool, secret, avecComptes)), createWriteStream(cheminFinal, { flags: "wx", mode: 0o600 }));

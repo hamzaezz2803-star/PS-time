@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 import { FiltresEtat } from "@/components/etats/filtres-etat";
 import { TableauEtat } from "@/components/etats/tableau-etat";
 import { CadrePageProgramme } from "@/components/programme/cadre-page-programme";
+import { Chargement } from "@/components/ui/chargement";
 import { MessageErreur } from "@/components/ui/message-erreur";
 import { aujourdhuiLocal } from "@/lib/donnees/compteurs-calcul";
 import { listerDepartements } from "@/lib/donnees/departements";
@@ -22,8 +24,19 @@ export async function generateMetadata({ params }: { params: Promise<{ etat: str
   return { title: estEtat(etat) ? textes.etats[etat].titre : undefined };
 }
 
-/** Un état du menu État : filtres, tableau et exports (une seule page pour tous les états). */
-export default async function PageEtat({ params, searchParams }: { params: Promise<{ etat: string }>; searchParams: ParametresRecherche }) {
+/**
+ * Un état du menu État : filtres, tableau et exports (une seule page pour tous les états).
+ * L'adresse (état choisi) n'est lue que sous `<Suspense>` : le cadre s'affiche tout de suite.
+ */
+export default function PageEtat({ params, searchParams }: { params: Promise<{ etat: string }>; searchParams: ParametresRecherche }) {
+  return (
+    <Suspense fallback={<Chargement message={textes.chargement} />}>
+      <PageDeLEtat params={params} searchParams={searchParams} />
+    </Suspense>
+  );
+}
+
+async function PageDeLEtat({ params, searchParams }: { params: Promise<{ etat: string }>; searchParams: ParametresRecherche }) {
   const { etat } = await params;
   if (!estEtat(etat)) notFound();
   return (
