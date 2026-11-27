@@ -5,6 +5,8 @@ import { graduations, hauteurPourcent } from "@/lib/metier/graphiques";
 import { formaterDuree } from "@/lib/metier/programme";
 import { TEXTES_PRESENCE } from "@/lib/textes/presence";
 import { cn } from "@/lib/utils";
+import { InfobulleGraphique } from "./infobulle-graphique";
+import { TableauValeurs } from "./tableau-valeurs";
 
 const textes = TEXTES_PRESENCE.statistiques.graphiques;
 const MINUTES_PAR_HEURE = 60;
@@ -32,13 +34,15 @@ type Proprietes = {
   unite: "nombre" | "heures";
   /** En-tête de la première colonne du tableau des valeurs (« Jour », « Heure »). */
   libelleCategorie?: string;
+  /** « compacte » : graphique moins haut, pour deux graphiques côte à côte. */
+  hauteur?: "normale" | "compacte";
 };
 
 /**
  * Colonnes (empilées ou côte à côte), axe gradué, légende, infobulle au survol et au clavier,
  * et tableau des valeurs : rien n'est lisible seulement par la couleur ou le survol.
  */
-export function GraphiqueColonnes({ id, titre, aide, etiquettes, etiquettesLongues, series, mode, unite, libelleCategorie = textes.jour }: Proprietes) {
+export function GraphiqueColonnes({ id, titre, aide, etiquettes, etiquettesLongues, series, mode, unite, libelleCategorie = textes.jour, hauteur = "normale" }: Proprietes) {
   const [actif, setActif] = useState<number | null>(null);
   const formater = (valeur: number) => (unite === "heures" ? formaterDuree(Math.round(valeur)) : String(valeur));
   const totaux = etiquettes.map((_, rang) => series.reduce((total, serie) => total + (serie.valeurs[rang] ?? 0), 0));
@@ -69,7 +73,7 @@ export function GraphiqueColonnes({ id, titre, aide, etiquettes, etiquettesLongu
       )}
 
       {/* Marge du haut : la graduation la plus haute, centrée sur son trait, ne touche pas la légende. */}
-      <div className="relative mt-3 h-52 ps-14" onPointerLeave={() => setActif(null)}>
+      <div className={cn("relative mt-3 ps-14", hauteur === "compacte" ? "h-40" : "h-52")} onPointerLeave={() => setActif(null)}>
         {/* Graduations : ligne de hauteur nulle posée sur la valeur, trait et texte centrés dessus. */}
         {ticks.map((tick) => (
           <div key={tick} className="absolute inset-x-0 flex h-0 items-center" style={{ bottom: `${hauteurPourcent(tick, haut)}%` }} aria-hidden="true">
@@ -108,24 +112,12 @@ export function GraphiqueColonnes({ id, titre, aide, etiquettes, etiquettesLongu
           ))}
         </div>
         {actif !== null && (
-          <div
-            role="presentation"
-            className={cn(
-              "pointer-events-none absolute top-0 z-10 min-w-40 rounded-lg bg-surface px-3 py-2 text-sm shadow-flottant ring-1 ring-bordure",
-              // Près d'un bord, l'infobulle se décale vers l'intérieur pour rester dans la carte.
-              (actif + 0.5) / etiquettes.length < 0.25 ? "-translate-x-[15%]" : (actif + 0.5) / etiquettes.length > 0.75 ? "-translate-x-[85%]" : "-translate-x-1/2",
-            )}
-            style={{ left: `calc(3.5rem + (100% - 3.5rem) * ${(actif + 0.5) / etiquettes.length})` }}
-          >
-            <p className="mb-1 font-medium text-texte-secondaire">{etiquettesLongues[actif]}</p>
-            {series.map((serie) => (
-              <p key={serie.cle} className="flex items-center gap-2">
-                <span className={cn("h-0.5 w-3 rounded-full", serie.couleur)} aria-hidden="true" />
-                <span className="font-semibold tabular-nums text-texte">{formater(serie.valeurs[actif] ?? 0)}</span>
-                <span className="text-texte-secondaire">{serie.nom}</span>
-              </p>
-            ))}
-          </div>
+          <InfobulleGraphique
+            rang={actif}
+            nombre={etiquettes.length}
+            titre={etiquettesLongues[actif] ?? ""}
+            lignes={series.map((serie) => ({ cle: serie.cle, nom: serie.nom, couleur: serie.couleur, valeur: formater(serie.valeurs[actif] ?? 0) }))}
+          />
         )}
       </div>
       <div className="flex gap-1 ps-14 text-sm text-texte-secondaire" aria-hidden="true">
@@ -136,34 +128,12 @@ export function GraphiqueColonnes({ id, titre, aide, etiquettes, etiquettesLongu
         ))}
       </div>
 
-      <details className="text-sm">
-        <summary className="inline-flex min-h-11 cursor-pointer items-center rounded-md px-1 font-medium text-primaire hover:underline focus-visible:outline-2 focus-visible:outline-primaire lg:min-h-9">
-          {textes.voirValeurs}
-        </summary>
-        <div className="mt-2 max-h-64 overflow-auto rounded-lg border border-bordure">
-          <table className="w-full text-start text-sm">
-            <caption className="sr-only">{titre}</caption>
-            <thead className="bg-fond text-texte-secondaire">
-              <tr>
-                <th scope="col" className="px-3 py-2 text-start font-medium">{libelleCategorie}</th>
-                {series.map((serie) => (
-                  <th key={serie.cle} scope="col" className="px-3 py-2 text-end font-medium">{serie.nom}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {etiquettesLongues.map((etiquette, rang) => (
-                <tr key={`${etiquette}-${rang}`} className="border-t border-bordure">
-                  <th scope="row" className="px-3 py-1.5 text-start font-normal capitalize text-texte">{etiquette}</th>
-                  {series.map((serie) => (
-                    <td key={serie.cle} className="px-3 py-1.5 text-end tabular-nums text-texte">{formater(serie.valeurs[rang] ?? 0)}</td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </details>
+      <TableauValeurs
+        titre={titre}
+        libelleCategorie={libelleCategorie}
+        colonnes={series}
+        lignes={etiquettesLongues.map((etiquette, rang) => ({ etiquette, valeurs: series.map((serie) => formater(serie.valeurs[rang] ?? 0)) }))}
+      />
     </figure>
   );
 }

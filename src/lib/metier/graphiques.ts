@@ -18,3 +18,25 @@ export function graduations(maximum: number, nombreMax = 4): number[] {
 
 /** Hauteur d'une valeur en % de l'axe (0 à 100). */
 export const hauteurPourcent = (valeur: number, haut: number) => (haut > 0 ? Math.min(100, Math.max(0, (valeur / haut) * 100)) : 0);
+
+/** Point d'une courbe : `x` en % de la largeur (centre de la colonne du jour), `y` en % depuis le haut. */
+export type PointCourbe = { rang: number; x: number; y: number };
+
+/**
+ * Points d'une courbe, une colonne par valeur, coupés en segments là où la valeur manque (null :
+ * jour sans personne attendu) : une donnée manquante n'est jamais tracée comme un zéro.
+ */
+export function segmentsCourbe(valeurs: readonly (number | null)[], haut: number): PointCourbe[][] {
+  const segments: PointCourbe[][] = [];
+  let courant: PointCourbe[] = [];
+  valeurs.forEach((valeur, rang) => {
+    if (valeur === null) {
+      if (courant.length > 0) segments.push(courant);
+      courant = [];
+      return;
+    }
+    courant.push({ rang, x: ((rang + 0.5) / valeurs.length) * 100, y: 100 - hauteurPourcent(valeur, haut) });
+  });
+  if (courant.length > 0) segments.push(courant);
+  return segments;
+}

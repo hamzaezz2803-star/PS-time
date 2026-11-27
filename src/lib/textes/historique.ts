@@ -91,6 +91,7 @@ export const TEXTES_HISTORIQUE = {
     if (entree.action === "deconnexion") return `Déconnexion de ${auteur}`;
     if (entree.action === "export") return `${auteur} a exporté ${EXPORTS[entree.objet] ?? "des données"}${precision}`;
     if (entree.objet === "sauvegarde") return `${auteur} a importé une sauvegarde des données${precision}`;
+    if (entree.objet === "badgeuse") return `${auteur} a synchronisé une badgeuse${precision}`;
     if (entree.objet === "rapport_presences" || entree.objet === "etat" || entree.objet === "session") return `${auteur} : ${entree.libelle ?? ""}`;
     return TEXTES_NOTIFICATIONS.phrase({ action: entree.action, objet: entree.objet, libelle: entree.libelle }, auteur);
   },

@@ -15,6 +15,7 @@ export const MODULE_DE_L_OBJET_HISTORIQUE = {
   etat: "presence",
   session: "administration",
   sauvegarde: "administration",
+  badgeuse: "administration",
 } as const satisfies Record<string, ModuleHistorique>;
 
 export type ObjetHistorique = keyof typeof MODULE_DE_L_OBJET_HISTORIQUE;

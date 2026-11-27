@@ -2,12 +2,13 @@ import Link from "next/link";
 import { CHEMIN_ESPACE, STATISTIQUES_EMPLOYES_MAX, STATISTIQUES_PERIODES } from "@/lib/constantes";
 import type { DonneesStatistiques } from "@/lib/donnees/statistiques-presence";
 import { formaterJour, formaterJourCourt } from "@/lib/formats";
-import { arriveesParHeure, bilanDuJour, cumulerBilans, joursParEvenement, parJourDeSemaine, presenceParDepartement } from "@/lib/metier/statistiques-presence";
+import { arriveesParHeure, bilanDuJour, cumulerBilans, joursParEvenement, parJourDeSemaine, presenceParDepartement, tauxPresence } from "@/lib/metier/statistiques-presence";
 import { TEXTES_PRESENCE } from "@/lib/textes/presence";
 import { cn } from "@/lib/utils";
 import { BarresDepartements } from "./barres-departements";
 import { BarresEvenements } from "./barres-evenements";
 import { ChiffresCles } from "./chiffres-cles";
+import { CourbeTaux } from "./courbe-taux";
 import { GraphiqueColonnes } from "./graphique-colonnes";
 import { RepartitionJour } from "./repartition-jour";
 
@@ -82,6 +83,18 @@ export function StatistiquesPresence({ donnees, periode }: { donnees: DonneesSta
           <RepartitionJour bilan={aujourdhui} />
         </div>
 
+        <div className={cn(CARTE, "lg:col-span-3")}>
+          <CourbeTaux
+            id="taux-jours"
+            titre={g.taux}
+            aide={g.tauxAide(periode)}
+            etiquettes={jours.map(formaterJourCourt)}
+            etiquettesLongues={jours.map(formaterJour)}
+            taux={bilans.map(tauxPresence)}
+            moyenne={tauxPresence(cumul)}
+          />
+        </div>
+
         <div className={cn(CARTE, "lg:col-span-2")}>
           <GraphiqueColonnes
             id="heures-jours"
@@ -120,42 +133,47 @@ export function StatistiquesPresence({ donnees, periode }: { donnees: DonneesSta
           <BarresEvenements lignes={joursParEvenement(employes)} periode={periode} />
         </div>
 
-        <div className={cn(CARTE, "lg:col-span-3")}>
-          <GraphiqueColonnes
-            id="jours-semaine"
-            titre={g.semaine}
-            aide={g.semaineAide(periode)}
-            etiquettes={[...g.joursSemaine]}
-            etiquettesLongues={[...g.joursSemaineLongs]}
-            mode="groupe"
-            unite="nombre"
-            libelleCategorie={g.jourSemaine}
-            series={[
-              { cle: "retards", nom: g.retards, couleur: "bg-graphe-retard", valeurs: semaine.map((s) => s.retards) },
-              { cle: "absents", nom: g.absents, couleur: "bg-graphe-absent", valeurs: semaine.map((s) => s.absents) },
-            ]}
-          />
-        </div>
-
-        <div className={cn(CARTE, "lg:col-span-3")}>
-          {arrivees.length === 0 ? (
-            <div className="flex flex-col gap-1">
-              <p className="text-base font-semibold text-marine">{textes.graphiques.arrivees}</p>
-              <p className="rounded-lg bg-fond px-3 py-4 text-sm text-texte-secondaire">{textes.graphiques.videAujourdhui}</p>
-            </div>
-          ) : (
+        {/* Côte à côte sur ordinateur, empilés sur téléphone. */}
+        <div className="grid gap-5 lg:col-span-3 lg:grid-cols-2">
+          <div className={CARTE}>
             <GraphiqueColonnes
-              id="arrivees"
-              titre={textes.graphiques.arrivees}
-              aide={textes.graphiques.arriveesAide}
-              etiquettes={arrivees.map((a) => textes.graphiques.heure(a.heure))}
-              etiquettesLongues={arrivees.map((a) => textes.graphiques.tranche(a.heure))}
+              id="jours-semaine"
+              hauteur="compacte"
+              titre={g.semaine}
+              aide={g.semaineAide(periode)}
+              etiquettes={[...g.joursSemaine]}
+              etiquettesLongues={[...g.joursSemaineLongs]}
               mode="groupe"
               unite="nombre"
-              libelleCategorie={textes.graphiques.heureColonne}
-              series={[{ cle: "arrivees", nom: textes.graphiques.arriveesValeur, couleur: "bg-primaire", valeurs: arrivees.map((a) => a.arrivees) }]}
+              libelleCategorie={g.jourSemaine}
+              series={[
+                { cle: "retards", nom: g.retards, couleur: "bg-graphe-retard", valeurs: semaine.map((s) => s.retards) },
+                { cle: "absents", nom: g.absents, couleur: "bg-graphe-absent", valeurs: semaine.map((s) => s.absents) },
+              ]}
             />
-          )}
+          </div>
+
+          <div className={CARTE}>
+            {arrivees.length === 0 ? (
+              <div className="flex flex-col gap-1">
+                <p className="text-base font-semibold text-marine">{textes.graphiques.arrivees}</p>
+                <p className="rounded-lg bg-fond px-3 py-4 text-sm text-texte-secondaire">{textes.graphiques.videAujourdhui}</p>
+              </div>
+            ) : (
+              <GraphiqueColonnes
+                id="arrivees"
+                hauteur="compacte"
+                titre={textes.graphiques.arrivees}
+                aide={textes.graphiques.arriveesAide}
+                etiquettes={arrivees.map((a) => textes.graphiques.heure(a.heure))}
+                etiquettesLongues={arrivees.map((a) => textes.graphiques.tranche(a.heure))}
+                mode="groupe"
+                unite="nombre"
+                libelleCategorie={textes.graphiques.heureColonne}
+                series={[{ cle: "arrivees", nom: textes.graphiques.arriveesValeur, couleur: "bg-primaire", valeurs: arrivees.map((a) => a.arrivees) }]}
+              />
+            )}
+          </div>
         </div>
       </div>
     </section>
