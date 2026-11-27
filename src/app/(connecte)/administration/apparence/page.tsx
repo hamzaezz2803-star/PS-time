@@ -38,10 +38,12 @@ async function ContenuApparence() {
 
 /** Couleurs du planning, sous les réglages : un échec de lecture n'empêche pas de régler le reste. */
 async function ContenuCouleursPlanning() {
+  let codes;
   try {
-    return <CouleursPlanning codes={await listerCodesAColorer()} />;
+    codes = await listerCodesAColorer();
   } catch (erreur) {
     console.error("Échec du chargement des couleurs du planning", { type: erreur instanceof Error ? erreur.name : "inconnu" });
     return <MessageErreur message={TEXTES_APPARENCE.couleursPlanning.echecChargement} className="text-base" />;
   }
+  return <CouleursPlanning codes={codes} />;
 }
