@@ -50,6 +50,8 @@ export type JourService = {
   pointages: number[];
   /** Profil appliqué, pour l'affichage (absent dans les calculs purs). */
   profil?: { code: string; nom: string; estDynamique: boolean } | null;
+  /** Aucune affectation ne couvre ce jour (ni rotation, ni horaire dynamique) : ce n'est pas un repos. */
+  estSansPlanning?: boolean;
 };
 
 /** Horaire prévu d'un profil de travail : de la première à la dernière plage fixe ; durée = somme des plages fixes. */

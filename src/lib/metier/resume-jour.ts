@@ -15,6 +15,8 @@ export type ResumeJour = {
   jour: string;
   /** Code du profil appliqué, ou null un jour de repos (ou sans planning). */
   profilCode: string | null;
+  /** Aucune affectation ce jour-là : « Aucun horaire », à ne pas confondre avec un repos. */
+  estSansPlanning: boolean;
   entree: number | null;
   sortie: number | null;
   travailleMinutes: number | null;
@@ -27,14 +29,26 @@ export type ResumeJour = {
 
 const resumeEvenement = ({ code, nom, type }: EvenementPeriode): EvenementResume => ({ code, nom, type });
 
+/**
+ * Journée telle qu'elle compte une fois l'événement retenu connu : un profil non badgé présume
+ * la présence aux heures prévues, sauf un jour d'absence retenue (congé, maladie...), où rien
+ * n'est présumé (sinon l'employé serait à la fois absent et présent 4 h).
+ */
+export function journeeSelonEvenement(journee: JourService, typeRetenu: EvenementPeriode["type"] | null): JourService {
+  if (typeRetenu !== "absence" || !journee.horaire || journee.horaire.estBadge) return journee;
+  return { ...journee, horaire: { ...journee.horaire, estBadge: true } };
+}
+
 export function resumerJour(journee: JourService, evenements: readonly EvenementPeriode[]): ResumeJour {
-  const valeurs = variablesDuJour(journee);
-  const { entree, sortie } = entreeSortie(journee);
   const duJour = evenements.filter((evenement) => evenement.debut <= journee.jour && journee.jour <= evenement.fin);
   const retenu = evenementRetenu(duJour, journee.pointages.length > 0);
+  const effective = journeeSelonEvenement(journee, retenu?.type ?? null);
+  const valeurs = variablesDuJour(effective);
+  const { entree, sortie } = entreeSortie(effective);
   return {
     jour: journee.jour,
     profilCode: journee.horaire ? (journee.profil?.code ?? null) : null,
+    estSansPlanning: journee.estSansPlanning === true,
     entree,
     sortie,
     travailleMinutes: valeurs.DUREE_TRAVAILLEE_MIN,

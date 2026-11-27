@@ -55,6 +55,7 @@ export async function chargerJoursService(employeId: string, debut: string, fin:
         jour,
         horaire: prevu.type === "travail" ? horaireDuProfil(prevu.profil) : null,
         profil: prevu.type === "travail" ? { code: prevu.profil.code, nom: prevu.profil.nom, estDynamique: prevu.rotation === null } : null,
+        estSansPlanning: prevu.type === "aucun",
         pointages: locaux.filter((pointage) => pointage.jour === jour).map((pointage) => pointage.minutes),
       };
     }),

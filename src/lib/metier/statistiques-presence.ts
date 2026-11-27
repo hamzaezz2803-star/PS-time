@@ -5,6 +5,7 @@
  */
 import { variablesDuJour, type JourService } from "./compteurs/variables.ts";
 import { evenementRetenu, type EvenementCandidat } from "./evenements.ts";
+import { journeeSelonEvenement } from "./resume-jour.ts";
 
 /** Situation d'un employé un jour donné. « justifie » : absent avec un événement d'absence (congé, maladie...). */
 export type StatutJour = "a_l_heure" | "en_retard" | "absent" | "justifie" | "attendu" | "sans_horaire";
@@ -82,11 +83,11 @@ const somme = (valeurs: readonly (number | null | undefined)[]) => valeurs.reduc
 /** Bilan d'un jour pour toute l'équipe (employés en poste ce jour-là). */
 export function bilanDuJour(employes: readonly EmployeStatistiques[], jour: string, maintenant: Maintenant): BilanJour {
   const enPoste = employes.filter((employe) => estEnPoste(employe, jour));
-  const journees = enPoste.flatMap((employe) => employe.jours.filter((j) => j.jour === jour));
-  const statuts = enPoste.flatMap((employe) =>
-    employe.jours.filter((j) => j.jour === jour).map((journee) => statutDuJour(journee, maintenant, evenementDeLaJournee(employe, journee))),
+  const journees = enPoste.flatMap((employe) =>
+    employe.jours.filter((j) => j.jour === jour).map((journee) => ({ journee, evenement: evenementDeLaJournee(employe, journee) })),
   );
-  const valeurs = journees.map(variablesDuJour);
+  const statuts = journees.map(({ journee, evenement }) => statutDuJour(journee, maintenant, evenement));
+  const valeurs = journees.map(({ journee, evenement }) => variablesDuJour(journeeSelonEvenement(journee, evenement)));
   const compter = (statut: StatutJour) => statuts.filter((s) => s === statut).length;
   return {
     jour,
