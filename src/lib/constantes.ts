@@ -328,8 +328,22 @@ export const CHEMIN_EXPORT_ETAT = (etat: string) => `${CHEMIN_ETATS}/${etat}/exp
 export const CHEMIN_IMPRESSION_ETAT = (etat: string) => `${CHEMIN_IMPRESSION_ETATS}/${etat}`;
 /** Lignes affichées à l'écran (l'export Excel ou PDF en contient jusqu'à RAPPORT_LIGNES_MAX). */
 export const ETAT_LIGNES_ECRAN_MAX = 500;
-/** Appareils (badgeuses) : page d'attente, la gestion des badgeuses viendra ensuite. */
+/** Appareils > Badgeuses : détection sur le réseau local et synchronisation, rien en base. */
 export const CHEMIN_APPAREILS = "/appareils";
+/** Port réseau des badgeuses ZKTeco (TCP). */
+export const PORT_BADGEUSE = 4370;
+/** Attente d'une adresse pendant la recherche : une badgeuse du réseau local répond bien plus vite. */
+export const DELAI_SONDAGE_BADGEUSE_MS = 700;
+/** Attente d'une réponse d'une badgeuse déjà trouvée (connexion, lecture, réglage de l'heure). */
+export const DELAI_REPONSE_BADGEUSE_MS = 4000;
+/** Adresses essayées en même temps pendant la recherche. */
+export const SONDAGES_SIMULTANES = 64;
+/** Réseaux du serveur parcourus au plus (cartes réseau privées). */
+export const RESEAUX_PARCOURUS_MAX = 4;
+export const RECHERCHES_BADGEUSES_PAR_MINUTE = 4;
+export const ACTIONS_BADGEUSE_PAR_MINUTE = 30;
+/** Au-delà de cet écart, l'heure de la badgeuse est signalée comme à régler. */
+export const ECART_HEURE_TOLERE_SECONDES = 60;
 /** Sauvegarde (Administration > Sauvegarde) : fichier SQL signé, produit et relu par l'application. */
 export const CHEMIN_SAUVEGARDE = "/administration/sauvegarde";
 export const CHEMIN_EXPORT_SAUVEGARDE = "/administration/sauvegarde/export";
