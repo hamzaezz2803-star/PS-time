@@ -7,6 +7,7 @@
     "dev:telephone": "next dev --experimental-https -H 0.0.0.0",
     "build": "next build",
     "start": "next start",
+    "serveur:local": "next start -H 127.0.0.1 -p 3000",
     "lint": "eslint",
     "db:generer": "drizzle-kit generate",
     "db:migrer": "drizzle-kit migrate",
