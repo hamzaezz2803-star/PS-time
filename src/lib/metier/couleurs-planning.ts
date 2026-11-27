@@ -53,3 +53,29 @@ export function codesColoresAffiches(jours: readonly JourColorable[], couleurs: 
   const parCode = (a: CodeColore, b: CodeColore) => a.code.localeCompare(b.code, "fr");
   return [...[...evenements.values()].sort(parCode), ...[...profils.values()].sort(parCode)];
 }
+
+const FORMAT_IDENTIFIANT = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const FORMAT_CLE = /^(evenement|profil):(.+)$/;
+
+export type ChoixCouleur = { genre: "evenement" | "profil"; id: string; couleur: CouleurRegle | null };
+
+/** Nom du champ de formulaire qui porte la couleur d'un événement ou d'un profil. */
+export const cleChoixCouleur = (genre: ChoixCouleur["genre"], id: string) => `${genre}:${id}`;
+
+/**
+ * Couleurs envoyées par le formulaire « Couleurs du planning » : champs `evenement:<id>` ou
+ * `profil:<id>`, valeur vide (selon le type) ou couleur de la palette. Les autres champs sont
+ * ignorés ; un identifiant ou une couleur invalide refuse tout l'envoi.
+ */
+export function lireChoixCouleurs(entrees: Iterable<[string, unknown]>, maximum: number): { ok: true; choix: ChoixCouleur[] } | { ok: false; erreur: "invalide" | "trop" } {
+  const choix: ChoixCouleur[] = [];
+  for (const [cle, valeur] of entrees) {
+    const correspondance = FORMAT_CLE.exec(cle);
+    if (!correspondance) continue;
+    const [, genre, id] = correspondance;
+    if (!FORMAT_IDENTIFIANT.test(id) || typeof valeur !== "string" || (valeur !== "" && !estCouleurRegle(valeur))) return { ok: false, erreur: "invalide" };
+    if (choix.length >= maximum) return { ok: false, erreur: "trop" };
+    choix.push({ genre: genre as ChoixCouleur["genre"], id: id.toLowerCase(), couleur: valeur === "" ? null : valeur });
+  }
+  return { ok: true, choix };
+}

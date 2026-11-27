@@ -1,8 +1,8 @@
 import "server-only";
 
-import { asc, eq, isNotNull } from "drizzle-orm";
+import { and, asc, eq, isNotNull, sql } from "drizzle-orm";
 import type { CouleurRegle } from "@/lib/constantes";
-import { estCouleurRegle, type CouleurChoisie, type CouleursPlanning } from "@/lib/metier/couleurs-planning";
+import { estCouleurRegle, type ChoixCouleur, type CouleurChoisie, type CouleursPlanning } from "@/lib/metier/couleurs-planning";
 import { obtenirBase } from "./base";
 import { evenements, profilsHoraires } from "./schema";
 
@@ -10,9 +10,6 @@ import { evenements, profilsHoraires } from "./schema";
 export type CodeAColorer = { id: string; code: string; nom: string; type: string; couleur: CouleurRegle | null };
 
 export type CodesAColorer = { evenements: CodeAColorer[]; profils: CodeAColorer[] };
-
-/** Choix envoyé par Administration > Apparence (identifiants et couleurs déjà validés). */
-export type ChoixCouleurCode = { genre: "evenement" | "profil"; id: string; couleur: CouleurRegle | null };
 
 const couleurLue = (valeur: string | null): CouleurRegle | null => (valeur !== null && estCouleurRegle(valeur) ? valeur : null);
 
@@ -46,13 +43,16 @@ export async function listerCodesAColorer(): Promise<CodesAColorer> {
   return { evenements: lignesEvenements.map(lire), profils: lignesProfils.map(lire) };
 }
 
-/** Enregistre les couleurs en une transaction ; renvoie le nombre de lignes modifiées (un code supprimé entre-temps est ignoré). */
-export async function enregistrerCouleursPlanning(choix: readonly ChoixCouleurCode[]): Promise<number> {
+/**
+ * Enregistre les couleurs (déjà validées) en une transaction ; renvoie le nombre de couleurs
+ * changées (une couleur identique ou un code supprimé entre-temps ne compte pas).
+ */
+export async function enregistrerCouleursPlanning(choix: readonly ChoixCouleur[]): Promise<number> {
   return obtenirBase().transaction(async (transaction) => {
     let modifiees = 0;
     for (const { genre, id, couleur } of choix) {
       const table = genre === "evenement" ? evenements : profilsHoraires;
-      const lignes = await transaction.update(table).set({ couleur }).where(eq(table.id, id)).returning({ id: table.id });
+      const lignes = await transaction.update(table).set({ couleur }).where(and(eq(table.id, id), sql`${table.couleur} IS DISTINCT FROM ${couleur}`)).returning({ id: table.id });
       modifiees += lignes.length;
     }
     return modifiees;

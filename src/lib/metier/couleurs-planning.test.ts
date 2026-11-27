@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { AUCUNE_COULEUR_CHOISIE, codesColoresAffiches, estCouleurRegle, teinteDuJour, type CouleursPlanning } from "./couleurs-planning.ts";
+import { AUCUNE_COULEUR_CHOISIE, codesColoresAffiches, estCouleurRegle, lireChoixCouleurs, teinteDuJour, type CouleursPlanning } from "./couleurs-planning.ts";
 
 const COULEURS: CouleursPlanning = {
   evenements: new Map([["MAL", { couleur: "rouge", nom: "Maladie" }]]),
@@ -52,5 +52,29 @@ describe("estCouleurRegle", () => {
     assert.equal(estCouleurRegle("turquoise"), true);
     assert.equal(estCouleurRegle("violet"), false);
     assert.equal(estCouleurRegle(""), false);
+  });
+});
+
+describe("lireChoixCouleurs", () => {
+  const ID = "00000000-0000-4000-8000-000000000001";
+
+  it("lit les couleurs des événements et des profils, vide = selon le type", () => {
+    const resultat = lireChoixCouleurs([[`evenement:${ID}`, "rouge"], [`profil:${ID}`, ""], ["$ACTION_ID_abc", "x"]], 10);
+    assert.deepEqual(resultat, {
+      ok: true,
+      choix: [
+        { genre: "evenement", id: ID, couleur: "rouge" },
+        { genre: "profil", id: ID, couleur: null },
+      ],
+    });
+  });
+
+  it("refuse une couleur hors palette ou un identifiant mal formé", () => {
+    assert.deepEqual(lireChoixCouleurs([[`evenement:${ID}`, "violet"]], 10), { ok: false, erreur: "invalide" });
+    assert.deepEqual(lireChoixCouleurs([["profil:1 OR 1=1", "bleu"]], 10), { ok: false, erreur: "invalide" });
+  });
+
+  it("refuse un envoi trop long", () => {
+    assert.deepEqual(lireChoixCouleurs([[`evenement:${ID}`, "bleu"], [`profil:${ID}`, "vert"]], 1), { ok: false, erreur: "trop" });
   });
 });
