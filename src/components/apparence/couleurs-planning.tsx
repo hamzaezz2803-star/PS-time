@@ -97,9 +97,8 @@ export function CouleursPlanning({ codes }: { codes: CodesAColorer }) {
   const aDesCodes = codes.evenements.length + codes.profils.length > 0;
 
   return (
-    <form action={action} className="flex flex-col gap-4 border-t border-bordure pt-8" aria-labelledby="titre-couleurs-planning" aria-describedby="aide-couleurs-planning">
+    <form action={action} className="flex flex-col gap-4 border-t border-bordure pt-8" aria-labelledby="titre-couleurs-planning">
       <h2 id="titre-couleurs-planning" className="text-lg font-semibold text-marine">{textes.titre}</h2>
-      <p id="aide-couleurs-planning" className="-mt-2 max-w-3xl text-sm text-texte-secondaire">{textes.aide}</p>
       <div className="grid gap-6 lg:grid-cols-2">
         <ListeCodes titre={textes.evenements} vide={textes.aucunEvenement} genre="evenement" codes={codes.evenements} couleurs={couleurs} onChange={changer} />
         <ListeCodes titre={textes.profils} vide={textes.aucunProfil} genre="profil" codes={codes.profils} couleurs={couleurs} onChange={changer} />

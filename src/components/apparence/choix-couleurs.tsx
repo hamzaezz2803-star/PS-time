@@ -86,13 +86,10 @@ export function ChoixCouleurs({ couleurs, erreurs, onChange, onReinitialiser }: 
 }) {
   const controles = controlerContrastes(couleurs);
   return (
-    <fieldset className="flex flex-col gap-3 rounded-xl border border-bordure bg-surface p-4 shadow-carte sm:p-5" aria-describedby="aide-couleurs">
+    <fieldset className="flex flex-col gap-3 rounded-xl border border-bordure bg-surface p-4 shadow-carte sm:p-5">
       <legend className="sr-only">{textes.titreCouleurs}</legend>
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div>
-          <p className="text-base font-semibold text-marine" aria-hidden="true">{textes.titreCouleurs}</p>
-          <p id="aide-couleurs" className="text-sm text-texte-secondaire">{textes.aideCouleurs}</p>
-        </div>
+        <p className="text-base font-semibold text-marine" aria-hidden="true">{textes.titreCouleurs}</p>
         <Bouton variante="fantome" onClick={onReinitialiser} className="shrink-0">
           <RotateCcw className="size-4" aria-hidden="true" />
           {textes.reinitialiserCouleurs}

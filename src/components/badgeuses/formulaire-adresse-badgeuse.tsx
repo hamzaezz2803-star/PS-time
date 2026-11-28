@@ -43,7 +43,6 @@ export function FormulaireAdresseBadgeuse({ surTrouvee }: { surTrouvee: (etat: E
         <Plug className="size-5 text-primaire" aria-hidden="true" />
         {textes.ajout.titre}
       </h2>
-      <p className="text-sm text-texte-secondaire">{textes.ajout.explication}</p>
       <form onSubmit={envoyer} noValidate className="flex flex-col gap-3">
         <ChampFormulaire
           nom="adresse-badgeuse"

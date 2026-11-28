@@ -123,7 +123,7 @@ export function CarteBadgeuse({
 
       <div className="flex flex-col gap-3 border-t border-bordure pt-4">
         <div className="flex flex-wrap items-center gap-2">
-          <Bouton variante="contour" onClick={() => lancer("synchroniser")} disabled={enCours || badgeuse.statut === "non_reconnue"} title={textes.actions.aideSynchroniser} className="flex-1 sm:flex-none">
+          <Bouton variante="contour" onClick={() => lancer("synchroniser")} disabled={enCours || badgeuse.statut === "non_reconnue"} className="flex-1 sm:flex-none">
             {enCours && operation === "synchroniser" ? <LoaderCircle className="size-4 animate-spin motion-reduce:animate-none" aria-hidden="true" /> : <RefreshCw className="size-4" aria-hidden="true" />}
             {enCours && operation === "synchroniser" ? textes.actions.synchronisation : textes.actions.synchroniser}
           </Bouton>

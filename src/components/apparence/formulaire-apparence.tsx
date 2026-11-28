@@ -32,7 +32,7 @@ export function FormulaireApparence({ actuelle }: { actuelle: Apparence }) {
   return (
     <form action={action} className="grid gap-6 lg:grid-cols-[1fr_20rem]">
       <div className="flex flex-col gap-8">
-        <Section id="themes" titre={textes.titreThemes} aide={textes.aideThemes} erreur={erreurs?.theme}>
+        <Section titre={textes.titreThemes} erreur={erreurs?.theme}>
           <div className="grid gap-4 sm:grid-cols-2">
             {THEMES.map((theme) => (
               <CarteChoix
@@ -64,7 +64,7 @@ export function FormulaireApparence({ actuelle }: { actuelle: Apparence }) {
           )}
         </Section>
 
-        <Section id="polices" titre={textes.titrePolices} aide={textes.aidePolices} erreur={erreurs?.police}>
+        <Section titre={textes.titrePolices} erreur={erreurs?.police}>
           <div className="grid gap-4 sm:grid-cols-2">
             {POLICES.map((police) => (
               <CarteChoix
@@ -85,7 +85,7 @@ export function FormulaireApparence({ actuelle }: { actuelle: Apparence }) {
           </div>
         </Section>
 
-        <Section id="tailles" titre={textes.titreTaille} aide={textes.aideTaille} erreur={erreurs?.taille}>
+        <Section titre={textes.titreTaille} erreur={erreurs?.taille}>
           <div className="grid gap-4 sm:grid-cols-3">
             {TAILLES_TEXTE.map((taille) => (
               <CarteChoix

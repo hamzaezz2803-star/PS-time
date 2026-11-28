@@ -66,7 +66,7 @@ export function ChoixAffichage({ choix, actuelle, erreurs, onChange }: {
 }) {
   return (
     <>
-      <Section id="menus" titre={textes.titreMenus} aide={textes.aideMenus} erreur={erreurs?.menu}>
+      <Section titre={textes.titreMenus} erreur={erreurs?.menu}>
         <div className="grid gap-4 sm:grid-cols-2">
           {MODES_MENU.map((menu) => (
             <CarteChoix key={menu} nom="menu" valeur={menu} estChoisi={choix.menu === menu} onChoisir={() => onChange({ menu })} libelle={textes.menus[menu].libelle} detail={textes.menus[menu].detail} estActuel={actuelle.menu === menu}>
@@ -76,7 +76,7 @@ export function ChoixAffichage({ choix, actuelle, erreurs, onChange }: {
         </div>
       </Section>
 
-      <Section id="densite" titre={textes.titreDensite} aide={textes.aideDensite} erreur={erreurs?.densite}>
+      <Section titre={textes.titreDensite} erreur={erreurs?.densite}>
         <div className="grid gap-4 sm:grid-cols-2">
           {DENSITES.map((densite) => (
             <CarteChoix key={densite} nom="densite" valeur={densite} estChoisi={choix.densite === densite} onChoisir={() => onChange({ densite })} libelle={textes.densites[densite].libelle} detail={textes.densites[densite].detail} estActuel={actuelle.densite === densite}>
@@ -86,7 +86,7 @@ export function ChoixAffichage({ choix, actuelle, erreurs, onChange }: {
         </div>
       </Section>
 
-      <Section id="impression" titre={textes.titreImpression} aide={textes.aideImpression} erreur={erreurs?.impression}>
+      <Section titre={textes.titreImpression} erreur={erreurs?.impression}>
         <div className="grid gap-4 sm:grid-cols-3">
           {MODES_IMPRESSION.map((impression) => (
             <CarteChoix key={impression} nom="impression" valeur={impression} estChoisi={choix.impression === impression} onChoisir={() => onChange({ impression })} libelle={textes.impressions[impression].libelle} detail={textes.impressions[impression].detail} estActuel={actuelle.impression === impression}>

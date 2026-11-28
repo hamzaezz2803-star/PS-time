@@ -5,14 +5,13 @@ import { TEXTES_APPAREILS } from "@/lib/textes/appareils";
 const { reseau: textes } = TEXTES_APPAREILS;
 
 /** Réseaux privés du serveur parcourus par la recherche. */
-export function PanneauReseau({ reseaux, port }: { reseaux: readonly ReseauLocal[]; port: number }) {
+export function PanneauReseau({ reseaux }: { reseaux: readonly ReseauLocal[] }) {
   return (
     <section aria-labelledby="titre-reseau" className="flex flex-col gap-3 rounded-lg border border-bordure bg-surface p-5 shadow-carte">
       <h2 id="titre-reseau" className="flex items-center gap-2 text-base font-semibold text-marine">
         <Network className="size-5 text-primaire" aria-hidden="true" />
         {textes.titre}
       </h2>
-      <p className="text-sm text-texte-secondaire">{textes.explication(port)}</p>
       {reseaux.length === 0 ? (
         <p className="rounded-md bg-attention/5 p-3 text-sm text-attention ring-1 ring-inset ring-attention/25">{textes.aucun}</p>
       ) : (

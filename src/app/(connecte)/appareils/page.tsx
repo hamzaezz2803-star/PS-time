@@ -29,5 +29,5 @@ async function ContenuAppareils() {
   const utilisateur = await obtenirUtilisateurPourEspace();
   if (!utilisateur.estSuperAdmin) return <MessageErreur message={textes.droits} className="text-base" />;
   const reseaux = reseauxDuServeur();
-  return <GestionBadgeuses rechercheImpossible={reseaux.length === 0} panneaux={<PanneauReseau reseaux={reseaux} port={PORT_BADGEUSE} />} />;
+  return <GestionBadgeuses rechercheImpossible={reseaux.length === 0} panneaux={<PanneauReseau reseaux={reseaux} />} />;
 }
