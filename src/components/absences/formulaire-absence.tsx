@@ -49,7 +49,6 @@ function EvenementEtPeriode({ etat, evenements, aujourdhui }: { etat: EtatFormul
         // Non contrôlé : React vide le formulaire après l'envoi ; la valeur par défaut, elle, est gardée.
         defaultValue={evenementId}
         onChange={(evenement) => setEvenementId(evenement.target.value)}
-        aide={textes.aideEvenement}
         erreur={erreurs?.evenementId}
         required
       />
@@ -67,7 +66,7 @@ function EvenementEtPeriode({ etat, evenements, aujourdhui }: { etat: EtatFormul
       ) : (
         <div className="grid gap-4 sm:grid-cols-3">
           <ChampDate nom="jour" libelle={textes.jour} required defaultValue={valeurSaisie(etat, "jour", aujourdhui)} erreur={erreurs?.jour} />
-          <ChampFormulaire nom="de" libelle={textes.de} type="time" required defaultValue={valeurSaisie(etat, "de", "")} aide={textes.aideHeures} erreur={erreurs?.de} className="tabular-nums" />
+          <ChampFormulaire nom="de" libelle={textes.de} type="time" required defaultValue={valeurSaisie(etat, "de", "")} erreur={erreurs?.de} className="tabular-nums" />
           <ChampFormulaire nom="a" libelle={textes.a} type="time" required defaultValue={valeurSaisie(etat, "a", "")} erreur={erreurs?.a} className="tabular-nums" />
         </div>
       )}

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { BriefcaseBusiness, ClockArrowUp, Info, KeyRound, LogIn, Monitor, Smartphone, Tablet, type LucideIcon } from "lucide-react";
+import { BriefcaseBusiness, ClockArrowUp, KeyRound, LogIn, Monitor, Smartphone, Tablet, type LucideIcon } from "lucide-react";
 import { CaseACocher } from "@/components/ui/case-a-cocher";
 import { MessageErreur } from "@/components/ui/message-erreur";
 import { APPAREILS_POINTAGE, DROITS_POINTAGE_DISTANCE, type AppareilPointage, type DroitPointageDistance } from "@/lib/constantes";
@@ -16,7 +16,7 @@ const ICONES: Record<AppareilPointage, LucideIcon> = { pc: Monitor, tablette: Ta
 const ICONES_DROITS: Record<DroitPointageDistance, LucideIcon> = { mission: BriefcaseBusiness, heures_sup: ClockArrowUp };
 
 /**
- * Carte cochable (appareil, type de pointage) : icône, nom et aide, bordure épaisse et fond quand
+ * Carte cochable (appareil, type de pointage) : icône et nom, bordure épaisse et fond quand
  * elle est cochée. Sans `onBasculer`, la case est cochée et figée (droit toujours accordé).
  */
 function CarteCochable({
@@ -24,7 +24,6 @@ function CarteCochable({
   valeur,
   Icone,
   libelle,
-  aide,
   estCoche,
   onBasculer,
 }: {
@@ -32,7 +31,6 @@ function CarteCochable({
   valeur: string;
   Icone: LucideIcon;
   libelle: string;
-  aide: string;
   estCoche: boolean;
   onBasculer?: () => void;
 }) {
@@ -47,10 +45,7 @@ function CarteCochable({
     >
       <input type="checkbox" name={estFige ? undefined : nom} value={valeur} checked={estCoche} onChange={onBasculer} disabled={estFige} className="mt-1 size-5 shrink-0 accent-primaire" />
       <Icone className={cn("mt-0.5 size-6 shrink-0", estCoche ? "text-primaire" : "text-texte-secondaire")} aria-hidden="true" />
-      <span className="flex flex-col">
-        <span className="font-medium text-texte">{libelle}</span>
-        <span className="text-sm text-texte-secondaire">{aide}</span>
-      </span>
+      <span className="font-medium text-texte">{libelle}</span>
     </label>
   );
 }
@@ -64,7 +59,7 @@ function ChoixDroits({ valeurInitiale }: { valeurInitiale: string }) {
     <fieldset className="flex flex-col gap-2">
       <legend className="mb-2 text-sm font-medium text-texte">{textes.droits}</legend>
       <div className="grid gap-3 sm:grid-cols-3">
-        <CarteCochable nom={CHAMPS_ACCES.droits} valeur="presence" Icone={LogIn} libelle={textes.presence} aide={textes.aidePresence} estCoche />
+        <CarteCochable nom={CHAMPS_ACCES.droits} valeur="presence" Icone={LogIn} libelle={textes.presence} estCoche />
         {DROITS_POINTAGE_DISTANCE.map((droit) => (
           <CarteCochable
             key={droit}
@@ -72,7 +67,6 @@ function ChoixDroits({ valeurInitiale }: { valeurInitiale: string }) {
             valeur={droit}
             Icone={ICONES_DROITS[droit]}
             libelle={textes.nomsDroits[droit]}
-            aide={textes.aidesDroits[droit]}
             estCoche={droits.includes(droit)}
             onBasculer={() => basculer(droit)}
           />
@@ -93,7 +87,6 @@ function CompteEmploye({ estModification, compte }: { estModification: boolean; 
         <KeyRound className="size-5 text-primaire" aria-hidden="true" />
         {textes.compte}
       </h3>
-      <p className="text-sm text-texte-secondaire">{textes.compteExplication}</p>
       {compte ? (
         <p className="text-sm font-medium text-texte">
           {textes.compteActif(compte.identifiant)}
@@ -103,7 +96,7 @@ function CompteEmploye({ estModification, compte }: { estModification: boolean; 
         <p className="text-sm font-medium text-texte">{textes.compteACreer}</p>
       )}
       {estModification && compte && (
-        <CaseACocher nom={CHAMPS_ACCES.reinitialiserMotDePasse} libelle={textes.reinitialiser} aide={textes.aideReinitialiser} />
+        <CaseACocher nom={CHAMPS_ACCES.reinitialiserMotDePasse} libelle={textes.reinitialiser} />
       )}
     </section>
   );
@@ -128,7 +121,7 @@ export function ChampsPointageDistance({
 
   return (
     <div className="flex flex-col gap-5">
-      <CaseACocher nom={CHAMPS_ACCES.pointageDistance} libelle={textes.autoriser} aide={textes.aideAutoriser} checked={estAutorise} onChange={(e) => setEstAutorise(e.target.checked)} />
+      <CaseACocher nom={CHAMPS_ACCES.pointageDistance} libelle={textes.autoriser} checked={estAutorise} onChange={(e) => setEstAutorise(e.target.checked)} />
       <MessageErreur message={erreurs?.[CHAMPS_ACCES.pointageDistance]} />
 
       {estAutorise ? (
@@ -144,7 +137,6 @@ export function ChampsPointageDistance({
                   valeur={appareil}
                   Icone={ICONES[appareil]}
                   libelle={textes.nomsAppareils[appareil]}
-                  aide={textes.aidesAppareils[appareil]}
                   estCoche={appareils.includes(appareil)}
                   onBasculer={() => basculer(appareil)}
                 />
@@ -155,19 +147,12 @@ export function ChampsPointageDistance({
           <ChoixDroits valeurInitiale={valeurs[CHAMPS_ACCES.droits] ?? ""} />
           <fieldset className="flex flex-col gap-1">
             <legend className="mb-1 text-sm font-medium text-texte">{textes.conditions}</legend>
-            <CaseACocher nom={CHAMPS_ACCES.exigePosition} libelle={textes.exigePosition} aide={textes.aideExigePosition} defaultChecked={valeurs[CHAMPS_ACCES.exigePosition] === "oui"} />
-            <CaseACocher nom={CHAMPS_ACCES.exigePhoto} libelle={textes.exigePhoto} aide={textes.aideExigePhoto} defaultChecked={valeurs[CHAMPS_ACCES.exigePhoto] === "oui"} />
+            <CaseACocher nom={CHAMPS_ACCES.exigePosition} libelle={textes.exigePosition} defaultChecked={valeurs[CHAMPS_ACCES.exigePosition] === "oui"} />
+            <CaseACocher nom={CHAMPS_ACCES.exigePhoto} libelle={textes.exigePhoto} defaultChecked={valeurs[CHAMPS_ACCES.exigePhoto] === "oui"} />
           </fieldset>
         </>
       ) : (
         <p className="rounded-lg bg-fond px-3 py-2.5 text-sm text-texte-secondaire">{textes.nonAutorise}</p>
-      )}
-
-      {!estAutorise && compte && (
-        <p className="flex items-start gap-2 text-sm text-texte-secondaire">
-          <Info className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
-          {textes.compteDesactive}
-        </p>
       )}
     </div>
   );

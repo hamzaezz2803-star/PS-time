@@ -31,7 +31,7 @@ function FormulaireAjout({ employeId, date, onTermine, onAnnuler }: { employeId:
       <input type="hidden" name="jour" value={date} />
       <div key={etat.numeroReponse} className="flex flex-1 flex-col gap-4 overflow-y-auto px-5 py-5 sm:px-6">
         <div className="grid gap-4 sm:grid-cols-2">
-          <ChampFormulaire nom="heure" libelle={textesPointage.heure} type="time" required defaultValue={valeurSaisie(etat, "heure", "")} aide={textesPointage.aideHeure} erreur={erreurs?.heure ?? erreurs?.jour ?? erreurs?.employeIds} className="tabular-nums" data-focus-initial />
+          <ChampFormulaire nom="heure" libelle={textesPointage.heure} type="time" required defaultValue={valeurSaisie(etat, "heure", "")} erreur={erreurs?.heure ?? erreurs?.jour ?? erreurs?.employeIds} className="tabular-nums" data-focus-initial />
           <ChampSelection nom="etat" libelle={textesPointage.etat} options={OPTIONS_ETAT} defaultValue={valeurSaisie(etat, "etat", ETATS_POINTAGE[0])} required erreur={erreurs?.etat} />
         </div>
         <ChampFormulaire nom="remarque" libelle={textesPointage.remarque} defaultValue={valeurSaisie(etat, "remarque", "")} placeholder={textesPointage.exempleRemarque} maxLength={LONGUEUR_MAX_REMARQUE_POINTAGE} autoComplete="off" erreur={erreurs?.remarque} />

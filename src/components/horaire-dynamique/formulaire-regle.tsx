@@ -131,7 +131,7 @@ function ContenuRegle({
         <p className="text-sm text-texte-secondaire">{textes.aideJours}</p>
       </fieldset>
 
-      <CaseACocher nom="estActif" libelle={textes.estActif} aide={textes.aideActif} checked={estActif} onChange={(e) => setEstActif(e.target.checked)} />
+      <CaseACocher nom="estActif" libelle={textes.estActif} checked={estActif} onChange={(e) => setEstActif(e.target.checked)} />
 
       {conflit && (
         <p role="status" className="flex items-start gap-2.5 rounded-lg border border-attention/40 bg-attention/5 p-3 text-sm text-texte">

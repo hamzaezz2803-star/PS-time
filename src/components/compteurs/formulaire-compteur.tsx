@@ -86,7 +86,7 @@ function ContenuCompteur({ etat, compteur }: { etat: EtatFormulaireListe; compte
     <div className="grid min-h-0 flex-1 gap-5 overflow-y-auto px-5 py-5 sm:px-6 lg:grid-cols-[minmax(0,1fr)_18rem]">
       <div className="flex min-w-0 flex-col gap-5">
         <div className="grid gap-4 sm:grid-cols-[12rem_minmax(0,1fr)]">
-          <ChampFormulaire nom="code" libelle={textes.code} defaultValue={valeurSaisie(etat, "code", compteur?.code ?? "")} readOnly={compteur !== undefined} aide={textes.aideCode} erreur={erreurs?.code} className="font-mono uppercase read-only:bg-fond" maxLength={30} required />
+          <ChampFormulaire nom="code" libelle={textes.code} defaultValue={valeurSaisie(etat, "code", compteur?.code ?? "")} readOnly={compteur !== undefined} erreur={erreurs?.code} className="font-mono uppercase read-only:bg-fond" maxLength={30} required />
           <ChampFormulaire nom="libelle" libelle={textes.libelle} defaultValue={valeurSaisie(etat, "libelle", compteur?.nom ?? "")} placeholder={textes.exempleLibelle} erreur={erreurs?.libelle} data-focus-initial={compteur ? true : undefined} maxLength={100} required />
         </div>
 
@@ -124,7 +124,7 @@ function ContenuCompteur({ etat, compteur }: { etat: EtatFormulaireListe; compte
           <MessageErreur message={erreurs?.description} />
         </div>
         <div className="flex flex-col gap-1">
-          <CaseACocher nom="estActif" libelle={textes.estActif} aide={textes.aideActif} defaultChecked={caseSaisie(etat, "estActif", compteur?.estActif ?? true)} aria-invalid={erreurs?.estActif ? true : undefined} />
+          <CaseACocher nom="estActif" libelle={textes.estActif} defaultChecked={caseSaisie(etat, "estActif", compteur?.estActif ?? true)} aria-invalid={erreurs?.estActif ? true : undefined} />
           <MessageErreur message={erreurs?.estActif} />
         </div>
 

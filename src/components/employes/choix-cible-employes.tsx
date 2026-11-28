@@ -95,7 +95,7 @@ export function ChoixCibleEmployes({
         ))}
       {mode === "departement" && (
         <>
-          <ChampSelection nom={`departement-${nomChamp}`} libelle={textes.departement} options={optionsDepartements} optionVide={textes.choisirDepartement} aide={textes.aideDepartement} value={departementId} onChange={(evenement) => setDepartementId(evenement.target.value)} />
+          <ChampSelection nom={`departement-${nomChamp}`} libelle={textes.departement} options={optionsDepartements} optionVide={textes.choisirDepartement} value={departementId} onChange={(evenement) => setDepartementId(evenement.target.value)} />
           {departementId && <EmployesRetenus employes={retenus} nomChamp={nomChamp} textes={textes} />}
         </>
       )}

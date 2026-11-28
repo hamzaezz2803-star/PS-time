@@ -83,7 +83,7 @@ function ContenuAffectation({ etat, affectation, options }: { etat: EtatFormulai
       <ChampSelection nom="rotationId" libelle={textes.rotation} options={options.rotations} optionVide={textes.choisirRotation} defaultValue={valeurSaisie(etat, "rotationId", affectation?.rotationId ?? "")} erreur={erreurs?.rotationId} />
       <div className="grid gap-4 sm:grid-cols-2">
         <ChampDate nom="dateDebut" libelle={textes.dateDebut} defaultValue={valeurSaisie(etat, "dateDebut", affectation?.dateDebut ?? "")} required erreur={erreurs?.dateDebut} />
-        <ChampDate nom="dateFin" libelle={textes.dateFin} defaultValue={valeurSaisie(etat, "dateFin", affectation?.dateFin ?? "")} aide={textes.aideDateFin} erreur={erreurs?.dateFin} />
+        <ChampDate nom="dateFin" libelle={textes.dateFin} defaultValue={valeurSaisie(etat, "dateFin", affectation?.dateFin ?? "")} erreur={erreurs?.dateFin} />
       </div>
     </div>
   );

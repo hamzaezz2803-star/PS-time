@@ -27,7 +27,7 @@ export function ChampsIdentiteContact({
       <ChampSelection nom="genre" libelle={textes.genre} options={OPTIONS_GENRE} optionVide={textes.aucunGenre} defaultValue={valeurs.genre ?? ""} erreur={erreurs?.genre} />
       <div className="hidden sm:block" aria-hidden="true" />
       <ChampSelection nom="typePieceIdentite" libelle={textes.typePiece} options={OPTIONS_PIECE} optionVide={textes.aucunePiece} defaultValue={valeurs.typePieceIdentite ?? ""} erreur={erreurs?.typePieceIdentite} />
-      <ChampFormulaire nom="numeroPieceIdentite" libelle={textes.numeroPiece} defaultValue={valeurs.numeroPieceIdentite ?? ""} maxLength={LONGUEUR_MAX_NUMERO_PIECE} autoComplete="off" spellCheck={false} aide={textes.aidePiece} erreur={erreurs?.numeroPieceIdentite} />
+      <ChampFormulaire nom="numeroPieceIdentite" libelle={textes.numeroPiece} defaultValue={valeurs.numeroPieceIdentite ?? ""} maxLength={LONGUEUR_MAX_NUMERO_PIECE} autoComplete="off" spellCheck={false} erreur={erreurs?.numeroPieceIdentite} />
       <ChampFormulaire nom="telephone" libelle={textes.telephone} type="tel" inputMode="tel" defaultValue={valeurs.telephone ?? ""} placeholder={textes.exempleTelephone} autoComplete="off" erreur={erreurs?.telephone} />
       <ChampFormulaire nom="email" libelle={textes.email} type="email" defaultValue={valeurs.email ?? ""} placeholder={textes.exempleEmail} maxLength={LONGUEUR_MAX_EMAIL} autoComplete="off" spellCheck={false} erreur={erreurs?.email} />
     </div>

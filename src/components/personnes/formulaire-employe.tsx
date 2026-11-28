@@ -130,8 +130,8 @@ export function FormulaireEmploye({
             <span className="text-base font-semibold text-marine">{textes.sectionPrincipale}</span>
             <span className="text-sm text-texte-secondaire">* {textes.obligatoire}</span>
           </legend>
-          <ChampFormulaire nom="matricule" libelle={obligatoire(textes.matricule)} defaultValue={valeurs.matricule ?? ""} maxLength={LONGUEUR_MAX_MATRICULE} autoComplete="off" spellCheck={false} required aide={textes.aideMatricule} erreur={erreurs?.matricule} />
-          <ChampFormulaire nom="numeroBadge" libelle={obligatoire(textes.numeroBadge)} defaultValue={valeurs.numeroBadge ?? ""} maxLength={LONGUEUR_MAX_NUMERO_BADGE} autoComplete="off" spellCheck={false} required aide={textes.aideBadge} erreur={erreurs?.numeroBadge} />
+          <ChampFormulaire nom="matricule" libelle={obligatoire(textes.matricule)} defaultValue={valeurs.matricule ?? ""} maxLength={LONGUEUR_MAX_MATRICULE} autoComplete="off" spellCheck={false} required erreur={erreurs?.matricule} />
+          <ChampFormulaire nom="numeroBadge" libelle={obligatoire(textes.numeroBadge)} defaultValue={valeurs.numeroBadge ?? ""} maxLength={LONGUEUR_MAX_NUMERO_BADGE} autoComplete="off" spellCheck={false} required erreur={erreurs?.numeroBadge} />
           <ChampFormulaire nom="prenom" libelle={obligatoire(textes.prenom)} defaultValue={valeurs.prenom ?? ""} maxLength={LONGUEUR_MAX_NOM_EMPLOYE} autoComplete="off" required erreur={erreurs?.prenom} />
           <ChampFormulaire nom="nom" libelle={obligatoire(textes.nom)} defaultValue={valeurs.nom ?? ""} maxLength={LONGUEUR_MAX_NOM_EMPLOYE} autoComplete="off" required erreur={erreurs?.nom} />
           <ChampSite sites={sites} valeurInitiale={valeurs.siteId || null} erreur={erreurs?.siteId} />

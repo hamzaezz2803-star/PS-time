@@ -70,7 +70,7 @@ export function FormulairePointage({
         <SectionFormulaire titre={textes.sectionPointage} icone={Clock}>
           <div className="grid gap-4 sm:grid-cols-3">
             <ChampDate nom="jour" libelle={textes.jour} required defaultValue={valeurSaisie(etat, "jour", jourDansFuseau(maintenant, FUSEAU_HORAIRE))} erreur={erreurs?.jour} />
-            <ChampFormulaire nom="heure" libelle={textes.heure} type="time" required defaultValue={valeurSaisie(etat, "heure", formaterHeure(maintenant))} aide={textes.aideHeure} erreur={erreurs?.heure} className="tabular-nums" />
+            <ChampFormulaire nom="heure" libelle={textes.heure} type="time" required defaultValue={valeurSaisie(etat, "heure", formaterHeure(maintenant))} erreur={erreurs?.heure} className="tabular-nums" />
             <ChampSelection nom="etat" libelle={textes.etat} options={OPTIONS_ETAT} defaultValue={valeurSaisie(etat, "etat", ETATS_POINTAGE[0])} required erreur={erreurs?.etat} />
           </div>
           <ChampFormulaire nom="remarque" libelle={textes.remarque} defaultValue={valeurSaisie(etat, "remarque", "")} placeholder={textes.exempleRemarque} maxLength={LONGUEUR_MAX_REMARQUE_POINTAGE} autoComplete="off" erreur={erreurs?.remarque} />

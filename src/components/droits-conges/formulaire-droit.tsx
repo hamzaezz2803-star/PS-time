@@ -38,7 +38,6 @@ function CodeDroit({ evenements, initial, erreur }: { evenements: EvenementDroit
         optionVide={textes.choisirEvenement}
         value={id}
         onChange={(evenement) => setId(evenement.target.value)}
-        aide={textes.aideEvenement}
         erreur={erreur}
         required
       />

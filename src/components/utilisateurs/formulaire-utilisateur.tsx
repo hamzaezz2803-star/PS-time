@@ -25,12 +25,12 @@ import { ChoixPages } from "./choix-pages";
 const { champs } = TEXTES_UTILISATEURS;
 
 /** Mot de passe (provisoire) et confirmation ; jamais réaffichés après une erreur. */
-function ChampsMotDePasse({ libelle, aide, erreurs }: { libelle: string; aide: string; erreurs?: Partial<Record<string, string>> }) {
+function ChampsMotDePasse({ libelle, erreurs }: { libelle: string; erreurs?: Partial<Record<string, string>> }) {
   return (
     <div className="grid gap-4 sm:grid-cols-2">
       {[
-        { nom: "motDePasse", libelle, aide },
-        { nom: "confirmation", libelle: champs.confirmation, aide: undefined },
+        { nom: "motDePasse", libelle },
+        { nom: "confirmation", libelle: champs.confirmation },
       ].map((champ) => {
         const erreur = erreurs?.[champ.nom];
         return (
@@ -41,9 +41,8 @@ function ChampsMotDePasse({ libelle, aide, erreurs }: { libelle: string; aide: s
               name={champ.nom}
               autoComplete="new-password"
               aria-invalid={erreur ? true : undefined}
-              aria-describedby={[champ.aide && `aide-${champ.nom}`, erreur && `erreur-${champ.nom}`].filter(Boolean).join(" ") || undefined}
+              aria-describedby={erreur ? `erreur-${champ.nom}` : undefined}
             />
-            {champ.aide && <p id={`aide-${champ.nom}`} className="text-sm text-texte-secondaire">{champ.aide}</p>}
             <MessageErreur id={`erreur-${champ.nom}`} message={erreur} />
           </div>
         );
@@ -90,7 +89,6 @@ export function FormulaireUtilisateur({ element, onTermine, onAnnuler }: Proprie
               autoCapitalize="none"
               spellCheck={false}
               required
-              aide={champs.aideIdentifiant(LONGUEUR_MIN_IDENTIFIANT, LONGUEUR_MAX_IDENTIFIANT)}
               erreur={erreurs?.identifiant}
             />
           )}
@@ -98,7 +96,6 @@ export function FormulaireUtilisateur({ element, onTermine, onAnnuler }: Proprie
 
         <ChampsMotDePasse
           libelle={element ? champs.nouveauMotDePasse : champs.motDePasse}
-          aide={element ? champs.aideNouveauMotDePasse(LONGUEUR_MIN_MOT_DE_PASSE) : champs.aideMotDePasse(LONGUEUR_MIN_MOT_DE_PASSE)}
           erreurs={erreurs}
         />
 
@@ -113,7 +110,7 @@ export function FormulaireUtilisateur({ element, onTermine, onAnnuler }: Proprie
 
         {element && (
           <div>
-            <CaseACocher nom="estActif" libelle={champs.actif} aide={champs.aideActif} defaultChecked={caseSaisie(etat, "estActif", element.estActif)} />
+            <CaseACocher nom="estActif" libelle={champs.actif} defaultChecked={caseSaisie(etat, "estActif", element.estActif)} />
             <MessageErreur message={erreurs?.estActif} />
           </div>
         )}

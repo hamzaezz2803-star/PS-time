@@ -20,8 +20,8 @@ export function ChampsEmploi({
     <div className="grid gap-x-6 gap-y-4 sm:grid-cols-2">
       <ChampSelection nom="typeEmploi" libelle={textes.typeEmploi} options={OPTIONS_TYPE_EMPLOI} optionVide={textes.aucunTypeEmploi} defaultValue={valeurs.typeEmploi ?? ""} erreur={erreurs?.typeEmploi} />
       <ChampDate nom="dateEmbauche" libelle={textes.dateEmbauche} defaultValue={valeurs.dateEmbauche ?? ""} erreur={erreurs?.dateEmbauche} />
-      <ChampDate nom="dateDebutEmploi" libelle={textes.dateDebutEmploi} defaultValue={valeurs.dateDebutEmploi ?? ""} aide={textes.aideDateDebut} erreur={erreurs?.dateDebutEmploi} />
-      <ChampDate nom="dateFinEmploi" libelle={textes.dateFinEmploi} defaultValue={valeurs.dateFinEmploi ?? ""} aide={textes.aideDateFin} erreur={erreurs?.dateFinEmploi} />
+      <ChampDate nom="dateDebutEmploi" libelle={textes.dateDebutEmploi} defaultValue={valeurs.dateDebutEmploi ?? ""} erreur={erreurs?.dateDebutEmploi} />
+      <ChampDate nom="dateFinEmploi" libelle={textes.dateFinEmploi} defaultValue={valeurs.dateFinEmploi ?? ""} erreur={erreurs?.dateFinEmploi} />
     </div>
   );
 }

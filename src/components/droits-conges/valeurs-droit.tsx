@@ -48,7 +48,7 @@ export function ValeursChiffrees({ etat, initiales, reglages }: { etat: EtatForm
     <div className="grid gap-6 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
       <div className="flex flex-col gap-4">
         <div className="max-w-xs">
-          <ChampFormulaire nom="joursAcquis" libelle={`${textes.joursAcquis} (${textes.unites[unite].toLowerCase()})`} inputMode="decimal" required value={droit} onChange={(evenement) => setDroit(evenement.target.value)} aide={textes.aideValeur[unite]} erreur={erreurs?.joursAcquis} autoComplete="off" className="tabular-nums" />
+          <ChampFormulaire nom="joursAcquis" libelle={`${textes.joursAcquis} (${textes.unites[unite].toLowerCase()})`} inputMode="decimal" required value={droit} onChange={(evenement) => setDroit(evenement.target.value)} erreur={erreurs?.joursAcquis} autoComplete="off" className="tabular-nums" />
         </div>
         <ChoixCartes nom="uniteSaisie" legende={textes.saisieDroit} options={OPTIONS_UNITE} valeur={unite} onChanger={setUnite} classeGrille="grid-cols-3" />
         {reglages}
@@ -62,7 +62,6 @@ export function ValeursChiffrees({ etat, initiales, reglages }: { etat: EtatForm
             inputMode="decimal"
             value={complements[champ]}
             onChange={(evenement) => setComplements((actuels) => ({ ...actuels, [champ]: evenement.target.value }))}
-            aide={champ === "joursReliquat" ? textes.aideReliquat : undefined}
             erreur={erreurs?.[champ]}
             autoComplete="off"
             className="tabular-nums"

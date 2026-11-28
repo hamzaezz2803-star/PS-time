@@ -58,7 +58,6 @@ export function FormulairePoste({
           autoComplete="off"
           spellCheck={false}
           required
-          aide={textes.aideCode}
           erreur={erreurs?.code}
         />
         <ChampFormulaire
@@ -81,7 +80,6 @@ export function FormulairePoste({
           step={1}
           defaultValue={poste?.ordre ?? ORDRE_POSTE_DEFAUT}
           className="tabular-nums sm:max-w-40"
-          aide={textes.aideOrdre(ORDRE_POSTE_MIN, ORDRE_POSTE_MAX)}
           erreur={erreurs?.ordre}
         />
         <ChampSite sites={sites} valeurInitiale={poste?.siteId ?? null} erreur={erreurs?.siteId} />

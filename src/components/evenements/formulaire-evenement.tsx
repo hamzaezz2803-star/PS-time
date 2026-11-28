@@ -63,7 +63,7 @@ export function FormulaireEvenement({ element, onTermine, onAnnuler }: Propriete
       <div key={etat.numeroReponse} ref={zoneDefilement} className="flex flex-1 flex-col gap-6 overflow-y-auto px-5 py-5 sm:px-6">
         <div className="flex flex-col gap-4">
           <div className="grid gap-4 sm:grid-cols-[10rem_1fr]">
-            <ChampFormulaire nom="code" libelle={champs.code} defaultValue={valeurSaisie(etat, "code", element?.code ?? "")} maxLength={LONGUEUR_MAX_CODE_EVENEMENT} autoComplete="off" autoCapitalize="characters" spellCheck={false} required className="uppercase" aide={champs.aideCode} erreur={erreurs?.code} data-focus-initial />
+            <ChampFormulaire nom="code" libelle={champs.code} defaultValue={valeurSaisie(etat, "code", element?.code ?? "")} maxLength={LONGUEUR_MAX_CODE_EVENEMENT} autoComplete="off" autoCapitalize="characters" spellCheck={false} required className="uppercase" erreur={erreurs?.code} data-focus-initial />
             <ChampFormulaire nom="nom" libelle={champs.nom} defaultValue={valeurSaisie(etat, "nom", element?.nom ?? "")} placeholder={champs.exempleNom} maxLength={LONGUEUR_MAX_NOM_EVENEMENT} autoComplete="off" required erreur={erreurs?.nom} />
           </div>
           <ChoixCartes nom="type" legende={champs.type} options={OPTIONS_TYPE} valeur={type} onChanger={setType} />
@@ -75,18 +75,18 @@ export function FormulaireEvenement({ element, onTermine, onAnnuler }: Propriete
           <MessageErreur message={erreurs?.uniteSaisie} />
           {unite === "heures" && (
             <div className="max-w-xs">
-              <ChampFormulaire nom="dureeHeures" libelle={champs.dureeHeures} defaultValue={valeurSaisie(etat, "dureeHeures", dureeInitiale)} inputMode="decimal" maxLength={5} autoComplete="off" required aide={champs.aideDureeHeures} erreur={erreurs?.dureeHeures} className="tabular-nums" />
+              <ChampFormulaire nom="dureeHeures" libelle={champs.dureeHeures} defaultValue={valeurSaisie(etat, "dureeHeures", dureeInitiale)} inputMode="decimal" maxLength={5} autoComplete="off" required erreur={erreurs?.dureeHeures} className="tabular-nums" />
             </div>
           )}
-          <CaseACocher nom="estPrioritaireSurPointages" libelle={champs.estPrioritaireSurPointages} aide={champs.aideNeutraliser} defaultChecked={coche("estPrioritaireSurPointages", false)} />
-          <CaseACocher nom="estSoumisDroits" libelle={champs.estSoumisDroits} aide={champs.aideSoumisDroits} defaultChecked={coche("estSoumisDroits", false)} />
-          <CaseACocher nom="estVisiblePlanning" libelle={champs.estVisiblePlanning} aide={champs.aideVisible} defaultChecked={coche("estVisiblePlanning", true)} />
+          <CaseACocher nom="estPrioritaireSurPointages" libelle={champs.estPrioritaireSurPointages} defaultChecked={coche("estPrioritaireSurPointages", false)} />
+          <CaseACocher nom="estSoumisDroits" libelle={champs.estSoumisDroits} defaultChecked={coche("estSoumisDroits", false)} />
+          <CaseACocher nom="estVisiblePlanning" libelle={champs.estVisiblePlanning} defaultChecked={coche("estVisiblePlanning", true)} />
           <JaugePriorite valeurInitiale={Number(valeurSaisie(etat, "priorite", String(element?.priorite ?? 0)))} erreur={erreurs?.priorite} />
         </Section>
 
         <Section titre={sections.paie}>
           <div className="max-w-xs">
-            <ChampFormulaire nom="codePaie" libelle={champs.codePaie} defaultValue={valeurSaisie(etat, "codePaie", element?.codePaie ?? "")} maxLength={LONGUEUR_MAX_CODE_PAIE} autoComplete="off" spellCheck={false} aide={champs.aideCodePaie} erreur={erreurs?.codePaie} />
+            <ChampFormulaire nom="codePaie" libelle={champs.codePaie} defaultValue={valeurSaisie(etat, "codePaie", element?.codePaie ?? "")} maxLength={LONGUEUR_MAX_CODE_PAIE} autoComplete="off" spellCheck={false} erreur={erreurs?.codePaie} />
           </div>
         </Section>
       </div>

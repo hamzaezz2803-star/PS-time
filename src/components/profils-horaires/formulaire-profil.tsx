@@ -49,7 +49,7 @@ export function FormulaireProfil({ element, onTermine, onAnnuler }: ProprietesFo
       {element && <input type="hidden" name="id" value={element.id} />}
       <div key={etat.numeroReponse} className="flex flex-1 flex-col gap-5 overflow-y-auto px-5 py-5 sm:px-6">
         <div className="grid gap-4 sm:grid-cols-[8rem_1fr]">
-          <ChampFormulaire nom="code" libelle={champs.code} defaultValue={valeurSaisie(etat, "code", element?.code ?? "")} maxLength={LONGUEUR_MAX_CODE_PROFIL} autoComplete="off" autoCapitalize="characters" spellCheck={false} required className="uppercase" aide={champs.aideCode} erreur={erreurs?.code} data-focus-initial />
+          <ChampFormulaire nom="code" libelle={champs.code} defaultValue={valeurSaisie(etat, "code", element?.code ?? "")} maxLength={LONGUEUR_MAX_CODE_PROFIL} autoComplete="off" autoCapitalize="characters" spellCheck={false} required className="uppercase" erreur={erreurs?.code} data-focus-initial />
           <ChampFormulaire nom="nom" libelle={champs.nom} defaultValue={valeurSaisie(etat, "nom", element?.nom ?? "")} placeholder={champs.exempleNom} maxLength={LONGUEUR_MAX_NOM_PROGRAMME} autoComplete="off" required erreur={erreurs?.nom} />
         </div>
 
@@ -58,11 +58,11 @@ export function FormulaireProfil({ element, onTermine, onAnnuler }: ProprietesFo
 
         {type === "travail" ? (
           <>
-            <CaseACocher nom="estBadge" libelle={champs.estBadge} aide={champs.aideBadge} defaultChecked={caseSaisie(etat, "estBadge", element?.estBadge ?? true)} />
+            <CaseACocher nom="estBadge" libelle={champs.estBadge} defaultChecked={caseSaisie(etat, "estBadge", element?.estBadge ?? true)} />
             <EditeurPlages initiales={lignesInitiales(etat.saisie, element)} erreur={erreurs?.plages} />
             <fieldset className="grid gap-4 sm:grid-cols-2">
               <legend className="mb-2 text-base font-semibold text-marine">{champs.repas}</legend>
-              <ChampFormulaire nom="repasMinimumMinutes" libelle={champs.repasMinimum} defaultValue={repas("repasMinimumMinutes")} inputMode="numeric" maxLength={3} aide={champs.aideRepas} erreur={erreurs?.repasMinimumMinutes} className="tabular-nums" placeholder={`0 – ${REPAS_MAX_MINUTES}`} />
+              <ChampFormulaire nom="repasMinimumMinutes" libelle={champs.repasMinimum} defaultValue={repas("repasMinimumMinutes")} inputMode="numeric" maxLength={3} erreur={erreurs?.repasMinimumMinutes} className="tabular-nums" placeholder={`0 – ${REPAS_MAX_MINUTES}`} />
               <ChampFormulaire nom="repasMaximumMinutes" libelle={champs.repasMaximum} defaultValue={repas("repasMaximumMinutes")} inputMode="numeric" maxLength={3} erreur={erreurs?.repasMaximumMinutes} className="tabular-nums" placeholder={`0 – ${REPAS_MAX_MINUTES}`} />
             </fieldset>
           </>
