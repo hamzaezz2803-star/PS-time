@@ -29,7 +29,12 @@ export async function PanneauMarque() {
             <p className="mt-1 text-sm text-white/85">{TEXTES_CONNEXION.accroche}</p>
           </div>
         </div>
-        <LogoEntreprise logo={logo} className="h-14 max-w-56 self-start px-3 py-2" />
+        {logo && (
+          <div className="flex items-center gap-4">
+            <LogoEntreprise logo={logo} className="size-14 rounded-xl p-1.5" classeImage="size-full" />
+            <p className="min-w-0 text-lg font-semibold leading-tight">{logo.nom}</p>
+          </div>
+        )}
       </div>
 
       {/* Ordinateur. */}
@@ -39,7 +44,13 @@ export async function PanneauMarque() {
             <LogoPsTime sizes="56px" className="size-14 shrink-0" />
             <span className="text-2xl font-bold tracking-tight">{TEXTES_NAVIGATION.nomApplication}</span>
           </div>
-          <LogoEntreprise logo={logo} className="h-20 max-w-64 px-4 py-3 shadow-flottant" />
+          {/* Même taille que le logo PS Time, avec le nom de l'entreprise à côté. */}
+          {logo && (
+            <div className="flex items-center gap-3">
+              <LogoEntreprise logo={logo} className="size-14 rounded-xl p-1.5" classeImage="size-full" />
+              <span className="min-w-0 text-2xl font-bold tracking-tight">{logo.nom}</span>
+            </div>
+          )}
         </div>
 
         <div className="relative grid min-h-64 flex-1 place-items-center">

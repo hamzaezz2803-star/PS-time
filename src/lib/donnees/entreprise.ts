@@ -14,8 +14,8 @@ export const ETIQUETTE_ENTREPRISE = "entreprise";
 /** Informations enregistrées, et version du logo (date de son dernier changement, en ms) ou null sans logo. */
 export type FicheEntreprise = DonneesEntreprise & { logoVersion: number | null };
 
-/** Ce qu'il faut pour afficher le logo : adresse (qui change avec le logo) et texte de remplacement. */
-export type LogoAffiche = { src: string; alt: string };
+/** Ce qu'il faut pour afficher le logo : adresse (qui change avec le logo), texte de remplacement et nom de l'entreprise. */
+export type LogoAffiche = { src: string; alt: string; nom: string };
 
 /**
  * Informations de l'entreprise, sans le contenu du logo. Lues sur toutes les pages connectées
@@ -49,7 +49,7 @@ export async function lireLogoAffiche(): Promise<LogoAffiche | null> {
   try {
     const fiche = await lireEntreprise();
     if (!fiche?.logoVersion) return null;
-    return { src: `${CHEMIN_LOGO_ENTREPRISE}?v=${fiche.logoVersion}`, alt: TEXTES_ENTREPRISE.altLogo(fiche.nom) };
+    return { src: `${CHEMIN_LOGO_ENTREPRISE}?v=${fiche.logoVersion}`, alt: TEXTES_ENTREPRISE.altLogo(fiche.nom), nom: fiche.nom };
   } catch (erreur) {
     console.error("Échec de la lecture du logo de l'entreprise", { type: erreur instanceof Error ? erreur.name : "inconnu" });
     return null;
