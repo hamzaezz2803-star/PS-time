@@ -309,6 +309,9 @@ export type Compteur = {
   pack: FichePackCompteur | null;
 };
 
+/** Événement qui donne des variables aux formules : JOURS_<code>, MIN_<code> et, s'il est soumis aux droits, PRIS_<code>, SOLDE_<code>. */
+export type CodeEvenementCompteur = { code: string; nom: string; estSoumisDroits: boolean };
+
 /** Explication d'un compteur du pack standard (migration 0007). */
 export type FichePackCompteur = {
   numero: number;

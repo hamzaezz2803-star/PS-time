@@ -6,8 +6,16 @@
  */
 import type { ProfilHoraire } from "../../../types/index.ts";
 import { NUIT_DEBUT_MINUTES, NUIT_FIN_MINUTES } from "../../constantes.ts";
-import type { EvenementCandidat, SaisieEvenement } from "../evenements.ts";
 import { theoriqueMinutes } from "../profil-horaire.ts";
+import {
+  AUCUN_CODE,
+  minutesDeNuit,
+  variablesDroitsDesCodes,
+  variablesEvenementsDuJour,
+  variablesJourDesCodes,
+  type CodesCompteurs,
+  type EvenementCompteur,
+} from "./variables-evenements.ts";
 import type { Periodicite } from "./periodes.ts";
 
 export type UniteVariable = "minutes" | "nombre" | "jours";
@@ -39,24 +47,6 @@ export const VARIABLES_COMPTEURS = [
   { nom: "NB_JOURS_INCOMPLETS", unite: "jours", periodicites: CUMULS },
 ] as const satisfies readonly DefinitionVariable[];
 
-/**
- * Codes des événements de l'installation, qui donnent des variables propres à chacun :
- * JOURS_<code> et MIN_<code> pour tout événement, PRIS_<code> et SOLDE_<code> pour un événement
- * soumis à la gestion des droits (droits aux congés).
- */
-export type CodesCompteurs = { evenements: readonly string[]; droits: readonly string[] };
-export const AUCUN_CODE: CodesCompteurs = { evenements: [], droits: [] };
-
-export const variableJours = (code: string) => `JOURS_${code}`;
-export const variableMinutes = (code: string) => `MIN_${code}`;
-export const variablePris = (code: string) => `PRIS_${code}`;
-export const variableSolde = (code: string) => `SOLDE_${code}`;
-
-/** Variables d'événement d'une journée (additionnées sur la semaine et le mois). */
-export const variablesJourDesCodes = (codes: CodesCompteurs) => codes.evenements.flatMap((code) => [variableJours(code), variableMinutes(code)]);
-/** Variables des droits aux congés : un état à la fin de la période, jamais additionné. */
-export const variablesDroitsDesCodes = (codes: CodesCompteurs) => codes.droits.flatMap((code) => [variablePris(code), variableSolde(code)]);
-
 /** Noms des variables utilisables pour une périodicité. */
 export function variablesPour(periodicite: Periodicite, codes: CodesCompteurs = AUCUN_CODE): string[] {
   const fixes = VARIABLES_COMPTEURS.filter((variable) => (variable.periodicites as readonly Periodicite[]).includes(periodicite)).map((variable) => variable.nom);
@@ -77,6 +67,8 @@ export type JourService = {
   profil?: { code: string; nom: string; estDynamique: boolean } | null;
   /** Aucune affectation ne couvre ce jour (ni rotation, ni horaire dynamique) : ce n'est pas un repos. */
   estSansPlanning?: boolean;
+  /** Événements de l'employé qui touchent le jour ; absent = non chargés (variables d'événement inconnues). */
+  evenements?: readonly EvenementCompteur[];
 };
 
 /** Jour de repos du planning (rotation ou profil Repos), à ne pas confondre avec un jour sans aucune affectation. */
@@ -105,8 +97,11 @@ export function entreeSortie({ horaire, pointages }: JourService): { entree: num
   return { entree, sortie: sortie !== null && sortie > (entree ?? sortie) ? sortie : null };
 }
 
-/** Variables d'une journée. Une valeur inconnue vaut null, jamais 0. */
-export function variablesDuJour(jour: JourService): ValeursVariables {
+/**
+ * Variables d'une journée. Une valeur inconnue vaut null, jamais 0. `codes` : codes d'événements
+ * qui donnent JOURS_<code> et MIN_<code>.
+ */
+export function variablesDuJour(jour: JourService, codes: CodesCompteurs = AUCUN_CODE): ValeursVariables {
   const { horaire } = jour;
   const { entree, sortie } = entreeSortie(jour);
   const ecart = (calcul: (h: HorairePrevu, minute: number) => number, minute: number | null) =>
@@ -121,6 +116,11 @@ export function variablesDuJour(jour: JourService): ValeursVariables {
     NB_POINTAGES: jour.pointages.length,
     A_HORAIRE: horaire ? 1 : 0,
     PRESENT: entree !== null ? 1 : 0,
+    DUREE_NUIT_MIN: minutesDeNuit(entree, sortie, NUIT_FIN_MINUTES, NUIT_DEBUT_MINUTES),
+    ...variablesEvenementsDuJour(
+      { jour: jour.jour, dureePrevue: horaire ? horaire.dureePrevue : null, aPointe: jour.pointages.length > 0, estRepos: estJourDeRepos(jour), evenements: jour.evenements },
+      codes,
+    ),
   };
 }
 
@@ -130,9 +130,9 @@ const VARIABLES_ADDITIONNEES = VARIABLES_COMPTEURS.filter((variable) => (variabl
 );
 
 /** Variables d'une semaine ou d'un mois à partir des variables de ses jours écoulés. */
-export function agregerJours(jours: readonly ValeursVariables[]): ValeursVariables {
+export function agregerJours(jours: readonly ValeursVariables[], codes: CodesCompteurs = AUCUN_CODE): ValeursVariables {
   const resultat: ValeursVariables = {};
-  for (const nom of VARIABLES_ADDITIONNEES) {
+  for (const nom of [...VARIABLES_ADDITIONNEES, ...variablesJourDesCodes(codes)]) {
     const connues = jours.map((jour) => jour[nom]).filter((valeur): valeur is number => valeur !== null && valeur !== undefined);
     resultat[nom] = connues.length > 0 ? connues.reduce((total, valeur) => total + valeur, 0) : null;
   }

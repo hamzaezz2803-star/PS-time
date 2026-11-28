@@ -13,6 +13,7 @@ import { resumerJour } from "@/lib/metier/resume-jour";
 import { evenementsDuJour, evenementsEnJourneesDeLEmploye } from "./absences";
 import { obtenirBase } from "./base";
 import { aujourdhuiLocal, chargerJoursService, estJourValide } from "./compteurs-calcul";
+import { chargerContexteEmploye } from "./compteurs-contexte";
 import { listerCompteursActifs } from "./compteurs";
 import { evaluerPointages } from "./planning";
 import { departements, employes, photosPointages, pointages, utilisateurs } from "./schema";
@@ -97,19 +98,23 @@ export async function chargerDetailJour(employeId: string, date: string, nombreJ
   const debutHistorique = ajouterJours(date, -(nombreJours - 1));
   const debut = periodes.reduce((plusTot, periode) => (periode.debut < plusTot ? periode.debut : plusTot), debutHistorique);
   const fin = periodes.reduce((plusTard, periode) => (periode.finCalcul > plusTard ? periode.finCalcul : plusTard), date);
-  const [chargement, compteurs, pointagesJour, evenementsJour, evenementsPeriode] = await Promise.all([
+  const [chargement, compteurs, pointagesJour, evenementsJour, evenementsPeriode, contexteEmploye] = await Promise.all([
     chargerJoursService(employeId, debut, fin),
     listerCompteursActifs(),
     pointagesDuJour(employe, date),
     evenementsDuJour(employeId, date),
     evenementsEnJourneesDeLEmploye(employeId, debut, fin),
+    chargerContexteEmploye(employeId, debut, fin, aujourdhuiLocal()),
   ]);
   if (!chargement.ok) return { ok: false, erreur: chargement.erreur === "employe" ? "employe" : "date" };
 
-  const valeurs = calculerCompteurs(compteurs, periodes, chargement.jours, cache);
+  // Événements et droits aux congés de l'employé : variables JOURS_, MIN_, PRIS_, SOLDE_ des formules.
+  const { contexte } = contexteEmploye;
+  const joursCalcul = contexteEmploye.avecEvenements(chargement.jours);
+  const valeurs = calculerCompteurs(compteurs, periodes, joursCalcul, cache, contexte);
   const parPeriodicite = (periodicite: Periodicite) => valeurs.filter((valeur) => valeur.periodicite === periodicite).map(versAffichee);
   // Chaque jour chargé (historique, semaine et mois) : résumé et compteurs journaliers.
-  const valeursJours = historiqueJournalier(compteurs, chargement.jours, cache);
+  const valeursJours = historiqueJournalier(compteurs, joursCalcul, cache, contexte);
   const jours = chargement.jours.map((jour, rang) => ({ ...resumerJour(jour, evenementsPeriode), valeurs: valeursJours[rang].valeurs.map(versAffichee) }));
   const jourDetail = chargement.jours.find((jour) => jour.jour === date);
   const tries = jourDetail ? [...jourDetail.pointages].sort((a, b) => a - b) : [];

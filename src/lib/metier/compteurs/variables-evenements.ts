@@ -9,8 +9,27 @@
  * affectation) a une durée inconnue (null, jamais 0).
  */
 import { evenementRetenu, type EvenementCandidat, type SaisieEvenement } from "../evenements.ts";
-import type { CodesCompteurs, ValeursVariables } from "./variables.ts";
-import { variableJours, variableMinutes } from "./variables.ts";
+
+/** Valeurs des variables (null = donnée inconnue, jamais remplacée par 0). */
+type ValeursVariables = Record<string, number | null>;
+
+/**
+ * Codes des événements de l'installation, qui donnent des variables propres à chacun :
+ * JOURS_<code> et MIN_<code> pour tout événement, PRIS_<code> et SOLDE_<code> pour un événement
+ * soumis à la gestion des droits (droits aux congés).
+ */
+export type CodesCompteurs = { evenements: readonly string[]; droits: readonly string[] };
+export const AUCUN_CODE: CodesCompteurs = { evenements: [], droits: [] };
+
+export const variableJours = (code: string) => `JOURS_${code}`;
+export const variableMinutes = (code: string) => `MIN_${code}`;
+export const variablePris = (code: string) => `PRIS_${code}`;
+export const variableSolde = (code: string) => `SOLDE_${code}`;
+
+/** Variables d'événement d'une journée (additionnées sur la semaine et le mois). */
+export const variablesJourDesCodes = (codes: CodesCompteurs) => codes.evenements.flatMap((code) => [variableJours(code), variableMinutes(code)]);
+/** Variables des droits aux congés : un état à la fin de la période, jamais additionné. */
+export const variablesDroitsDesCodes = (codes: CodesCompteurs) => codes.droits.flatMap((code) => [variablePris(code), variableSolde(code)]);
 
 export type EvenementCompteur = EvenementCandidat & SaisieEvenement & { code: string; type: "absence" | "presence" };
 
@@ -37,7 +56,7 @@ function minutesSelon(journee: JourneeEvenements, filtre: (evenement: EvenementC
 /** Variables d'événement d'une journée ; `evenements` absent (non chargés) : toutes inconnues. */
 export function variablesEvenementsDuJour(journee: Omit<JourneeEvenements, "evenements"> & { evenements?: readonly EvenementCompteur[] }, codes: CodesCompteurs): ValeursVariables {
   const { evenements } = journee;
-  const noms = ["DUREE_ABSENCE_MIN", "DUREE_EVT_PRESENCE_MIN", "JOURS_ABSENCE", ...codes.evenements.flatMap((code) => [variableJours(code), variableMinutes(code)])];
+  const noms = ["DUREE_ABSENCE_MIN", "DUREE_EVT_PRESENCE_MIN", "JOURS_ABSENCE", ...variablesJourDesCodes(codes)];
   if (!evenements) return Object.fromEntries(noms.map((nom) => [nom, null]));
 
   const complete = { ...journee, evenements };

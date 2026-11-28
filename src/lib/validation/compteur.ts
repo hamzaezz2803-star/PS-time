@@ -3,6 +3,7 @@ import { FORMULE_LONGUEUR_MAX, LONGUEUR_MAX_DESCRIPTION_COMPTEUR, LONGUEUR_MAX_L
 import { UNITES_COMPTEUR, type UniteCompteur } from "@/lib/metier/compteurs/format";
 import { PERIODICITES, type Periodicite } from "@/lib/metier/compteurs/periodes";
 import { variablesPour } from "@/lib/metier/compteurs/variables";
+import { AUCUN_CODE, type CodesCompteurs } from "@/lib/metier/compteurs/variables-evenements";
 import { compilerFormule } from "@/lib/metier/formules/formule";
 import { messageErreurFormule } from "@/lib/textes/formules";
 import { TEXTES_COMPTEURS } from "@/lib/textes/compteurs";
@@ -38,9 +39,9 @@ export type DonneesCompteur = {
  * Première erreur de la formule pour les périodicités choisies (une variable peut exister pour
  * le mois mais pas pour le jour), ou null si elle est valide partout.
  */
-export function erreurFormule(formule: string, periodicites: readonly Periodicite[]): string | null {
+export function erreurFormule(formule: string, periodicites: readonly Periodicite[], codes: CodesCompteurs = AUCUN_CODE): string | null {
   for (const periodicite of periodicites) {
-    const resultat = compilerFormule(formule, variablesPour(periodicite));
+    const resultat = compilerFormule(formule, variablesPour(periodicite, codes));
     if (!resultat.ok) {
       const message = messageErreurFormule(resultat.erreur);
       return periodicites.length > 1 ? TEXTES_COMPTEURS.erreurPour(TEXTES_PERIODICITES[periodicite], message) : message;
@@ -49,8 +50,11 @@ export function erreurFormule(formule: string, periodicites: readonly Periodicit
   return null;
 }
 
-/** Valide le formulaire d'un compteur, formule comprise (vérifiée pour chaque périodicité cochée). */
-export function validerCompteur(formulaire: FormData): Resultat<DonneesCompteur> & { erreursChamps?: Record<string, string> } {
+/**
+ * Valide le formulaire d'un compteur, formule comprise (vérifiée pour chaque périodicité cochée,
+ * avec les variables des événements de l'installation).
+ */
+export function validerCompteur(formulaire: FormData, codes: CodesCompteurs): Resultat<DonneesCompteur> & { erreursChamps?: Record<string, string> } {
   const analyse = schemaCompteur.safeParse({
     code: lireTexte(formulaire.get("code")),
     libelle: lireTexte(formulaire.get("libelle")),
@@ -65,7 +69,7 @@ export function validerCompteur(formulaire: FormData): Resultat<DonneesCompteur>
   const donnees = { ...analyse.data, formule: analyse.data.formule.trim() };
   // Toujours dans l'ordre jour, semaine, mois.
   donnees.periodicites = PERIODICITES.filter((periodicite) => donnees.periodicites.includes(periodicite));
-  const erreur = erreurFormule(donnees.formule, donnees.periodicites);
+  const erreur = erreurFormule(donnees.formule, donnees.periodicites, codes);
   if (erreur) return { ok: false, erreur: "validation", erreursChamps: { formule: erreur } };
   return { ok: true, donnees };
 }
