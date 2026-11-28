@@ -105,7 +105,7 @@ export const TEXTES_COMPTEURS = {
     numero: (n: number) => `N° ${String(n).padStart(2, "0")}`,
     badgePack: "Pack",
     aAdapter: "Formule à écrire",
-    aideAAdapter: "Compteur laissé libre pour un besoin propre au client : écrivez sa formule (fenêtre « Modifier ») pour pouvoir l'activer.",
+    aideAAdapter: "Ce compteur n'a pas encore de formule : écrivez-la (fenêtre « Modifier ») pour pouvoir l'activer.",
     aCompleter: "Événement à créer",
     formuleIncomplete: (detail: string) => `Activation impossible : ${detail} Créez l'événement manquant (Présence > Gestion des exceptions > Événements) ou modifiez la formule.`,
     fonctionnement: "Fonctionnement",

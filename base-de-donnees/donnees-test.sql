@@ -415,8 +415,7 @@ FROM (
 ) t
 WHERE t.horodatage <= now();
 
--- 14 bis. Pack standard (migrations 0007 et 0008) : tous ses compteurs sont activés pour les essais, sauf le
--- compteur libre (formule à écrire, refusé par la base). Les pointages de la section 14 donnent les durées :
+-- 14 bis. Pack standard (migrations 0007 à 0009) : tous ses compteurs sont activés pour les essais. Les pointages de la section 14 donnent les durées :
 -- journées de plus de 10 h (J8 : heures écrêtées, temps hors limite), semaines de plus de 42 h et 44 h
 -- (Bureau : repos compensateur, heures sup. à 125 %), de plus de 52 h (J8 du lundi au samedi, Adil Naciri
 -- T016 : heures sup. à 150 %), sorties oubliées (débit). Les sections 12, 13 et 16 donnent les absences,

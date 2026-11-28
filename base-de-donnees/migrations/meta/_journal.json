@@ -64,6 +64,13 @@
       "when": 1795876794061,
       "tag": "0008_compteurs_pack_formules",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1795877182006,
+      "tag": "0009_retrait_compteur_libre",
+      "breakpoints": true
     }
   ]
 }
