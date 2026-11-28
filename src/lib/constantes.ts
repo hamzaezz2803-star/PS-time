@@ -310,6 +310,11 @@ export const CHEMIN_COMPTEURS = "/presence/compteurs";
 export const LIMITE_COMPTEURS = 500;
 export const LONGUEUR_MAX_LIBELLE_COMPTEUR = 100;
 export const LONGUEUR_MAX_DESCRIPTION_COMPTEUR = 500;
+/**
+ * Pack standard des compteurs (d'après la « Description des compteurs du Pack-Easy » de Gestor) :
+ * inséré désactivé à l'installation par la migration 0007. Familles pour le regroupement à l'écran.
+ */
+export const FAMILLES_COMPTEUR = ["presence", "absences", "heures_sup", "conges", "autres"] as const;
 export const CHEMIN_DETAIL_JOUR = "/presence/detail-jour";
 /** Détail jour : pointages affichés au plus, et longueurs d'historique proposées (jours). */
 export const DETAIL_POINTAGES_MAX = 200;

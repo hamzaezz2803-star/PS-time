@@ -17,7 +17,7 @@ import {
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
-import { ACTIONS_HISTORIQUE, COULEUR_REGLE_DEFAUT, COULEURS_REGLE, COULEURS_PERSONNALISABLES, DENSITES, MODES_IMPRESSION, MODES_MENU, MODULES_HISTORIQUE, PAGES, POLICES, TAILLES_TEXTE, THEMES, TYPES_EVENEMENT, TYPES_PIECE_JOINTE, UNITES_SAISIE_EVENEMENT, DUREE_EVENEMENT_MAX_MINUTES, PIECE_JOINTE_TAILLE_MAX_OCTETS } from "../constantes.ts";
+import { ACTIONS_HISTORIQUE, COULEUR_REGLE_DEFAUT, COULEURS_REGLE, COULEURS_PERSONNALISABLES, DENSITES, MODES_IMPRESSION, MODES_MENU, MODULES_HISTORIQUE, PAGES, POLICES, TAILLES_TEXTE, THEMES, TYPES_EVENEMENT, TYPES_PIECE_JOINTE, UNITES_SAISIE_EVENEMENT, DUREE_EVENEMENT_MAX_MINUTES, PIECE_JOINTE_TAILLE_MAX_OCTETS, FAMILLES_COMPTEUR } from "../constantes.ts";
 
 /**
  * Schéma de la base. Toute modification passe par une migration :
@@ -777,6 +777,16 @@ export const compteurs = pgTable(
     unite: varchar("unite", { length: 12 }).notNull(),
     description: varchar("description", { length: 500 }),
     estActif: boolean("est_actif").notNull().default(true),
+    // Pack standard (migration 0007) : numéro dans le pack (vide = compteur créé par le client),
+    // famille, fonctionnement d'origine, calcul dans PS Time et remise à zéro.
+    numeroPack: int("numero_pack"),
+    famille: varchar("famille", { length: 15 }),
+    fonctionnement: varchar("fonctionnement", { length: 2000 }),
+    adaptation: varchar("adaptation", { length: 1000 }),
+    remiseAZero: varchar("remise_a_zero", { length: 300 }),
+    // Vrai tant que la formule du pack attend des données que PS Time ne calcule pas encore :
+    // le compteur ne peut pas être activé avant que sa formule soit modifiée.
+    estAAdapter: boolean("est_a_adapter").notNull().default(false),
     // Augmente à chaque changement de formule, d'unité ou de périodicité.
     version: int("version").notNull().default(1),
     creePar: referenceAuteur("cree_par"),
@@ -795,6 +805,10 @@ export const compteurs = pgTable(
     check("compteurs_une_periodicite", sql`${table.journalier} OR ${table.hebdomadaire} OR ${table.mensuel}`),
     check("compteurs_unite_valide", sql`${table.unite} IN ('minutes', 'heures', 'jours', 'nombre', 'pourcentage')`),
     check("compteurs_version_positive", sql`${table.version} >= 1`),
+    uniqueIndex("compteurs_numero_pack_idx").on(table.numeroPack),
+    check("compteurs_numero_pack_valide", sql`${table.numeroPack} IS NULL OR ${table.numeroPack} BETWEEN 1 AND 99`),
+    check("compteurs_famille_valide", sql`${table.famille} IS NULL OR ${table.famille} IN (${listeSql(FAMILLES_COMPTEUR)})`),
+    check("compteurs_a_adapter_inactif", sql`NOT (${table.estAAdapter} AND ${table.estActif})`),
   ],
 );
 
