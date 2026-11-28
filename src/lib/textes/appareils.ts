@@ -130,16 +130,6 @@ export const TEXTES_APPAREILS = {
     synchronisee: (heure: string) => `Exemple : heure réglée sur ${heure}, badgeuse prête pour le pointage.`,
   },
 
-  suite: {
-    titre: "Ce que fait la synchronisation",
-    points: [
-      "Règle l'heure de la badgeuse sur celle du serveur, pour que chaque pointage soit daté juste.",
-      "Remet la badgeuse en service si elle était bloquée, pour qu'elle accepte les pointages.",
-      "Relit son état : nombre d'utilisateurs et de pointages gardés dans sa mémoire.",
-    ],
-    avenir:
-      "L'envoi des employés vers la badgeuse et l'import de ses pointages dans PS Time viendront dans une prochaine version. Aucune empreinte ni image du visage n'est lue.",
-  },
 
   historique: (adresse: string, numeroSerie: string | null) => `${adresse}${numeroSerie ? ` · n° ${numeroSerie}` : ""} · heure réglée`,
 };

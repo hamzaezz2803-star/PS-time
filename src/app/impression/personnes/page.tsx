@@ -53,10 +53,7 @@ async function DocumentEmployes({ searchParams }: { searchParams: ParametresRech
           <ArrowLeft className="size-5" aria-hidden="true" />
           {textes.retour}
         </Link>
-        <div className="flex flex-wrap items-center gap-3">
-          <p className="text-sm text-texte-secondaire">{textes.aideImpression}</p>
-          <BoutonImprimer />
-        </div>
+        <BoutonImprimer />
       </div>
 
       <article className="rounded-xl bg-surface p-8 shadow-carte ring-1 ring-bordure print:rounded-none print:p-0 print:shadow-none print:ring-0">

@@ -77,7 +77,6 @@ export function HistoriqueCompteurs({ detail }: { detail: DetailJour }) {
 
   return (
     <Carte titre={textes.titre} Icone={History} action={choixDuree}>
-      <p className="-mt-1 mb-3 text-sm text-texte-secondaire">{textes.legende}</p>
       {journaliers.length === 0 && <p className="mb-3 text-sm text-texte-secondaire">{textes.aucun}</p>}
       <div className="relative -mx-4 -mb-4 overflow-x-auto border-t border-bordure sm:-mx-5 sm:-mb-5">
           <table className="w-full text-left text-sm">

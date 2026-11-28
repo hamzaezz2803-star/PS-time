@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition, type ReactNode } from "react";
-import { CircleCheck, LoaderCircle, Radar, SearchX } from "lucide-react";
+import { LoaderCircle, Radar, SearchX } from "lucide-react";
 import { rechercherBadgeusesDuReseau } from "@/app/(connecte)/appareils/actions";
 import { Bouton } from "@/components/ui/bouton";
 import { MessageErreur } from "@/components/ui/message-erreur";
@@ -79,20 +79,6 @@ export function GestionBadgeuses({ rechercheImpossible, panneaux }: { rechercheI
       <aside className="flex flex-col gap-4">
         {panneaux}
         <FormulaireAdresseBadgeuse surTrouvee={mettreAJour} />
-        <section aria-labelledby="titre-suite" className="flex flex-col gap-3 rounded-lg border border-bordure bg-surface p-5 shadow-carte">
-          <h2 id="titre-suite" className="text-base font-semibold text-marine">
-            {textes.suite.titre}
-          </h2>
-          <ul className="flex flex-col gap-2 text-sm text-texte">
-            {textes.suite.points.map((point) => (
-              <li key={point} className="flex items-start gap-2">
-                <CircleCheck className="mt-0.5 size-4 shrink-0 text-succes" aria-hidden="true" />
-                {point}
-              </li>
-            ))}
-          </ul>
-          <p className="text-sm text-texte-secondaire">{textes.suite.avenir}</p>
-        </section>
       </aside>
     </div>
   );

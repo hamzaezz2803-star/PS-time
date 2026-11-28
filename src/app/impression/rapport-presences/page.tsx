@@ -11,7 +11,6 @@ import { aujourdhuiLocal } from "@/lib/donnees/compteurs-calcul";
 import { COLONNES_RAPPORT, preparerExportRapport } from "@/lib/export/rapport-presences";
 import { TEXTES_CONNEXION } from "@/lib/textes/connexion";
 import { TEXTES_NAVIGATION } from "@/lib/textes/navigation";
-import { TEXTES_PERSONNES } from "@/lib/textes/personnes";
 import { TEXTES_RAPPORT } from "@/lib/textes/rapport-presences";
 import { chaineRapport, lireRechercheRapport } from "@/lib/validation/rapport-presences";
 
@@ -44,10 +43,7 @@ async function DocumentRapport({ searchParams }: { searchParams: ParametresReche
           <ArrowLeft className="size-5" aria-hidden="true" />
           {textes.document.retour}
         </Link>
-        <div className="flex flex-wrap items-center gap-3">
-          <p className="text-sm text-texte-secondaire">{TEXTES_PERSONNES.export.aideImpression}</p>
-          <BoutonImprimer />
-        </div>
+        <BoutonImprimer />
       </div>
 
       <article className="rounded-xl bg-surface p-8 shadow-carte ring-1 ring-bordure print:rounded-none print:p-0 print:shadow-none print:ring-0">

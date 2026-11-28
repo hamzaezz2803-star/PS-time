@@ -14,7 +14,6 @@ import { ETATS, estEtat } from "@/lib/metier/etats";
 import { TEXTES_CONNEXION } from "@/lib/textes/connexion";
 import { TEXTES_ETATS } from "@/lib/textes/etats";
 import { TEXTES_NAVIGATION } from "@/lib/textes/navigation";
-import { TEXTES_PERSONNES } from "@/lib/textes/personnes";
 import { TEXTES_RAPPORT } from "@/lib/textes/rapport-presences";
 import { chaineEtat, lireRechercheEtat } from "@/lib/validation/etats";
 
@@ -51,10 +50,7 @@ async function DocumentEtat({ params, searchParams }: { params: Promise<{ etat: 
           <ArrowLeft className="size-5" aria-hidden="true" />
           {TEXTES_ETATS.document.retour}
         </Link>
-        <div className="flex flex-wrap items-center gap-3">
-          <p className="text-sm text-texte-secondaire">{TEXTES_PERSONNES.export.aideImpression}</p>
-          <BoutonImprimer />
-        </div>
+        <BoutonImprimer />
       </div>
 
       <article className="rounded-xl bg-surface p-8 shadow-carte ring-1 ring-bordure print:rounded-none print:p-0 print:shadow-none print:ring-0">

@@ -27,15 +27,11 @@ export default function PageChangerMotDePasse() {
 }
 
 async function ContenuChangement() {
-  const utilisateur = await obtenirUtilisateurConnecte();
+  // Vérifie la session avant d'afficher le formulaire.
+  await obtenirUtilisateurConnecte();
   return (
-    <>
-      <p className="mb-8 mt-2 text-base text-texte-secondaire">
-        {utilisateur.doitChangerMotDePasse
-          ? TEXTES_MOT_DE_PASSE.obligatoire
-          : TEXTES_MOT_DE_PASSE.volontaire}
-      </p>
+    <div className="mt-8">
       <FormulaireMotDePasse />
-    </>
+    </div>
   );
 }
