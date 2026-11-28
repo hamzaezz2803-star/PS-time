@@ -2,14 +2,14 @@ import { BookOpen, Calculator, RotateCcw, type LucideIcon } from "lucide-react";
 import { TEXTES_COMPTEURS } from "@/lib/textes/compteurs";
 import type { FichePackCompteur } from "@/types";
 
-const textes = TEXTES_COMPTEURS.pack;
+const textes = TEXTES_COMPTEURS.standard;
 
-/** Explication d'un compteur du pack : fonctionnement d'origine, calcul dans PS Time, remise à zéro. */
-export function ExplicationPack({ pack }: { pack: FichePackCompteur }) {
+/** Explication d'un compteur standard : fonctionnement d'origine, calcul dans PS Time, remise à zéro. */
+export function ExplicationStandard({ fiche }: { fiche: FichePackCompteur }) {
   const rubriques: { Icone: LucideIcon; titre: string; texte: string | null }[] = [
-    { Icone: BookOpen, titre: textes.fonctionnement, texte: pack.fonctionnement },
-    { Icone: Calculator, titre: textes.adaptation, texte: pack.adaptation },
-    { Icone: RotateCcw, titre: textes.remiseAZero, texte: pack.remiseAZero },
+    { Icone: BookOpen, titre: textes.fonctionnement, texte: fiche.fonctionnement },
+    { Icone: Calculator, titre: textes.adaptation, texte: fiche.adaptation },
+    { Icone: RotateCcw, titre: textes.remiseAZero, texte: fiche.remiseAZero },
   ];
   return (
     <dl className="flex flex-col gap-3.5">

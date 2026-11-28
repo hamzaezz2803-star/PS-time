@@ -7,7 +7,7 @@ import { TEXTES_COMPTEURS as textes } from "@/lib/textes/compteurs";
 import { TEXTES_PERIODICITES } from "@/lib/textes/variables-compteurs";
 import type { Compteur, FichePackCompteur } from "@/types";
 import { useErreurFormule } from "./etat-compteur";
-import { ExplicationPack } from "./explication-pack";
+import { ExplicationStandard } from "./explication-standard";
 import { VersionsCompteur } from "./versions-compteur";
 
 /**
@@ -41,7 +41,7 @@ export function FicheCompteurStandard({ compteur, fiche, onFermer }: { compteur:
             {textes.standard.formuleIncomplete(erreur)}
           </p>
         )}
-        <ExplicationPack pack={fiche} />
+        <ExplicationStandard fiche={fiche} />
         <VersionsCompteur compteurId={compteur.id} versionActuelle={compteur.version} />
       </div>
       <div className="flex shrink-0 justify-end border-t border-bordure bg-fond px-5 py-3 sm:px-6">

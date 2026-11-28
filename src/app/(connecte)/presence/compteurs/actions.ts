@@ -47,7 +47,8 @@ export async function enregistrerCompteur(_etat: EtatFormulaire, formulaire: For
     if (!resultat.ok) {
       if (resultat.erreur === "code") return { erreursChamps: { code: textes.erreurs.codeDejaPris } };
       if (resultat.erreur === "libelle") return { erreursChamps: { libelle: textes.erreurs.libelleDejaPris } };
-      if (resultat.erreur === "a_adapter") return { erreursChamps: { estActif: textes.pack.activationRefusee } };
+      if (resultat.erreur === "a_adapter") return { erreursChamps: { estActif: textes.standard.activationRefusee } };
+      if (resultat.erreur === "standard") return { message: textes.standard.modificationRefusee };
       refresh();
       return { message: textes.introuvable };
     }
@@ -74,12 +75,12 @@ export async function changerEtatCompteur(id: string, estActif: boolean): Promis
       const [compteur, liste] = await Promise.all([formuleDuCompteur(analyse.data), listerCodesCompteurs()]);
       if (!compteur) return { message: textes.introuvable };
       const erreur = erreurFormule(compteur.formule, compteur.periodicites, codesDesEvenements(liste));
-      if (erreur) return { message: textes.pack.formuleIncomplete(erreur) };
+      if (erreur) return { message: textes.standard.formuleIncomplete(erreur) };
     }
     const resultat = await changerEtatEnBase(analyse.data, estActif, auteur.id);
     refresh();
     if (resultat === "introuvable") return { message: textes.introuvable };
-    if (resultat === "a_adapter") return { message: textes.pack.activationRefusee };
+    if (resultat === "a_adapter") return { message: textes.standard.activationRefusee };
     await notifier("compteur", "modification", estActif ? textes.actif : textes.inactif, CHEMIN_COMPTEURS);
     return { succes: { message: estActif ? textes.active : textes.desactive, idSelectionne: analyse.data } };
   } catch (erreur) {
@@ -103,7 +104,7 @@ export async function supprimerCompteur(_etat: EtatFormulaire, formulaire: FormD
     return { message: textes.echec };
   }
   refresh();
-  if (!resultat.ok) return { message: resultat.erreur === "pack" ? textes.pack.suppressionRefusee : textes.introuvable };
+  if (!resultat.ok) return { message: resultat.erreur === "standard" ? textes.standard.suppressionRefusee : textes.introuvable };
   await notifier("compteur", "suppression", resultat.libelle, CHEMIN_COMPTEURS);
   return { succes: { message: textes.supprime, idSelectionne: null } };
 }

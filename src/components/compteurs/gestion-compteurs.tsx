@@ -1,23 +1,26 @@
 "use client";
 
 import { useState } from "react";
-import { Gauge } from "lucide-react";
+import { Gauge, Lock } from "lucide-react";
 import { supprimerCompteur } from "@/app/(connecte)/presence/compteurs/actions";
 import { GestionListe, type ColonneListe } from "@/components/liste/gestion-liste";
-import { ListeOnglets, PanneauOnglet } from "@/components/ui/onglets";
 import { Pastille } from "@/components/ui/pastille";
 import { PERIODICITES, type Periodicite } from "@/lib/metier/compteurs/periodes";
 import { TEXTES_COMPTEURS as textes } from "@/lib/textes/compteurs";
 import { TEXTES_PERIODICITES } from "@/lib/textes/variables-compteurs";
 import type { Compteur } from "@/types";
 import { BoutonFiltre } from "./bouton-filtre";
-import { EtatCompteur } from "./ligne-compteur-pack";
-import { CataloguePack, compteursDuPack } from "./catalogue-pack";
+import { EtatCompteur } from "./etat-compteur";
 import { FormulaireCompteur } from "./formulaire-compteur";
 
 type FiltreEtat = "tous" | "actifs" | "inactifs";
-type Onglet = "pack" | "tous";
-const BASE_ONGLETS = "compteurs";
+type FiltreType = "tous" | "standards" | "personnalises";
+
+const estStandard = (compteur: Compteur) => compteur.pack !== null;
+
+/** Compteurs standards d'abord (ordre du document), puis ceux du client par libellé. */
+const trier = (compteurs: Compteur[]) =>
+  [...compteurs].sort((a, b) => (a.pack?.numero ?? Infinity) - (b.pack?.numero ?? Infinity) || a.nom.localeCompare(b.nom, "fr"));
 
 const COLONNES: ColonneListe<Compteur>[] = [
   {
@@ -26,9 +29,9 @@ const COLONNES: ColonneListe<Compteur>[] = [
       <span className="flex min-w-0 flex-col">
         <span className="flex flex-wrap items-center gap-2">
           {compteur.nom}
-          {compteur.pack && <Pastille ton="info">{`${textes.pack.badgePack} · ${textes.pack.numero(compteur.pack.numero)}`}</Pastille>}
+          {compteur.pack && <Pastille ton="neutre" Icone={Lock}>{textes.standard.badge}</Pastille>}
         </span>
-        <span className="truncate font-mono text-sm font-normal text-texte-secondaire">{compteur.code}</span>
+        <span className="truncate text-sm font-normal text-texte-secondaire">{compteur.description ?? compteur.code}</span>
       </span>
     ),
   },
@@ -46,12 +49,17 @@ const COLONNES: ColonneListe<Compteur>[] = [
   { titre: textes.colonnes.etat, rendu: (compteur) => <EtatCompteur compteur={compteur} /> },
 ];
 
-/** Liste de tous les compteurs avec filtres (périodicité, état), création et modification en fenêtre. */
-function ListeCompteurs({ compteurs }: { compteurs: Compteur[] }) {
+/**
+ * Tous les compteurs dans une seule liste : les standards (fixes : consultés, activés ou désactivés)
+ * et ceux créés par le client (« Nouveau compteur »). Filtres type, périodicité et état.
+ */
+export function GestionCompteurs({ compteurs }: { compteurs: Compteur[] }) {
+  const [type, setType] = useState<FiltreType>("tous");
   const [periodicite, setPeriodicite] = useState<Periodicite | null>(null);
   const [filtreEtat, setFiltreEtat] = useState<FiltreEtat>("tous");
-  const visibles = compteurs.filter(
+  const visibles = trier(compteurs).filter(
     (compteur) =>
+      (type === "tous" || estStandard(compteur) === (type === "standards")) &&
       (!periodicite || compteur.periodicites.includes(periodicite)) &&
       (filtreEtat === "tous" || compteur.estActif === (filtreEtat === "actifs")),
   );
@@ -60,6 +68,11 @@ function ListeCompteurs({ compteurs }: { compteurs: Compteur[] }) {
     <div className="flex flex-col gap-4">
       {compteurs.length > 0 && (
         <div role="group" aria-label={textes.filtres.libelle} className="flex flex-wrap items-center gap-x-6 gap-y-2">
+          <div className="flex flex-wrap items-center gap-1 rounded-lg bg-canevas p-1" role="group" aria-label={textes.filtres.type}>
+            {(["tous", "standards", "personnalises"] as const).map((valeur) => (
+              <BoutonFiltre key={valeur} estChoisi={type === valeur} onClick={() => setType(valeur)}>{textes.filtres.types[valeur]}</BoutonFiltre>
+            ))}
+          </div>
           <div className="flex flex-wrap items-center gap-1 rounded-lg bg-canevas p-1" role="group" aria-label={textes.filtres.periodicite}>
             <BoutonFiltre estChoisi={periodicite === null} onClick={() => setPeriodicite(null)}>{textes.filtres.toutes}</BoutonFiltre>
             {PERIODICITES.map((valeur) => (
@@ -80,29 +93,8 @@ function ListeCompteurs({ compteurs }: { compteurs: Compteur[] }) {
         icone={Gauge}
         rendreFormulaire={(proprietes) => <FormulaireCompteur {...proprietes} />}
         actionSupprimer={supprimerCompteur}
+        estEnLectureSeule={estStandard}
       />
-    </div>
-  );
-}
-
-/** Page des compteurs : onglet du pack standard (explications, activation) et liste de tous les compteurs. */
-export function GestionCompteurs({ compteurs }: { compteurs: Compteur[] }) {
-  const pack = compteursDuPack(compteurs);
-  const [onglet, setOnglet] = useState<Onglet>(pack.length > 0 ? "pack" : "tous");
-  const onglets = [
-    { id: "pack", libelle: textes.pack.ongletPack(pack.length) },
-    { id: "tous", libelle: textes.pack.ongletTous(compteurs.length) },
-  ];
-
-  return (
-    <div className="flex flex-col">
-      <ListeOnglets base={BASE_ONGLETS} onglets={onglets} actif={onglet} onChanger={(id) => setOnglet(id as Onglet)} libelle={textes.pack.libelleOnglets} />
-      <PanneauOnglet base={BASE_ONGLETS} id="pack" actif={onglet}>
-        <CataloguePack compteurs={pack} />
-      </PanneauOnglet>
-      <PanneauOnglet base={BASE_ONGLETS} id="tous" actif={onglet}>
-        <ListeCompteurs compteurs={compteurs} />
-      </PanneauOnglet>
     </div>
   );
 }

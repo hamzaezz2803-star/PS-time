@@ -112,7 +112,7 @@ export async function listerVersions(compteurId: string): Promise<VersionCompteu
 
 export type ResultatCompteur =
   | { ok: true; id: string; version: number }
-  | { ok: false; erreur: "introuvable" | "code" | "libelle" | "a_adapter" };
+  | { ok: false; erreur: "introuvable" | "code" | "libelle" | "a_adapter" | "standard" };
 
 /** Champs d'une version (formule, unité, périodicités) : copiés dans `compteurs_versions`. */
 const champsVersion = (donnees: DonneesCompteur) => ({ formule: donnees.formule, unite: donnees.unite, ...colonnesDesPeriodicites(donnees.periodicites) });
@@ -134,7 +134,9 @@ export async function enregistrerCompteur(id: string | null, donnees: DonneesCom
 
       const [actuel] = await transaction.select(colonnes).from(compteurs).where(eq(compteurs.id, id)).for("update");
       if (!actuel) return { ok: false, erreur: "introuvable" };
-      // Un compteur du pack « à adapter » le reste tant que sa formule n'a pas été réécrite.
+      // Un compteur standard est fixe : il ne se modifie pas (le client crée le sien).
+      if (actuel.numeroPack !== null) return { ok: false, erreur: "standard" };
+      // Un compteur « à adapter » le reste tant que sa formule n'a pas été réécrite.
       const estAAdapter = resteAAdapter(actuel, donnees.formule);
       if (estAAdapter && donnees.estActif) return { ok: false, erreur: "a_adapter" };
       const nouvelleVersion = changeLaVersion(versCompteur(actuel), donnees) ? actuel.version + 1 : actuel.version;
@@ -164,11 +166,11 @@ export async function changerEtatCompteur(id: string, estActif: boolean, auteurI
   return existe ? "a_adapter" : "introuvable";
 }
 
-export type ResultatSuppressionCompteur = { ok: true; libelle: string } | { ok: false; erreur: "introuvable" | "pack" };
+export type ResultatSuppressionCompteur = { ok: true; libelle: string } | { ok: false; erreur: "introuvable" | "standard" };
 
 /**
  * Supprime un compteur et tout son historique de versions, dans une transaction.
- * Un compteur du pack standard ne se supprime pas : il se désactive.
+ * Un compteur standard ne se supprime pas : il se désactive.
  */
 export async function supprimerCompteurParId(id: string): Promise<ResultatSuppressionCompteur> {
   return obtenirBase().transaction(async (transaction): Promise<ResultatSuppressionCompteur> => {
@@ -178,7 +180,7 @@ export async function supprimerCompteurParId(id: string): Promise<ResultatSuppre
       .where(eq(compteurs.id, id))
       .for("update");
     if (!compteur) return { ok: false, erreur: "introuvable" };
-    if (compteur.numeroPack !== null) return { ok: false, erreur: "pack" };
+    if (compteur.numeroPack !== null) return { ok: false, erreur: "standard" };
     await transaction.delete(compteursVersions).where(eq(compteursVersions.compteurId, id));
     await transaction.delete(compteurs).where(eq(compteurs.id, id));
     return { ok: true, libelle: compteur.libelle };
