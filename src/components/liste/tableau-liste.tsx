@@ -1,6 +1,6 @@
 "use client";
 
-import { Pencil, Trash2, type LucideIcon } from "lucide-react";
+import { Eye, Pencil, Trash2, type LucideIcon } from "lucide-react";
 import { BoutonIcone } from "@/components/ui/bouton-icone";
 import { cn } from "@/lib/utils";
 import type { ColonneListe } from "./gestion-liste";
@@ -14,15 +14,18 @@ export function TableauListe<T extends { id: string; nom: string }>({
   textes,
   onModifier,
   onSupprimer,
+  estEnLectureSeule,
 }: {
   elements: T[];
   colonnes: ColonneListe<T>[];
   icone: LucideIcon;
   idEnEvidence: string | null;
-  textes: { actions: string; modifier: (nom: string) => string; supprimer: (nom: string) => string };
+  textes: { actions: string; modifier: (nom: string) => string; supprimer: (nom: string) => string; consulter?: (nom: string) => string };
   onModifier: (id: string) => void;
   /** Absent : pas de suppression (ex. élément qu'on désactive au lieu de le supprimer). */
   onSupprimer?: (id: string) => void;
+  /** Élément fixe (ex. compteur standard) : il se consulte, ne se modifie ni ne se supprime. */
+  estEnLectureSeule?: (element: T) => boolean;
 }) {
   return (
     <div className="relative overflow-x-auto">
@@ -69,8 +72,12 @@ export function TableauListe<T extends { id: string; nom: string }>({
               <td className="px-3 py-1.5">
                 {/* Toujours visibles au clavier et sur mobile ; plus discrètes sur ordinateur hors survol. */}
                 <div className="flex items-center justify-end gap-0.5 transition-opacity duration-150 lg:opacity-60 lg:group-hover/ligne:opacity-100 lg:group-focus-within/ligne:opacity-100">
-                  <BoutonIcone libelle={textes.modifier(element.nom)} Icone={Pencil} onClick={() => onModifier(element.id)} />
-                  {onSupprimer && <BoutonIcone libelle={textes.supprimer(element.nom)} Icone={Trash2} onClick={() => onSupprimer(element.id)} estDanger />}
+                  {estEnLectureSeule?.(element) ? (
+                    <BoutonIcone libelle={(textes.consulter ?? textes.modifier)(element.nom)} Icone={Eye} onClick={() => onModifier(element.id)} />
+                  ) : (
+                    <BoutonIcone libelle={textes.modifier(element.nom)} Icone={Pencil} onClick={() => onModifier(element.id)} />
+                  )}
+                  {onSupprimer && !estEnLectureSeule?.(element) && <BoutonIcone libelle={textes.supprimer(element.nom)} Icone={Trash2} onClick={() => onSupprimer(element.id)} estDanger />}
                 </div>
               </td>
             </tr>

@@ -30,6 +30,9 @@ export type TextesGestionListe = TextesSuppression & {
   titreCreation: string;
   titreModification: (nom: string) => string;
   titreSuppression: string;
+  /** Titre de la fenêtre et libellé du bouton d'un élément en lecture seule. */
+  titreConsultation?: (nom: string) => string;
+  consulter?: (nom: string) => string;
   modifier: (nom: string) => string;
   supprimer: (nom: string) => string;
   actions: string;
@@ -55,6 +58,7 @@ export function GestionListe<T extends { id: string; nom: string }>({
   icone: Icone,
   rendreFormulaire,
   actionSupprimer,
+  estEnLectureSeule,
 }: {
   elements: T[];
   colonnes: ColonneListe<T>[];
@@ -63,6 +67,8 @@ export function GestionListe<T extends { id: string; nom: string }>({
   rendreFormulaire: (proprietes: ProprietesFormulaireListe<T>) => ReactNode;
   /** Absent : la liste ne propose pas de suppression. */
   actionSupprimer?: (etat: EtatFormulaire, formulaire: FormData) => Promise<EtatFormulaire>;
+  /** Élément fixe : consulté dans la fenêtre, jamais supprimé. */
+  estEnLectureSeule?: (element: T) => boolean;
 }) {
   const [fenetre, setFenetre] = useState<Fenetre | null>(null);
   const [messageSucces, setMessageSucces] = useState<string>();
@@ -88,7 +94,9 @@ export function GestionListe<T extends { id: string; nom: string }>({
       : fenetre?.type === "suppression"
         ? textes.titreSuppression
         : cible
-          ? textes.titreModification(cible.nom)
+          ? estEnLectureSeule?.(cible) && textes.titreConsultation
+            ? textes.titreConsultation(cible.nom)
+            : textes.titreModification(cible.nom)
           : "";
 
   return (
@@ -131,6 +139,7 @@ export function GestionListe<T extends { id: string; nom: string }>({
             textes={textes}
             onModifier={(id) => ouvrir({ type: "modification", id })}
             onSupprimer={actionSupprimer && ((id) => ouvrir({ type: "suppression", id }))}
+            estEnLectureSeule={estEnLectureSeule}
           />
         )}
       </section>
