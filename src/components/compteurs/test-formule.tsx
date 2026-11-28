@@ -10,6 +10,7 @@ import { TEXTES_COMPTEURS } from "@/lib/textes/compteurs";
 import { messageErreurFormule } from "@/lib/textes/formules";
 import { TEXTES_PERIODICITES, TEXTES_VARIABLES } from "@/lib/textes/variables-compteurs";
 import { cn } from "@/lib/utils";
+import { useCodesEvenements } from "./contexte-codes";
 
 const textes = TEXTES_COMPTEURS.test;
 
@@ -25,8 +26,9 @@ export function TestFormule({ formule, periodicites, unite }: { formule: string;
   const [choisie, setChoisie] = useState<Periodicite | null>(null);
   const [saisies, setSaisies] = useState<Record<string, string>>({});
   const periodicite = choisie && periodicites.includes(choisie) ? choisie : (periodicites[0] ?? null);
+  const { codes } = useCodesEvenements();
 
-  const compilation = periodicite ? compilerFormule(formule, variablesPour(periodicite)) : null;
+  const compilation = periodicite ? compilerFormule(formule, variablesPour(periodicite, codes)) : null;
   const resultat = compilation?.ok
     ? calculerFormule(compilation.formule, Object.fromEntries(compilation.formule.variables.map((nom) => [nom, lireNombre(saisies[nom])])))
     : null;

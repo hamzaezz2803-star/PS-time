@@ -8,12 +8,23 @@ import { Pastille } from "@/components/ui/pastille";
 import { TEXTES_COMPTEURS as textes } from "@/lib/textes/compteurs";
 import { TEXTES_PERIODICITES } from "@/lib/textes/variables-compteurs";
 import { cn } from "@/lib/utils";
+import { erreurFormule } from "@/lib/validation/compteur";
 import type { Compteur, FichePackCompteur } from "@/types";
+import { useCodesEvenements } from "./contexte-codes";
 import { ExplicationPack } from "./explication-pack";
+
+/** Erreur de la formule avec les événements actuels (ex. JOURS_MAL sans événement MAL), ou null. */
+function useErreurFormule(compteur: Compteur): string | null {
+  const { codes } = useCodesEvenements();
+  return compteur.estAAdapter ? null : erreurFormule(compteur.formule, compteur.periodicites, codes);
+}
 
 /** État d'un compteur : interrupteur, ou étiquette tant que sa formule attend des données que PS Time ne fournit pas. */
 export function EtatCompteur({ compteur }: { compteur: Compteur }) {
+  const erreur = useErreurFormule(compteur);
   if (compteur.estAAdapter) return <Pastille ton="attention" Icone={TriangleAlert}>{textes.pack.aAdapter}</Pastille>;
+  // Un compteur actif reste désactivable même si sa formule ne compile plus.
+  if (erreur && !compteur.estActif) return <Pastille ton="attention" Icone={TriangleAlert}>{textes.pack.aCompleter}</Pastille>;
   return (
     <Interrupteur
       estActif={compteur.estActif}
@@ -32,6 +43,7 @@ const BOUTON_ICONE =
  */
 export function LigneCompteurPack({ compteur, pack, onModifier }: { compteur: Compteur; pack: FichePackCompteur; onModifier: () => void }) {
   const [estOuverte, setEstOuverte] = useState(false);
+  const erreur = useErreurFormule(compteur);
   const idDetail = `detail-compteur-pack-${pack.numero}`;
 
   return (
@@ -73,6 +85,12 @@ export function LigneCompteurPack({ compteur, pack, onModifier }: { compteur: Co
             <p className="flex items-start gap-2 rounded-lg bg-attention/5 px-3 py-2 text-sm text-attention ring-1 ring-inset ring-attention/25">
               <TriangleAlert className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
               {textes.pack.aideAAdapter}
+            </p>
+          )}
+          {erreur && (
+            <p className="flex items-start gap-2 rounded-lg bg-attention/5 px-3 py-2 text-sm text-attention ring-1 ring-inset ring-attention/25">
+              <TriangleAlert className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+              {textes.pack.formuleIncomplete(erreur)}
             </p>
           )}
           <div className="flex flex-wrap items-center gap-2">

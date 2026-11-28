@@ -20,6 +20,7 @@ import { erreurFormule } from "@/lib/validation/compteur";
 import { cn } from "@/lib/utils";
 import type { Compteur, FichePackCompteur } from "@/types";
 import { AideFormule } from "./aide-formule";
+import { useCodesEvenements } from "./contexte-codes";
 import { EditeurFormule } from "./editeur-formule";
 import { ExplicationPack } from "./explication-pack";
 import { TestFormule } from "./test-formule";
@@ -71,9 +72,10 @@ function ContenuCompteur({ etat, compteur }: { etat: EtatFormulaireListe; compte
   const [formule, setFormule] = useState(() => valeurSaisie(etat, "formule", compteur?.formule ?? ""));
   const zone = useRef<HTMLTextAreaElement>(null);
   const erreurs = etat.erreursChamps;
+  const { codes } = useCodesEvenements();
 
-  const variablesConnues = useMemo(() => new Set(periodicites.flatMap((periodicite) => variablesPour(periodicite))), [periodicites]);
-  const erreurDirecte = formule.trim() === "" ? null : erreurFormule(formule, periodicites);
+  const variablesConnues = useMemo(() => new Set(periodicites.flatMap((periodicite) => variablesPour(periodicite, codes))), [periodicites, codes]);
+  const erreurDirecte = formule.trim() === "" ? null : erreurFormule(formule, periodicites, codes);
   const versionChangera = compteur !== undefined && changeLaVersion(compteur, { formule: formule.trim(), unite, periodicites });
 
   const basculer = (periodicite: Periodicite) =>

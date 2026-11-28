@@ -8,6 +8,7 @@ import { TEXTES_COMPTEURS } from "@/lib/textes/compteurs";
 import { AIDE_FONCTIONS, AIDE_OPERATEURS } from "@/lib/textes/formules";
 import { TEXTES_PERIODICITES, TEXTES_VARIABLES } from "@/lib/textes/variables-compteurs";
 import { cn } from "@/lib/utils";
+import { VariablesEvenements } from "./aide-variables-evenements";
 
 const textes = TEXTES_COMPTEURS.aide;
 const BASE = "aide-formule";
@@ -46,6 +47,7 @@ export function AideFormule({ periodicites, onInserer }: { periodicites: readonl
               );
             })}
           </ul>
+          <VariablesEvenements onInserer={onInserer} />
         </PanneauOnglet>
         <PanneauOnglet base={BASE} id="fonctions" actif={onglet}>
           <ul className="-mt-3 flex flex-col">
