@@ -1,26 +1,9 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
 import { CalendarDays } from "lucide-react";
+import { DateDuJour } from "@/components/ui/date-du-jour";
 import { HorlogePalettes } from "@/components/ui/horloge-palettes";
-import { formaterDate } from "@/lib/formats";
 import { TEXTES_ESPACE } from "@/lib/textes/espace";
-
-const MILLISECONDES_PAR_MINUTE = 60_000;
-
-function abonner(rappel: () => void) {
-  const minuterie = setInterval(rappel, MILLISECONDES_PAR_MINUTE / 4);
-  return () => clearInterval(minuterie);
-}
-const minuteActuelle = () => Math.floor(Date.now() / MILLISECONDES_PAR_MINUTE);
-const minuteServeur = () => null;
-
-/** Date du jour à Casablanca (change à minuit sans recharger la page). */
-function DateDuJour() {
-  const minute = useSyncExternalStore(abonner, minuteActuelle, minuteServeur);
-  if (minute === null) return <span className="inline-block h-5 w-32 rounded bg-canevas" aria-hidden="true" />;
-  return <span className="capitalize">{formaterDate(new Date(minute * MILLISECONDES_PAR_MINUTE))}</span>;
-}
 
 /** Accueil du tableau de bord : salutation à gauche, horloge à palettes et date du jour à droite. */
 export function BanniereAccueil({ nom }: { nom: string }) {

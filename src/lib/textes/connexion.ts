@@ -1,14 +1,13 @@
 /** Textes de l'écran de connexion. */
 export const TEXTES_CONNEXION = {
   titrePage: "Connexion",
-  surTitre: "Espace de connexion",
   titre: "Connexion à PS Time",
   bienvenue: "Bienvenue sur PS Time",
-  sousTitre: "Saisissez vos identifiants pour accéder à votre espace de pointage.",
   accroche: "Le pointage de vos équipes, simple et fiable.",
   phraseAppui:
     "Arrivées, pauses et heures travaillées, suivies au même endroit.",
   altLogo: "Logo PS Time",
+  heureCasablanca: "Heure de Casablanca",
   champs: {
     identifiant: {
       libelle: "Identifiant",

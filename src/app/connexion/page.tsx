@@ -25,16 +25,10 @@ export default function PageConnexion() {
       <main className="grid w-full max-w-md overflow-hidden rounded-2xl bg-surface shadow-flottant lg:min-h-[36rem] lg:max-w-5xl lg:grid-cols-2">
         <PanneauMarque />
 
-        <section className="flex flex-col justify-center px-6 pb-8 pt-4 sm:px-10 lg:px-14 lg:py-12">
-          <p className="text-sm font-semibold uppercase tracking-wider text-primaire">
-            {TEXTES_CONNEXION.surTitre}
-          </p>
-          <h1 className="mt-1 text-2xl font-bold text-marine sm:text-3xl">
+        <section className="flex flex-col justify-center px-6 py-8 sm:px-10 lg:px-14 lg:py-12">
+          <h1 className="mb-8 text-2xl font-bold tracking-tight text-marine sm:text-3xl">
             {TEXTES_CONNEXION.titre}
           </h1>
-          <p className="mb-8 mt-2 text-base text-texte-secondaire">
-            {TEXTES_CONNEXION.sousTitre}
-          </p>
           <Suspense>
             <MessageMotDePasseChange />
           </Suspense>
