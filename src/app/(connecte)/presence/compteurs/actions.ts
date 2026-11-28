@@ -4,11 +4,12 @@ import { refresh } from "next/cache";
 import { z } from "zod";
 import { notifier } from "@/lib/actions/notifier";
 import { CHEMIN_COMPTEURS } from "@/lib/constantes";
-import { changerEtatCompteur as changerEtatEnBase, enregistrerCompteur as enregistrerEnBase, listerVersions, supprimerCompteurParId } from "@/lib/donnees/compteurs";
+import { changerEtatCompteur as changerEtatEnBase, enregistrerCompteur as enregistrerEnBase, formuleDuCompteur, listerVersions, supprimerCompteurParId } from "@/lib/donnees/compteurs";
+import { codesDesEvenements, listerCodesCompteurs } from "@/lib/donnees/compteurs-contexte";
 import { obtenirUtilisateurPourEspace } from "@/lib/donnees/session";
 import { peutAcceder } from "@/lib/metier/droits";
 import { TEXTES_COMPTEURS as textes } from "@/lib/textes/compteurs";
-import { validerCompteur } from "@/lib/validation/compteur";
+import { erreurFormule, validerCompteur } from "@/lib/validation/compteur";
 import type { EtatFormulaire, VersionCompteur } from "@/types";
 
 const identifiant = z.uuid();
@@ -30,7 +31,14 @@ export async function enregistrerCompteur(_etat: EtatFormulaire, formulaire: For
 
   const id = formulaire.get("id") ? identifiant.safeParse(formulaire.get("id")) : null;
   if (id && !id.success) return { message: textes.introuvable };
-  const validation = validerCompteur(formulaire);
+  let codes;
+  try {
+    codes = codesDesEvenements(await listerCodesCompteurs());
+  } catch (erreur) {
+    journaliserEchec("de la lecture des événements", erreur);
+    return { message: textes.echec };
+  }
+  const validation = validerCompteur(formulaire, codes);
   if (!validation.ok) return { erreursChamps: validation.erreursChamps };
 
   try {
@@ -60,6 +68,13 @@ export async function changerEtatCompteur(id: string, estActif: boolean): Promis
   if (!analyse.success || typeof estActif !== "boolean") return { message: textes.introuvable };
 
   try {
+    // Une formule qui cite un événement disparu (ex. JOURS_MAL sans événement MAL) ne s'active pas.
+    if (estActif) {
+      const [compteur, liste] = await Promise.all([formuleDuCompteur(analyse.data), listerCodesCompteurs()]);
+      if (!compteur) return { message: textes.introuvable };
+      const erreur = erreurFormule(compteur.formule, compteur.periodicites, codesDesEvenements(liste));
+      if (erreur) return { message: textes.pack.formuleIncomplete(erreur) };
+    }
     const resultat = await changerEtatEnBase(analyse.data, estActif, auteur.id);
     refresh();
     if (resultat === "introuvable") return { message: textes.introuvable };

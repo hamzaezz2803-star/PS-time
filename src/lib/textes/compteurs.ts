@@ -104,9 +104,10 @@ export const TEXTES_COMPTEURS = {
     filtreFamille: "Famille",
     numero: (n: number) => `N° ${String(n).padStart(2, "0")}`,
     badgePack: "Pack",
-    aAdapter: "Données manquantes",
-    aideAAdapter:
-      "Pas encore calculable : ce compteur a besoin de données que les formules de PS Time ne lisent pas encore (événements d'absence, droits aux congés ou heures de nuit). Il ne peut pas être activé tant qu'une vraie formule ne remplace pas « 0 ».",
+    aAdapter: "Formule à écrire",
+    aideAAdapter: "Compteur laissé libre pour un besoin propre au client : écrivez sa formule (fenêtre « Modifier ») pour pouvoir l'activer.",
+    aCompleter: "Événement à créer",
+    formuleIncomplete: (detail: string) => `Activation impossible : ${detail} Créez l'événement manquant (Présence > Gestion des exceptions > Événements) ou modifiez la formule.`,
     fonctionnement: "Fonctionnement",
     adaptation: "Calcul dans PS Time",
     remiseAZero: "Remise à zéro",

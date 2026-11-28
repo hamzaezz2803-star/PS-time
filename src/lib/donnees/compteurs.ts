@@ -71,6 +71,15 @@ export async function listerCompteurs(): Promise<Compteur[]> {
   return lignes.map(versCompteur);
 }
 
+/** Formule et périodicités d'un compteur (contrôle avant son activation), ou null s'il n'existe plus. */
+export async function formuleDuCompteur(id: string): Promise<Pick<Compteur, "formule" | "periodicites"> | null> {
+  const [ligne] = await obtenirBase()
+    .select({ formule: compteurs.formule, journalier: compteurs.journalier, hebdomadaire: compteurs.hebdomadaire, mensuel: compteurs.mensuel })
+    .from(compteurs)
+    .where(eq(compteurs.id, id));
+  return ligne ? { formule: ligne.formule, periodicites: periodicitesDesColonnes(ligne) } : null;
+}
+
 /** Compteurs actifs, prêts à être calculés. */
 export async function listerCompteursActifs(): Promise<(DefinitionCompteur & Compteur)[]> {
   const lignes = await obtenirBase().select(colonnes).from(compteurs).where(eq(compteurs.estActif, true)).orderBy(asc(compteurs.libelle)).limit(LIMITE_COMPTEURS);
