@@ -67,7 +67,7 @@ export type EntreeHistorique = {
 export type Notification = {
   id: string;
   action: "creation" | "modification" | "suppression";
-  objet: "site" | "departement" | "poste" | "employe" | "profil_horaire" | "rotation" | "groupe" | "affectation" | "regle_horaire" | "horaire_dynamique" | "pointage" | "pointage_distance" | "evenement" | "absence" | "droit_conge" | "compteur" | "utilisateur" | "mot_de_passe" | "apparence";
+  objet: "site" | "departement" | "poste" | "employe" | "profil_horaire" | "rotation" | "groupe" | "affectation" | "regle_horaire" | "horaire_dynamique" | "pointage" | "pointage_distance" | "evenement" | "absence" | "droit_conge" | "compteur" | "utilisateur" | "mot_de_passe" | "apparence" | "entreprise";
   libelle: string | null;
   lien: string | null;
   auteurId: string | null;

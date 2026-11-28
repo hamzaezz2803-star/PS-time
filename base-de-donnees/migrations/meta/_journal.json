@@ -71,6 +71,13 @@
       "when": 1795877182006,
       "tag": "0009_retrait_compteur_libre",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1795879075859,
+      "tag": "0010_entreprise",
+      "breakpoints": true
     }
   ]
 }

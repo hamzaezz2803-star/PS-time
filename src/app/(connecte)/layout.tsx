@@ -2,6 +2,7 @@ import { Suspense, type ReactNode } from "react";
 import { BarreNavigation } from "@/components/tableau-de-bord/barre-navigation";
 import { CadreTableauDeBord } from "@/components/tableau-de-bord/cadre-tableau-de-bord";
 import { MenuUtilisateur } from "@/components/tableau-de-bord/menu-utilisateur";
+import { lireLogoAffiche, type LogoAffiche } from "@/lib/donnees/entreprise";
 import { obtenirUtilisateurPourEspace } from "@/lib/donnees/session";
 
 /** Compte connecté, lu à la requête (donc sous <Suspense>). */
@@ -11,9 +12,9 @@ async function CompteUtilisateur() {
 }
 
 /** Menus limités aux pages du compte (relues à chaque requête : un droit retiré disparaît aussitôt). */
-async function NavigationSelonDroits() {
+async function NavigationSelonDroits({ logoEntreprise }: { logoEntreprise: LogoAffiche | null }) {
   const { estSuperAdmin, pages } = await obtenirUtilisateurPourEspace();
-  return <BarreNavigation droits={{ estSuperAdmin, pages }} />;
+  return <BarreNavigation droits={{ estSuperAdmin, pages }} logoEntreprise={logoEntreprise} />;
 }
 
 function CompteEnChargement() {
@@ -30,12 +31,15 @@ function NavigationEnChargement() {
   );
 }
 
-export default function LayoutConnecte({ children }: { children: ReactNode }) {
+export default async function LayoutConnecte({ children }: { children: ReactNode }) {
+  // Logo de l'entreprise : lu en cache (même pour tous les comptes), à côté du logo PS Time et dans le tiroir.
+  const logoEntreprise = await lireLogoAffiche();
   return (
     <CadreTableauDeBord
+      logoEntreprise={logoEntreprise}
       navigation={
         <Suspense fallback={<NavigationEnChargement />}>
-          <NavigationSelonDroits />
+          <NavigationSelonDroits logoEntreprise={logoEntreprise} />
         </Suspense>
       }
       compte={

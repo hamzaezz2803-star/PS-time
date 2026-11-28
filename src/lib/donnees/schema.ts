@@ -17,7 +17,7 @@ import {
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
-import { ACTIONS_HISTORIQUE, COULEUR_REGLE_DEFAUT, COULEURS_REGLE, COULEURS_PERSONNALISABLES, DENSITES, MODES_IMPRESSION, MODES_MENU, MODULES_HISTORIQUE, PAGES, POLICES, TAILLES_TEXTE, THEMES, TYPES_EVENEMENT, TYPES_PIECE_JOINTE, UNITES_SAISIE_EVENEMENT, DUREE_EVENEMENT_MAX_MINUTES, PIECE_JOINTE_TAILLE_MAX_OCTETS, FAMILLES_COMPTEUR } from "../constantes.ts";
+import { ACTIONS_HISTORIQUE, COULEUR_REGLE_DEFAUT, COULEURS_REGLE, COULEURS_PERSONNALISABLES, DENSITES, MODES_IMPRESSION, MODES_MENU, MODULES_HISTORIQUE, PAGES, POLICES, TAILLES_TEXTE, THEMES, TYPES_EVENEMENT, TYPES_PIECE_JOINTE, UNITES_SAISIE_EVENEMENT, DUREE_EVENEMENT_MAX_MINUTES, PIECE_JOINTE_TAILLE_MAX_OCTETS, FAMILLES_COMPTEUR, LOGO_ENTREPRISE_TAILLE_MAX_OCTETS } from "../constantes.ts";
 
 /**
  * Schéma de la base. Toute modification passe par une migration :
@@ -1014,5 +1014,49 @@ export const droitsCongesPiecesJointes = pgTable(
     // Nom court : le nom automatique dépasse les 63 caractères permis par PostgreSQL.
     foreignKey({ name: "droits_conges_pj_piece_fk", columns: [table.pieceJointeId], foreignColumns: [piecesJointes.id] }).onDelete("cascade"),
     index("droits_conges_pieces_jointes_piece_idx").on(table.pieceJointeId),
+  ],
+);
+
+/**
+ * Informations de l'entreprise cliente (une seule ligne, `est_unique`) : nom, coordonnées,
+ * identifiants légaux et logo facultatif. Le logo est le seul élément servi sans session
+ * (écran de connexion) ; le reste n'est lu que dans l'application.
+ */
+export const entreprise = pgTable(
+  "entreprise",
+  {
+    id: identifiantUnique(),
+    estUnique: boolean("est_unique").notNull().default(true),
+    nom: varchar("nom", { length: 150 }).notNull(),
+    adresse: varchar("adresse", { length: 255 }),
+    telephone: varchar("telephone", { length: 20 }),
+    email: varchar("email", { length: 254 }),
+    ice: varchar("ice", { length: 15 }),
+    registreCommerce: varchar("registre_commerce", { length: 40 }),
+    identifiantFiscal: varchar("identifiant_fiscal", { length: 15 }),
+    numeroCnss: varchar("numero_cnss", { length: 15 }),
+    logoTypeMime: varchar("logo_type_mime", { length: 20 }),
+    logoContenu: binaire("logo_contenu"),
+    logoTailleOctets: int("logo_taille_octets"),
+    logoModifieLe: date("logo_modifie_le"),
+    modifiePar: uuid("modifie_par").references(() => utilisateurs.id, { onDelete: "set null" }),
+    creeLe: dateCreation(),
+    modifieLe: dateModification(),
+  },
+  (table) => [
+    uniqueIndex("entreprise_unique_idx").on(table.estUnique),
+    index("entreprise_modifie_par_idx").on(table.modifiePar),
+    check("entreprise_une_seule_ligne", sql`${table.estUnique}`),
+    check("entreprise_nom_non_vide", sql`char_length(trim(${table.nom})) > 0`),
+    check("entreprise_email_minuscules", sql`${table.email} IS NULL OR ${table.email} = lower(${table.email})`),
+    check("entreprise_telephone", sql`${table.telephone} IS NULL OR ${table.telephone} ~ '^[+][1-9][0-9]{7,14}$'`),
+    check("entreprise_ice", sql`${table.ice} IS NULL OR ${table.ice} ~ '^[0-9]{15}$'`),
+    check("entreprise_identifiant_fiscal", sql`${table.identifiantFiscal} IS NULL OR ${table.identifiantFiscal} ~ '^[0-9]+$'`),
+    check("entreprise_numero_cnss", sql`${table.numeroCnss} IS NULL OR ${table.numeroCnss} ~ '^[0-9]+$'`),
+    // Logo : ses quatre colonnes vides ensemble, ou toutes renseignées (format et taille vérifiés).
+    check(
+      "entreprise_logo",
+      sql`(${table.logoTypeMime} IS NULL AND ${table.logoContenu} IS NULL AND ${table.logoTailleOctets} IS NULL AND ${table.logoModifieLe} IS NULL) OR (${table.logoTypeMime} IN ('image/jpeg', 'image/png', 'image/webp') AND ${table.logoContenu} IS NOT NULL AND ${table.logoModifieLe} IS NOT NULL AND ${table.logoTailleOctets} BETWEEN 1 AND ${sql.raw(String(LOGO_ENTREPRISE_TAILLE_MAX_OCTETS))})`,
+    ),
   ],
 );

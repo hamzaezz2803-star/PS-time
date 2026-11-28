@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useState, type PointerEvent } from "react";
 import { ChevronDown } from "lucide-react";
 import { useMenuDeroulant } from "@/components/ui/utiliser-menu-deroulant";
+import type { LogoAffiche } from "@/lib/donnees/entreprise";
 import type { Droits } from "@/lib/metier/droits";
 import { TEXTES_NAVIGATION } from "@/lib/textes/navigation";
 import { cn } from "@/lib/utils";
@@ -61,7 +62,7 @@ function MenuDeroulant({ menu, chemin, alignerAFin }: { menu: MenuNavigation; ch
 type Repere = { gauche: number; largeur: number };
 
 /** Barre de navigation (ordinateur) et tiroir (mobile), limités aux pages accordées au compte. */
-export function BarreNavigation({ droits }: { droits: Droits }) {
+export function BarreNavigation({ droits, logoEntreprise }: { droits: Droits; logoEntreprise: LogoAffiche | null }) {
   const chemin = usePathname();
   const menus = menusVisibles(droits);
   const [repere, setRepere] = useState<Repere | null>(null);
@@ -111,7 +112,7 @@ export function BarreNavigation({ droits }: { droits: Droits }) {
           })}
         </ul>
       </nav>
-      <TiroirNavigation menus={menus} chemin={chemin} />
+      <TiroirNavigation menus={menus} chemin={chemin} logoEntreprise={logoEntreprise} />
     </>
   );
 }

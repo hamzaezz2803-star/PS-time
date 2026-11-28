@@ -45,6 +45,7 @@ export const TEXTES_NAVIGATION = {
   utilisateurs: "Utilisateurs",
   historique: "Historique",
   apparence: "Apparence",
+  entreprise: "Entreprise",
   sauvegarde: "Sauvegarde",
   heureActuelle: "Date et heure actuelles",
   /** Phrase courte sous chaque page dans les menus déroulants. */
@@ -74,6 +75,7 @@ export const TEXTES_NAVIGATION = {
     utilisateurs: "Comptes et pages accordées",
     historique: "Traçabilité des actions",
     apparence: "Thème, police et taille",
+    entreprise: "Nom, coordonnées et logo",
     sauvegarde: "Export et restauration",
   },
   compte: {

@@ -52,6 +52,21 @@ export const PAGES = [...PAGES_PAR_MODULE.personnel, ...PAGES_PAR_MODULE.plannin
 export const PAGES_MASQUEES: readonly string[] = ["absences"];
 export const CHEMIN_UTILISATEURS = "/administration/utilisateurs";
 export const CHEMIN_APPARENCE = "/administration/apparence";
+/** Informations de l'entreprise (Administration > Entreprise) et son logo, servi sans session (écran de connexion). */
+export const CHEMIN_ENTREPRISE = "/administration/entreprise";
+export const CHEMIN_LOGO_ENTREPRISE = "/logo-entreprise";
+/** Logo réduit dans le navigateur (plus grand côté, proportions gardées), puis vérifié par le serveur. */
+export const LOGO_ENTREPRISE_COTE_MAX_PIXELS = 512;
+export const LOGO_ENTREPRISE_QUALITE_WEBP = 0.9;
+/** 256 Ko : identique à la contrainte de la base (entreprise_logo). */
+export const LOGO_ENTREPRISE_TAILLE_MAX_OCTETS = 262_144;
+export const LONGUEUR_MAX_NOM_ENTREPRISE = 150;
+export const LONGUEUR_MAX_ADRESSE_ENTREPRISE = 255;
+/** Registre de commerce (ex. « Casablanca 123456 ») ; ICE : 15 chiffres ; IF et CNSS : chiffres seulement. */
+export const LONGUEUR_MAX_RC = 40;
+export const LONGUEUR_ICE = 15;
+export const LONGUEUR_MAX_IDENTIFIANT_FISCAL = 15;
+export const LONGUEUR_MAX_NUMERO_CNSS = 15;
 /** Apparence de l'application, choisie par le super administrateur (même liste que la base). */
 export const THEMES = ["bleu", "emeraude", "ocean", "ardoise", "personnalise"] as const;
 export const POLICES = ["hanken", "inter", "source_sans", "atkinson"] as const;

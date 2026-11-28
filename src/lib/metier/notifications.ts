@@ -32,6 +32,7 @@ export const MODULE_DE_L_OBJET = {
   utilisateur: "administration",
   mot_de_passe: "administration",
   apparence: "administration",
+  entreprise: "administration",
 } as const satisfies Record<string, ModuleNotification>;
 
 export type ObjetNotification = keyof typeof MODULE_DE_L_OBJET;
@@ -62,6 +63,7 @@ const PAGE_DE_L_OBJET: Record<ObjetNotification, Page | null> = {
   utilisateur: null,
   mot_de_passe: null,
   apparence: null,
+  entreprise: null,
 };
 
 /** Objets dont ce compte voit les notifications : ceux de ses pages, plus l'administration pour un super administrateur. */

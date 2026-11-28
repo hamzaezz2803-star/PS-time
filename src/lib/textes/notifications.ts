@@ -22,6 +22,7 @@ const OBJETS: Record<Notification["objet"], { avec: string; sans: string }> = {
   utilisateur: { avec: "le compte", sans: "un compte" },
   mot_de_passe: { avec: "son mot de passe", sans: "son mot de passe" },
   apparence: { avec: "l'apparence de l'application", sans: "l'apparence de l'application" },
+  entreprise: { avec: "les informations de l'entreprise", sans: "les informations de l'entreprise" },
 };
 
 const VERBES: Record<Notification["action"], string> = {

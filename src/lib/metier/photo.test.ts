@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { PHOTO_TAILLE_MAX_OCTETS } from "../constantes.ts";
-import { cadrageCarre, detecterTypePhoto, verifierPhoto } from "./photo.ts";
+import { cadrageCarre, detecterTypePhoto, dimensionsDansCadre, verifierPhoto } from "./photo.ts";
 
 const octets = (...valeurs: number[]) => new Uint8Array([...valeurs, 0, 0, 0, 0]);
 const JPEG = octets(0xff, 0xd8, 0xff, 0xe0);
@@ -35,6 +35,13 @@ describe("verifierPhoto", () => {
     assert.deepEqual(verifierPhoto(tropLourd), { ok: false, erreur: "taille" });
   });
 
+  it("applique une autre limite de taille si elle est donnée (logo de l'entreprise)", () => {
+    const image = new Uint8Array(2_000);
+    image.set(PNG);
+    assert.deepEqual(verifierPhoto(image, 1_000), { ok: false, erreur: "taille" });
+    assert.deepEqual(verifierPhoto(image, 2_000), { ok: true, type: "image/png" });
+  });
+
   it("refuse un format non accepté", () => {
     assert.deepEqual(verifierPhoto(octets(0x47, 0x49, 0x46, 0x38)), { ok: false, erreur: "format" });
   });
@@ -45,5 +52,17 @@ describe("cadrageCarre", () => {
     assert.deepEqual(cadrageCarre(1200, 800), { x: 200, y: 0, cote: 800 });
     assert.deepEqual(cadrageCarre(600, 1001), { x: 0, y: 200, cote: 600 });
     assert.deepEqual(cadrageCarre(500, 500), { x: 0, y: 0, cote: 500 });
+  });
+});
+
+describe("dimensionsDansCadre", () => {
+  it("réduit le plus grand côté en gardant les proportions", () => {
+    assert.deepEqual(dimensionsDansCadre(2000, 500, 512), { largeur: 512, hauteur: 128 });
+    assert.deepEqual(dimensionsDansCadre(300, 1200, 512), { largeur: 128, hauteur: 512 });
+  });
+
+  it("n'agrandit jamais une petite image et garde au moins 1 px", () => {
+    assert.deepEqual(dimensionsDansCadre(200, 100, 512), { largeur: 200, hauteur: 100 });
+    assert.deepEqual(dimensionsDansCadre(5000, 2, 512), { largeur: 512, hauteur: 1 });
   });
 });

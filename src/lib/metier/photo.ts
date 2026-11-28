@@ -20,9 +20,9 @@ export function detecterTypePhoto(octets: Uint8Array): TypePhoto | null {
 
 export type VerificationPhoto = { ok: true; type: TypePhoto } | { ok: false; erreur: "taille" | "format" };
 
-/** Une photo acceptée : non vide, 512 Ko au plus, en JPEG, PNG ou WebP. */
-export function verifierPhoto(octets: Uint8Array): VerificationPhoto {
-  if (octets.length === 0 || octets.length > PHOTO_TAILLE_MAX_OCTETS) return { ok: false, erreur: "taille" };
+/** Une image acceptée : non vide, pas plus lourde que la limite (512 Ko par défaut), en JPEG, PNG ou WebP. */
+export function verifierPhoto(octets: Uint8Array, tailleMaxOctets = PHOTO_TAILLE_MAX_OCTETS): VerificationPhoto {
+  if (octets.length === 0 || octets.length > tailleMaxOctets) return { ok: false, erreur: "taille" };
   const type = detecterTypePhoto(octets);
   return type ? { ok: true, type } : { ok: false, erreur: "format" };
 }
@@ -31,4 +31,10 @@ export function verifierPhoto(octets: Uint8Array): VerificationPhoto {
 export function cadrageCarre(largeur: number, hauteur: number): { x: number; y: number; cote: number } {
   const cote = Math.min(largeur, hauteur);
   return { x: Math.floor((largeur - cote) / 2), y: Math.floor((hauteur - cote) / 2), cote };
+}
+
+/** Dimensions d'une image réduite pour tenir dans un carré, proportions gardées (jamais agrandie). */
+export function dimensionsDansCadre(largeur: number, hauteur: number, coteMax: number): { largeur: number; hauteur: number } {
+  const echelle = Math.min(1, coteMax / Math.max(largeur, hauteur));
+  return { largeur: Math.max(1, Math.round(largeur * echelle)), hauteur: Math.max(1, Math.round(hauteur * echelle)) };
 }

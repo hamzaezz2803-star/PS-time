@@ -1,4 +1,6 @@
 import Image from "next/image";
+import { LogoEntreprise } from "@/components/entreprise/logo-entreprise";
+import { lireLogoAffiche } from "@/lib/donnees/entreprise";
 import { TEXTES_CONNEXION } from "@/lib/textes/connexion";
 import { BordNuage } from "./bord-nuage";
 import { Ondulations } from "./ondulations";
@@ -16,9 +18,11 @@ const POINTS: { haut: number; gauche: number; taillePx: number }[] = [
 
 /**
  * Partie gauche de la carte de connexion : logo, icônes du pointage en orbite et accroche,
- * fermée par un bord en nuage. Bandeau compact sur téléphone.
+ * fermée par un bord en nuage. Bandeau compact sur téléphone. Le logo de l'entreprise, s'il existe,
+ * est placé sous celui de PS Time.
  */
-export function PanneauMarque() {
+export async function PanneauMarque() {
+  const logo = await lireLogoAffiche();
   return (
     <aside className="relative isolate overflow-hidden bg-marine pb-16 text-white lg:flex lg:flex-col lg:pb-0 lg:pe-16">
       {/* Grands disques discrets en arrière-plan, comme des planètes. */}
@@ -60,6 +64,9 @@ export function PanneauMarque() {
           <p className="mt-1 text-sm text-white/85">{TEXTES_CONNEXION.accroche}</p>
         </div>
       </div>
+      <div className="px-6 pt-4 sm:px-10 lg:hidden empty:hidden">
+        <LogoEntreprise logo={logo} className="h-14 max-w-48 px-3 py-2" />
+      </div>
 
       {/* Ordinateur : logo au centre des icônes en orbite. */}
       <div className="relative hidden min-h-0 flex-1 items-center justify-center lg:flex">
@@ -67,15 +74,18 @@ export function PanneauMarque() {
           <Ondulations />
           <OrbiteIcones />
         </div>
-        <Image
-          src="/logo-ps-time.webp"
-          alt={TEXTES_CONNEXION.altLogo}
-          width={1155}
-          height={1163}
-          priority
-          sizes="128px"
-          className="relative z-10 size-28 xl:size-32"
-        />
+        <div className="relative z-10 flex flex-col items-center gap-4">
+          <Image
+            src="/logo-ps-time.webp"
+            alt={TEXTES_CONNEXION.altLogo}
+            width={1155}
+            height={1163}
+            priority
+            sizes="128px"
+            className="size-28 xl:size-32"
+          />
+          <LogoEntreprise logo={logo} className="h-16 max-w-52 px-3 py-2 shadow-flottant" />
+        </div>
       </div>
 
       <div className="relative z-10 hidden px-10 pb-10 lg:block">

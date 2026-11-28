@@ -4,7 +4,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useMemo, useState, type ReactNode } from "react";
 import { Menu } from "lucide-react";
+import { LogoEntreprise } from "@/components/entreprise/logo-entreprise";
 import { CHEMIN_ESPACE } from "@/lib/constantes";
+import type { LogoAffiche } from "@/lib/donnees/entreprise";
 import { TEXTES_CONNEXION } from "@/lib/textes/connexion";
 import { TEXTES_NAVIGATION } from "@/lib/textes/navigation";
 import { cn } from "@/lib/utils";
@@ -17,7 +19,8 @@ import { Notifications } from "./notifications";
 const BOUTON_ICONE =
   "flex size-11 shrink-0 items-center justify-center rounded-lg text-texte-secondaire transition-colors duration-150 hover:bg-canevas hover:text-texte focus-visible:outline-2 focus-visible:outline-primaire";
 
-function Marque() {
+/** Logo PS Time, puis celui de l'entreprise s'il existe. */
+function Marque({ logoEntreprise }: { logoEntreprise: LogoAffiche | null }) {
   return (
     <Link
       href={CHEMIN_ESPACE}
@@ -30,6 +33,8 @@ function Marque() {
         <span className="block text-base font-bold leading-tight tracking-tight text-marine">{TEXTES_NAVIGATION.nomApplication}</span>
         <span className="block text-sm leading-tight text-texte-secondaire">{TEXTES_NAVIGATION.sousTitreApplication}</span>
       </span>
+      {logoEntreprise && <span className="h-6 w-px shrink-0 bg-bordure" aria-hidden="true" />}
+      <LogoEntreprise logo={logoEntreprise} className="h-9 max-w-24 px-1.5 py-1 shadow-carte sm:max-w-32" />
     </Link>
   );
 }
@@ -38,7 +43,17 @@ function Marque() {
  * Cadre des pages connectées : barre de navigation blanche en haut (menus déroulants sur
  * ordinateur, tiroir sur mobile), fil d'Ariane, puis zone de travail claire.
  */
-export function CadreTableauDeBord({ navigation, compte, children }: { navigation: ReactNode; compte: ReactNode; children: ReactNode }) {
+export function CadreTableauDeBord({
+  logoEntreprise,
+  navigation,
+  compte,
+  children,
+}: {
+  logoEntreprise: LogoAffiche | null;
+  navigation: ReactNode;
+  compte: ReactNode;
+  children: ReactNode;
+}) {
   const [estOuvertMobile, setEstOuvertMobile] = useState(false);
   const basculerMobile = useCallback(() => setEstOuvertMobile((ouvert) => !ouvert), []);
   const fermerMobile = useCallback(() => setEstOuvertMobile(false), []);
@@ -58,7 +73,7 @@ export function CadreTableauDeBord({ navigation, compte, children }: { navigatio
             >
               <Menu className="size-5" aria-hidden="true" />
             </button>
-            <Marque />
+            <Marque logoEntreprise={logoEntreprise} />
             <span className={cn("h-6 w-px bg-bordure", MENUS_VISIBLES)} aria-hidden="true" />
             <div className="min-w-0 flex-1">{navigation}</div>
             <Notifications />

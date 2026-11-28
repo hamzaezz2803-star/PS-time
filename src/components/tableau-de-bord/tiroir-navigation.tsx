@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useEffect } from "react";
 import { X } from "lucide-react";
+import { LogoEntreprise } from "@/components/entreprise/logo-entreprise";
+import type { LogoAffiche } from "@/lib/donnees/entreprise";
 import { TEXTES_NAVIGATION } from "@/lib/textes/navigation";
 import { cn } from "@/lib/utils";
 import { useMenu } from "./contexte-menu";
@@ -23,7 +25,7 @@ function LienTiroir({ lien, estActif }: { lien: Pick<LienNavigation, "libelle" |
 }
 
 /** Tiroir de navigation sur mobile et tablette : tous les menus dépliés, fermé par Échap ou un clic à côté. */
-export function TiroirNavigation({ menus, chemin }: { menus: MenuNavigation[]; chemin: string }) {
+export function TiroirNavigation({ menus, chemin, logoEntreprise }: { menus: MenuNavigation[]; chemin: string; logoEntreprise: LogoAffiche | null }) {
   const { estOuvertMobile, fermerMobile } = useMenu();
 
   useEffect(() => {
@@ -45,7 +47,10 @@ export function TiroirNavigation({ menus, chemin }: { menus: MenuNavigation[]; c
         className="relative flex h-full w-80 max-w-[88vw] animate-apparition flex-col overflow-y-auto bg-surface p-3 shadow-flottant motion-reduce:animate-none"
       >
         <div className="mb-2 flex items-center justify-between ps-3">
-          <span className="text-base font-bold text-marine">{TEXTES_NAVIGATION.nomApplication}</span>
+          <span className="flex min-w-0 items-center gap-3">
+            <span className="text-base font-bold text-marine">{TEXTES_NAVIGATION.nomApplication}</span>
+            <LogoEntreprise logo={logoEntreprise} className="h-9 max-w-36 px-1.5 py-1" />
+          </span>
           <button
             type="button"
             onClick={fermerMobile}
