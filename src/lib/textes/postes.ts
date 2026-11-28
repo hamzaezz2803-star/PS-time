@@ -1,8 +1,6 @@
 /** Textes de la gestion des postes. */
 export const TEXTES_POSTES = {
   titrePage: "Postes",
-  sousTitre:
-    "Définissez les postes de l'entreprise et leur hiérarchie. Cliquez sur un poste pour le modifier.",
   chargement: "Chargement des postes...",
   arbre: {
     titre: "Hiérarchie des postes",
@@ -29,12 +27,9 @@ export const TEXTES_POSTES = {
     titreModification: (nom: string) => `Modifier « ${nom} »`,
     code: "Numéro de poste",
     exempleCode: "Par exemple : OP-01",
-    aideCode: "Unique dans l'entreprise. Lettres, chiffres, tirets, points ou soulignés.",
     nom: "Nom du poste",
     exempleNom: "Par exemple : Opérateur de tri",
     ordre: "Ordre d'affichage",
-    aideOrdre: (minimum: number, maximum: number) =>
-      `De ${minimum} à ${maximum}. Le plus petit apparaît en premier ; ${maximum} place le poste en fin de liste.`,
     parent: "Poste parent",
     aucunParent: "Aucun (poste principal)",
     enregistrer: "Enregistrer",

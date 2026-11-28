@@ -59,17 +59,23 @@ export function ImportSauvegarde() {
         <li>{textes.import.externe}</li>
       </ul>
       <form onSubmit={envoyer} className="flex flex-col gap-4" aria-busy={etat.enCours}>
-        <ChampFormulaire nom="fichier" type="file" accept=".sql" required libelle={textes.import.fichier} aide={textes.import.aideFichier} className="py-2 lg:py-1.5" />
-        <ChampFormulaire
-          nom="confirmation"
-          libelle={textes.import.confirmation}
-          aide={textes.import.aideConfirmation}
-          autoComplete="off"
-          spellCheck={false}
-          value={confirmation}
-          onChange={(evenement) => setConfirmation(evenement.target.value)}
-          className="sm:max-w-xs"
-        />
+        <div className="flex flex-col gap-2">
+          <ChampFormulaire nom="fichier" type="file" accept=".sql" required libelle={textes.import.fichier} aria-describedby="aide-fichier" className="py-2 lg:py-1.5" />
+          <p id="aide-fichier" className="text-sm text-texte-secondaire">{textes.import.aideFichier}</p>
+        </div>
+        <div className="flex flex-col gap-2">
+          <ChampFormulaire
+            nom="confirmation"
+            libelle={textes.import.confirmation}
+            aria-describedby="aide-confirmation"
+            autoComplete="off"
+            spellCheck={false}
+            value={confirmation}
+            onChange={(evenement) => setConfirmation(evenement.target.value)}
+            className="sm:max-w-xs"
+          />
+          <p id="aide-confirmation" className="text-sm text-texte-secondaire">{textes.import.aideConfirmation}</p>
+        </div>
         <Bouton type="submit" variante="contour" disabled={etat.enCours || confirmation !== MOT_CONFIRMATION_IMPORT} className="self-start border-erreur text-erreur">
           {etat.enCours ? <LoaderCircle className="size-4 animate-spin motion-reduce:animate-none" aria-hidden="true" /> : <Upload className="size-4" aria-hidden="true" />}
           {etat.enCours ? textes.import.enCours : textes.import.bouton}

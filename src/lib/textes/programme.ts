@@ -26,7 +26,6 @@ export const TEXTES_PROGRAMME = {
   groupes: {
     ...commun,
     titrePage: "Groupes",
-    sousTitre: "Regroupez les employés qui suivent la même rotation, pour la leur affecter d'un seul coup.",
     chargement: "Chargement des groupes...",
     titre: "Groupes",
     total: (n: number) => (n <= 1 ? `${n} groupe` : `${n} groupes`),
@@ -45,7 +44,6 @@ export const TEXTES_PROGRAMME = {
     description: "Description",
     exempleDescription: "Par exemple : production, poste du matin",
     membres: "Membres",
-    aideMembres: "Un employé ne peut appartenir qu'à un seul groupe : le cocher ici le retire de son groupe actuel.",
     rechercher: "Rechercher un employé",
     exempleRecherche: "Nom ou matricule",
     selectionnes: (n: number) => (n <= 1 ? `${n} sélectionné` : `${n} sélectionnés`),
@@ -64,8 +62,6 @@ export const TEXTES_PROGRAMME = {
   rotations: {
     ...commun,
     titrePage: "Rotations",
-    sousTitre:
-      "Indiquez quel profil horaire s'applique chaque jour : une semaine type, ou un cycle de plusieurs jours (3 × 8, par exemple).",
     chargement: "Chargement des rotations...",
     titre: "Rotations",
     total: (n: number) => (n <= 1 ? `${n} rotation` : `${n} rotations`),
@@ -83,12 +79,8 @@ export const TEXTES_PROGRAMME = {
     nom: "Nom de la rotation",
     exempleNom: "Par exemple : Semaine bureau",
     type: "Type de rotation",
-    aideHebdomadaire: "Du lundi au dimanche, répété chaque semaine.",
-    aideCycle: "Le cycle recommence à partir de la date de début de l'affectation.",
     nombreJours: "Nombre de jours du cycle",
     planning: "Profil horaire de chaque jour",
-    rappelDates:
-      "Les dates de début et de fin se choisissent à l'étape Affectations, quand vous appliquez cette rotation à un groupe ou à un employé.",
     repos: "Repos",
     jour: (numero: number) => `Jour ${numero}`,
     joursSemaine: ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"],
@@ -107,8 +99,6 @@ export const TEXTES_PROGRAMME = {
   affectations: {
     ...commun,
     titrePage: "Affectations",
-    sousTitre:
-      "Attribuez une rotation à un groupe ou à un employé, pour une période. Une affectation individuelle passe avant celle du groupe.",
     chargement: "Chargement des affectations...",
     titre: "Affectations",
     total: (n: number) => (n <= 1 ? `${n} affectation` : `${n} affectations`),
@@ -135,7 +125,6 @@ export const TEXTES_PROGRAMME = {
     choisirRotation: "Choisir une rotation",
     dateDebut: "Date de début",
     dateFin: "Date de fin",
-    aideDateFin: "Laissez vide pour une affectation sans fin.",
     manque: "Créez d'abord au moins une rotation, et un groupe ou un employé.",
     cree: "Affectation créée.",
     modifie: "Modifications enregistrées.",

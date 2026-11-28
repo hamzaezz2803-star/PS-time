@@ -5,12 +5,9 @@ const ratioLisible = (ratio: number) => ratio.toLocaleString("fr-FR", { maximumF
 
 export const TEXTES_APPARENCE = {
   titrePage: "Apparence",
-  sousTitre: "Choisissez les couleurs, la police, la taille du texte, les menus, la densité des tableaux, l'impression et les couleurs du planning. Le changement s'applique à tous les comptes.",
   chargement: "Chargement de l'apparence...",
   titreThemes: "Thème de couleurs",
-  aideThemes: "Couleurs des boutons, des liens, des titres et des repères de la page active.",
   titrePolices: "Police",
-  aidePolices: "Police de tous les textes de l'application, chiffres des heures compris.",
   actuel: "Actuel",
   apercu: "Aperçu",
   exempleTitre: "Pointage du jour",
@@ -26,7 +23,6 @@ export const TEXTES_APPARENCE = {
     personnalise: { libelle: "Personnalisé", detail: "Vos propres couleurs, vérifiées pour rester lisibles" },
   },
   titreCouleurs: "Couleurs personnalisées",
-  aideCouleurs: "Les nuances de survol et les fonds clairs sont calculés à partir de ces couleurs. Chaque couleur est vérifiée : le texte doit rester lisible (contraste d'au moins 4,5:1).",
   reinitialiserCouleurs: "Repartir des couleurs PS Time",
   codeCouleur: (couleur: string) => `Code de la ${couleur.toLocaleLowerCase("fr")} (#rrggbb)`,
   couleurs: {
@@ -38,7 +34,6 @@ export const TEXTES_APPARENCE = {
   lisible: (ratio: number) => `Lisible (${ratioLisible(ratio)}:1)`,
   decoratif: "Décorative, toujours acceptée",
   titreTaille: "Taille du texte",
-  aideTaille: "Agrandit tous les textes, les boutons et les espacements de l'application.",
   tailles: {
     normale: { libelle: "Normale", detail: "Taille d'origine (par défaut)" },
     grande: { libelle: "Grande", detail: "Un peu plus grand (112 %)" },
@@ -52,26 +47,22 @@ export const TEXTES_APPARENCE = {
     atkinson: { libelle: "Atkinson Hyperlegible", detail: "Pensée pour les personnes malvoyantes" },
   },
   titreMenus: "Menus",
-  aideMenus: "Présentation des menus de la barre du haut, de leurs panneaux et du tiroir sur mobile.",
   menus: {
     icones: { libelle: "Icônes et texte", detail: "Une icône devant chaque menu quand la place le permet (par défaut)" },
     texte: { libelle: "Texte seul", detail: "Menus plus sobres, sans icône" },
   },
   exempleMenus: ["Personnel", "Présence", "État"],
   titreDensite: "Densité des tableaux",
-  aideDensite: "Hauteur des lignes des listes, des états et des cases du planning, sur tablette et ordinateur. Sur téléphone, les lignes restent assez hautes pour le doigt.",
   densites: {
     confortable: { libelle: "Confortable", detail: "Lignes aérées (par défaut)" },
     compacte: { libelle: "Compacte", detail: "Plus de lignes visibles à l'écran" },
   },
   titreImpression: "Couleurs d'impression",
-  aideImpression: "Couleurs des pages imprimées ou enregistrées en PDF (listes, états, planning). L'écran ne change pas.",
   impressions: {
     couleurs: { libelle: "Couleurs d'origine", detail: "Imprimé comme à l'écran (par défaut)" },
     gris: { libelle: "Niveaux de gris", detail: "Mêmes nuances, sans couleur" },
     noir_blanc: { libelle: "Noir et blanc", detail: "Texte noir sans fond, économe en encre" },
   },
-  exempleImpression: "Planning",
   enregistrer: "Enregistrer l'apparence",
   enregistrementEnCours: "Enregistrement...",
   enregistre: "Apparence enregistrée. Elle s'applique maintenant à tous les comptes.",
@@ -79,7 +70,6 @@ export const TEXTES_APPARENCE = {
   echec: "L'enregistrement a échoué. Réessayez dans un instant.",
   couleursPlanning: {
     titre: "Couleurs du planning",
-    aide: "Une couleur pour chaque événement et chaque profil horaire, dans le Planning mensuel et annuel et sa légende. « Selon le type » garde la couleur d'origine : orange pour une absence, turquoise pour une présence, blanc pour un horaire. Le code reste toujours écrit dans la case.",
     evenements: "Événements",
     profils: "Profils horaires",
     colonneCode: "Code",

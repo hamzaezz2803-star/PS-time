@@ -2,7 +2,6 @@
 
 export const TEXTES_COMPTEURS = {
   titrePage: "Gestion des compteurs",
-  sousTitre: "Définissez vos indicateurs (retards, heures, absences...) par une formule. Les valeurs sont calculées à partir des pointages et de l'horaire prévu.",
   chargement: "Chargement des compteurs...",
   droits: "Votre compte n'a pas accès à cette page. Demandez-la au super administrateur.",
   echec: "L'opération a échoué. Réessayez dans un instant.",
@@ -43,21 +42,17 @@ export const TEXTES_COMPTEURS = {
   sectionIdentite: "Identité",
   sectionFormule: "Formule",
   code: "Identifiant",
-  aideCode: "Majuscules, chiffres, « _ » ou « - » (30 caractères au plus). Ne change plus après la création.",
   libelle: "Libellé",
   exempleLibelle: "Par exemple : Retard du jour",
   periodicites: "Calculé pour",
-  aidePeriodicites: "Semaine : du lundi au dimanche. Seuls les jours écoulés comptent.",
   unite: "Unité du résultat",
   unites: { minutes: "Minutes (vues en h et min)", heures: "Heures", jours: "Jours", nombre: "Nombre", pourcentage: "Pourcentage" },
   unitesCourtes: { minutes: "Minutes", heures: "Heures", jours: "Jours", nombre: "Nombre", pourcentage: "%" },
   description: "Description (facultative)",
   estActif: "Compteur actif",
-  aideActif: "Un compteur inactif n'est plus calculé.",
   formule: "Formule",
   exempleFormule: "Par exemple : IF(RETARD_MIN > 5, RETARD_MIN, 0)",
   formuleValide: "Formule valide",
-  aideFormuleVide: "Écrivez la formule, ou cliquez sur une variable ou une fonction dans l'aide.",
   erreurPour: (periode: string, message: string) => `${periode} : ${message}`,
   choisirPeriodicite: "Cochez au moins une périodicité pour vérifier la formule.",
   versionChangera: "Formule, unité ou périodicités modifiées : une nouvelle version sera créée.",
@@ -73,7 +68,6 @@ export const TEXTES_COMPTEURS = {
   // Test
   test: {
     titre: "Tester la formule",
-    aide: "Saisissez des valeurs d'essai. Un champ vide = donnée manquante.",
     periodicite: "Variables de",
     aucuneVariable: "Cette formule n'utilise aucune variable.",
     resultat: "Résultat",
@@ -94,8 +88,6 @@ export const TEXTES_COMPTEURS = {
   // Compteurs standards (livrés avec l'application, désactivés à l'installation, fixes)
   standard: {
     badge: "Standard",
-    lectureSeule:
-      "Compteur standard de PS Time : il ne se modifie pas et ne se supprime pas, il s'active ou se désactive dans la liste. Pour une autre règle (seuil, formule), créez votre compteur avec « Nouveau compteur ».",
     familles: { presence: "Présence et temps de travail", absences: "Absences", heures_sup: "Heures supplémentaires", conges: "Congés et RTT", autres: "Autres" },
     formule: "Formule",
     fonctionnement: "Fonctionnement",

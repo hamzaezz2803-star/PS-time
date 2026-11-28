@@ -19,7 +19,6 @@ export type TextesChoixCible = TextesChoixEmployes & {
   aucunGroupe: string;
   departement: string;
   choisirDepartement: string;
-  aideDepartement: string;
   employesConcernes: (n: number) => string;
 };
 

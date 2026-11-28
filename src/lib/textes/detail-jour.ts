@@ -2,7 +2,6 @@
 
 export const TEXTES_DETAIL_JOUR = {
   titrePage: "Détail jour",
-  sousTitre: "Pour un employé et une date : son horaire, ses pointages et ses compteurs du jour, de la semaine et du mois.",
   chargement: "Chargement du détail...",
   droits: "Votre compte n'a pas accès à cette page. Demandez-la au super administrateur.",
   echec: "Le détail n'a pas pu être chargé. Réessayez dans un instant.",
@@ -50,7 +49,6 @@ export const TEXTES_DETAIL_JOUR = {
     titre: "Pointages",
     total: (n: number) => (n <= 1 ? `${n} pointage` : `${n} pointages`),
     aucun: "Aucun pointage ce jour-là.",
-    aideCorrection: "Badgeuse en panne ou badge oublié ? Ajoutez les pointages manquants.",
     badgeuse: "Badgeuse",
     manuel: "Saisie manuelle",
     distance: "À distance",
@@ -96,9 +94,7 @@ export const TEXTES_DETAIL_JOUR = {
     titreDetail: (nom: string, periode: string) => `${nom}, ${periode}`,
     fermer: "Fermer",
     valeurPeriode: "Valeur de la période",
-    explication: (jusquA: string) => `La formule de la période est calculée sur les jours ci-dessous, jusqu'au ${jusquA}.`,
     valeurDuJour: "Valeur du jour",
-    sansCompteurJour: "Ce compteur n'a pas de valeur par jour : seuls les éléments de chaque journée sont montrés.",
   },
 
   jour: {
@@ -140,7 +136,6 @@ export const TEXTES_DETAIL_JOUR = {
     jours: (n: number) => `${n} jours`,
     aucun: "Aucun compteur journalier actif : seuls l’horaire, les pointages et les événements sont montrés.",
     colonneJour: "Jour",
-    legende: "Une ligne par jour, le plus récent en haut. Le statut résume la journée ; cliquez un jour pour l'afficher. Les jours de repos sont grisés et les valeurs à zéro atténuées.",
     groupeJournee: "La journée",
     groupeCompteurs: "Compteurs du jour",
     total: "Total (moyenne pour les %)",

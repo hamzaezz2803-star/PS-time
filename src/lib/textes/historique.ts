@@ -13,8 +13,6 @@ const EXPORTS: Partial<Record<EntreeHistorique["objet"], string>> = {
 
 export const TEXTES_HISTORIQUE = {
   titrePage: "Historique",
-  sousTitre:
-    "Toutes les actions de tous les comptes, super administrateurs compris : créations, modifications, suppressions, connexions et exports. Réservé au super administrateur.",
   chargement: "Chargement de l'historique...",
   droits: "L'historique est réservé au super administrateur.",
   echec: "Impossible de charger l'historique. Réessayez dans un instant.",
@@ -63,8 +61,6 @@ export const TEXTES_HISTORIQUE = {
     aujourdhui: "Aujourd'hui",
     septJours: "7 derniers jours",
     trenteJours: "30 derniers jours",
-    aideLimite: (jours: number, conservation: number) =>
-      `Jusqu'à ${jours} jours par recherche. Les actions sont gardées ${conservation} jours.`,
   },
   liste: {
     titre: "Actions",

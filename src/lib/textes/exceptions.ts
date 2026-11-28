@@ -2,8 +2,6 @@
 export const TEXTES_EXCEPTIONS = {
   pointages: {
     titrePage: "Pointage manuel",
-    sousTitre:
-      "Ajoutez à la main une entrée, une sortie ou une pause pour un ou plusieurs employés : oubli de badge, correction ou test.",
     chargement: "Chargement des pointages...",
     droits: "Votre compte n'a pas accès à cette page. Demandez-la au super administrateur.",
     titreListe: "Pointages saisis à la main",
@@ -72,7 +70,6 @@ export const TEXTES_EXCEPTIONS = {
     aucunEmployeTrouve: "Aucun employé ne correspond à cette recherche.",
     jour: "Date du pointage",
     heure: "Heure",
-    aideHeure: "Heure locale de l'entreprise (Casablanca).",
     etat: "État",
     remarque: "Remarque",
     exempleRemarque: "Par exemple : oubli de badge",

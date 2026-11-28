@@ -37,14 +37,6 @@ const LIBELLES_COURTS: Record<CodeStatut, string> = {
 
 export const TEXTES_STATUT_POINTAGE = {
   colonne: "Résultat",
-  aideColonne: "Comparaison avec le profil horaire du jour (affectation, rotation, profil) et heure validée.",
-  explications: {
-    aucun_planning: "Aucune affectation ne couvre ce jour (ni pour l'employé, ni pour son groupe).",
-    jour_repos: "La rotation prévoit un repos ce jour-là.",
-    non_badge: "L'employé est considéré présent toute la journée : son pointage n'est pas compté.",
-    plage_interdite: "Aucun pointage ne doit avoir lieu dans cette plage du profil horaire.",
-    plage_neutralisee: "L'employé n'est pas attendu dans cette plage du profil horaire.",
-  } as Partial<Record<CodeStatut, string>>,
 };
 
 export function libelleStatut(statut: StatutPointage): string {

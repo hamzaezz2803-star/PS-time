@@ -44,20 +44,23 @@ export function FormulairePremierCompte({
       <input type="hidden" name="jeton" value={jeton} />
       <div className="flex flex-1 flex-col gap-5 overflow-y-auto px-5 py-5 sm:px-6">
         <p className="text-base text-texte-secondaire">{textes.explication}</p>
-        <ChampFormulaire
-          nom="identifiant"
-          libelle={textes.identifiant}
-          defaultValue={etat.identifiantSaisi ?? ""}
-          placeholder={textes.exempleIdentifiant}
-          maxLength={LONGUEUR_MAX_IDENTIFIANT}
-          autoComplete="username"
-          autoCapitalize="none"
-          spellCheck={false}
-          required
-          aide={textes.aideIdentifiant(LONGUEUR_MIN_IDENTIFIANT, LONGUEUR_MAX_IDENTIFIANT)}
-          erreur={erreurs?.identifiant}
-          data-focus-initial
-        />
+        <div className="flex flex-col gap-2">
+          <ChampFormulaire
+            nom="identifiant"
+            libelle={textes.identifiant}
+            defaultValue={etat.identifiantSaisi ?? ""}
+            placeholder={textes.exempleIdentifiant}
+            maxLength={LONGUEUR_MAX_IDENTIFIANT}
+            autoComplete="username"
+            autoCapitalize="none"
+            spellCheck={false}
+            required
+            aria-describedby={erreurs?.identifiant ? "aide-identifiant erreur-identifiant" : "aide-identifiant"}
+            erreur={erreurs?.identifiant}
+            data-focus-initial
+          />
+          <p id="aide-identifiant" className="text-sm text-texte-secondaire">{textes.aideIdentifiant(LONGUEUR_MIN_IDENTIFIANT, LONGUEUR_MAX_IDENTIFIANT)}</p>
+        </div>
         {CHAMPS_MOT_DE_PASSE.map(({ nom, libelle, aide }) => {
           const erreur = erreurs?.[nom];
           const idAide = aide ? `aide-${nom}` : undefined;

@@ -1,7 +1,6 @@
 /** Textes de Consultation > Planning (planning mensuel et annuel d'un employé). */
 export const TEXTES_PLANNING = {
   titrePage: "Planning",
-  sousTitre: "Le planning d'un employé sur un mois ou sur une année : horaire prévu, événements, temps réalisé et anomalies.",
   chargement: "Chargement du planning...",
   miseAJour: "Mise à jour du planning...",
   droits: "Votre compte n'a pas accès à cette page. Demandez-la au super administrateur.",

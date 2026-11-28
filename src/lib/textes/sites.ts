@@ -1,8 +1,6 @@
 /** Textes de la gestion des sites (entreprises ou établissements). */
 export const TEXTES_SITES = {
   titrePage: "Sites",
-  sousTitre:
-    "Ajoutez les entreprises ou établissements que vous gérez, puis rattachez-y départements, postes et employés.",
   chargement: "Chargement des sites...",
   titre: "Sites",
   total: (n: number) => (n <= 1 ? `${n} site` : `${n} sites`),

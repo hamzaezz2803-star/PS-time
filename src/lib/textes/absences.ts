@@ -5,8 +5,6 @@ const pointages = TEXTES_EXCEPTIONS.pointages;
 
 export const TEXTES_ABSENCES = {
   titrePage: "Absences et événements",
-  sousTitre:
-    "Indiquez pourquoi un employé n'a pas pointé ou n'était pas au poste : congé, maladie, formation, mission... Le tableau de bord et le Détail jour en tiennent compte.",
   chargement: "Chargement des absences...",
   droits: pointages.droits,
   titreListe: "Absences et événements saisis",
@@ -58,17 +56,14 @@ export const TEXTES_ABSENCES = {
   aucunEmployeTrouve: pointages.aucunEmployeTrouve,
   evenement: "Événement",
   choisirEvenement: "Choisir un événement...",
-  aideEvenement: "Les événements masqués du planning ne sont pas proposés.",
   duree: "Durée",
   journees: "Journées entières",
   enHeures: "Quelques heures",
-  aideEnHeures: "Possible seulement pour un événement « saisi en heures », sur un seul jour.",
   du: "Du",
   au: "Au",
   jour: "Jour",
   de: "De",
   a: "À",
-  aideHeures: "Heures locales de l'entreprise (Casablanca).",
   remarque: "Remarque",
   exempleRemarque: "Par exemple : certificat médical reçu",
   enregistrer: "Enregistrer",

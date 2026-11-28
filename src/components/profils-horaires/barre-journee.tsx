@@ -41,17 +41,14 @@ export function BarreJournee({ plages, avecReperes = false, className }: { plage
   );
 }
 
-/** Légende des types de plage, avec leur explication. */
+/** Légende des types de plage. */
 export function LegendePlages() {
   return (
     <ul className="grid gap-2 text-sm text-texte sm:grid-cols-2">
       {TYPES_PLAGE.map((type) => (
         <li key={type} className="flex items-start gap-2">
           <span className={cn("mt-0.5 size-4 shrink-0 rounded ring-1 ring-inset ring-bordure", COULEURS_PLAGE[type])} aria-hidden="true" />
-          <span>
-            <span className="font-medium">{libelle(type)}</span>
-            <span className="text-texte-secondaire"> : {TEXTES_PROFILS.typesPlage[type].aide}</span>
-          </span>
+          <span className="font-medium">{libelle(type)}</span>
         </li>
       ))}
     </ul>

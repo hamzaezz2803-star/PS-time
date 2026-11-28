@@ -2,7 +2,6 @@
 
 export const TEXTES_RAPPORT = {
   titrePage: "Rapport des présences",
-  sousTitre: "Pour les employés en horaire dynamique : le premier pointage de chaque jour et l'horaire reconnu par les règles.",
   chargement: "Chargement du rapport...",
   droits: "Votre compte n'a pas accès à cette page. Demandez-la au super administrateur.",
   echec: "Le rapport n'a pas pu être chargé. Réessayez dans un instant.",
@@ -18,7 +17,6 @@ export const TEXTES_RAPPORT = {
     ceMois: "Ce mois",
     septJours: "7 derniers jours",
     trenteJours: "30 derniers jours",
-    aideLimite: (jours: number) => `${jours} jours au plus par recherche.`,
     filtrer: "Filtrer par nom ou matricule",
     exempleFiltre: "Nom ou matricule",
   },

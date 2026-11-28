@@ -41,7 +41,6 @@ export const TEXTES_NOTIFICATIONS = {
   ilYA: (minutes: number) => (minutes < 1 ? "à l'instant" : minutes < 60 ? `il y a ${minutes} min` : `il y a ${Math.floor(minutes / 60)} h ${String(minutes % 60).padStart(2, "0")}`),
   nouveau: "Nouveau",
   erreur: "Impossible de charger les notifications. Nouvel essai dans quelques secondes.",
-  aideConservation: (jours: number) => `Les ${jours} derniers jours, selon vos pages.`,
   /** « Salma a créé le site « Usine » » ; pour un pointage, le libellé dit l'état et le nombre. */
   phrase: (notification: Pick<Notification, "action" | "objet" | "libelle">, auteur: string) => {
     if (notification.objet === "mot_de_passe") return `${auteur} a changé son mot de passe`;

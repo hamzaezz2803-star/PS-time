@@ -1,8 +1,6 @@
 /** Textes de la gestion des départements. */
 export const TEXTES_DEPARTEMENTS = {
   titrePage: "Départements",
-  sousTitre:
-    "Organisez votre entreprise en départements et sous-départements. Cliquez sur un département pour le modifier.",
   chargement: "Chargement des départements...",
   arbre: {
     titre: "Organisation",

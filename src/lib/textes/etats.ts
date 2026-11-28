@@ -9,26 +9,21 @@ export const TEXTES_ETATS = {
   etats: {
     presences: {
       titre: "Présences et retards",
-      sousTitre: "Jour par jour et pour chaque employé : horaire prévu, entrée, sortie, temps travaillé, retard et statut du jour.",
       vide: "Aucun employé attendu, pointé ni absent sur cette période.",
     },
     evenements: {
       titre: "Absences et événements",
-      sousTitre:
-        "Congés, maladies, formations... saisis pour les employés. Jours comptés sur la période choisie : hors repos du planning, puis ceux où l'événement est validé (retenu, donc décompté des droits aux congés).",
       vide: "Aucun événement saisi sur cette période.",
     },
     conges: {
       titre: "Congés et soldes",
-      sousTitre: "Droits aux congés valables sur la période, avec le total, les jours pris, prévus et le solde prévisionnel.",
       vide: "Aucun droit aux congés sur cette période.",
     },
     "pointages-manuels": {
       titre: "Pointages manuels",
-      sousTitre: "Pointages saisis à la main (oubli de badge, badgeuse en panne...), avec qui les a saisis.",
       vide: "Aucun pointage manuel sur cette période.",
     },
-  } satisfies Record<Etat, { titre: string; sousTitre: string; vide: string }>,
+  } satisfies Record<Etat, { titre: string; vide: string }>,
 
   filtres: {
     titre: "Filtrer l'état",

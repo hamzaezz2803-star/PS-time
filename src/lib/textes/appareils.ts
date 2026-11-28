@@ -20,14 +20,11 @@ function dureeEcart(secondes: number): string {
 
 export const TEXTES_APPAREILS = {
   titrePage: "Badgeuses",
-  sousTitre: "Trouvez les badgeuses du réseau local du serveur et mettez-les à l'heure de PS Time pour qu'elles soient prêtes au pointage.",
   chargement: "Chargement des badgeuses...",
   droits: "Cette page est réservée au super administrateur.",
 
   reseau: {
     titre: "Réseau du serveur",
-    explication: (port: number) =>
-      `PS Time cherche les badgeuses ZKTeco (port ${port}) sur les réseaux privés de la machine qui l'héberge. Rien n'est enregistré en base : la liste est relue à chaque recherche.`,
     aucun: "Le serveur n'est relié à aucun réseau privé (10.x, 172.16 à 31.x, 192.168.x) : la recherche automatique est impossible.",
     serveur: "Serveur",
     plage: (reseau: string, longueur: number) => `${reseau}/${longueur}`,
@@ -47,7 +44,6 @@ export const TEXTES_APPAREILS = {
 
   ajout: {
     titre: "Badgeuse sur un autre réseau ?",
-    explication: "Saisissez son adresse IP (affichée dans le menu Communication de la badgeuse). Seules les adresses privées sont acceptées.",
     libelle: "Adresse IP de la badgeuse",
     exemple: "ex. 192.168.1.201",
     bouton: "Tester l'adresse",
@@ -107,7 +103,6 @@ export const TEXTES_APPAREILS = {
     verification: "Vérification...",
     synchroniser: "Synchroniser",
     synchronisation: "Synchronisation...",
-    aideSynchroniser: "Met la badgeuse à l'heure du serveur (Casablanca) et la remet en service pour le pointage.",
   },
 
   messages: {

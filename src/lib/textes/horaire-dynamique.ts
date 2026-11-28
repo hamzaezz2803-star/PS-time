@@ -6,8 +6,6 @@ const { commun } = TEXTES_PROGRAMME;
 export const TEXTES_HORAIRE_DYNAMIQUE = {
   ...commun,
   titrePage: "Horaire dynamique",
-  sousTitre:
-    "L'horaire du jour est reconnu d'après l'heure du premier pointage. Pour les employés concernés, la règle reconnue passe avant leur rotation.",
   chargement: "Chargement de l'horaire dynamique...",
   onglets: { libelle: "Sections de l'horaire dynamique", regles: "Règles", employes: "Employés concernés" },
 
@@ -36,17 +34,13 @@ export const TEXTES_HORAIRE_DYNAMIQUE = {
   // Formulaire
   heureDebut: "Premier pointage à partir de",
   heureFin: "Jusqu'à (exclu)",
-  aideFenetre: "Fenêtre de la même journée, sans passer minuit.",
   profil: "Profil horaire appliqué",
   choisirProfil: "Choisir un profil",
   jours: "Jours concernés",
-  aideJours: "Aucun jour coché = tous les jours.",
   tousLesJours: "Tous",
   joursOuvres: "Lun. à ven.",
   estActif: "Règle active",
-  aideActif: "Une règle inactive est gardée mais n'est plus appliquée.",
   couleur: "Couleur dans le rapport des présences",
-  aideCouleur: "Choisissez une couleur différente par règle : l'horaire reconnu se repère d'un coup d'œil.",
   apercu: "Aperçu",
   couleurChoisie: (nom: string) => `Couleur choisie : ${nom}`,
   nomsCouleurs: {
@@ -68,7 +62,6 @@ export const TEXTES_HORAIRE_DYNAMIQUE = {
 
   // Employés
   titreEmployes: "Employés concernés",
-  aideEmployes: "Cochez les employés dont l'horaire doit être reconnu d'après leur premier pointage. Les autres gardent leur rotation.",
   enregistrerEmployes: "Enregistrer la sélection",
   employesEnregistres: (n: number) =>
     n === 0 ? "Plus aucun employé n'utilise l'horaire dynamique." : n === 1 ? "1 employé utilise l'horaire dynamique." : `${n} employés utilisent l'horaire dynamique.`,

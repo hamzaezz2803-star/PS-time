@@ -6,7 +6,6 @@ const TAILLE_MAX_MO = Math.round(TAILLE_MAX_IMPORT_OCTETS / (1024 * 1024));
 
 export const TEXTES_SAUVEGARDE = {
   titrePage: "Sauvegarde",
-  sousTitre: "Exporter toutes les données de l'installation dans un fichier SQL, ou restaurer une sauvegarde faite par PS Time. Réservé au super administrateur.",
   chargement: "Chargement de la sauvegarde...",
   droits: "La sauvegarde est réservée au super administrateur.",
   confidentiel:

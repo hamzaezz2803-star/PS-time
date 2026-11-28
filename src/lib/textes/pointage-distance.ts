@@ -21,7 +21,6 @@ export const TEXTES_POINTAGE_DISTANCE = {
   appareils: { pc: "ordinateur", tablette: "tablette", telephone: "téléphone" },
   position: {
     titre: "Ma position",
-    aide: "Détectée automatiquement par votre appareil. Elle ne peut pas être choisie ni déplacée.",
     recherche: "Recherche de votre position...",
     precision: (metres: number) => `Précision : environ ${metres} m`,
     actualiser: "Actualiser la position",
@@ -33,7 +32,6 @@ export const TEXTES_POINTAGE_DISTANCE = {
   },
   photo: {
     titre: "Photo du pointage",
-    aide: "Prenez une photo sur le moment : le lieu où vous êtes, ou vous-même. Elle accompagne votre pointage.",
     demarrer: "Ouvrir la caméra",
     prendre: "Prendre la photo",
     reprendre: "Reprendre",

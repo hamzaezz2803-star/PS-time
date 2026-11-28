@@ -1,8 +1,6 @@
 /** Textes de la gestion des utilisateurs (réservée au super administrateur). */
 export const TEXTES_UTILISATEURS = {
   titrePage: "Utilisateurs",
-  sousTitre:
-    "Créez les comptes des administrateurs et choisissez, page par page, ce que chacun peut voir et gérer. Chacun ne voit que ses pages.",
   chargement: "Chargement des utilisateurs...",
   titre: "Comptes",
   total: (n: number) => (n <= 1 ? `${n} compte` : `${n} comptes`),
@@ -34,22 +32,14 @@ export const TEXTES_UTILISATEURS = {
     exempleNom: "Par exemple : Yassine Alaoui",
     identifiant: "Identifiant de connexion",
     exempleIdentifiant: "Par exemple : y.alaoui",
-    aideIdentifiant: (minimum: number, maximum: number) =>
-      `De ${minimum} à ${maximum} caractères : lettres minuscules sans accent, chiffres, point, tiret ou tiret bas. Ne peut plus être changé ensuite.`,
     motDePasse: "Mot de passe provisoire",
     nouveauMotDePasse: "Nouveau mot de passe provisoire",
-    aideMotDePasse: (minimum: number) =>
-      `Au moins ${minimum} caractères. À transmettre à la personne : elle devra le changer à sa première connexion.`,
-    aideNouveauMotDePasse: (minimum: number) =>
-      `Facultatif. Laissez vide pour garder le mot de passe actuel. Au moins ${minimum} caractères ; la personne devra le changer et ses sessions ouvertes seront fermées.`,
     confirmation: "Confirmer le mot de passe",
     pages: "Autorisations",
-    aidePages: "Cochez chaque page que ce compte peut voir et gérer. La case d'un module coche ou décoche toutes ses pages.",
     tout: "Tout",
     toutLeModule: (module: string) => `Tout le module ${module}`,
     compteModule: (accordees: number, total: number) => `${accordees} sur ${total}`,
     actif: "Compte actif",
-    aideActif: "Décoché : la personne ne peut plus se connecter et ses sessions sont fermées.",
     superAdmin: "Le super administrateur a accès à toutes les pages, à la gestion des utilisateurs et à l'apparence.",
   },
   modules: { personnel: "Personnel", planning: "Planning", presence: "Présence", etats: "État" },
