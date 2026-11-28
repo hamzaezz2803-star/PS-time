@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { changeLaVersion, colonnesDesPeriodicites, formaterMinutes, formaterValeur, periodicitesDesColonnes } from "./format.ts";
+import { changeLaVersion, colonnesDesPeriodicites, formaterMinutes, formaterValeur, periodicitesDesColonnes, resteAAdapter } from "./format.ts";
 
 describe("affichage des valeurs", () => {
   it("écrit les minutes en heures et minutes", () => {
@@ -33,5 +33,14 @@ describe("périodicités et versions", () => {
     assert.equal(changeLaVersion(avant, { ...avant, formule: "RETARD_MIN + 1" }), true);
     assert.equal(changeLaVersion(avant, { ...avant, unite: "heures" }), true);
     assert.equal(changeLaVersion(avant, { ...avant, periodicites: ["JOUR", "MOIS"] }), true);
+  });
+});
+
+describe("pack standard : compteur à adapter", () => {
+  it("reste à adapter tant que la formule n'est pas réécrite", () => {
+    assert.equal(resteAAdapter({ estAAdapter: true, formule: "0" }, "0"), true);
+    assert.equal(resteAAdapter({ estAAdapter: true, formule: "0" }, " 0 "), true);
+    assert.equal(resteAAdapter({ estAAdapter: true, formule: "0" }, "DUREE_TRAVAILLEE_MIN"), false);
+    assert.equal(resteAAdapter({ estAAdapter: false, formule: "0" }, "0"), false);
   });
 });

@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useRef, useState } from "react";
-import { Info } from "lucide-react";
+import { ChevronDown, Info, TriangleAlert } from "lucide-react";
 import { enregistrerCompteur } from "@/app/(connecte)/presence/compteurs/actions";
 import type { ProprietesFormulaireListe } from "@/components/liste/gestion-liste";
 import { caseSaisie, useFormulaireListe, valeurSaisie, type EtatFormulaireListe } from "@/components/liste/utiliser-formulaire-liste";
@@ -18,9 +18,10 @@ import { TEXTES_COMPTEURS as textes } from "@/lib/textes/compteurs";
 import { TEXTES_PERIODICITES } from "@/lib/textes/variables-compteurs";
 import { erreurFormule } from "@/lib/validation/compteur";
 import { cn } from "@/lib/utils";
-import type { Compteur } from "@/types";
+import type { Compteur, FichePackCompteur } from "@/types";
 import { AideFormule } from "./aide-formule";
 import { EditeurFormule } from "./editeur-formule";
+import { ExplicationPack } from "./explication-pack";
 import { TestFormule } from "./test-formule";
 import { VersionsCompteur } from "./versions-compteur";
 
@@ -35,6 +36,27 @@ export function FormulaireCompteur({ element, onTermine, onAnnuler }: Proprietes
       <ContenuCompteur key={etat.numeroReponse} etat={etat} compteur={element} />
       <PiedFormulaire message={etat.message} enCours={enCours} libelle={textes.enregistrer} libelleEnCours={textes.enregistrementEnCours} libelleAnnuler={textes.annuler} onAnnuler={onAnnuler} />
     </form>
+  );
+}
+
+/** Rappel de l'explication d'un compteur du pack standard, dépliable, en tête du formulaire. */
+function FichePack({ compteur, pack }: { compteur: Compteur; pack: FichePackCompteur }) {
+  return (
+    <details className="group rounded-xl border border-bordure bg-fond" open={compteur.estAAdapter}>
+      <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 px-4 text-sm font-semibold text-marine focus-visible:outline-2 focus-visible:outline-primaire [&::-webkit-details-marker]:hidden">
+        <ChevronDown className="size-4 shrink-0 transition-transform duration-150 group-open:rotate-180 motion-reduce:transition-none" aria-hidden="true" />
+        {textes.pack.fiche} · {textes.pack.numero(pack.numero)}
+      </summary>
+      <div className="flex flex-col gap-3 px-4 pb-4">
+        {compteur.estAAdapter && (
+          <p className="flex items-start gap-2 rounded-lg bg-attention/5 px-3 py-2 text-sm text-attention ring-1 ring-inset ring-attention/25">
+            <TriangleAlert className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+            {textes.pack.aideAAdapter}
+          </p>
+        )}
+        <ExplicationPack pack={pack} />
+      </div>
+    </details>
   );
 }
 
@@ -73,6 +95,7 @@ function ContenuCompteur({ etat, compteur }: { etat: EtatFormulaireListe; compte
   return (
     <div className="grid min-h-0 flex-1 gap-5 overflow-y-auto px-5 py-5 sm:px-6 lg:grid-cols-[minmax(0,1fr)_18rem]">
       <div className="flex min-w-0 flex-col gap-5">
+        {compteur?.pack && <FichePack compteur={compteur} pack={compteur.pack} />}
         <div className="grid gap-4 sm:grid-cols-[12rem_minmax(0,1fr)]">
           <ChampFormulaire nom="code" libelle={textes.code} defaultValue={valeurSaisie(etat, "code", compteur?.code ?? "")} readOnly={compteur !== undefined} aide={textes.aideCode} erreur={erreurs?.code} className="font-mono uppercase read-only:bg-fond" maxLength={30} required />
           <ChampFormulaire nom="libelle" libelle={textes.libelle} defaultValue={valeurSaisie(etat, "libelle", compteur?.nom ?? "")} placeholder={textes.exempleLibelle} erreur={erreurs?.libelle} data-focus-initial={compteur ? true : undefined} maxLength={100} required />
@@ -111,7 +134,10 @@ function ContenuCompteur({ etat, compteur }: { etat: EtatFormulaireListe; compte
           <textarea id="description" name="description" rows={2} maxLength={LONGUEUR_MAX_DESCRIPTION_COMPTEUR} defaultValue={valeurSaisie(etat, "description", compteur?.description ?? "")} aria-invalid={erreurs?.description ? true : undefined} className="w-full rounded-lg border border-bordure-champ bg-surface px-3.5 py-2.5 text-base text-texte focus-visible:border-primaire focus-visible:outline-2 focus-visible:outline-primaire" />
           <MessageErreur message={erreurs?.description} />
         </div>
-        <CaseACocher nom="estActif" libelle={textes.estActif} aide={textes.aideActif} defaultChecked={caseSaisie(etat, "estActif", compteur?.estActif ?? true)} />
+        <div className="flex flex-col gap-1">
+          <CaseACocher nom="estActif" libelle={textes.estActif} aide={textes.aideActif} defaultChecked={caseSaisie(etat, "estActif", compteur?.estActif ?? true)} aria-invalid={erreurs?.estActif ? true : undefined} />
+          <MessageErreur message={erreurs?.estActif} />
+        </div>
 
         <TestFormule formule={formule} periodicites={periodicites} unite={unite} />
         {compteur && <VersionsCompteur compteurId={compteur.id} versionActuelle={compteur.version} />}

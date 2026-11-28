@@ -2,25 +2,32 @@
 
 import { useState } from "react";
 import { Gauge } from "lucide-react";
-import { changerEtatCompteur, supprimerCompteur } from "@/app/(connecte)/presence/compteurs/actions";
+import { supprimerCompteur } from "@/app/(connecte)/presence/compteurs/actions";
 import { GestionListe, type ColonneListe } from "@/components/liste/gestion-liste";
-import { Interrupteur } from "@/components/ui/interrupteur";
+import { ListeOnglets, PanneauOnglet } from "@/components/ui/onglets";
 import { Pastille } from "@/components/ui/pastille";
 import { PERIODICITES, type Periodicite } from "@/lib/metier/compteurs/periodes";
 import { TEXTES_COMPTEURS as textes } from "@/lib/textes/compteurs";
 import { TEXTES_PERIODICITES } from "@/lib/textes/variables-compteurs";
-import { cn } from "@/lib/utils";
 import type { Compteur } from "@/types";
+import { BoutonFiltre } from "./bouton-filtre";
+import { EtatCompteur } from "./carte-compteur-pack";
+import { CataloguePack, compteursDuPack } from "./catalogue-pack";
 import { FormulaireCompteur } from "./formulaire-compteur";
 
 type FiltreEtat = "tous" | "actifs" | "inactifs";
+type Onglet = "pack" | "tous";
+const BASE_ONGLETS = "compteurs";
 
 const COLONNES: ColonneListe<Compteur>[] = [
   {
     titre: textes.colonnes.compteur,
     rendu: (compteur) => (
       <span className="flex min-w-0 flex-col">
-        <span>{compteur.nom}</span>
+        <span className="flex flex-wrap items-center gap-2">
+          {compteur.nom}
+          {compteur.pack && <Pastille ton="info">{`${textes.pack.badgePack} · ${textes.pack.numero(compteur.pack.numero)}`}</Pastille>}
+        </span>
         <span className="truncate font-mono text-sm font-normal text-texte-secondaire">{compteur.code}</span>
       </span>
     ),
@@ -36,37 +43,11 @@ const COLONNES: ColonneListe<Compteur>[] = [
     ),
   },
   { titre: textes.colonnes.unite, estSecondaire: true, rendu: (compteur) => textes.unitesCourtes[compteur.unite] },
-  {
-    titre: textes.colonnes.etat,
-    rendu: (compteur) => (
-      <Interrupteur
-        estActif={compteur.estActif}
-        basculer={(nouvelEtat) => changerEtatCompteur(compteur.id, nouvelEtat)}
-        libelles={{ actif: textes.actif, inactif: textes.inactif, activer: textes.activer(compteur.nom), desactiver: textes.desactiver(compteur.nom) }}
-      />
-    ),
-  },
+  { titre: textes.colonnes.etat, rendu: (compteur) => <EtatCompteur compteur={compteur} /> },
 ];
 
-/** Bouton d'un filtre (état pressé annoncé aux lecteurs d'écran). */
-function BoutonFiltre({ estChoisi, onClick, children }: { estChoisi: boolean; onClick: () => void; children: string }) {
-  return (
-    <button
-      type="button"
-      aria-pressed={estChoisi}
-      onClick={onClick}
-      className={cn(
-        "min-h-11 rounded-md px-3 text-sm font-medium transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-primaire lg:min-h-9",
-        estChoisi ? "bg-surface text-marine shadow-carte ring-1 ring-bordure" : "text-texte-secondaire hover:text-texte",
-      )}
-    >
-      {children}
-    </button>
-  );
-}
-
-/** Liste des compteurs avec filtres (périodicité, état), création et modification en fenêtre. */
-export function GestionCompteurs({ compteurs }: { compteurs: Compteur[] }) {
+/** Liste de tous les compteurs avec filtres (périodicité, état), création et modification en fenêtre. */
+function ListeCompteurs({ compteurs }: { compteurs: Compteur[] }) {
   const [periodicite, setPeriodicite] = useState<Periodicite | null>(null);
   const [filtreEtat, setFiltreEtat] = useState<FiltreEtat>("tous");
   const visibles = compteurs.filter(
@@ -100,6 +81,28 @@ export function GestionCompteurs({ compteurs }: { compteurs: Compteur[] }) {
         rendreFormulaire={(proprietes) => <FormulaireCompteur {...proprietes} />}
         actionSupprimer={supprimerCompteur}
       />
+    </div>
+  );
+}
+
+/** Page des compteurs : onglet du pack standard (explications, activation) et liste de tous les compteurs. */
+export function GestionCompteurs({ compteurs }: { compteurs: Compteur[] }) {
+  const pack = compteursDuPack(compteurs);
+  const [onglet, setOnglet] = useState<Onglet>(pack.length > 0 ? "pack" : "tous");
+  const onglets = [
+    { id: "pack", libelle: textes.pack.ongletPack(pack.length) },
+    { id: "tous", libelle: textes.pack.ongletTous(compteurs.length) },
+  ];
+
+  return (
+    <div className="flex flex-col">
+      <ListeOnglets base={BASE_ONGLETS} onglets={onglets} actif={onglet} onChanger={(id) => setOnglet(id as Onglet)} libelle={textes.pack.libelleOnglets} />
+      <PanneauOnglet base={BASE_ONGLETS} id="pack" actif={onglet}>
+        <CataloguePack compteurs={pack} />
+      </PanneauOnglet>
+      <PanneauOnglet base={BASE_ONGLETS} id="tous" actif={onglet}>
+        <ListeCompteurs compteurs={compteurs} />
+      </PanneauOnglet>
     </div>
   );
 }

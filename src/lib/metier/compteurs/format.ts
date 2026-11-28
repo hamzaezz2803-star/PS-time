@@ -48,6 +48,11 @@ export function colonnesDesPeriodicites(periodicites: readonly Periodicite[]): C
   return { journalier: periodicites.includes("JOUR"), hebdomadaire: periodicites.includes("SEMAINE"), mensuel: periodicites.includes("MOIS") };
 }
 
+/** Un compteur du pack « à adapter » le reste tant que sa formule n'a pas été réécrite. */
+export function resteAAdapter(avant: { estAAdapter: boolean; formule: string }, formuleApres: string): boolean {
+  return avant.estAAdapter && avant.formule.trim() === formuleApres.trim();
+}
+
 /** Vrai si un changement oblige à créer une nouvelle version (formule, unité ou périodicités). */
 export function changeLaVersion(
   avant: { formule: string; unite: string; periodicites: readonly Periodicite[] },

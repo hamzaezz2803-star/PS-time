@@ -3,7 +3,7 @@ import "server-only";
 import { and, asc, desc, eq } from "drizzle-orm";
 import { FAMILLES_COMPTEUR, LIMITE_COMPTEURS } from "@/lib/constantes";
 import type { DefinitionCompteur } from "@/lib/metier/compteurs/calcul";
-import { changeLaVersion, colonnesDesPeriodicites, periodicitesDesColonnes, type UniteCompteur } from "@/lib/metier/compteurs/format";
+import { changeLaVersion, colonnesDesPeriodicites, periodicitesDesColonnes, resteAAdapter, type UniteCompteur } from "@/lib/metier/compteurs/format";
 import type { DonneesCompteur } from "@/lib/validation/compteur";
 import type { Compteur, FichePackCompteur, VersionCompteur } from "@/types";
 import { obtenirBase } from "./base";
@@ -126,7 +126,7 @@ export async function enregistrerCompteur(id: string | null, donnees: DonneesCom
       const [actuel] = await transaction.select(colonnes).from(compteurs).where(eq(compteurs.id, id)).for("update");
       if (!actuel) return { ok: false, erreur: "introuvable" };
       // Un compteur du pack « à adapter » le reste tant que sa formule n'a pas été réécrite.
-      const estAAdapter = actuel.estAAdapter && actuel.formule === donnees.formule;
+      const estAAdapter = resteAAdapter(actuel, donnees.formule);
       if (estAAdapter && donnees.estActif) return { ok: false, erreur: "a_adapter" };
       const nouvelleVersion = changeLaVersion(versCompteur(actuel), donnees) ? actuel.version + 1 : actuel.version;
       await transaction.update(compteurs).set({ ...champs, estAAdapter, version: nouvelleVersion }).where(eq(compteurs.id, id));
