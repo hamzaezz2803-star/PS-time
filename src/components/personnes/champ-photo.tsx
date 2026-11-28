@@ -72,10 +72,12 @@ export function ChampPhoto({ employeId, photoModifieeLe, erreur }: { employeId?:
       <div className="flex min-w-0 flex-1 flex-col gap-2">
         <div>
           <p className="text-sm font-medium text-texte">{textes.libelle}</p>
-          <p id="aide-photo" className="text-sm text-texte-secondaire">{enCours ? textes.traitement : estRetiree ? textes.retiree : textes.aide}</p>
+          {(enCours || estRetiree) && (
+            <p id="etat-photo" className="text-sm text-texte-secondaire">{enCours ? textes.traitement : textes.retiree}</p>
+          )}
         </div>
         <div className="flex flex-wrap gap-2">
-          <Bouton variante="contour" onClick={() => champChoix.current?.click()} disabled={enCours} aria-describedby="aide-photo">
+          <Bouton variante="contour" onClick={() => champChoix.current?.click()} disabled={enCours} aria-describedby={enCours || estRetiree ? "etat-photo" : undefined}>
             <Camera className="size-4" aria-hidden="true" />
             {imageAffichee ? textes.changer : textes.choisir}
           </Bouton>

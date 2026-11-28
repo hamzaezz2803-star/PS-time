@@ -3,7 +3,7 @@ import { FileSpreadsheet, FileText, Search } from "lucide-react";
 import { Bouton } from "@/components/ui/bouton";
 import { ChampCalendrier } from "@/components/ui/champ-calendrier";
 import { Etiquette } from "@/components/ui/etiquette";
-import { CHEMIN_ETAT, CHEMIN_EXPORT_ETAT, CHEMIN_IMPRESSION_ETAT, LONGUEUR_MAX_RECHERCHE, RAPPORT_JOURS_DEFAUT, RAPPORT_JOURS_MAX } from "@/lib/constantes";
+import { CHEMIN_ETAT, CHEMIN_EXPORT_ETAT, CHEMIN_IMPRESSION_ETAT, LONGUEUR_MAX_RECHERCHE, RAPPORT_JOURS_DEFAUT } from "@/lib/constantes";
 import { aplatirArbre, construireArbre, type ElementArbre } from "@/lib/metier/arbre";
 import { ajouterJours } from "@/lib/metier/compteurs/periodes";
 import type { Etat } from "@/lib/metier/etats";
@@ -58,7 +58,6 @@ export function FiltresEtat({ etat, recherche, departements, aujourdhui }: { eta
           {textes.rechercher}
         </Bouton>
       </form>
-      <p className="-mt-2 text-sm text-texte-secondaire">{textes.aideLimite(RAPPORT_JOURS_MAX)}</p>
 
       <div className="flex flex-wrap items-center gap-x-6 gap-y-3 border-t border-bordure pt-4">
         <div className="flex flex-wrap items-center gap-2">

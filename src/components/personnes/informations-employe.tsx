@@ -39,8 +39,6 @@ export function InformationsEmploye({
 
   return (
     <div className="flex flex-col gap-4">
-      <p className="text-sm text-texte-secondaire">{textes.description}</p>
-
       {lignes.length === 0 ? (
         <p className="rounded-lg border border-dashed border-bordure-champ px-4 py-5 text-center text-sm text-texte-secondaire">
           {textes.aucune}

@@ -1,7 +1,7 @@
 import { CircleAlert, CircleCheck, CircleHelp, Clock4, MoonStar, type LucideIcon } from "lucide-react";
 import { Pastille } from "@/components/ui/pastille";
 import type { CodeStatut, StatutPointage } from "@/lib/metier/statut-pointage";
-import { libelleService, libelleStatut, TEXTES_STATUT_POINTAGE } from "@/lib/textes/statut-pointage";
+import { libelleService, libelleStatut } from "@/lib/textes/statut-pointage";
 
 type Ton = "succes" | "info" | "attention" | "neutre";
 
@@ -26,9 +26,8 @@ const APPARENCE: Record<CodeStatut, { ton: Ton; Icone: LucideIcon }> = {
 export function ResultatPointage({ statut }: { statut: StatutPointage }) {
   const { ton, Icone } = APPARENCE[statut.code];
   const service = libelleService(statut);
-  const explication = TEXTES_STATUT_POINTAGE.explications[statut.code];
   return (
-    <span className="flex flex-col items-start gap-1" title={explication}>
+    <span className="flex flex-col items-start gap-1">
       <Pastille ton={ton} Icone={Icone}>{libelleStatut(statut)}</Pastille>
       {service && <span className="text-sm text-texte-secondaire tabular-nums">{service}</span>}
     </span>

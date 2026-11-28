@@ -73,9 +73,8 @@ export function ChoixPages({ initiales, erreur }: { initiales: Page[]; erreur?: 
     setCoches((actuelles) => (estCoche ? [...new Set([...actuelles, ...pages])] : actuelles.filter((p) => !pages.includes(p))));
 
   return (
-    <fieldset className="flex flex-col gap-2" aria-describedby="aide-pages">
+    <fieldset className="flex flex-col gap-2">
       <legend className="text-base font-semibold text-marine">{champs.pages}</legend>
-      <p id="aide-pages" className="text-sm text-texte-secondaire">{champs.aidePages}</p>
       <div className="mt-1 overflow-hidden rounded-lg border border-bordure">
         <label className="flex min-h-12 cursor-pointer items-center gap-3 border-b-2 border-bordure px-4 text-base font-semibold text-texte">
           <CaseEnsemble coches={nombreCoches} total={PAGES_PROPOSEES.length} onChange={() => fixer(PAGES_PROPOSEES, nombreCoches < PAGES_PROPOSEES.length)} />

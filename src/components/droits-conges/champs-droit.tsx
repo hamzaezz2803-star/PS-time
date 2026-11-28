@@ -77,15 +77,10 @@ function BilanDroit({ bilan, unite }: { bilan: DroitCongeListe["bilan"]; unite: 
   );
 }
 
-/** Un choix de la fiche (deux cartes) avec son explication. */
-function Choix<V extends string>({ nom, legende, aide, options, initiale }: { nom: string; legende: string; aide: string; options: OptionCarte<V>[]; initiale: V }) {
+/** Un choix de la fiche (deux cartes). */
+function Choix<V extends string>({ nom, legende, options, initiale }: { nom: string; legende: string; options: OptionCarte<V>[]; initiale: V }) {
   const [valeur, setValeur] = useState<V>(initiale);
-  return (
-    <div className="flex flex-col gap-1">
-      <ChoixCartes nom={nom} legende={legende} options={options} valeur={valeur} onChanger={setValeur} />
-      <p className="text-sm text-texte-secondaire">{aide}</p>
-    </div>
-  );
+  return <ChoixCartes nom={nom} legende={legende} options={options} valeur={valeur} onChanger={setValeur} />;
 }
 
 /** Confirmation, solde et report : les choix Oui / Non de la fiche. */
@@ -96,9 +91,9 @@ function Reglages({ etat, initiales }: { etat: EtatFormulaireListe; initiales: V
   };
   return (
     <>
-      <Choix nom="estConfirme" legende={textes.confirmation} aide={textes.aideConfirmation} options={OPTIONS_OUI_NON} initiale={lire("estConfirme", enOuiNon(initiales.estConfirme), ["oui", "non"])} />
-      <Choix nom="solde" legende={textes.solde} aide={textes.aideSolde} options={OPTIONS_SOLDE} initiale={lire<Solde>("solde", initiales.estBloquant ? "positif" : "negatif", ["positif", "negatif"])} />
-      <Choix nom="estReporte" legende={textes.reportSurPeriode} aide={textes.aideReport} options={OPTIONS_OUI_NON} initiale={lire("estReporte", enOuiNon(initiales.estReporte), ["oui", "non"])} />
+      <Choix nom="estConfirme" legende={textes.confirmation} options={OPTIONS_OUI_NON} initiale={lire("estConfirme", enOuiNon(initiales.estConfirme), ["oui", "non"])} />
+      <Choix nom="solde" legende={textes.solde} options={OPTIONS_SOLDE} initiale={lire<Solde>("solde", initiales.estBloquant ? "positif" : "negatif", ["positif", "negatif"])} />
+      <Choix nom="estReporte" legende={textes.reportSurPeriode} options={OPTIONS_OUI_NON} initiale={lire("estReporte", enOuiNon(initiales.estReporte), ["oui", "non"])} />
     </>
   );
 }

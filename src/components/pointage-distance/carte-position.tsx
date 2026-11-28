@@ -18,13 +18,10 @@ export function CartePosition({ etat, onActualiser }: { etat: EtatPosition; onAc
   return (
     <section className="flex h-full flex-col gap-3 rounded-xl border border-bordure bg-surface p-5 shadow-carte" aria-labelledby="titre-position">
       <div className="flex items-start justify-between gap-3">
-        <div className="flex flex-col gap-1">
-          <h2 id="titre-position" className="flex items-center gap-2 text-lg font-semibold text-marine">
-            <MapPin className="size-5 text-primaire" aria-hidden="true" />
-            {textes.titre}
-          </h2>
-          <p className="text-sm text-texte-secondaire">{textes.aide}</p>
-        </div>
+        <h2 id="titre-position" className="flex items-center gap-2 text-lg font-semibold text-marine">
+          <MapPin className="size-5 text-primaire" aria-hidden="true" />
+          {textes.titre}
+        </h2>
         <Bouton variante="fantome" onClick={onActualiser} disabled={etat.etat === "recherche" || etat.etat === "nonPrise"} aria-label={textes.actualiser} title={textes.actualiser}>
           <RefreshCw className="size-5" aria-hidden="true" />
         </Bouton>

@@ -51,9 +51,8 @@ export function EditeurPlages({ initiales, erreur }: { initiales: LignePlage[]; 
   const retirer = (rang: number) => setLignes((actuelles) => actuelles.filter((_, i) => i !== rang));
 
   return (
-    <fieldset className="flex flex-col gap-3" aria-describedby="aide-plages">
+    <fieldset className="flex flex-col gap-3">
       <legend className="text-base font-semibold text-marine">{champs.plages}</legend>
-      <p id="aide-plages" className="text-sm text-texte-secondaire">{champs.aidePlages}</p>
 
       <div className="rounded-xl border border-bordure bg-fond p-4">
         <BarreJournee plages={plages} avecReperes />

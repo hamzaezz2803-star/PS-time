@@ -49,7 +49,6 @@ export function JaugePriorite({ valeurInitiale, erreur }: { valeurInitiale: numb
           value={valeur}
           onChange={(evenement) => setValeur(borner(evenement.target.valueAsNumber))}
           aria-valuetext={`${valeur}, ${niveau}`}
-          aria-describedby="aide-priorite"
           aria-invalid={erreur ? true : undefined}
           className="jauge-priorite relative h-11 w-full"
         />
@@ -58,7 +57,6 @@ export function JaugePriorite({ valeurInitiale, erreur }: { valeurInitiale: numb
         <span>0 · {niveauxPriorite.basse}</span>
         <span>{PRIORITE_EVENEMENT_MAX} · {niveauxPriorite.haute}</span>
       </div>
-      <p id="aide-priorite" className="text-sm text-texte-secondaire">{champs.aidePriorite}</p>
       <MessageErreur message={erreur} />
     </div>
   );

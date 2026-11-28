@@ -9,7 +9,6 @@ const textes = TEXTES_PROGRAMME.rotations;
 type TypeRotation = (typeof TYPES_ROTATION)[number];
 
 const ICONES_TYPE: Record<TypeRotation, LucideIcon> = { hebdomadaire: CalendarDays, cycle: Repeat };
-const AIDES_TYPE: Record<TypeRotation, string> = { hebdomadaire: textes.aideHebdomadaire, cycle: textes.aideCycle };
 
 /** Choix du type de rotation, en deux cartes cliquables (boutons radio). */
 export function ChoixTypeRotation({ type, onChange }: { type: TypeRotation; onChange: (type: TypeRotation) => void }) {
@@ -32,10 +31,7 @@ export function ChoixTypeRotation({ type, onChange }: { type: TypeRotation; onCh
               <span className={cn("flex size-9 shrink-0 items-center justify-center rounded-lg", estChoisi ? "bg-primaire text-white" : "bg-canevas text-texte-secondaire")}>
                 <Icone className="size-5" aria-hidden="true" />
               </span>
-              <span className="flex flex-1 flex-col gap-0.5 pe-6">
-                <span className="text-base font-semibold text-texte">{textes.types[valeur]}</span>
-                <span className="text-sm text-texte-secondaire">{AIDES_TYPE[valeur]}</span>
-              </span>
+              <span className="flex-1 pe-6 text-base font-semibold text-texte">{textes.types[valeur]}</span>
               {estChoisi && <CircleCheck className="absolute end-3 top-3 size-5 text-primaire" aria-hidden="true" />}
             </label>
           );

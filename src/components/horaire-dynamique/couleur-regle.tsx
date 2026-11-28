@@ -45,7 +45,6 @@ export function ChoixCouleurRegle({ valeur, onChange, apercu }: { valeur: Couleu
         <PastilleRegle couleur={valeur} code={apercu.code} nom={apercu.nom} />
         <span className="sr-only">{textes.couleurChoisie(textes.nomsCouleurs[valeur])}</span>
       </p>
-      <p className="text-sm text-texte-secondaire">{textes.aideCouleur}</p>
     </fieldset>
   );
 }

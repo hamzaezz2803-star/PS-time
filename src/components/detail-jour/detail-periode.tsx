@@ -17,7 +17,7 @@ const colonnes = TEXTES_DETAIL_JOUR.jour;
  * jours qui composent la valeur (horaire, entrée et sortie, temps travaillé, retard, événement
  * retenu, valeur du jour si le compteur en a une).
  */
-export function DetailPeriode({ compteur, valeur, periode, jours, finCalcul }: { compteur: Compteur; valeur: ValeurAffichee; periode: string; jours: JourDetail[]; finCalcul: string }) {
+export function DetailPeriode({ compteur, valeur, periode, jours }: { compteur: Compteur; valeur: ValeurAffichee; periode: string; jours: JourDetail[] }) {
   const [estOuverte, setEstOuverte] = useState(false);
   const aValeurJour = compteur.periodicites.includes("JOUR");
   const valeurDuJour = (jour: JourDetail) => jour.valeurs.find((element) => element.idCompteur === compteur.id)?.valeur ?? null;
@@ -37,7 +37,6 @@ export function DetailPeriode({ compteur, valeur, periode, jours, finCalcul }: {
             <span className="text-2xl font-semibold text-marine tabular-nums">{valeur.valeur === null ? textes.nonCalculable : formaterValeur(valeur.valeur, compteur.unite)}</span>
             <p className="w-full font-mono text-sm text-texte-secondaire">{compteur.formule}</p>
           </div>
-          <p className="text-sm text-texte-secondaire">{aValeurJour ? textes.explication(formaterJour(finCalcul)) : textes.sansCompteurJour}</p>
           <div className="-mx-5 overflow-x-auto sm:-mx-6">
             <table className="w-full text-left text-sm">
               <thead className="border-y border-bordure bg-fond/70 text-texte-secondaire">

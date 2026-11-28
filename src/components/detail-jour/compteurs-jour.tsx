@@ -110,7 +110,7 @@ function GroupePeriode({ detail, periodicite }: { detail: DetailJour; periodicit
                 key={valeur.idCompteur}
                 compteur={compteur}
                 valeur={valeur}
-                detail={<DetailPeriode compteur={compteur} valeur={valeur} periode={sousTitre} jours={jours} finCalcul={periode.finCalcul} />}
+                detail={<DetailPeriode compteur={compteur} valeur={valeur} periode={sousTitre} jours={jours} />}
               />
             );
           })}

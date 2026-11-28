@@ -40,7 +40,6 @@ export function TestFormule({ formule, periodicites, unite }: { formule: string;
         {textes.titre}
       </summary>
       <div className="flex flex-col gap-3 border-t border-bordure p-3.5">
-        <p className="text-sm text-texte-secondaire">{textes.aide}</p>
         {periodicites.length > 1 && (
           <div className="flex flex-wrap items-center gap-2" role="group" aria-label={textes.periodicite}>
             <span className="text-sm text-texte-secondaire">{textes.periodicite}</span>

@@ -13,8 +13,6 @@ import { PiedFormulaire } from "@/components/ui/pied-formulaire";
 import {
   LONGUEUR_MAX_IDENTIFIANT,
   LONGUEUR_MAX_NOM_UTILISATEUR,
-  LONGUEUR_MIN_IDENTIFIANT,
-  LONGUEUR_MIN_MOT_DE_PASSE,
 } from "@/lib/constantes";
 import { nettoyerPages } from "@/lib/metier/droits";
 import { lireTexte } from "@/lib/validation/commun";

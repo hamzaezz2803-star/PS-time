@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { Etiquette } from "@/components/ui/etiquette";
 import { MessageErreur } from "@/components/ui/message-erreur";
-import { PIECE_JOINTE_TAILLE_MAX_OCTETS, PIECES_JOINTES_PAR_ENVOI_MAX } from "@/lib/constantes";
 import { TEXTES_DROITS_CONGES as textes } from "@/lib/textes/droits-conges";
 
 /** Extensions proposées par le sélecteur de fichiers ; le serveur revérifie le vrai format. */
@@ -21,13 +20,9 @@ export function ChampFichiers({ erreur, requis = false }: { erreur?: string; req
         multiple
         required={requis}
         accept={ACCEPT_PIECES_JOINTES}
-        aria-describedby="aide-fichiers"
         aria-invalid={erreur ? true : undefined}
         className="block w-full rounded-lg border border-bordure-champ bg-surface text-base text-texte file:me-3 file:min-h-11 file:cursor-pointer file:border-0 file:border-e file:border-bordure file:bg-ciel file:px-4 file:font-medium file:text-marine hover:file:bg-canevas focus-visible:outline-2 focus-visible:outline-primaire"
       />
-      <p id="aide-fichiers" className="text-sm text-texte-secondaire">
-        {textes.aideFichiers(PIECES_JOINTES_PAR_ENVOI_MAX, PIECE_JOINTE_TAILLE_MAX_OCTETS / (1024 * 1024))}
-      </p>
       <MessageErreur message={erreur} />
     </div>
   );

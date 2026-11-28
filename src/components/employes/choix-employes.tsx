@@ -17,7 +17,6 @@ export type TextesChoixEmployes = {
   selectionnes: (nombre: number) => string;
   aucunEmploye: string;
   aucunResultat: string;
-  aide?: string;
   /** Avec `departements` : filtre par département et cases « tout cocher ». */
   filtreDepartement?: string;
   tousDepartements?: string;
@@ -96,7 +95,6 @@ export function ChoixEmployes({
           </select>
         )}
       </div>
-      {textes.aide && <p className="text-sm text-texte-secondaire">{textes.aide}</p>}
       {textes.toutCocher && textes.toutDecocher && (
         <div className="flex flex-wrap gap-1">
           <button type="button" onClick={() => modifier([...idsVisibles], true)} disabled={visibles.length === 0} className="inline-flex min-h-11 items-center gap-1.5 rounded-md px-2 text-sm font-semibold text-primaire hover:bg-ciel focus-visible:outline-2 focus-visible:outline-primaire disabled:opacity-50 lg:min-h-9">

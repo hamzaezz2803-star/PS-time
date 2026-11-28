@@ -88,12 +88,9 @@ function ContenuRegle({
 
   return (
     <div className="flex flex-1 flex-col gap-5 overflow-y-auto px-5 py-5 sm:px-6">
-      <div className="flex flex-col gap-2">
-        <div className="grid gap-4 sm:grid-cols-2">
-          <ChampFormulaire nom="debut" libelle={textes.heureDebut} type="time" value={debut} onChange={(e) => setDebut(e.target.value)} required erreur={erreurs?.debut} />
-          <ChampFormulaire nom="fin" libelle={textes.heureFin} type="time" value={fin} onChange={(e) => setFin(e.target.value)} required erreur={erreurs?.fin} />
-        </div>
-        <p className="text-sm text-texte-secondaire">{textes.aideFenetre}</p>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <ChampFormulaire nom="debut" libelle={textes.heureDebut} type="time" value={debut} onChange={(e) => setDebut(e.target.value)} required erreur={erreurs?.debut} />
+        <ChampFormulaire nom="fin" libelle={textes.heureFin} type="time" value={fin} onChange={(e) => setFin(e.target.value)} required erreur={erreurs?.fin} />
       </div>
 
       <ChampSelection nom="profilId" libelle={textes.profil} options={profils} optionVide={textes.choisirProfil} value={profilId} onChange={(e) => setProfilId(e.target.value)} erreur={erreurs?.profilId} />
@@ -128,7 +125,6 @@ function ContenuRegle({
             {textes.tousLesJours}
           </button>
         </div>
-        <p className="text-sm text-texte-secondaire">{textes.aideJours}</p>
       </fieldset>
 
       <CaseACocher nom="estActif" libelle={textes.estActif} checked={estActif} onChange={(e) => setEstActif(e.target.checked)} />

@@ -104,7 +104,6 @@ function ContenuCompteur({ etat, compteur }: { etat: EtatFormulaireListe; compte
                 );
               })}
             </div>
-            <p className="text-sm text-texte-secondaire">{textes.aidePeriodicites}</p>
             <MessageErreur message={erreurs?.periodicites} />
           </fieldset>
           <ChampSelection nom="unite" libelle={textes.unite} options={OPTIONS_UNITES} value={unite} onChange={(e) => setUnite(e.target.value as UniteCompteur)} erreur={erreurs?.unite} />

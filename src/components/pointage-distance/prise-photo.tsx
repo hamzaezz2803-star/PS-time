@@ -91,7 +91,6 @@ export function PrisePhoto({ onChanger }: { onChanger: (photo: Blob | null) => v
         <Camera className="size-5 text-primaire" aria-hidden="true" />
         {textes.titre}
       </h2>
-      <p className="text-sm text-texte-secondaire">{textes.aide}</p>
 
       <div className="relative aspect-[3/4] w-full overflow-hidden rounded-lg bg-marine sm:aspect-video">
         <video ref={video} autoPlay playsInline muted aria-label={textes.video} className={estActif ? cn("size-full object-cover", miroir) : "hidden"} />

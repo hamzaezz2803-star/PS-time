@@ -3,7 +3,7 @@ import { FileSpreadsheet, FileText, Search } from "lucide-react";
 import { Bouton } from "@/components/ui/bouton";
 import { ChampCalendrier } from "@/components/ui/champ-calendrier";
 import { Etiquette } from "@/components/ui/etiquette";
-import { CHEMIN_EXPORT_RAPPORT_PRESENCES, CHEMIN_IMPRESSION_RAPPORT_PRESENCES, CHEMIN_RAPPORT_PRESENCES, RAPPORT_JOURS_DEFAUT, RAPPORT_JOURS_MAX } from "@/lib/constantes";
+import { CHEMIN_EXPORT_RAPPORT_PRESENCES, CHEMIN_IMPRESSION_RAPPORT_PRESENCES, CHEMIN_RAPPORT_PRESENCES, RAPPORT_JOURS_DEFAUT } from "@/lib/constantes";
 import { aplatirArbre, construireArbre, type ElementArbre } from "@/lib/metier/arbre";
 import { ajouterJours } from "@/lib/metier/compteurs/periodes";
 import { periodeRapide } from "@/lib/metier/rapport-presences";
@@ -52,7 +52,6 @@ export function FiltresRapport({ recherche, departements, aujourdhui }: { recher
           {textes.rechercher}
         </Bouton>
       </form>
-      <p className="-mt-2 text-sm text-texte-secondaire">{textes.aideLimite(RAPPORT_JOURS_MAX)}</p>
 
       <div className="flex flex-wrap items-center gap-x-6 gap-y-3 border-t border-bordure pt-4">
         <div className="flex flex-wrap items-center gap-2">

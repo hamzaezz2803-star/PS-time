@@ -54,7 +54,6 @@ export function ChoixDoigts({ valeurInitiale }: { valeurInitiale: string }) {
   return (
     <section className="flex flex-col gap-3">
       <h3 className="text-base font-semibold text-marine">{textes.empreintes}</h3>
-      <p className="text-sm text-texte-secondaire">{textes.aideEmpreintes(DOIGTS_CONSEILLES)}</p>
       <div className="grid gap-3 sm:grid-cols-2">
         <Main titre={textes.mainGauche} doigts={DOIGTS.slice(0, 5)} choisis={choisis} onBasculer={basculer} />
         <Main titre={textes.mainDroite} doigts={DOIGTS.slice(5)} choisis={choisis} onBasculer={basculer} />

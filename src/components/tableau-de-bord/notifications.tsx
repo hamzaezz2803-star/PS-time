@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Bell, BellOff, Fingerprint, Hand, KeyRound, Pencil, Plus, Trash2, type LucideIcon } from "lucide-react";
 import { useMenuDeroulant } from "@/components/ui/utiliser-menu-deroulant";
 import { lireNotifications, marquerLues, type EtatNotifications } from "@/lib/actions/notifications";
-import { CONSERVATION_NOTIFICATIONS_JOURS, INTERVALLE_NOTIFICATIONS_MS } from "@/lib/constantes";
+import { INTERVALLE_NOTIFICATIONS_MS } from "@/lib/constantes";
 import { formaterDate, formaterHeure } from "@/lib/formats";
 import { TEXTES_NOTIFICATIONS as textes } from "@/lib/textes/notifications";
 import { cn } from "@/lib/utils";
@@ -169,7 +169,6 @@ export function Notifications() {
               ))}
             </ul>
           )}
-          <p className="border-t border-bordure px-4 py-2 text-xs text-texte-secondaire">{textes.aideConservation(CONSERVATION_NOTIFICATIONS_JOURS)}</p>
         </div>
       )}
     </div>

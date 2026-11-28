@@ -161,10 +161,7 @@ export function CartePointages({
   return (
     <Carte titre={t.titre} Icone={ClipboardList} action={action}>
       {pointages.length === 0 ? (
-        <div className="flex flex-col gap-1">
-          <p className="text-base text-texte-secondaire">{t.aucun}</p>
-          {correction && <p className="text-sm text-texte-secondaire">{t.aideCorrection}</p>}
-        </div>
+        <p className="text-base text-texte-secondaire">{t.aucun}</p>
       ) : (
         <ol className="flex flex-col">
           {pointages.map((pointage) => {

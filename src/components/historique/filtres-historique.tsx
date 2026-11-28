@@ -3,7 +3,7 @@ import { RotateCcw, Search } from "lucide-react";
 import { Bouton } from "@/components/ui/bouton";
 import { ChampCalendrier } from "@/components/ui/champ-calendrier";
 import { Etiquette } from "@/components/ui/etiquette";
-import { ACTIONS_HISTORIQUE, CHEMIN_HISTORIQUE, CONSERVATION_HISTORIQUE_JOURS, HISTORIQUE_JOURS_DEFAUT, HISTORIQUE_JOURS_MAX, LONGUEUR_MAX_RECHERCHE, MODULES_HISTORIQUE } from "@/lib/constantes";
+import { ACTIONS_HISTORIQUE, CHEMIN_HISTORIQUE, HISTORIQUE_JOURS_DEFAUT, LONGUEUR_MAX_RECHERCHE, MODULES_HISTORIQUE } from "@/lib/constantes";
 import { ajouterJours } from "@/lib/metier/compteurs/periodes";
 import { TEXTES_HISTORIQUE } from "@/lib/textes/historique";
 import { cn } from "@/lib/utils";
@@ -96,7 +96,6 @@ export function FiltresHistorique({ recherche, auteurs, aujourdhui }: { recherch
             );
           })}
         </div>
-        <p className="text-sm text-texte-secondaire sm:ms-auto">{textes.aideLimite(HISTORIQUE_JOURS_MAX, CONSERVATION_HISTORIQUE_JOURS)}</p>
       </div>
     </section>
   );

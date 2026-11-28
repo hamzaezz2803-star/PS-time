@@ -24,7 +24,7 @@ export function ChoixMembres({
       employes={employes}
       nomChamp="membres"
       selectionInitiale={selectionInitiale}
-      textes={{ ...textes, aide: textes.aideMembres }}
+      textes={textes}
       detail={(employe) => {
         const groupeId = groupeParEmploye.get(employe.id);
         const nomGroupe = groupeId && groupeId !== idGroupe ? nomsGroupes.get(groupeId) : undefined;

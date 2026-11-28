@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 
 const textes = TEXTES_PERSONNES.export;
 
-function Entree({ href, Icone, titre, aide, telecharger = false }: { href: string; Icone: LucideIcon; titre: string; aide: string; telecharger?: boolean }) {
+function Entree({ href, Icone, titre, telecharger = false }: { href: string; Icone: LucideIcon; titre: string; telecharger?: boolean }) {
   return (
     <a
       href={href}
@@ -19,10 +19,7 @@ function Entree({ href, Icone, titre, aide, telecharger = false }: { href: strin
       <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-ciel text-primaire">
         <Icone className="size-5" aria-hidden="true" />
       </span>
-      <span className="flex flex-col">
-        <span className="text-sm font-semibold text-texte">{titre}</span>
-        <span className="text-sm text-texte-secondaire">{aide}</span>
-      </span>
+      <span className="text-sm font-semibold text-texte">{titre}</span>
     </a>
   );
 }
@@ -52,8 +49,8 @@ export function MenuExport({ requete }: { requete: string }) {
           role="menu"
           className="absolute end-0 top-full z-20 mt-2 w-72 animate-apparition rounded-lg bg-surface p-1 shadow-flottant ring-1 ring-bordure motion-reduce:animate-none"
         >
-          <Entree href={`${CHEMIN_EXPORT_EXCEL_PERSONNES}${requete}`} telecharger Icone={FileSpreadsheet} titre={textes.excel} aide={textes.aideExcel} />
-          <Entree href={`${CHEMIN_IMPRESSION_PERSONNES}${requete}`} Icone={FileText} titre={textes.pdf} aide={textes.aidePdf} />
+          <Entree href={`${CHEMIN_EXPORT_EXCEL_PERSONNES}${requete}`} telecharger Icone={FileSpreadsheet} titre={textes.excel} />
+          <Entree href={`${CHEMIN_IMPRESSION_PERSONNES}${requete}`} Icone={FileText} titre={textes.pdf} />
         </div>
       )}
     </div>

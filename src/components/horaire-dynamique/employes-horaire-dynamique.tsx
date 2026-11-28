@@ -25,10 +25,7 @@ export function EmployesHoraireDynamique({
 
   return (
     <form action={action} className="flex flex-col gap-4 rounded-xl border border-bordure bg-surface p-4 shadow-carte sm:p-5">
-      <div className="flex flex-col gap-1">
-        <h2 className="text-base font-semibold text-marine">{textes.titreEmployes}</h2>
-        <p className="text-sm text-texte-secondaire">{textes.aideEmployes}</p>
-      </div>
+      <h2 className="text-base font-semibold text-marine">{textes.titreEmployes}</h2>
       <ChoixEmployes employes={employes} departements={departements} nomChamp="employes" selectionInitiale={selection} textes={textes} />
       <div className="flex flex-col gap-3 border-t border-bordure pt-4 sm:flex-row sm:items-center sm:justify-between">
         <div aria-live="polite">

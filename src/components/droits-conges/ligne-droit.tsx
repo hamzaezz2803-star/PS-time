@@ -114,7 +114,7 @@ export function LigneDroit({ droit }: { droit: DroitCongeListe }) {
       <div className="flex flex-col items-end gap-0.5 [grid-area:reste] lg:items-start">
         {!droit.estConfirme ? (
           <>
-            <p className="flex items-center gap-1 text-sm font-semibold text-attention" title={textes.aideAConfirmer}>
+            <p className="flex items-center gap-1 text-sm font-semibold text-attention">
               <CircleDashed className="size-4 shrink-0" aria-hidden="true" />
               {textes.aConfirmer}
             </p>
@@ -127,7 +127,7 @@ export function LigneDroit({ droit }: { droit: DroitCongeListe }) {
               <Icone className="size-4 shrink-0" aria-hidden="true" />
               {textes.etats[etat]}
               {droit.estBloquant && (
-                <span className="ms-1 text-texte-secondaire" title={textes.aideBloquantCarte}>
+                <span className="ms-1 text-texte-secondaire">
                   <Lock className="size-3.5" aria-hidden="true" />
                   <span className="sr-only">{textes.bloquant}</span>
                 </span>

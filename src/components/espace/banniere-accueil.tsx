@@ -30,7 +30,6 @@ export function BanniereAccueil({ nom }: { nom: string }) {
         <div className="flex max-w-xl flex-col gap-2">
           <p className="text-sm font-semibold uppercase tracking-wider text-primaire">{TEXTES_ESPACE.surtitre}</p>
           <h1 className="text-2xl font-bold tracking-tight text-marine sm:text-3xl">{TEXTES_ESPACE.bonjour(nom)}</h1>
-          <p className="text-base leading-relaxed text-texte-secondaire">{TEXTES_ESPACE.introduction}</p>
         </div>
         <div className="flex shrink-0 flex-col items-start gap-3 rounded-xl border border-bordure bg-surface p-4 shadow-carte sm:p-5 lg:items-center">
           <p className="text-sm font-semibold uppercase tracking-wider text-texte-secondaire">{TEXTES_ESPACE.heureCasablanca}</p>

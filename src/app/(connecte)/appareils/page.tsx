@@ -5,7 +5,6 @@ import { PanneauReseau } from "@/components/badgeuses/panneau-reseau";
 import { Chargement } from "@/components/ui/chargement";
 import { EnTetePage } from "@/components/ui/en-tete-page";
 import { MessageErreur } from "@/components/ui/message-erreur";
-import { PORT_BADGEUSE } from "@/lib/constantes";
 import { reseauxDuServeur } from "@/lib/donnees/badgeuses";
 import { obtenirUtilisateurPourEspace } from "@/lib/donnees/session";
 import { TEXTES_APPAREILS as textes } from "@/lib/textes/appareils";

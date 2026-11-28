@@ -44,7 +44,6 @@ export function CadreVisage() {
   return (
     <section className="flex flex-col gap-3">
       <h3 className="text-base font-semibold text-marine">{textes.visage}</h3>
-      <p className="text-sm text-texte-secondaire">{textes.aideVisage}</p>
       <div className="relative mx-auto aspect-[4/3] w-full max-w-sm overflow-hidden rounded-xl bg-marine">
         <video ref={video} autoPlay playsInline muted aria-label={textes.videoCamera} className={estActif ? "size-full -scale-x-100 object-cover" : "hidden"} />
         {/* Cadre : fond assombri autour d'un ovale, pour guider la position du visage. */}
