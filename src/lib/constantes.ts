@@ -315,6 +315,9 @@ export const LONGUEUR_MAX_DESCRIPTION_COMPTEUR = 500;
  * inséré désactivé à l'installation par la migration 0007. Familles pour le regroupement à l'écran.
  */
 export const FAMILLES_COMPTEUR = ["presence", "absences", "heures_sup", "conges", "autres"] as const;
+/** Travail de nuit (Code du travail marocain, art. 172 : de 21 h à 6 h), en minutes depuis minuit. */
+export const NUIT_DEBUT_MINUTES = 21 * 60;
+export const NUIT_FIN_MINUTES = 6 * 60;
 export const CHEMIN_DETAIL_JOUR = "/presence/detail-jour";
 /** Détail jour : pointages affichés au plus, et longueurs d'historique proposées (jours). */
 export const DETAIL_POINTAGES_MAX = 200;

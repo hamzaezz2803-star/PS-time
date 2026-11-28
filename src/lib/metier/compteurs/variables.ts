@@ -5,6 +5,8 @@
  * Libellés et règles affichés : lib/textes/variables-compteurs.ts.
  */
 import type { ProfilHoraire } from "../../../types/index.ts";
+import { NUIT_DEBUT_MINUTES, NUIT_FIN_MINUTES } from "../../constantes.ts";
+import type { EvenementCandidat, SaisieEvenement } from "../evenements.ts";
 import { theoriqueMinutes } from "../profil-horaire.ts";
 import type { Periodicite } from "./periodes.ts";
 
@@ -24,6 +26,10 @@ export const VARIABLES_COMPTEURS = [
   { nom: "DEPART_ANTICIPE_MIN", unite: "minutes", periodicites: TOUTES },
   { nom: "DEPASSEMENT_MIN", unite: "minutes", periodicites: TOUTES },
   { nom: "NB_POINTAGES", unite: "nombre", periodicites: TOUTES },
+  { nom: "DUREE_NUIT_MIN", unite: "minutes", periodicites: TOUTES },
+  { nom: "DUREE_ABSENCE_MIN", unite: "minutes", periodicites: TOUTES },
+  { nom: "DUREE_EVT_PRESENCE_MIN", unite: "minutes", periodicites: TOUTES },
+  { nom: "JOURS_ABSENCE", unite: "jours", periodicites: TOUTES },
   { nom: "A_HORAIRE", unite: "nombre", periodicites: JOUR },
   { nom: "PRESENT", unite: "nombre", periodicites: JOUR },
   { nom: "NB_JOURS", unite: "jours", periodicites: CUMULS },
@@ -33,9 +39,28 @@ export const VARIABLES_COMPTEURS = [
   { nom: "NB_JOURS_INCOMPLETS", unite: "jours", periodicites: CUMULS },
 ] as const satisfies readonly DefinitionVariable[];
 
+/**
+ * Codes des événements de l'installation, qui donnent des variables propres à chacun :
+ * JOURS_<code> et MIN_<code> pour tout événement, PRIS_<code> et SOLDE_<code> pour un événement
+ * soumis à la gestion des droits (droits aux congés).
+ */
+export type CodesCompteurs = { evenements: readonly string[]; droits: readonly string[] };
+export const AUCUN_CODE: CodesCompteurs = { evenements: [], droits: [] };
+
+export const variableJours = (code: string) => `JOURS_${code}`;
+export const variableMinutes = (code: string) => `MIN_${code}`;
+export const variablePris = (code: string) => `PRIS_${code}`;
+export const variableSolde = (code: string) => `SOLDE_${code}`;
+
+/** Variables d'événement d'une journée (additionnées sur la semaine et le mois). */
+export const variablesJourDesCodes = (codes: CodesCompteurs) => codes.evenements.flatMap((code) => [variableJours(code), variableMinutes(code)]);
+/** Variables des droits aux congés : un état à la fin de la période, jamais additionné. */
+export const variablesDroitsDesCodes = (codes: CodesCompteurs) => codes.droits.flatMap((code) => [variablePris(code), variableSolde(code)]);
+
 /** Noms des variables utilisables pour une périodicité. */
-export function variablesPour(periodicite: Periodicite): string[] {
-  return VARIABLES_COMPTEURS.filter((variable) => (variable.periodicites as readonly Periodicite[]).includes(periodicite)).map((variable) => variable.nom);
+export function variablesPour(periodicite: Periodicite, codes: CodesCompteurs = AUCUN_CODE): string[] {
+  const fixes = VARIABLES_COMPTEURS.filter((variable) => (variable.periodicites as readonly Periodicite[]).includes(periodicite)).map((variable) => variable.nom);
+  return [...fixes, ...variablesJourDesCodes(codes), ...variablesDroitsDesCodes(codes)];
 }
 
 export type ValeursVariables = Record<string, number | null>;
