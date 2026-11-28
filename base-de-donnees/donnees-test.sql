@@ -230,6 +230,14 @@ INSERT INTO compteurs_versions (id, compteur_id, version, formule, journalier, h
 SELECT ('00000000-0000-4000-8000-0000000017' || right(id::text, 2))::uuid, id, 1, formule, journalier, hebdomadaire, mensuel, unite
 FROM compteurs WHERE id::text LIKE '00000000-0000-4000-8000-%';
 
+-- 11 bis. Pack standard (migration 0007) : les compteurs calculables sont activés pour les essais.
+-- Les pointages de la section 14 leur donnent des valeurs : journées de plus de 10 h (J8 : heures
+-- écrêtées, temps hors limite), semaines de plus de 42 h et 44 h (Bureau : repos compensateur, heures
+-- sup. à 125 %), de plus de 52 h (J8 du lundi au samedi, Adil Naciri T016 : heures sup. à 150 %),
+-- sorties oubliées (débit), arrivées en avance. Les compteurs « Données manquantes » restent désactivés
+-- (la base refuse de les activer). supprimer-donnees-test.sql les désactive de nouveau.
+UPDATE compteurs SET est_actif = true WHERE numero_pack IS NOT NULL AND NOT est_a_adapter;
+
 -- 12. Événements : motifs d'absence et de présence courants, à la journée, à la demi-journée ou en heures.
 -- La récupération est non active. Congés payés, reportés et récupération sont soumis à la gestion des droits.
 INSERT INTO evenements (id, code, nom, type, unite_saisie, duree_minutes, est_prioritaire_sur_pointages, est_visible_planning, priorite, code_paie, est_soumis_droits) VALUES

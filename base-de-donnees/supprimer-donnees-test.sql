@@ -7,6 +7,8 @@ BEGIN;
 -- Compteurs de test et leurs versions (avant les comptes et profils).
 DELETE FROM compteurs_versions WHERE compteur_id::text LIKE '00000000-0000-4000-8000-%';
 DELETE FROM compteurs WHERE id::text LIKE '00000000-0000-4000-8000-%';
+-- Pack standard : retour à l'état d'installation (tous désactivés), sans le supprimer.
+UPDATE compteurs SET est_actif = false WHERE numero_pack IS NOT NULL;
 -- Absences de test, et celles saisies dans l'application pour un employé ou un événement de test.
 DELETE FROM evenements_employes WHERE id::text LIKE '00000000-0000-4000-8000-%' OR employe_id::text LIKE '00000000-0000-4000-8000-%' OR evenement_id::text LIKE '00000000-0000-4000-8000-%';
 -- Droits aux congés de test, et ceux saisis dans l'application pour un employé ou un événement de test.

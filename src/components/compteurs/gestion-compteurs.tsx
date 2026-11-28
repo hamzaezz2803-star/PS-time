@@ -11,7 +11,7 @@ import { TEXTES_COMPTEURS as textes } from "@/lib/textes/compteurs";
 import { TEXTES_PERIODICITES } from "@/lib/textes/variables-compteurs";
 import type { Compteur } from "@/types";
 import { BoutonFiltre } from "./bouton-filtre";
-import { EtatCompteur } from "./carte-compteur-pack";
+import { EtatCompteur } from "./ligne-compteur-pack";
 import { CataloguePack, compteursDuPack } from "./catalogue-pack";
 import { FormulaireCompteur } from "./formulaire-compteur";
 
