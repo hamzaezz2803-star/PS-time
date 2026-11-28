@@ -3,7 +3,7 @@ import "server-only";
 import { and, asc, eq, gte, lte } from "drizzle-orm";
 import type { ContexteCalcul } from "@/lib/metier/compteurs/calcul";
 import type { JourService, ValeursVariables } from "@/lib/metier/compteurs/variables";
-import { variablePris, variableSolde, type CodesCompteurs, type EvenementCompteur } from "@/lib/metier/compteurs/variables-evenements";
+import { codesDesEvenements, variablePris, variableSolde, type CodesCompteurs, type EvenementCompteur } from "@/lib/metier/compteurs/variables-evenements";
 import type { CodeEvenementCompteur } from "@/types";
 import { obtenirBase } from "./base";
 import { calculerSoldes, COLONNES_SOLDE } from "./droits-conges-soldes";
@@ -19,11 +19,6 @@ export async function listerCodesCompteurs(): Promise<CodeEvenementCompteur[]> {
     .orderBy(asc(evenements.code));
 }
 
-/** Codes utilisés par le calcul et la vérification des formules. */
-export const codesDesEvenements = (liste: readonly CodeEvenementCompteur[]): CodesCompteurs => ({
-  evenements: liste.map((evenement) => evenement.code),
-  droits: liste.filter((evenement) => evenement.estSoumisDroits).map((evenement) => evenement.code),
-});
 
 /** Événements d'un employé (journées entières et heures) qui touchent la période. */
 async function evenementsDeLEmploye(employeId: string, debut: string, fin: string): Promise<EvenementCompteur[]> {

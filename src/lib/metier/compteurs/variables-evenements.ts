@@ -31,6 +31,12 @@ export const variablesJourDesCodes = (codes: CodesCompteurs) => codes.evenements
 /** Variables des droits aux congés : un état à la fin de la période, jamais additionné. */
 export const variablesDroitsDesCodes = (codes: CodesCompteurs) => codes.droits.flatMap((code) => [variablePris(code), variableSolde(code)]);
 
+/** Codes utilisés par le calcul et la vérification des formules. */
+export const codesDesEvenements = (liste: readonly { code: string; estSoumisDroits: boolean }[]): CodesCompteurs => ({
+  evenements: liste.map((evenement) => evenement.code),
+  droits: liste.filter((evenement) => evenement.estSoumisDroits).map((evenement) => evenement.code),
+});
+
 export type EvenementCompteur = EvenementCandidat & SaisieEvenement & { code: string; type: "absence" | "presence" };
 
 type JourneeEvenements = { jour: string; dureePrevue: number | null; aPointe: boolean; estRepos: boolean; evenements: readonly EvenementCompteur[] };
