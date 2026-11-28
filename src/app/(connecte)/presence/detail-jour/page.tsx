@@ -40,7 +40,7 @@ function lireSelection(parametres: Record<string, string | string[] | undefined>
 export default function PageDetailJour({ searchParams }: { searchParams: ParametresRecherche }) {
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-6">
-      <EnTetePage titre={textes.titrePage} sousTitre={textes.sousTitre} />
+      <EnTetePage titre={textes.titrePage} />
       <Suspense fallback={<Chargement message={textes.chargement} />}>
         <ContenuDetailJour searchParams={searchParams} />
       </Suspense>

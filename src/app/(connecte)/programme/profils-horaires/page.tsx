@@ -8,7 +8,7 @@ export const metadata: Metadata = { title: TEXTES_PROFILS.titrePage };
 
 export default function PageProfilsHoraires() {
   return (
-    <CadrePageProgramme titre={TEXTES_PROFILS.titrePage} sousTitre={TEXTES_PROFILS.sousTitre} chargement={TEXTES_PROFILS.chargement}>
+    <CadrePageProgramme titre={TEXTES_PROFILS.titrePage} chargement={TEXTES_PROFILS.chargement}>
       <ContenuProfils />
     </CadrePageProgramme>
   );

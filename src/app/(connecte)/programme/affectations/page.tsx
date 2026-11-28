@@ -12,7 +12,7 @@ export const metadata: Metadata = { title: textes.titrePage };
 
 export default function PageAffectations() {
   return (
-    <CadrePageProgramme titre={textes.titrePage} sousTitre={textes.sousTitre} chargement={textes.chargement}>
+    <CadrePageProgramme titre={textes.titrePage} chargement={textes.chargement}>
       <ContenuAffectations />
     </CadrePageProgramme>
   );

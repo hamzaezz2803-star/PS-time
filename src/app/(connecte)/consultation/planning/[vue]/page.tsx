@@ -33,7 +33,7 @@ type ParametresRecherche = Promise<Record<string, string | string[] | undefined>
 export default function PagePlanning({ params, searchParams }: PageProps<"/consultation/planning/[vue]">) {
   return (
     <div className="mx-auto flex max-w-7xl flex-col gap-6">
-      <EnTetePage titre={textes.titrePage} sousTitre={textes.sousTitre} />
+      <EnTetePage titre={textes.titrePage} />
       <Suspense fallback={<Chargement message={textes.chargement} />}>
         <ContenuPlanning params={params} searchParams={searchParams} />
       </Suspense>

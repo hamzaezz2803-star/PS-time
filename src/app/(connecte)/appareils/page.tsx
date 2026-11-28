@@ -16,7 +16,7 @@ export const metadata: Metadata = { title: textes.titrePage };
 export default function PageAppareils() {
   return (
     <div className="mx-auto flex max-w-7xl flex-col gap-6">
-      <EnTetePage titre={textes.titrePage} sousTitre={textes.sousTitre} />
+      <EnTetePage titre={textes.titrePage} />
       <Suspense fallback={<Chargement message={textes.chargement} />}>
         <ContenuAppareils />
       </Suspense>

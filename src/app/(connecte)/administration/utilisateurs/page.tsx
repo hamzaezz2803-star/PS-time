@@ -13,7 +13,7 @@ export const metadata: Metadata = { title: TEXTES_UTILISATEURS.titrePage };
 export default function PageUtilisateurs() {
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-6">
-      <EnTetePage titre={TEXTES_UTILISATEURS.titrePage} sousTitre={TEXTES_UTILISATEURS.sousTitre} />
+      <EnTetePage titre={TEXTES_UTILISATEURS.titrePage} />
       <Suspense fallback={<Chargement message={TEXTES_UTILISATEURS.chargement} />}>
         <ContenuUtilisateurs />
       </Suspense>

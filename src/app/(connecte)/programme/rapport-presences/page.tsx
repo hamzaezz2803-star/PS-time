@@ -15,7 +15,7 @@ type ParametresRecherche = Promise<Record<string, string | string[] | undefined>
 
 export default function PageRapportPresences({ searchParams }: { searchParams: ParametresRecherche }) {
   return (
-    <CadrePageProgramme titre={textes.titrePage} sousTitre={textes.sousTitre} chargement={textes.chargement}>
+    <CadrePageProgramme titre={textes.titrePage} chargement={textes.chargement}>
       <ContenuRapport searchParams={searchParams} />
     </CadrePageProgramme>
   );

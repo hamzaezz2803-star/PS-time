@@ -14,7 +14,7 @@ export const metadata: Metadata = { title: TEXTES_DEPARTEMENTS.titrePage };
 export default function PageDepartements() {
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-6">
-      <EnTetePage titre={TEXTES_DEPARTEMENTS.titrePage} sousTitre={TEXTES_DEPARTEMENTS.sousTitre} />
+      <EnTetePage titre={TEXTES_DEPARTEMENTS.titrePage} />
       <Suspense fallback={<Chargement message={TEXTES_DEPARTEMENTS.chargement} />}>
         <ContenuDepartements />
       </Suspense>

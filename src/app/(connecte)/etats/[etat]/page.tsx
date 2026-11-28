@@ -40,7 +40,7 @@ async function PageDeLEtat({ params, searchParams }: { params: Promise<{ etat: s
   const { etat } = await params;
   if (!estEtat(etat)) notFound();
   return (
-    <CadrePageProgramme titre={textes.etats[etat].titre} sousTitre={textes.etats[etat].sousTitre} chargement={textes.chargement}>
+    <CadrePageProgramme titre={textes.etats[etat].titre} chargement={textes.chargement}>
       <ContenuEtat etat={etat} searchParams={searchParams} />
     </CadrePageProgramme>
   );

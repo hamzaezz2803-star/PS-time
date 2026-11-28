@@ -16,7 +16,7 @@ export const metadata: Metadata = { title: textes.titrePage };
 export default function PageCompteurs() {
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-6">
-      <EnTetePage titre={textes.titrePage} sousTitre={textes.sousTitre} />
+      <EnTetePage titre={textes.titrePage} />
       <Suspense fallback={<Chargement message={textes.chargement} />}>
         <ContenuCompteurs />
       </Suspense>

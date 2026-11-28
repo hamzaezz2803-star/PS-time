@@ -14,7 +14,7 @@ export const metadata: Metadata = { title: textes.titrePage };
 export default function PageSauvegarde() {
   return (
     <div className="mx-auto flex max-w-4xl flex-col gap-6">
-      <EnTetePage titre={textes.titrePage} sousTitre={textes.sousTitre} />
+      <EnTetePage titre={textes.titrePage} />
       <Suspense fallback={<Chargement message={textes.chargement} />}>
         <ContenuSauvegarde />
       </Suspense>

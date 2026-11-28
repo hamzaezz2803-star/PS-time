@@ -34,14 +34,12 @@ export function ChampMinutes({
   libelle,
   valeur,
   maximum,
-  aide,
   erreur,
 }: {
   nom: string;
   libelle: string;
   valeur: string;
   maximum: number;
-  aide?: string;
   erreur?: string;
 }) {
   return (
@@ -55,7 +53,6 @@ export function ChampMinutes({
       step={1}
       defaultValue={valeur}
       className="tabular-nums"
-      aide={aide}
       erreur={erreur}
     />
   );

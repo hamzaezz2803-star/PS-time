@@ -10,7 +10,7 @@ export const metadata: Metadata = { title: textes.titrePage };
 
 export default function PageGroupes() {
   return (
-    <CadrePageProgramme titre={textes.titrePage} sousTitre={textes.sousTitre} chargement={textes.chargement}>
+    <CadrePageProgramme titre={textes.titrePage} chargement={textes.chargement}>
       <ContenuGroupes />
     </CadrePageProgramme>
   );

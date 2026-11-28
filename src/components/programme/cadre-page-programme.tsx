@@ -6,21 +6,19 @@ import { obtenirUtilisateurPourEspace } from "@/lib/donnees/session";
 import { peutAcceder, type Page } from "@/lib/metier/droits";
 import { TEXTES_PROGRAMME } from "@/lib/textes/programme";
 
-/** Titre, sous-titre et contenu chargé d'une page du module Programme. */
+/** Titre et contenu chargé d'une page du module Programme. */
 export function CadrePageProgramme({
   titre,
-  sousTitre,
   chargement,
   children,
 }: {
   titre: string;
-  sousTitre: string;
   chargement: string;
   children: ReactNode;
 }) {
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-6">
-      <EnTetePage titre={titre} sousTitre={sousTitre} />
+      <EnTetePage titre={titre} />
       <Suspense fallback={<Chargement message={chargement} />}>{children}</Suspense>
     </div>
   );

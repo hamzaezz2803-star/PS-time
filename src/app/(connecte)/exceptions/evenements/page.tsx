@@ -8,7 +8,7 @@ export const metadata: Metadata = { title: TEXTES_EVENEMENTS.titrePage };
 
 export default function PageEvenements() {
   return (
-    <CadrePageProgramme titre={TEXTES_EVENEMENTS.titrePage} sousTitre={TEXTES_EVENEMENTS.sousTitre} chargement={TEXTES_EVENEMENTS.chargement}>
+    <CadrePageProgramme titre={TEXTES_EVENEMENTS.titrePage} chargement={TEXTES_EVENEMENTS.chargement}>
       <ContenuEvenements />
     </CadrePageProgramme>
   );

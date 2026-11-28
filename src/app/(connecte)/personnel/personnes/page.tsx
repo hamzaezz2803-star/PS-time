@@ -29,7 +29,7 @@ type ParametresRecherche = Promise<Record<string, string | string[] | undefined>
 export default function PagePersonnes({ searchParams }: { searchParams: ParametresRecherche }) {
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-6">
-      <EnTetePage titre={TEXTES_PERSONNES.titrePage} sousTitre={TEXTES_PERSONNES.sousTitre} />
+      <EnTetePage titre={TEXTES_PERSONNES.titrePage} />
       <Suspense fallback={<Chargement message={TEXTES_PERSONNES.chargement} />}>
         <ContenuPersonnes searchParams={searchParams} />
       </Suspense>

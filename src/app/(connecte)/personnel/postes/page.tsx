@@ -14,7 +14,7 @@ export const metadata: Metadata = { title: TEXTES_POSTES.titrePage };
 export default function PagePostes() {
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-6">
-      <EnTetePage titre={TEXTES_POSTES.titrePage} sousTitre={TEXTES_POSTES.sousTitre} />
+      <EnTetePage titre={TEXTES_POSTES.titrePage} />
       <Suspense fallback={<Chargement message={TEXTES_POSTES.chargement} />}>
         <ContenuPostes />
       </Suspense>

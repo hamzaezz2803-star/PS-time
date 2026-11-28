@@ -8,15 +8,12 @@ type ProprietesChamp = Omit<InputHTMLAttributes<HTMLInputElement>, "id" | "name"
   /** Nom envoyé avec le formulaire, s'il diffère de `nom` (ex. lignes répétées d'une liste). */
   nomEnvoi?: string;
   libelle: string;
-  aide?: string;
   erreur?: string;
 };
 
-/** Champ texte complet : libellé au-dessus, aide et erreur en dessous, reliés pour les lecteurs d'écran. */
-export function ChampFormulaire({ nom, nomEnvoi, libelle, aide, erreur, ...proprietes }: ProprietesChamp) {
-  const idAide = aide ? `aide-${nom}` : undefined;
+/** Champ texte complet : libellé au-dessus, erreur en dessous, reliés pour les lecteurs d'écran. */
+export function ChampFormulaire({ nom, nomEnvoi, libelle, erreur, ...proprietes }: ProprietesChamp) {
   const idErreur = erreur ? `erreur-${nom}` : undefined;
-  const decritPar = [idAide, idErreur].filter(Boolean).join(" ") || undefined;
 
   return (
     <div className="flex flex-col gap-2">
@@ -25,14 +22,9 @@ export function ChampFormulaire({ nom, nomEnvoi, libelle, aide, erreur, ...propr
         id={nom}
         name={nomEnvoi ?? nom}
         aria-invalid={erreur ? true : undefined}
-        aria-describedby={decritPar}
+        aria-describedby={idErreur}
         {...proprietes}
       />
-      {aide && (
-        <p id={idAide} className="text-sm text-texte-secondaire">
-          {aide}
-        </p>
-      )}
       <MessageErreur id={idErreur} message={erreur} />
     </div>
   );

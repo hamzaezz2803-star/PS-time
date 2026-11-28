@@ -15,7 +15,7 @@ export const metadata: Metadata = { title: TEXTES_APPARENCE.titrePage };
 export default function PageApparence() {
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-6">
-      <EnTetePage titre={TEXTES_APPARENCE.titrePage} sousTitre={TEXTES_APPARENCE.sousTitre} />
+      <EnTetePage titre={TEXTES_APPARENCE.titrePage} />
       <Suspense fallback={<Chargement message={TEXTES_APPARENCE.chargement} />}>
         <ContenuApparence />
       </Suspense>

@@ -14,7 +14,7 @@ export const metadata: Metadata = { title: TEXTES_SITES.titrePage };
 export default function PageSites() {
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-6">
-      <EnTetePage titre={TEXTES_SITES.titrePage} sousTitre={TEXTES_SITES.sousTitre} />
+      <EnTetePage titre={TEXTES_SITES.titrePage} />
       <Suspense fallback={<Chargement message={TEXTES_SITES.chargement} />}>
         <ContenuSites />
       </Suspense>

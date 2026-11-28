@@ -20,7 +20,7 @@ type ParametresRecherche = Promise<Record<string, string | string[] | undefined>
 export default function PageHistorique({ searchParams }: { searchParams: ParametresRecherche }) {
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-6">
-      <EnTetePage titre={textes.titrePage} sousTitre={textes.sousTitre} />
+      <EnTetePage titre={textes.titrePage} />
       <Suspense fallback={<Chargement message={textes.chargement} />}>
         <ContenuHistorique searchParams={searchParams} />
       </Suspense>
