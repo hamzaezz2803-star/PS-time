@@ -230,13 +230,6 @@ INSERT INTO compteurs_versions (id, compteur_id, version, formule, journalier, h
 SELECT ('00000000-0000-4000-8000-0000000017' || right(id::text, 2))::uuid, id, 1, formule, journalier, hebdomadaire, mensuel, unite
 FROM compteurs WHERE id::text LIKE '00000000-0000-4000-8000-%';
 
--- 11 bis. Pack standard (migration 0007) : les compteurs calculables sont activés pour les essais.
--- Les pointages de la section 14 leur donnent des valeurs : journées de plus de 10 h (J8 : heures
--- écrêtées, temps hors limite), semaines de plus de 42 h et 44 h (Bureau : repos compensateur, heures
--- sup. à 125 %), de plus de 52 h (J8 du lundi au samedi, Adil Naciri T016 : heures sup. à 150 %),
--- sorties oubliées (débit), arrivées en avance. Les compteurs « Données manquantes » restent désactivés
--- (la base refuse de les activer). supprimer-donnees-test.sql les désactive de nouveau.
-UPDATE compteurs SET est_actif = true WHERE numero_pack IS NOT NULL AND NOT est_a_adapter;
 
 -- 12. Événements : motifs d'absence et de présence courants, à la journée, à la demi-journée ou en heures.
 -- La récupération est non active. Congés payés, reportés et récupération sont soumis à la gestion des droits.
@@ -251,7 +244,12 @@ INSERT INTO evenements (id, code, nom, type, unite_saisie, duree_minutes, est_pr
   ('00000000-0000-4000-8000-000000001808', 'ABA', 'Absence autorisée', 'absence', 'heures', 120, false, true, 20, NULL, false),
   ('00000000-0000-4000-8000-000000001809', 'FOR', 'Formation', 'presence', 'heures', 120, true, true, 30, 'FOR', false),
   ('00000000-0000-4000-8000-000000001810', 'MIS', 'Mission', 'presence', 'journee', NULL, true, true, 30, 'MIS', false),
-  ('00000000-0000-4000-8000-000000001811', 'RCP', 'Récupération', 'absence', 'heures', 120, false, false, 15, NULL, true);
+  ('00000000-0000-4000-8000-000000001811', 'RCP', 'Récupération', 'absence', 'heures', 120, false, false, 15, NULL, true),
+  -- Codes repris par les formules du pack standard (Gestor) : heures sup. à récupérer (HSR, REC), à payer (HSP), RTT.
+  ('00000000-0000-4000-8000-000000001812', 'HSR', 'Heures sup. à récupérer', 'presence', 'heures', 60, false, true, 25, 'HSR', false),
+  ('00000000-0000-4000-8000-000000001813', 'REC', 'Récupération d''heures sup.', 'absence', 'heures', 60, false, true, 25, NULL, false),
+  ('00000000-0000-4000-8000-000000001814', 'HSP', 'Heures sup. à payer', 'presence', 'heures', 60, false, true, 25, 'HSP', false),
+  ('00000000-0000-4000-8000-000000001815', 'RTT', 'Jour de RTT', 'absence', 'journee', NULL, false, true, 10, 'RTT', true);
 
 -- 13. Absences et événements des employés, autour de la date du jour (en jours : -2 = avant-hier).
 -- Cas couverts : congé en cours, passé et à venir ; maladie ; accident du travail ; paternité ;
@@ -280,6 +278,15 @@ FROM (
   UNION ALL SELECT '00000000-0000-4000-8000-000000002009', '00000000-0000-4000-8000-000000000308', '00000000-0000-4000-8000-000000001804', -20, -15, NULL, NULL, 'Déclaration d''accident envoyée'
   UNION ALL SELECT '00000000-0000-4000-8000-000000002010', '00000000-0000-4000-8000-000000000309', '00000000-0000-4000-8000-000000001807', -12, -12, NULL, NULL, 'Convenance personnelle'
   UNION ALL SELECT '00000000-0000-4000-8000-000000002011', '00000000-0000-4000-8000-000000000314', '00000000-0000-4000-8000-000000001806', -25, -23, NULL, NULL, 'Naissance'
+  -- Heures sup. à récupérer, récupérées et à payer (compteurs du pack 10 et 11), saisies en heures.
+  UNION ALL SELECT '00000000-0000-4000-8000-000000002018', '00000000-0000-4000-8000-000000000301', '00000000-0000-4000-8000-000000001812', -3, -3, 1050, 1170, 'Inventaire de fin de mois'
+  UNION ALL SELECT '00000000-0000-4000-8000-000000002019', '00000000-0000-4000-8000-000000000301', '00000000-0000-4000-8000-000000001813', -1, -1, 960, 1020, 'Récupération d''une heure'
+  UNION ALL SELECT '00000000-0000-4000-8000-000000002020', '00000000-0000-4000-8000-000000000316', '00000000-0000-4000-8000-000000001814', -4, -4, 1080, 1230, 'Commande urgente'
+  -- Jour de RTT un jour ouvré (deux semaines avant le dernier jour ouvré), décompté du droit RTT.
+  UNION ALL SELECT '00000000-0000-4000-8000-000000002021', '00000000-0000-4000-8000-000000000313', '00000000-0000-4000-8000-000000001815',
+    -(CASE extract(dow FROM (now() AT TIME ZONE 'UTC')::date) WHEN 1 THEN 3 WHEN 0 THEN 2 ELSE 1 END + 14),
+    -(CASE extract(dow FROM (now() AT TIME ZONE 'UTC')::date) WHEN 1 THEN 3 WHEN 0 THEN 2 ELSE 1 END + 14),
+    NULL, NULL, 'Jour de RTT'
   UNION ALL SELECT '00000000-0000-4000-8000-000000002012', '00000000-0000-4000-8000-000000000312', '00000000-0000-4000-8000-000000001802', -18, -17, NULL, NULL, 'Reliquat de l''an dernier'
   UNION ALL SELECT '00000000-0000-4000-8000-000000002013', '00000000-0000-4000-8000-000000000301', '00000000-0000-4000-8000-000000001801', -15, -11, NULL, NULL, NULL
   UNION ALL SELECT '00000000-0000-4000-8000-000000002014', '00000000-0000-4000-8000-000000000302', '00000000-0000-4000-8000-000000001801', 10, 14, NULL, NULL, 'Prévu, en attente de confirmation du droit'
@@ -408,6 +415,15 @@ FROM (
 ) t
 WHERE t.horodatage <= now();
 
+-- 14 bis. Pack standard (migrations 0007 et 0008) : tous ses compteurs sont activés pour les essais, sauf le
+-- compteur libre (formule à écrire, refusé par la base). Les pointages de la section 14 donnent les durées :
+-- journées de plus de 10 h (J8 : heures écrêtées, temps hors limite), semaines de plus de 42 h et 44 h
+-- (Bureau : repos compensateur, heures sup. à 125 %), de plus de 52 h (J8 du lundi au samedi, Adil Naciri
+-- T016 : heures sup. à 150 %), sorties oubliées (débit). Les sections 12, 13 et 16 donnent les absences,
+-- maladie (MAL), missions et formations, heures sup. HSR, REC, HSP, congés (CP) et RTT. Après les événements
+-- (section 12), dont les formules citent les codes. supprimer-donnees-test.sql les désactive de nouveau.
+UPDATE compteurs SET est_actif = true WHERE numero_pack IS NOT NULL AND NOT est_a_adapter;
+
 -- 15. Pointages saisis à la main (page Pointage manuel), le dernier jour ouvré avant aujourd'hui :
 -- deux employés de bureau (08:30-17:30) : Zineb Alaoui (T013) a oublié son badge (à l'heure) et a fait
 -- des heures supplémentaires jusqu'à 18:55 ; Anas Mansouri (T014) l'a oublié aussi et est arrivé en
@@ -458,6 +474,7 @@ FROM (
   UNION ALL SELECT '00000000-0000-4000-8000-000000002107', '00000000-0000-4000-8000-000000000312', '00000000-0000-4000-8000-000000001802', 0, 5, 0, 0, 'journee', true, false, false, NULL
   UNION ALL SELECT '00000000-0000-4000-8000-000000002108', '00000000-0000-4000-8000-000000000314', '00000000-0000-4000-8000-000000001801', 0, 9.5, 0, 0, 'demi_journee', true, false, false, 'Contrat à durée déterminée, au prorata'
   UNION ALL SELECT '00000000-0000-4000-8000-000000002109', '00000000-0000-4000-8000-000000000305', '00000000-0000-4000-8000-000000001811', 0, 16, 0, 0, 'heures', true, false, false, 'Heures de récupération'
+  UNION ALL SELECT '00000000-0000-4000-8000-000000002110', '00000000-0000-4000-8000-000000000313', '00000000-0000-4000-8000-000000001815', 0, 10, 0, 0, 'journee', true, false, false, 'Jours de RTT de l''année'
 ) d;
 
 COMMIT;
