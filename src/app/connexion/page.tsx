@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import { EntrepriseConnexion } from "@/components/connexion/entreprise-connexion";
 import { FormulaireConnexion } from "@/components/connexion/formulaire-connexion";
 import { MessageMotDePasseChange } from "@/components/connexion/message-mot-de-passe-change";
 import { PanneauMarque } from "@/components/connexion/panneau-marque";
@@ -26,6 +27,7 @@ export default function PageConnexion() {
         <PanneauMarque />
 
         <section className="flex flex-col justify-center px-6 py-8 sm:px-10 lg:px-14 lg:py-12">
+          <EntrepriseConnexion />
           <h1 className="mb-8 text-2xl font-bold tracking-tight text-marine sm:text-3xl">
             {TEXTES_CONNEXION.titre}
           </h1>

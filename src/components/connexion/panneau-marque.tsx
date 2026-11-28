@@ -1,8 +1,6 @@
 import Image from "next/image";
-import { LogoEntreprise } from "@/components/entreprise/logo-entreprise";
 import { DateDuJour } from "@/components/ui/date-du-jour";
 import { HorlogePalettes } from "@/components/ui/horloge-palettes";
-import { lireLogoAffiche } from "@/lib/donnees/entreprise";
 import { TEXTES_CONNEXION } from "@/lib/textes/connexion";
 import { TEXTES_NAVIGATION } from "@/lib/textes/navigation";
 import { Cadran } from "./cadran";
@@ -12,12 +10,10 @@ function LogoPsTime({ className, sizes }: { className: string; sizes: string }) 
 }
 
 /**
- * Partie gauche de la carte de connexion : logo PS Time et, dessous, celui de l'entreprise s'il
- * existe ; sur ordinateur, l'heure de Casablanca en palettes sur un cadran gradué, puis l'accroche.
+ * Partie gauche de la carte de connexion : logo PS Time ; sur ordinateur, l'heure de Casablanca en palettes sur un cadran gradué, puis l'accroche.
  * Bandeau compact sur téléphone et tablette.
  */
-export async function PanneauMarque() {
-  const logo = await lireLogoAffiche();
+export function PanneauMarque() {
   return (
     <aside className="relative isolate overflow-hidden bg-marine text-white">
       {/* Téléphone et tablette : bandeau compact. */}
@@ -29,12 +25,6 @@ export async function PanneauMarque() {
             <p className="mt-1 text-sm text-white/85">{TEXTES_CONNEXION.accroche}</p>
           </div>
         </div>
-        {logo && (
-          <div className="flex items-center gap-4">
-            <LogoEntreprise logo={logo} className="size-14 rounded-xl p-1.5" classeImage="size-full" />
-            <p className="min-w-0 text-lg font-semibold leading-tight">{logo.nom}</p>
-          </div>
-        )}
       </div>
 
       {/* Ordinateur. */}
@@ -44,13 +34,6 @@ export async function PanneauMarque() {
             <LogoPsTime sizes="56px" className="size-14 shrink-0" />
             <span className="text-2xl font-bold tracking-tight">{TEXTES_NAVIGATION.nomApplication}</span>
           </div>
-          {/* Même taille que le logo PS Time, avec le nom de l'entreprise à côté. */}
-          {logo && (
-            <div className="flex items-center gap-3">
-              <LogoEntreprise logo={logo} className="size-14 rounded-xl p-1.5" classeImage="size-full" />
-              <span className="min-w-0 text-2xl font-bold tracking-tight">{logo.nom}</span>
-            </div>
-          )}
         </div>
 
         <div className="relative grid min-h-64 flex-1 place-items-center">
