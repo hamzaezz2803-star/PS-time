@@ -50,6 +50,11 @@ describe("variables d'une journée", () => {
       NB_POINTAGES: 4,
       A_HORAIRE: 1,
       PRESENT: 1,
+      DUREE_NUIT_MIN: 0,
+      // Événements non chargés : variables d'événement inconnues, jamais 0.
+      DUREE_ABSENCE_MIN: null,
+      DUREE_EVT_PRESENCE_MIN: null,
+      JOURS_ABSENCE: null,
     });
   });
 
