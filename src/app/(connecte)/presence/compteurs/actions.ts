@@ -38,6 +38,7 @@ export async function enregistrerCompteur(_etat: EtatFormulaire, formulaire: For
     if (!resultat.ok) {
       if (resultat.erreur === "code") return { erreursChamps: { code: textes.erreurs.codeDejaPris } };
       if (resultat.erreur === "libelle") return { erreursChamps: { libelle: textes.erreurs.libelleDejaPris } };
+      if (resultat.erreur === "a_adapter") return { erreursChamps: { estActif: textes.pack.activationRefusee } };
       refresh();
       return { message: textes.introuvable };
     }
@@ -59,9 +60,10 @@ export async function changerEtatCompteur(id: string, estActif: boolean): Promis
   if (!analyse.success || typeof estActif !== "boolean") return { message: textes.introuvable };
 
   try {
-    const trouve = await changerEtatEnBase(analyse.data, estActif, auteur.id);
+    const resultat = await changerEtatEnBase(analyse.data, estActif, auteur.id);
     refresh();
-    if (!trouve) return { message: textes.introuvable };
+    if (resultat === "introuvable") return { message: textes.introuvable };
+    if (resultat === "a_adapter") return { message: textes.pack.activationRefusee };
     await notifier("compteur", "modification", estActif ? textes.actif : textes.inactif, CHEMIN_COMPTEURS);
     return { succes: { message: estActif ? textes.active : textes.desactive, idSelectionne: analyse.data } };
   } catch (erreur) {
@@ -77,16 +79,16 @@ export async function supprimerCompteur(_etat: EtatFormulaire, formulaire: FormD
   const id = identifiant.safeParse(formulaire.get("id"));
   if (!id.success) return { message: textes.introuvable };
 
-  let libelle: string | null;
+  let resultat: Awaited<ReturnType<typeof supprimerCompteurParId>>;
   try {
-    libelle = await supprimerCompteurParId(id.data);
+    resultat = await supprimerCompteurParId(id.data);
   } catch (erreur) {
     journaliserEchec("de la suppression", erreur);
     return { message: textes.echec };
   }
   refresh();
-  if (!libelle) return { message: textes.introuvable };
-  await notifier("compteur", "suppression", libelle, CHEMIN_COMPTEURS);
+  if (!resultat.ok) return { message: resultat.erreur === "pack" ? textes.pack.suppressionRefusee : textes.introuvable };
+  await notifier("compteur", "suppression", resultat.libelle, CHEMIN_COMPTEURS);
   return { succes: { message: textes.supprime, idSelectionne: null } };
 }
 

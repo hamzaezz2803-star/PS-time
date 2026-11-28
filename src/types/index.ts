@@ -303,6 +303,19 @@ export type Compteur = {
   description: string | null;
   estActif: boolean;
   version: number;
+  /** Vrai tant que la formule du pack attend des données que PS Time ne calcule pas encore (activation refusée). */
+  estAAdapter: boolean;
+  /** Fiche du pack standard ; null pour un compteur créé par le client. */
+  pack: FichePackCompteur | null;
+};
+
+/** Explication d'un compteur du pack standard (migration 0007). */
+export type FichePackCompteur = {
+  numero: number;
+  famille: (typeof import("@/lib/constantes").FAMILLES_COMPTEUR)[number];
+  fonctionnement: string | null;
+  adaptation: string | null;
+  remiseAZero: string | null;
 };
 
 /** Version passée ou actuelle d'un compteur (historique). */

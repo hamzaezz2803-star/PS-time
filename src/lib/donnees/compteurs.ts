@@ -1,11 +1,11 @@
 import "server-only";
 
-import { asc, desc, eq } from "drizzle-orm";
-import { LIMITE_COMPTEURS } from "@/lib/constantes";
+import { and, asc, desc, eq } from "drizzle-orm";
+import { FAMILLES_COMPTEUR, LIMITE_COMPTEURS } from "@/lib/constantes";
 import type { DefinitionCompteur } from "@/lib/metier/compteurs/calcul";
 import { changeLaVersion, colonnesDesPeriodicites, periodicitesDesColonnes, type UniteCompteur } from "@/lib/metier/compteurs/format";
 import type { DonneesCompteur } from "@/lib/validation/compteur";
-import type { Compteur, VersionCompteur } from "@/types";
+import type { Compteur, FichePackCompteur, VersionCompteur } from "@/types";
 import { obtenirBase } from "./base";
 import { indexEnDoublon } from "./erreurs";
 import { compteurs, compteursVersions, utilisateurs } from "./schema";
@@ -22,15 +22,47 @@ const colonnes = {
   description: compteurs.description,
   estActif: compteurs.estActif,
   version: compteurs.version,
+  estAAdapter: compteurs.estAAdapter,
+  numeroPack: compteurs.numeroPack,
+  famille: compteurs.famille,
+  fonctionnement: compteurs.fonctionnement,
+  adaptation: compteurs.adaptation,
+  remiseAZero: compteurs.remiseAZero,
 };
 
-type LigneCompteur = { journalier: boolean; hebdomadaire: boolean; mensuel: boolean; unite: string } & Omit<Compteur, "periodicites" | "unite">;
+type LigneCompteur = {
+  journalier: boolean;
+  hebdomadaire: boolean;
+  mensuel: boolean;
+  unite: string;
+  numeroPack: number | null;
+  famille: string | null;
+  fonctionnement: string | null;
+  adaptation: string | null;
+  remiseAZero: string | null;
+} & Omit<Compteur, "periodicites" | "unite" | "pack">;
 
-const versCompteur = ({ journalier, hebdomadaire, mensuel, unite, ...reste }: LigneCompteur): Compteur => ({
-  ...reste,
+/** Fiche du pack standard, ou null pour un compteur créé par le client. */
+function fichePack({ numeroPack, famille, fonctionnement, adaptation, remiseAZero }: LigneCompteur): FichePackCompteur | null {
+  if (numeroPack === null) return null;
+  // La contrainte « check » de la base garantit une famille connue ; « autres » si elle manque.
+  const familleConnue = FAMILLES_COMPTEUR.find((valeur) => valeur === famille) ?? "autres";
+  return { numero: numeroPack, famille: familleConnue, fonctionnement, adaptation, remiseAZero };
+}
+
+const versCompteur = (ligne: LigneCompteur): Compteur => ({
+  id: ligne.id,
+  code: ligne.code,
+  nom: ligne.nom,
+  formule: ligne.formule,
+  description: ligne.description,
+  estActif: ligne.estActif,
+  version: ligne.version,
+  estAAdapter: ligne.estAAdapter,
   // La contrainte « check » de la base garantit une unité connue.
-  unite: unite as UniteCompteur,
-  periodicites: periodicitesDesColonnes({ journalier, hebdomadaire, mensuel }),
+  unite: ligne.unite as UniteCompteur,
+  periodicites: periodicitesDesColonnes(ligne),
+  pack: fichePack(ligne),
 });
 
 /** Compteurs triés par libellé. */
@@ -71,7 +103,7 @@ export async function listerVersions(compteurId: string): Promise<VersionCompteu
 
 export type ResultatCompteur =
   | { ok: true; id: string; version: number }
-  | { ok: false; erreur: "introuvable" | "code" | "libelle" };
+  | { ok: false; erreur: "introuvable" | "code" | "libelle" | "a_adapter" };
 
 /** Champs d'une version (formule, unité, périodicités) : copiés dans `compteurs_versions`. */
 const champsVersion = (donnees: DonneesCompteur) => ({ formule: donnees.formule, unite: donnees.unite, ...colonnesDesPeriodicites(donnees.periodicites) });
@@ -93,8 +125,11 @@ export async function enregistrerCompteur(id: string | null, donnees: DonneesCom
 
       const [actuel] = await transaction.select(colonnes).from(compteurs).where(eq(compteurs.id, id)).for("update");
       if (!actuel) return { ok: false, erreur: "introuvable" };
+      // Un compteur du pack « à adapter » le reste tant que sa formule n'a pas été réécrite.
+      const estAAdapter = actuel.estAAdapter && actuel.formule === donnees.formule;
+      if (estAAdapter && donnees.estActif) return { ok: false, erreur: "a_adapter" };
       const nouvelleVersion = changeLaVersion(versCompteur(actuel), donnees) ? actuel.version + 1 : actuel.version;
-      await transaction.update(compteurs).set({ ...champs, version: nouvelleVersion }).where(eq(compteurs.id, id));
+      await transaction.update(compteurs).set({ ...champs, estAAdapter, version: nouvelleVersion }).where(eq(compteurs.id, id));
       if (nouvelleVersion !== actuel.version) {
         await transaction.insert(compteursVersions).values({ compteurId: id, version: nouvelleVersion, ...champsVersion(donnees), modifiePar: auteurId });
       }
@@ -108,22 +143,35 @@ export async function enregistrerCompteur(id: string | null, donnees: DonneesCom
   }
 }
 
-/** Active ou désactive un compteur ; faux s'il n'existe plus. */
-export async function changerEtatCompteur(id: string, estActif: boolean, auteurId: string): Promise<boolean> {
-  const resultat = await obtenirBase().update(compteurs).set({ estActif, modifiePar: auteurId }).where(eq(compteurs.id, id));
-  return (resultat.rowCount ?? 0) > 0;
+/**
+ * Active ou désactive un compteur. Un compteur du pack encore « à adapter » ne s'active pas
+ * (la base le refuse aussi : contrainte `compteurs_a_adapter_inactif`).
+ */
+export async function changerEtatCompteur(id: string, estActif: boolean, auteurId: string): Promise<"ok" | "introuvable" | "a_adapter"> {
+  const condition = estActif ? and(eq(compteurs.id, id), eq(compteurs.estAAdapter, false)) : eq(compteurs.id, id);
+  const resultat = await obtenirBase().update(compteurs).set({ estActif, modifiePar: auteurId }).where(condition);
+  if ((resultat.rowCount ?? 0) > 0) return "ok";
+  const [existe] = await obtenirBase().select({ id: compteurs.id }).from(compteurs).where(eq(compteurs.id, id));
+  return existe ? "a_adapter" : "introuvable";
 }
+
+export type ResultatSuppressionCompteur = { ok: true; libelle: string } | { ok: false; erreur: "introuvable" | "pack" };
 
 /**
  * Supprime un compteur et tout son historique de versions, dans une transaction.
- * Renvoie son libellé, ou null s'il n'existe plus.
+ * Un compteur du pack standard ne se supprime pas : il se désactive.
  */
-export async function supprimerCompteurParId(id: string): Promise<string | null> {
-  return obtenirBase().transaction(async (transaction) => {
-    const [compteur] = await transaction.select({ libelle: compteurs.libelle }).from(compteurs).where(eq(compteurs.id, id)).for("update");
-    if (!compteur) return null;
+export async function supprimerCompteurParId(id: string): Promise<ResultatSuppressionCompteur> {
+  return obtenirBase().transaction(async (transaction): Promise<ResultatSuppressionCompteur> => {
+    const [compteur] = await transaction
+      .select({ libelle: compteurs.libelle, numeroPack: compteurs.numeroPack })
+      .from(compteurs)
+      .where(eq(compteurs.id, id))
+      .for("update");
+    if (!compteur) return { ok: false, erreur: "introuvable" };
+    if (compteur.numeroPack !== null) return { ok: false, erreur: "pack" };
     await transaction.delete(compteursVersions).where(eq(compteursVersions.compteurId, id));
     await transaction.delete(compteurs).where(eq(compteurs.id, id));
-    return compteur.libelle;
+    return { ok: true, libelle: compteur.libelle };
   });
 }

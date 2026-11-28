@@ -89,6 +89,35 @@ export const TEXTES_COMPTEURS = {
     auteurInconnu: "compte supprimé",
   },
 
+  // Pack standard (compteurs livrés avec l'application, désactivés à l'installation)
+  pack: {
+    ongletPack: (n: number) => `Pack standard (${n})`,
+    ongletTous: (n: number) => `Tous les compteurs (${n})`,
+    libelleOnglets: "Affichage des compteurs",
+    titre: "Pack standard des compteurs",
+    intro:
+      "Compteurs livrés avec PS Time, tous désactivés à l'installation. Lisez l'explication de chacun et activez ceux dont l'entreprise a besoin. Les seuils écrits dans une formule (42 h, 44 h...) se modifient dans la fenêtre « Modifier ».",
+    resume: { total: "Compteurs du pack", actifs: "Activés", aAdapter: "À adapter", prets: "Prêts à activer" },
+    familles: { presence: "Présence et temps de travail", absences: "Absences", heures_sup: "Heures supplémentaires", conges: "Congés et RTT", autres: "Autres" },
+    toutesFamilles: "Toutes",
+    filtreFamille: "Famille",
+    numero: (n: number) => `N° ${String(n).padStart(2, "0")}`,
+    badgePack: "Pack",
+    aAdapter: "À adapter",
+    aideAAdapter: "Demande des données que PS Time ne calcule pas encore : écrivez sa formule avant de l'activer.",
+    fonctionnement: "Fonctionnement",
+    adaptation: "Calcul dans PS Time",
+    remiseAZero: "Remise à zéro",
+    formule: "Formule",
+    explication: "Lire l'explication",
+    modifier: "Modifier",
+    fiche: "Fiche du pack standard",
+    activationRefusee: "Ce compteur du pack attend des données que PS Time ne calcule pas encore. Modifiez d'abord sa formule, puis activez-le.",
+    suppressionRefusee: "Un compteur du pack standard ne se supprime pas. Désactivez-le s'il ne sert pas.",
+    aucunPack: "Le pack standard n'est pas encore installé dans cette base. Demandez à l'installateur de mettre la base à jour.",
+    aucuneFamille: "Aucun compteur du pack dans cette famille.",
+  },
+
   erreurs: {
     codeInvalide: "Identifiant invalide : majuscules, chiffres, « _ » ou « - », 30 caractères au plus, sans espace.",
     codeDejaPris: "Un compteur utilise déjà cet identifiant.",
