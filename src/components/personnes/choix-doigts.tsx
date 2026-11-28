@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Check, ShieldCheck } from "lucide-react";
+import { Check } from "lucide-react";
 import { DOIGTS, DOIGTS_CONSEILLES, type Doigt } from "@/lib/constantes";
 import { decrireDoigt, normaliserDoigts, texteVersDoigts } from "@/lib/metier/acces-pointage";
 import { TEXTES_PERSONNES } from "@/lib/textes/personnes";
@@ -69,10 +69,6 @@ export function ChoixDoigts({ valeurInitiale }: { valeurInitiale: string }) {
           </button>
         )}
       </div>
-      <p className="flex items-start gap-2 rounded-lg bg-fond px-3 py-2.5 text-sm text-texte-secondaire">
-        <ShieldCheck className="mt-0.5 size-4 shrink-0 text-succes" aria-hidden="true" />
-        {textes.aucuneEmpreinte}
-      </p>
     </section>
   );
 }

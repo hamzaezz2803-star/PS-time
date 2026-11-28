@@ -1,6 +1,6 @@
 "use client";
 
-import { Lock, TriangleAlert } from "lucide-react";
+import { TriangleAlert } from "lucide-react";
 import { Bouton } from "@/components/ui/bouton";
 import { Pastille } from "@/components/ui/pastille";
 import { TEXTES_COMPTEURS as textes } from "@/lib/textes/compteurs";
@@ -19,10 +19,6 @@ export function FicheCompteurStandard({ compteur, fiche, onFermer }: { compteur:
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <div className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto px-5 py-5 sm:px-6">
-        <p className="flex items-start gap-2.5 rounded-lg bg-ciel px-3.5 py-2.5 text-sm text-marine">
-          <Lock className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
-          {textes.standard.lectureSeule}
-        </p>
         {compteur.description && <p className="text-base text-texte">{compteur.description}</p>}
         <div className="flex flex-wrap gap-1.5">
           <Pastille ton="info">{textes.standard.familles[fiche.famille]}</Pastille>

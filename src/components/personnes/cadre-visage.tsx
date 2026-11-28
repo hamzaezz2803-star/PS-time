@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Camera, CameraOff, ShieldCheck } from "lucide-react";
+import { Camera, CameraOff } from "lucide-react";
 import { Bouton } from "@/components/ui/bouton";
 import { TEXTES_PERSONNES } from "@/lib/textes/personnes";
 
@@ -76,10 +76,6 @@ export function CadreVisage() {
           <p role="alert" className="text-center text-sm text-erreur">{etat === "refuse" ? textes.cameraRefusee : textes.cameraIndisponible}</p>
         )}
       </div>
-      <p className="flex items-start gap-2 rounded-lg bg-fond px-3 py-2.5 text-sm text-texte-secondaire">
-        <ShieldCheck className="mt-0.5 size-4 shrink-0 text-succes" aria-hidden="true" />
-        {textes.aucuneImage}
-      </p>
     </section>
   );
 }
