@@ -26,7 +26,7 @@ export default function PageConnexion() {
       <main className="grid w-full max-w-md overflow-hidden rounded-2xl bg-surface shadow-flottant lg:min-h-[36rem] lg:max-w-5xl lg:grid-cols-2">
         <PanneauMarque />
 
-        <section className="flex flex-col justify-center px-6 py-8 sm:px-10 lg:px-14 lg:py-12">
+        <section className="relative flex flex-col justify-center px-6 py-8 sm:px-10 lg:px-14 lg:py-12 lg:has-data-entreprise:pt-36 xl:has-data-entreprise:pt-40">
           <EntrepriseConnexion />
           <h1 className="mb-8 text-2xl font-bold tracking-tight text-marine sm:text-3xl">
             {TEXTES_CONNEXION.titre}
